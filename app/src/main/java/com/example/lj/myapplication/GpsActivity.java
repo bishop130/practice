@@ -100,4 +100,7 @@ public class GpsActivity extends AppCompatActivity {
             Log.d("test", "onStatusChanged, provider:" + provider + ", status:" + status + " ,Bundle:" + extras);
         }
     };
+
+
+
 } // end of class
