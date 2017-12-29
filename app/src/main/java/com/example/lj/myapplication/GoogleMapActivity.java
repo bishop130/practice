@@ -2,7 +2,10 @@ package com.example.lj.myapplication;
 
 import android.Manifest;
 import android.app.FragmentManager;
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -10,6 +13,9 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -20,14 +26,19 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+
+import java.io.IOException;
+import java.util.List;
 
 public class GoogleMapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private UiSettings mUiSettings;
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationProviderClient;
+    private InputMethodManager mInputMethodManager;
 
     private static final String TAG = "MapActivity";
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
@@ -46,6 +57,33 @@ public class GoogleMapActivity extends AppCompatActivity implements OnMapReadyCa
 
 
 
+    }
+    public void onSearch(View view){
+
+
+
+        mInputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        EditText location_tf = (EditText)findViewById(R.id.Adress);
+        String location = location_tf.getText().toString();
+        List<Address> addressList = null;
+
+        mInputMethodManager.hideSoftInputFromWindow(location_tf.getWindowToken(),0);
+
+        if(location != null || !location.equals("")){
+            Geocoder geocoder = new Geocoder(this);
+            try {
+               addressList = geocoder.getFromLocationName(location,1);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Address address = addressList.get(0);
+            LatLng latLng = new LatLng(address.getLatitude(),address.getLongitude());
+            mMap.addMarker(new MarkerOptions().position(latLng).title("Marker"));
+            mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+            mMap.clear();
+
+
+        }
     }
 
     private void InitMap(){
@@ -153,6 +191,9 @@ public class GoogleMapActivity extends AppCompatActivity implements OnMapReadyCa
 
         }
     }
+
+
+
 
    /* @Override
     public void onMapReady(GoogleMap googleMap) {
