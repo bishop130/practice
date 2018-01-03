@@ -24,6 +24,24 @@ public class MainActivity extends AppCompatActivity {
 
         Button button = (Button)findViewById(R.id.btnGoogleMap);
         Button gpsBtn = (Button)findViewById(R.id.btnGPS);
+        Button placeBtn = (Button)findViewById(R.id.goPlace);
+        Button calendarBtn = (Button)findViewById(R.id.goCalendar);
+        Button goWebView = (Button)findViewById(R.id.webView);
+        goWebView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this,WebActivity.class);
+                startActivity(intent);
+            }
+        });
+        calendarBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this,SampleLoginActivity.class);
+                startActivity(intent);
+            }
+        });
+
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -36,6 +54,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this,GpsActivity.class);
+                startActivity(intent);
+            }
+        });
+        placeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this,AutoCompleteActivity.class);
                 startActivity(intent);
             }
         });

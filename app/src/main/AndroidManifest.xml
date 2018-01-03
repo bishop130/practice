@@ -2,11 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.lj.myapplication">
 
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
-
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name=".GlobalApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -16,6 +16,9 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCPVeX6g7uWKodB7G5bI9-iQKdhCi0y7UY" />
+        <meta-data
+            android:name="com.kakao.sdk.AppKey"
+            android:value="@string/kakao_app_key" />
 
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -25,7 +28,11 @@
             </intent-filter>
         </activity>
         <activity android:name=".GoogleMapActivity" />
-        <activity android:name=".GpsActivity"></activity>
+        <activity android:name=".GpsActivity" />
+        <activity android:name=".AutoCompleteActivity" />
+        <activity android:name=".SampleLoginActivity" />
+        <activity android:name=".WebActivity" />
+        <activity android:name=".SampleSignupActivity"></activity>
     </application>
 
 </manifest>
