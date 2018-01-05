@@ -39,6 +39,7 @@ dependencies {
     compile 'gun0912.ted:tedpermission:2.0.0'
     compile 'com.github.yongbeam:AirCalendar:0.0.5'
     compile 'com.squareup.picasso:picasso:2.3.2'
+    compile 'com.mcxiaoke.volley:library:1.0.19'
 
     compile group: project.KAKAO_SDK_GROUP, name: 'kakaolink', version: project.KAKAO_SDK_VERSION
     compile group: project.KAKAO_SDK_GROUP, name: 'kakaotalk', version: project.KAKAO_SDK_VERSION
