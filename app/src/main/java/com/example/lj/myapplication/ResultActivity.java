@@ -1,8 +1,8 @@
 package com.example.lj.myapplication;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -16,7 +16,6 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
-import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,6 +24,7 @@ public class ResultActivity extends AppCompatActivity {
     private StringRequest request;
     private static final String URL = "http://bishop130.cafe24.com/test.php";
     private RequestQueue requestQueue;
+    private String test;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
