@@ -24,7 +24,6 @@ public class ResultActivity extends AppCompatActivity {
     private StringRequest request;
     private static final String URL = "http://bishop130.cafe24.com/test.php";
     private RequestQueue requestQueue;
-    private String test;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
