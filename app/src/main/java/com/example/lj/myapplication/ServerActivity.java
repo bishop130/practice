@@ -24,21 +24,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class WebActivity extends AppCompatActivity {
+public class ServerActivity extends AppCompatActivity {
 
-    private EditText email,password;
+    private EditText email;
     private Button sign_in_register;
     private RequestQueue requestQueue;
-    private static final String URL = "http://192.168.123.105:80/practice/user_control.php";
+    private static final String URL = "http://bishop130.cafe24.com/user_control.php";
     private StringRequest request;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_web);
+        setContentView(R.layout.activity_server);
 
         email = (EditText) findViewById(R.id.email);
-        password = (EditText) findViewById(R.id.password);
         sign_in_register = (Button) findViewById(R.id.sign_in_register);
 
         requestQueue = Volley.newRequestQueue(this);
@@ -75,7 +74,6 @@ public class WebActivity extends AppCompatActivity {
                     protected Map<String, String> getParams() throws AuthFailureError {
                         HashMap<String,String> hashMap = new HashMap<String, String>();
                         hashMap.put("email",email.getText().toString());
-                        hashMap.put("password",password.getText().toString());
 
                         return hashMap;
                     }

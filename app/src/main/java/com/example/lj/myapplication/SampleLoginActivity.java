@@ -14,6 +14,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.kakao.auth.AuthType;
 import com.kakao.auth.ISessionCallback;
 import com.kakao.auth.Session;
@@ -26,19 +33,26 @@ import com.kakao.usermgmt.response.model.UserProfile;
 import com.kakao.util.exception.KakaoException;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.security.MessageDigest;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class SampleLoginActivity extends Activity {
 
     private SessionCallback mKakaocallback;
+    private static final String URL = "http://bishop130.cafe24.com/user_control.php";
+    private RequestQueue requestQueue;
+    private StringRequest request;
 
     // view
     private TextView tv_user_id;
     private TextView tv_user_name;
     private ImageView iv_user_profile;
     private Button logout;
-
     private String userName;
     private String userId;
     private String profileUrl;
@@ -47,6 +61,8 @@ public class SampleLoginActivity extends Activity {
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calendar);
+
+        requestQueue = Volley.newRequestQueue(this);
 
 
         tv_user_id = (TextView) findViewById(R.id.tv_user_id);
@@ -120,6 +136,40 @@ public class SampleLoginActivity extends Activity {
                     profileUrl = userProfile.getProfileImagePath();
                     userId = String.valueOf(userProfile.getId());
                     userName = userProfile.getNickname();
+                    request = new StringRequest(Request.Method.POST, URL, new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            try {
+                                JSONObject jsonObject = new JSONObject(response);
+                                if(jsonObject.names().get(0).equals("success")){
+                                    Toast.makeText(getApplicationContext(),"SUCCESS "+jsonObject.getString("success"),Toast.LENGTH_SHORT).show();
+                                    startActivity(new Intent(getApplicationContext(),MainActivity.class));
+                                }else {
+                                    Toast.makeText(getApplicationContext(), "Error" +jsonObject.getString("error"), Toast.LENGTH_SHORT).show();
+                                }
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+
+
+                        }
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+
+                        }
+                    }){
+                        @Override
+                        protected Map<String, String> getParams() throws AuthFailureError {
+                            HashMap<String,String> hashMap = new HashMap<String, String>();
+                            hashMap.put("email",userId);
+
+                            return hashMap;
+                        }
+                    };
+
+                    requestQueue.add(request);
 
                     setLayoutText();
                 }

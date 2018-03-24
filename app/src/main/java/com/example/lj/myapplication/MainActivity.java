@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
         goWebView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this,WebActivity.class);
+                Intent intent = new Intent(MainActivity.this,ServerActivity.class);
                 startActivity(intent);
             }
         });
@@ -77,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         };
+
         TedPermission.with(this)
                 .setPermissionListener(permissionlistener)
                 .setRationaleMessage("구글 로그인을 하기 위해서는 주소록 접근 권한이 필요해요")

@@ -31,8 +31,11 @@
         <activity android:name=".GpsActivity" />
         <activity android:name=".AutoCompleteActivity" />
         <activity android:name=".SampleLoginActivity" />
-        <activity android:name=".WebActivity" />
-        <activity android:name=".SampleSignupActivity"></activity>
+        <activity android:name=".SampleSignupActivity" />
+        <activity android:name=".ServerActivity" />
+        <activity android:name=".TimePickerActivity" />
+        <activity android:name=".DatePickerActivity" />
+        <activity android:name=".ResultActivity"></activity>
     </application>
 
 </manifest>

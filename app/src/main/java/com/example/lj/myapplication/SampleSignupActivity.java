@@ -53,6 +53,8 @@ public class SampleSignupActivity extends AppCompatActivity {
                 userName = userProfile.getNickname();
 
                 setLayoutText();
+
+                
             }
 
             @Override

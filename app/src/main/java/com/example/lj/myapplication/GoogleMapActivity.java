@@ -17,7 +17,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -45,6 +49,7 @@ import com.google.android.gms.tasks.Task;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 import static android.content.ContentValues.TAG;
 
@@ -62,6 +67,13 @@ public class GoogleMapActivity extends AppCompatActivity implements OnMapReadyCa
     private static final float DEFAULT_ZOOM = 15f;
     private static final int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
     private Boolean mLocationPermissionsGranted = false;
+    LatLng midLatLng;
+    Geocoder geocoder;
+    List<Address> addresses;
+    PlaceAutocompleteFragment autocompleteFragment;
+
+    private TextView address_result;
+
 
 
     @Override
@@ -69,15 +81,27 @@ public class GoogleMapActivity extends AppCompatActivity implements OnMapReadyCa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_google_map);
 
+        Button button = (Button)findViewById(R.id.addressConfirmed);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(GoogleMapActivity.this,TimePickerActivity.class);
+                intent.putExtra("lat",String.valueOf(midLatLng.latitude));
+                intent.putExtra("lng",String.valueOf(midLatLng.longitude));
+                startActivity(intent);
+            }
+        });
+
         getLocationPermission();
 
 
-
-
-
-
+        geocoder = new Geocoder(this, Locale.getDefault());
+        address_result=(TextView)findViewById(R.id.address);
+        autocompleteFragment = (PlaceAutocompleteFragment)
+                getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
 
     }
+
 
     private void InitMap(){
         FragmentManager fragmentManager = getFragmentManager();
@@ -85,6 +109,7 @@ public class GoogleMapActivity extends AppCompatActivity implements OnMapReadyCa
         mapFragment.getMapAsync(this);
 
     }
+
     private void getDeviceLocation(){
         Log.d(TAG, "getDeviceLocation: getting the devices current location");
 
@@ -167,9 +192,9 @@ public class GoogleMapActivity extends AppCompatActivity implements OnMapReadyCa
             }
         }
     }
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        Toast.makeText(this, "Map is Ready", Toast.LENGTH_SHORT).show();
         Log.d(TAG, "onMapReady: map is ready");
 
 
@@ -185,19 +210,32 @@ public class GoogleMapActivity extends AppCompatActivity implements OnMapReadyCa
             }
             mMap.setMyLocationEnabled(true);
             mMap.getUiSettings().setMyLocationButtonEnabled(true);
-            mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
+            mMap.getUiSettings().setZoomControlsEnabled(true);
+            mMap.getUiSettings().setRotateGesturesEnabled(false);
+            mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
                 @Override
-                public void onCameraMove() {
-                    // Get the center of the map
-                    LatLng center = mMap.getCameraPosition().target;
+                public void onCameraIdle() {
+                    //get latlng at the center by calling
+                    midLatLng = mMap.getCameraPosition().target;
+                    double lat = midLatLng.latitude;
+                    double lng = midLatLng.longitude;
+                    try {
+                        addresses = geocoder.getFromLocation(lat, lng, 1);
+                        if (addresses != null && addresses.size() > 0){
+                            String address = addresses.get(0).getAddressLine(0);
+                            address_result.setText(address);
 
+                    ;        Toast.makeText(getApplicationContext(), "Your address is: " +address+"Location:"+midLatLng, Toast.LENGTH_LONG).show();
+                        }
+                    }
+                    catch (IOException e){
+                        Log.d(TAG,"setOnCamera Error");
+
+                    }
                 }
             });
 
 
-
-            PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment)
-                    getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
             autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
                 @Override
                 public void onPlaceSelected(Place place) {
@@ -205,7 +243,6 @@ public class GoogleMapActivity extends AppCompatActivity implements OnMapReadyCa
                     String i = place.getLatLng().toString();
                     Toast.makeText(GoogleMapActivity.this, i, Toast.LENGTH_SHORT).show();
                     final LatLng location = place.getLatLng();
-                    mMap.addMarker(new MarkerOptions().position(location).title("Marker"));
                     mMap.animateCamera(CameraUpdateFactory.newLatLng(location));
                     Log.i(TAG, "Place: " + place.getName());
                 }
@@ -216,19 +253,19 @@ public class GoogleMapActivity extends AppCompatActivity implements OnMapReadyCa
                     Log.i(TAG, "An error occurred: " + status);
                 }
             });
-            try {
+
+           /* try {
                 Intent intent =
                         new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
                                 .build(this);
                 startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
-            } catch (GooglePlayServicesRepairableException e) {
+            } catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
                 // TODO: Handle the error.
-            } catch (GooglePlayServicesNotAvailableException e) {
-                // TODO: Handle the error.
-            }
+            }*/
 
         }
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == PLACE_AUTOCOMPLETE_REQUEST_CODE) {
@@ -245,100 +282,4 @@ public class GoogleMapActivity extends AppCompatActivity implements OnMapReadyCa
             }
         }
     }
-
-
-
-
-   /* @Override
-    public void onMapReady(GoogleMap googleMap) {
-
-        PermissionListener permissionlistener = new PermissionListener() {
-            @Override
-            public void onPermissionGranted() {
-                Toast.makeText(GoogleMapActivity.this, "권한 허가", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onPermissionDenied(ArrayList<String> deniedPermissions) {
-                Toast.makeText(GoogleMapActivity.this, "권한 거부\n" + deniedPermissions.toString(), Toast.LENGTH_SHORT).show();
-            }
-
-
-        };
-
-        final LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
-        mMap = googleMap;
-
-        mUiSettings = mMap.getUiSettings();
-        mUiSettings.setZoomControlsEnabled(true);
-
-
-
-
-
-
-
-        //Initialize Google Play Services
-
-
-        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-
-            @Override
-            public void onMapClick(LatLng point) {
-                mMap.clear();
-                MarkerOptions marker = new MarkerOptions()
-                        .position(new LatLng(point.latitude, point.longitude))
-                        .title("New Marker")
-                        .draggable(true);
-
-                mMap.addMarker(marker);
-
-
-            }
-        });
-
-    }
-    private final LocationListener mLocationListener = new LocationListener() {
-        public void onLocationChanged(Location location) {
-            //여기서 위치값이 갱신되면 이벤트가 발생한다.
-            //값은 Location 형태로 리턴되며 좌표 출력 방법은 다음과 같다.
-
-            Log.d("test", "onLocationChanged, location:" + location);
-            double longitude = location.getLongitude(); //경도
-            double latitude = location.getLatitude();   //위도
-            double altitude = location.getAltitude();   //고도
-            float accuracy = location.getAccuracy();    //정확도
-            String provider = location.getProvider();   //위치제공자
-            //Gps 위치제공자에 의한 위치변화. 오차범위가 좁다.
-            //Network 위치제공자에 의한 위치변화
-            //Network 위치는 Gps에 비해 정확도가 많이 떨어진다.
-
-            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-            MarkerOptions markerOptions = new MarkerOptions();
-            markerOptions.position(latLng);
-            markerOptions.title("Current Position");
-            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
-            mMap.addMarker(markerOptions);
-
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-            mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
-
-
-        }
-        public void onProviderDisabled(String provider) {
-            // Disabled시
-            Log.d("test", "onProviderDisabled, provider:" + provider);
-        }
-
-        public void onProviderEnabled(String provider) {
-            // Enabled시
-            Log.d("test", "onProviderEnabled, provider:" + provider);
-        }
-
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-            // 변경시
-            Log.d("test", "onStatusChanged, provider:" + provider + ", status:" + status + " ,Bundle:" + extras);
-        }
-    };*/
 }
