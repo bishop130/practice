@@ -2,11 +2,7 @@ package com.example.lj.myapplication;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.Signature;
 import android.os.Bundle;
-import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -21,11 +17,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.kakao.auth.AuthType;
 import com.kakao.auth.ISessionCallback;
 import com.kakao.auth.Session;
 import com.kakao.network.ErrorResult;
-import com.kakao.usermgmt.LoginButton;
 import com.kakao.usermgmt.UserManagement;
 import com.kakao.usermgmt.callback.LogoutResponseCallback;
 import com.kakao.usermgmt.callback.MeResponseCallback;
@@ -36,7 +30,6 @@ import com.squareup.picasso.Picasso;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -184,7 +177,7 @@ public class SampleLoginActivity extends Activity {
         @Override
         public void onSessionOpenFailed(KakaoException exception) {
             if(exception != null) {
-                Toast.makeText(SampleLoginActivity.this, "세션실패", Toast.LENGTH_SHORT).show();
+                Toast.makeText(SampleLoginActivity.this, "세션실패"+exception.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.d("TAG" , exception.getMessage());
             }
         }

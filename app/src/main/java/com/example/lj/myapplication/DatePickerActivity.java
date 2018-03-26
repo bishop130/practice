@@ -9,6 +9,8 @@ import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.Toast;
 
+import com.kakao.usermgmt.response.model.UserProfile;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -18,7 +20,9 @@ public class DatePickerActivity extends AppCompatActivity {
     CalendarView calendarView;
     private int year, month, day;
     private String hour,min;
-    private String location;
+    private String Lat,Lng;
+    UserProfile userProfile;
+    String userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,12 +36,16 @@ public class DatePickerActivity extends AppCompatActivity {
         month = calendar.get(Calendar.MONTH) + 1;
         day = calendar.get(Calendar.DAY_OF_MONTH);
 
+        userId = String.valueOf(userProfile.getId());
+        Toast.makeText(getApplicationContext(),userId,Toast.LENGTH_LONG).show();
+
 
 
         Intent getintent = getIntent();
         hour = getintent.getStringExtra("hour");
         min = getintent.getStringExtra("min");
-        location = getintent.getStringExtra("Location");
+        Lat = getintent.getStringExtra("Lat");
+        Lng = getintent.getStringExtra("Lng");
 
         calendarView =(CalendarView)findViewById(R.id.calendar);
         calendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
@@ -61,7 +69,8 @@ public class DatePickerActivity extends AppCompatActivity {
                 Intent intent = new Intent(DatePickerActivity.this,ResultActivity.class);
                 intent.putExtra("date",String.valueOf(year+"/"+month+"/"+day));
                 intent.putExtra("time",String.valueOf(hour+"/"+min));
-                intent.putExtra("Location",String.valueOf(location));
+                intent.putExtra("Lat",Lat);
+                intent.putExtra("Lng",Lng);
                 startActivity(intent);
 
             }

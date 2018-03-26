@@ -15,15 +15,22 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.kakao.usermgmt.response.model.UserProfile;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class ResultActivity extends AppCompatActivity {
     String result;
+    String Lat;
+    String Lng;
+    String userId;
+    String date;
+    String time;
     private StringRequest request;
     private static final String URL = "http://bishop130.cafe24.com/test.php";
     private RequestQueue requestQueue;
+    UserProfile userProfile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,13 +38,15 @@ public class ResultActivity extends AppCompatActivity {
         setContentView(R.layout.activity_result);
 
         requestQueue = Volley.newRequestQueue(this);
+        userId = String.valueOf(userProfile.getId());
 
 
         Intent intent = getIntent();
-        String date = intent.getStringExtra("date");
-        String time = intent.getStringExtra("time");
-        String location = intent.getStringExtra("Location");
-        result = "date:"+date+"time:"+time+"location"+location;
+        date = intent.getStringExtra("date");
+        time = intent.getStringExtra("time");
+        Lat = intent.getStringExtra("Lat");
+        Lng = intent.getStringExtra("Lng");
+        result = "date:"+date+"time:"+time;
 
         Button button = (Button)findViewById(R.id.Btn_Register);
         button.setOnClickListener(new View.OnClickListener() {
@@ -59,7 +68,9 @@ public class ResultActivity extends AppCompatActivity {
                     @Override
                     protected Map<String, String> getParams() throws AuthFailureError {
                         HashMap<String,String> hashMap = new HashMap<String, String>();
-                        hashMap.put("email",result);
+                        hashMap.put("Lat",Lat);
+                        hashMap.put("Lng",Lng);
+                        hashMap.put("email",userId);
                         hashMap.put("password","bishop130");
 
                         return hashMap;
