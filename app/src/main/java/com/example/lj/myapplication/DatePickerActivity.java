@@ -19,9 +19,9 @@ public class DatePickerActivity extends AppCompatActivity {
 
     CalendarView calendarView;
     private int year, month, day;
+    private String Year, Month, Day;
     private String hour,min;
     private String Lat,Lng;
-    UserProfile userProfile;
     String userId;
 
     @Override
@@ -33,10 +33,12 @@ public class DatePickerActivity extends AppCompatActivity {
         Calendar calendar = new GregorianCalendar();
         calendar.setTime(date);
         year = calendar.get(Calendar.YEAR);
+        Year = String.valueOf(year);
         month = calendar.get(Calendar.MONTH) + 1;
+        Month = String.valueOf(month);
         day = calendar.get(Calendar.DAY_OF_MONTH);
+        Day = String.valueOf(day);
 
-        userId = String.valueOf(userProfile.getId());
         Toast.makeText(getApplicationContext(),userId,Toast.LENGTH_LONG).show();
 
 
@@ -46,6 +48,7 @@ public class DatePickerActivity extends AppCompatActivity {
         min = getintent.getStringExtra("min");
         Lat = getintent.getStringExtra("Lat");
         Lng = getintent.getStringExtra("Lng");
+        userId = getintent.getStringExtra("userId");
 
         calendarView =(CalendarView)findViewById(R.id.calendar);
         calendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
@@ -53,10 +56,13 @@ public class DatePickerActivity extends AppCompatActivity {
             public void onSelectedDayChange(@NonNull CalendarView calendarView, int years, int months, int days) {
 
                 year=years;
-                month=months+1;
-                day=days;
+                Year = String.valueOf(year);
 
-                Toast.makeText(getApplicationContext(),year+"/"+month+"/"+day,Toast.LENGTH_LONG).show();
+                month=months+1;
+                Month = String.valueOf(month);
+
+                day=days;
+                Day = String.valueOf(day);
 
 
             }
@@ -67,17 +73,21 @@ public class DatePickerActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(DatePickerActivity.this,ResultActivity.class);
-                intent.putExtra("date",String.valueOf(year+"/"+month+"/"+day));
-                intent.putExtra("time",String.valueOf(hour+"/"+min));
+                intent.putExtra("year",Year);
+                intent.putExtra("month",Month);
+                intent.putExtra("day",Day);
+                intent.putExtra("hour",String.valueOf(hour));
+                intent.putExtra("min",String.valueOf(min));
                 intent.putExtra("Lat",Lat);
                 intent.putExtra("Lng",Lng);
+                intent.putExtra("userId",userId);
                 startActivity(intent);
 
             }
         });
 
 
-        Toast.makeText(getApplicationContext(),hour+":"+min+"/"+year+month+day,Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(),hour+":"+min,Toast.LENGTH_LONG).show();
 
 
     }

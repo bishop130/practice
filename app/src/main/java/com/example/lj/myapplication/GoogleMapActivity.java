@@ -55,10 +55,8 @@ import static android.content.ContentValues.TAG;
 
 public class GoogleMapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
-    private UiSettings mUiSettings;
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationProviderClient;
-    private InputMethodManager mInputMethodManager;
 
     private static final String TAG = "MapActivity";
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;

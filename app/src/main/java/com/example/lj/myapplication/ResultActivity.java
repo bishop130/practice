@@ -24,13 +24,10 @@ public class ResultActivity extends AppCompatActivity {
     String result;
     String Lat;
     String Lng;
-    String userId;
-    String date;
-    String time;
+    String year,month,day,hour,min,userId;
     private StringRequest request;
     private static final String URL = "http://bishop130.cafe24.com/test.php";
     private RequestQueue requestQueue;
-    UserProfile userProfile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,15 +35,19 @@ public class ResultActivity extends AppCompatActivity {
         setContentView(R.layout.activity_result);
 
         requestQueue = Volley.newRequestQueue(this);
-        userId = String.valueOf(userProfile.getId());
 
 
         Intent intent = getIntent();
-        date = intent.getStringExtra("date");
-        time = intent.getStringExtra("time");
+        year = intent.getStringExtra("year");
+        month = intent.getStringExtra("month");
+        day = intent.getStringExtra("day");
+        hour = intent.getStringExtra("hour");
+        min = intent.getStringExtra("min");
         Lat = intent.getStringExtra("Lat");
         Lng = intent.getStringExtra("Lng");
-        result = "date:"+date+"time:"+time;
+        userId = intent.getStringExtra("userId");
+
+        result = "year:"+year+"\nmonth: "+month+"\nday: "+day+"\nhour: "+hour+"\nmin: "+min+"\nLat: "+Lat+"\nLng: "+Lng+"\nuserId: "+userId;
 
         Button button = (Button)findViewById(R.id.Btn_Register);
         button.setOnClickListener(new View.OnClickListener() {
@@ -70,7 +71,7 @@ public class ResultActivity extends AppCompatActivity {
                         HashMap<String,String> hashMap = new HashMap<String, String>();
                         hashMap.put("Lat",Lat);
                         hashMap.put("Lng",Lng);
-                        hashMap.put("email",userId);
+                        hashMap.put("userId",userId);
                         hashMap.put("password","bishop130");
 
                         return hashMap;
@@ -80,6 +81,7 @@ public class ResultActivity extends AppCompatActivity {
 
             }
         });
+
 
 
 

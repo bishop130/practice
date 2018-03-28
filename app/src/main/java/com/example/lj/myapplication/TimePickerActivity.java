@@ -74,10 +74,14 @@ public class TimePickerActivity extends AppCompatActivity {
         mTimePicker.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
             @Override
             public void onTimeChanged(TimePicker timePicker, int hours, int mins) {
-                Toast.makeText(getApplicationContext(), "hour : " + hour + ", min : " + mins+"Location = "+location, Toast.LENGTH_LONG).show();
+
+                hour = String.format("%02d",hours);
+                hour = String.valueOf(hour);
+
+                minute=String.format("%02d",mins);
+                minute=String.valueOf(minute);
+                Toast.makeText(getApplicationContext(), "hour : " + hour + ", min : " + minute+"Location = "+location, Toast.LENGTH_LONG).show();
                 Toast.makeText(getApplicationContext(), userId, Toast.LENGTH_LONG).show();
-                hour = String.valueOf(hours);
-                minute=String.valueOf(mins);
             }
         });
 
@@ -89,6 +93,7 @@ public class TimePickerActivity extends AppCompatActivity {
                 Intent intent = new Intent(TimePickerActivity.this,DatePickerActivity.class);
                 intent.putExtra("hour",hour);
                 intent.putExtra("min",minute);
+                intent.putExtra("userId",userId);
                 intent.putExtra("Lat",lat);
                 intent.putExtra("Lng",lng);
                 startActivity(intent);
