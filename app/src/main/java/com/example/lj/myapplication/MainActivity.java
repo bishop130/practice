@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
                 .setPermissionListener(permissionlistener)
                 .setRationaleMessage("구글 로그인을 하기 위해서는 주소록 접근 권한이 필요해요")
                 .setDeniedMessage("왜 거부하셨어요...\n하지만 [설정] > [권한] 에서 권한을 허용할 수 있어요.")
-                .setPermissions(Manifest.permission.ACCESS_FINE_LOCATION)
+                .setPermissions(Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.READ_CONTACTS)
                 .check();
 
 

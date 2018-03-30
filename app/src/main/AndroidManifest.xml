@@ -3,7 +3,8 @@
     package="com.example.lj.myapplication">
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.INTERNET" />\
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
 
     <application
         android:name=".GlobalApplication"
@@ -35,7 +36,8 @@
         <activity android:name=".ServerActivity" />
         <activity android:name=".TimePickerActivity" />
         <activity android:name=".DatePickerActivity" />
-        <activity android:name=".ResultActivity"></activity>
+        <activity android:name=".ResultActivity" />
+        <activity android:name=".ContactActivity"></activity>
     </application>
 
 </manifest>
