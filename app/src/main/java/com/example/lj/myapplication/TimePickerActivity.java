@@ -12,8 +12,13 @@ import android.widget.Toast;
 import com.kakao.network.ErrorResult;
 import com.kakao.usermgmt.UserManagement;
 import com.kakao.usermgmt.callback.MeResponseCallback;
+import com.kakao.usermgmt.callback.MeV2ResponseCallback;
+import com.kakao.usermgmt.response.MeV2Response;
 import com.kakao.usermgmt.response.model.UserProfile;
 import com.kakao.util.helper.log.Logger;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TimePickerActivity extends AppCompatActivity {
 
@@ -34,26 +39,20 @@ public class TimePickerActivity extends AppCompatActivity {
         double Lng = Double.parseDouble(lng);
         lat = String.format("%.6f",Lat);
         lng = String.format("%.6f",Lng);
-        UserManagement.requestMe(new MeResponseCallback() {
-            @Override
-            public void onFailure(ErrorResult errorResult) {
-                String message = "failed to get user info. msg=" + errorResult;
-                Logger.d(message);
-
-            }
-
+        List<String> keys = new ArrayList<>();
+        keys.add("properties.nickname");
+        keys.add("properties.profile_image");
+        keys.add("kakao_account.email");
+        UserManagement.getInstance().me(keys, new MeV2ResponseCallback() {
             @Override
             public void onSessionClosed(ErrorResult errorResult) {
+
             }
 
             @Override
-            public void onSuccess(UserProfile userProfile) {
-                Logger.d("UserProfile : " + userProfile);
-                userId = String.valueOf(userProfile.getId());
-            }
-
-            @Override
-            public void onNotSignedUp() {
+            public void onSuccess(MeV2Response result) {
+                Logger.d("UserProfile : " + result);
+                userId = String.valueOf(result.getId());
             }
         });
 

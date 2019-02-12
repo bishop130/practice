@@ -17,21 +17,28 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.kakao.auth.ApiResponseCallback;
 import com.kakao.auth.ISessionCallback;
 import com.kakao.auth.Session;
+import com.kakao.kakaotalk.KakaoTalkService;
+import com.kakao.kakaotalk.response.KakaoTalkProfile;
 import com.kakao.network.ErrorResult;
+import com.kakao.usermgmt.StringSet;
 import com.kakao.usermgmt.UserManagement;
 import com.kakao.usermgmt.callback.LogoutResponseCallback;
-import com.kakao.usermgmt.callback.MeResponseCallback;
-import com.kakao.usermgmt.response.model.UserProfile;
+import com.kakao.usermgmt.callback.MeV2ResponseCallback;
+import com.kakao.usermgmt.response.MeV2Response;
 import com.kakao.util.exception.KakaoException;
+import com.kakao.util.helper.log.Logger;
 import com.squareup.picasso.Picasso;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+
 
 
 public class SampleLoginActivity extends Activity {
@@ -50,6 +57,7 @@ public class SampleLoginActivity extends Activity {
     private String userId;
     private String profileUrl;
 
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,12 +73,15 @@ public class SampleLoginActivity extends Activity {
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                UserManagement.requestLogout(new LogoutResponseCallback() {
+                UserManagement.getInstance().requestLogout(new LogoutResponseCallback() {
                     @Override
                     public void onCompleteLogout() {
-                        Toast.makeText(SampleLoginActivity.this, "로그아웃성공", Toast.LENGTH_SHORT).show();
+
                     }
                 });
+                Toast.makeText(SampleLoginActivity.this, "로그아웃성공", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(SampleLoginActivity.this,MainActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -103,75 +114,73 @@ public class SampleLoginActivity extends Activity {
             startActivity(intent);
 
             // 사용자 정보를 가져옴, 회원가입 미가입시 자동가입 시킴
-            UserManagement.requestMe(new MeResponseCallback() {
-                @Override
-                public void onFailure(ErrorResult errorResult) {
-                    int ErrorCode = errorResult.getErrorCode();
-                    int ClientErrorCode = -777;
 
-                    if (ErrorCode == ClientErrorCode) {
-                        Toast.makeText(getApplicationContext(), "카카오톡 서버의 네트워크가 불안정합니다. 잠시 후 다시 시도해주세요.", Toast.LENGTH_SHORT).show();
-                    } else {
+                List<String> keys = new ArrayList<>();
+                keys.add("properties.nickname");
+                keys.add("properties.profile_image");
+                keys.add("kakao_account.email");
+
+                UserManagement.getInstance().me(keys, new MeV2ResponseCallback() {
+                    @Override
+                    public void onSessionClosed(ErrorResult errorResult) {
                         Toast.makeText(SampleLoginActivity.this, "로그인 실패", Toast.LENGTH_SHORT).show();
                         Log.d("TAG" , "오류로 카카오로그인 실패 ");
+
                     }
-                }
 
-                @Override
-                public void onSessionClosed(ErrorResult errorResult) {
-                    Toast.makeText(SampleLoginActivity.this, "로그인 실패", Toast.LENGTH_SHORT).show();
-                    Log.d("TAG" , "오류로 카카오로그인 실패 ");
-                }
+                    @Override
+                    public void onSuccess(MeV2Response response) {
+                        Toast.makeText(SampleLoginActivity.this, "로그인 성공", Toast.LENGTH_SHORT).show();
+                        requestUpdateProfile();
 
-                @Override
-                public void onSuccess(UserProfile userProfile) {
-                    Toast.makeText(SampleLoginActivity.this, "로그인 성공", Toast.LENGTH_SHORT).show();
-                    profileUrl = userProfile.getProfileImagePath();
-                    userId = String.valueOf(userProfile.getId());
-                    userName = userProfile.getNickname();
-                    request = new StringRequest(Request.Method.POST, URL, new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            try {
-                                JSONObject jsonObject = new JSONObject(response);
-                                if(jsonObject.names().get(0).equals("success")){
-                                    Toast.makeText(getApplicationContext(),"SUCCESS "+jsonObject.getString("success"),Toast.LENGTH_SHORT).show();
-                                    startActivity(new Intent(getApplicationContext(),MainActivity.class));
-                                }else {
-                                    Toast.makeText(getApplicationContext(), "Error" +jsonObject.getString("error"), Toast.LENGTH_SHORT).show();
+                        profileUrl = response.getProfileImagePath();
+                        userId = String.valueOf(response.getId());
+                        userName = response.getNickname();
+                        request = new StringRequest(Request.Method.POST, URL, new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                try {
+                                    JSONObject jsonObject = new JSONObject(response);
+                                    if(jsonObject.names().get(0).equals("success")){
+                                        Toast.makeText(getApplicationContext(),"SUCCESS "+jsonObject.getString("success"),Toast.LENGTH_SHORT).show();
+                                        startActivity(new Intent(getApplicationContext(),MainActivity.class));
+                                    }else {
+                                        Toast.makeText(getApplicationContext(), "Error" +jsonObject.getString("error"), Toast.LENGTH_SHORT).show();
+                                    }
+
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
                                 }
 
-                            } catch (JSONException e) {
-                                e.printStackTrace();
+
                             }
+                        }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+
+                            }
+                        }){
+                            @Override
+                            protected Map<String, String> getParams() throws AuthFailureError {
+                                HashMap<String,String> hashMap = new HashMap<String, String>();
+                                hashMap.put("email",userId);
+
+                                return hashMap;
+                            }
+                        };
+
+                        requestQueue.add(request);
+
+                        setLayoutText();
+                    }
 
 
-                        }
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
+                    @Override
+                    public void onFailure(ErrorResult errorResult){
 
-                        }
-                    }){
-                        @Override
-                        protected Map<String, String> getParams() throws AuthFailureError {
-                            HashMap<String,String> hashMap = new HashMap<String, String>();
-                            hashMap.put("email",userId);
+                    }
 
-                            return hashMap;
-                        }
-                    };
-
-                    requestQueue.add(request);
-
-                    setLayoutText();
-                }
-
-                @Override
-                public void onNotSignedUp() {
-                    // 자동가입이 아닐경우 동의창
-                }
-            });
+                });
         }
 
         @Override
@@ -185,6 +194,40 @@ public class SampleLoginActivity extends Activity {
     /**
      * 사용자의 상태를 알아 보기 위해 me API 호출을 한다.
      */
+
+    private void requestUpdateProfile() {
+        final Map<String, String> properties = new HashMap<String, String>();
+        properties.put("nickname", "Leo");
+        properties.put("profile_image", "Leo");
+
+        UserManagement.getInstance().requestUpdateProfile(new ApiResponseCallback<Long> () {
+            @Override
+            public void onSuccess(Long userId) {
+                Toast.makeText(SampleLoginActivity.this, "새로받은 userID"+userId, Toast.LENGTH_SHORT).show();
+
+            }
+
+            @Override
+            public void onNotSignedUp() {
+                Toast.makeText(SampleLoginActivity.this, "사인업안됨", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(ErrorResult errorResult) {
+                String message = "failed to get user info. msg=" + errorResult;
+                Logger.e(message);
+                Toast.makeText(SampleLoginActivity.this, "실패!! "+errorResult, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onSessionClosed(ErrorResult errorResult) {
+                Toast.makeText(SampleLoginActivity.this, "세션닫힘"+userId, Toast.LENGTH_SHORT).show();
+            }
+
+        }, properties);
+
+        Toast.makeText(SampleLoginActivity.this, "프로퍼티  "+properties, Toast.LENGTH_SHORT).show();
+    }
 
     private void setLayoutText(){
         tv_user_id.setText(userId);

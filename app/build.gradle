@@ -16,6 +16,17 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    splits {
+        abi {
+            enable true
+            reset()
+            include 'x86', 'x86_64', 'armeabi-v7a', 'armeabi'
+            universalApk false
+        }
+    }
+    dataBinding {
+        enabled = true
+    }
 }
 configurations.all {
     resolutionStrategy.eachDependency { DependencyResolveDetails details ->
@@ -30,20 +41,28 @@ configurations.all {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation files('libs/libDaumMapAndroid.jar')
+
     implementation 'com.android.support:appcompat-v7:26.1.0'
     implementation 'com.android.support:recyclerview-v7:26.1.0'
+    implementation 'com.android.support:design:26.1.0'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     implementation 'com.google.android.gms:play-services-maps:11.8.0'
     implementation 'com.google.android.gms:play-services-location:11.8.0'
     implementation 'com.google.android.gms:play-services-places:11.8.0'
-    compile 'gun0912.ted:tedpermission:2.0.0'
-    compile 'com.github.yongbeam:AirCalendar:0.0.5'
-    compile 'com.squareup.picasso:picasso:2.3.2'
-    compile 'com.mcxiaoke.volley:library:1.0.19'
 
-    compile group: project.KAKAO_SDK_GROUP, name: 'kakaolink', version: project.KAKAO_SDK_VERSION
-    compile group: project.KAKAO_SDK_GROUP, name: 'kakaotalk', version: project.KAKAO_SDK_VERSION
-    compile group: 'com.kakao.sdk', name: 'usermgmt', version: project.KAKAO_SDK_VERSION
+    implementation 'com.squareup.retrofit2:retrofit:2.1.0' // Retrofit
+    implementation 'com.squareup.retrofit2:converter-gson:2.0.0-beta3'
+
+
+    implementation 'gun0912.ted:tedpermission:2.0.0'
+    implementation 'com.github.yongbeam:AirCalendar:0.0.5'
+    implementation 'com.squareup.picasso:picasso:2.3.2'
+    implementation 'com.mcxiaoke.volley:library:1.0.19'
+
+    implementation group: project.KAKAO_SDK_GROUP, name: 'kakaolink', version: project.KAKAO_SDK_VERSION
+    implementation group: project.KAKAO_SDK_GROUP, name: 'kakaotalk', version: project.KAKAO_SDK_VERSION
+    implementation group: 'com.kakao.sdk', name: 'usermgmt', version: project.KAKAO_SDK_VERSION
 
 
     testImplementation 'junit:junit:4.12'
