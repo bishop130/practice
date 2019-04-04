@@ -1,25 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/contact_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/White"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+    <androidx.appcompat.widget.SearchView
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:id="@+id/contact_search"
+        />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_contact_selected"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars = "horizontal">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+<RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/activity_contact">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_contact"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical" />
 
     <Button
-        android:id="@+id/btnAddress"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginStart="0dp"
-        android:layout_marginTop="0dp"
-        android:layout_marginEnd="-1dp"
-        android:text="Address" />
-
-    <ListView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/btnAddress"
-        android:id="@+id/listview" />
+        android:id="@+id/contact_ok"
+        android:layout_alignParentBottom="true"
+        android:text="확인"
+        android:textColor="@color/White"
+        android:textSize="20sp"
+        android:background="?attr/colorPrimary"/>
 </RelativeLayout>
+
+
+
+</LinearLayout>
 

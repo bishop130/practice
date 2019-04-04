@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/wall_paper"
+    >
+
+
+    <LinearLayout
+        android:id="@+id/layout_profile_wrapper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/rounded"
+        android:orientation="vertical"
+        android:padding="8dp"
+        android:layout_marginTop="20dp"
+        >
+
+        <LinearLayout
+            android:id="@+id/profile_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+
+            android:orientation="horizontal"
+            android:clickable="true"
+            android:focusable="true">
+
+            <RelativeLayout
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:gravity="center">
+
+                <ImageView
+                    android:id="@+id/profile_image_setting"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+
+
+
+                    />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center">
+
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_toLeftOf="@id/arrow_button"
+                  >
+
+                    <TextView
+                        android:id="@+id/kakao_name_setting"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="로그인"
+                        android:textSize="20sp"
+                        android:layout_marginStart="12dp"
+                        android:layout_centerVertical="true"/>
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/arrow_button"
+                    android:layout_width="40dp"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
+                    android:gravity="center"
+
+
+                    >
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_keyboard_arrow_right_black_24dp" />
+
+                </RelativeLayout>
+
+
+            </RelativeLayout>
+
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+    <LinearLayout
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/rounded"
+        android:layout_marginTop="32dp"
+        android:orientation="vertical"
+        >
+
+        <LinearLayout
+            android:id="@+id/faq"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp">
+            <ImageView
+                android:id="@+id/faq_icon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/faq_icon"
+                android:layout_marginStart="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="알려진 버그 안내"
+                android:textSize="18sp"
+                android:layout_marginStart="24dp"
+                android:layout_gravity="center"
+                android:gravity="center"
+                />
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/right_arrow"
+                android:layout_gravity="center"
+                android:layout_marginEnd="12dp"
+                />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/rounded"
+        android:layout_marginTop="32dp"
+        android:orientation="vertical"
+       >
+        <LinearLayout
+            android:id="@+id/alarm_setting_go"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp">
+            <ImageView
+                android:id="@+id/alarm_setting_icon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/notification_setting_icon"
+                android:layout_marginStart="8dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="알람설정"
+            android:textSize="18sp"
+            android:layout_marginStart="24dp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            />
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/right_arrow"
+                android:layout_gravity="center"
+                android:layout_marginEnd="12dp"
+                />
+        </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginStart="80dp"
+            android:layout_marginEnd="24dp"
+            android:background="@color/divider_line"/>
+        <LinearLayout
+            android:id="@+id/auto_register_location"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded"
+            android:padding="12dp">
+            <ImageView
+                android:id="@+id/auto_register_location_icon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/location_setting_icon"
+                android:layout_marginStart="8dp"/>
+            
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="자동위치등록 설정"
+                android:textSize="18sp"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:layout_marginStart="24dp"
+                />
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/right_arrow"
+                android:layout_gravity="center"
+                android:layout_marginEnd="12dp"
+                />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/rounded"
+        android:layout_marginTop="32dp"
+        android:orientation="vertical"
+       >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp">
+            <ImageView
+                android:id="@+id/friends_icon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/people_icon"
+                android:layout_marginStart="8dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="친구등록"
+            android:textSize="18sp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:layout_marginStart="24dp"
+            />
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/right_arrow"
+                android:layout_gravity="center"
+                android:layout_marginEnd="12dp"
+                />
+        </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginStart="80dp"
+            android:layout_marginEnd="24dp"
+            android:background="@color/divider_line"/>
+        <LinearLayout
+            android:id="@+id/go_to_my_profile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded"
+            android:padding="12dp">
+            <ImageView
+                android:id="@+id/account_icon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/my_profile_icon"
+                android:layout_marginStart="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="내 정보"
+                android:textSize="18sp"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:layout_marginStart="24dp"
+                />
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/right_arrow"
+                android:layout_gravity="center"
+                android:layout_marginEnd="12dp"
+                />
+
+        </LinearLayout>
+
+    </LinearLayout>
+   
+   
+
+
+
+</LinearLayout>

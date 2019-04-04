@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+
+
+
+    <com.prolificinteractive.materialcalendarview.MaterialCalendarView
+        android:id="@+id/material_calendar_day"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:mcv_tileHeight="34dp"
+        app:mcv_tileWidth="48dp"
+        android:padding="4dp"
+
+        />
+
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@color/wall_paper2"
+       >
+        <RelativeLayout
+            android:layout_width="4dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="40dp"
+            android:background="@color/time_line">
+
+        </RelativeLayout>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_day"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:splitMotionEvents="false"
+        android:clipToPadding="false"
+        android:paddingBottom="80dp"
+        android:scrollbars="vertical"
+       >
+
+
+    </androidx.recyclerview.widget.RecyclerView>
+    </FrameLayout>
+</LinearLayout>

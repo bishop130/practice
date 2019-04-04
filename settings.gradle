@@ -1,1 +1,1 @@
-include ':app'
+include ':app', ':vertical-stepper-form'

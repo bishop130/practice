@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".RecyclerResultActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/recycler_result_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/White"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+
+
+        <RelativeLayout
+            android:id="@+id/map_view_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="-24dp"
+
+            android:layout_below="@+id/layout_status_wrap"
+
+
+            >
+
+            <fragment
+                android:id="@+id/map_view2"
+                class="com.google.android.gms.maps.MapFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="0dp" />
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/btn_mission_location"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_alignParentRight="true"
+                android:layout_marginTop="60dp"
+                android:layout_marginRight="12dp"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:divider="@android:color/transparent"
+                android:dividerHeight="0.0px"
+                android:elevation="8dp"
+                android:text="현재위치"
+                app:cardCornerRadius="8dp"
+
+                >
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_flag_black_24dp" />
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/btn_current_location"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_below="@+id/btn_mission_location"
+                android:layout_alignParentRight="true"
+                android:layout_marginTop="12dp"
+                android:layout_marginRight="12dp"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:divider="@android:color/transparent"
+                android:dividerHeight="0.0px"
+                android:elevation="8dp"
+                android:text="현재위치"
+                app:cardCornerRadius="8dp"
+
+                >
+                <TextView
+                    android:id="@+id/location_loading"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="24sp"
+                    android:text="?"
+                    android:textStyle="bold"
+                    android:layout_gravity="center"
+                    android:visibility="visible"
+                    android:textColor="@color/colorPrimary"/>
+
+                <ImageView
+                    android:id="@+id/location_founded"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:visibility="gone"
+                    android:src="@drawable/ic_my_location_black_24dp" />
+            </androidx.cardview.widget.CardView>
+
+
+            <Button
+                android:id="@+id/register_location"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_marginLeft="80dp"
+                android:layout_marginRight="80dp"
+                android:layout_marginBottom="32dp"
+                android:background="@drawable/register_button_shape"
+                android:elevation="12dp"
+                android:padding="12dp"
+                android:text="내 위치 등록"
+                android:textColor="@color/White"
+                android:textSize="18sp"
+                android:visibility="visible"/>
+
+
+        </RelativeLayout>
+        <RelativeLayout
+            android:id="@+id/layout_status_wrap"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/register_activity_bottom_rounded"
+            android:elevation="8dp"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/layout_if_success"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:gravity="center"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/text_if_success"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="성공"
+                    android:textSize="30sp" />
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/check_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                android:elevation="4dp"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <LinearLayout
+                    android:id="@+id/tv_MissionTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="40dp"
+                    android:textSize="32sp">
+
+                    <ImageView
+                        android:id="@+id/unchecked_date_icon"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/unchecked_icon" />
+
+                    <TextView
+                        android:id="@+id/check_date"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginStart="30dp"
+                        android:text="날짜 확인" />
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="40dp"
+                    android:layout_marginTop="12dp"
+                    android:textSize="32sp">
+
+                    <ImageView
+                        android:id="@+id/unchecked_time_icon"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/unchecked_icon" />
+
+                    <TextView
+                        android:id="@+id/check_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginStart="30dp"
+                        android:text="시간 확인" />
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="40dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp"
+                    android:textSize="32sp">
+
+                    <ImageView
+                        android:id="@+id/unchecked_location_icon"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/unknown_icon" />
+
+                    <TextView
+                        android:id="@+id/check_location"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginStart="30dp"
+                        android:text="위치 확인중.." />
+
+
+                </LinearLayout>
+
+            </LinearLayout>
+        </RelativeLayout>
+    </RelativeLayout>
+
+</LinearLayout>

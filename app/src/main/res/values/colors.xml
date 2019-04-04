@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorPrimaryDark">#4D73ED</color>
     <color name="colorAccent">#FF4081</color>
 
     <color name="red">#FFC93437</color>
     <color name="blue">#FF375BF1</color>
     <color name="yellow">#FFF7D23E</color>
     <color name="green">#FF34A350</color>
+    <color name="black">#000000</color>
+    <color name="White">#FFFFFF</color>
+    <color name="LayoutColor">#FAFAFA</color>
+    <color name="dateColor">#87B744</color>
+    <color name="transparent">#00000000</color>
+    <color name="wall_paper2">#F3F2F8</color>
+    <color name="wall_paper">#ECECEC</color>
+    <color name="time_line">#EAE9EE</color>
+    <color name="divider_line">#ECECEC</color>
 </resources>

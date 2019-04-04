@@ -1,123 +1,269 @@
 package com.example.lj.myapplication;
 
-import android.app.Activity;
-import android.content.Intent;
-import android.database.Cursor;
+import android.Manifest;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.ListView;
-import android.widget.SimpleAdapter;
-import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.lj.myapplication.Adapters.RecyclerViewContactAdapter;
+import com.example.lj.myapplication.Items.ContactItem;
+import com.example.lj.myapplication.Items.ContactItemForServer;
+import com.example.lj.myapplication.Items.SendData;
+import com.github.tamir7.contacts.Contact;
+import com.github.tamir7.contacts.Contacts;
+import com.github.tamir7.contacts.Query;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import net.daum.mf.map.api.MapView;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
-public class ContactActivity extends Activity implements View.OnClickListener {
+import java.util.List;
 
-    private ArrayList<HashMap<String, String>> dataList;
-    private ListView mListview;
-    private Button mBtnAddress;
+public class ContactActivity extends AppCompatActivity {
+
+    private final String TAG = "MainActivity";
+    private RecyclerView recyclerView;
+    RecyclerViewContactAdapter adapter;
+    ArrayList<ContactItem> listItem;
+    LinearLayoutManager layoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contact);
+        listItem = new ArrayList<>();
+        recyclerView = (RecyclerView) findViewById(R.id.recycler_view_contact);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
 
-        mListview = (ListView) findViewById(R.id.listview);
-        mBtnAddress = (Button) findViewById(R.id.btnAddress);
-        mBtnAddress.setOnClickListener(this);
 
-        mListview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.contact_toolbar);
+        toolbar.setTitle("연락처 선택");
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+
+
+        SearchView searchView = (SearchView)findViewById(R.id.contact_search);
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                HashMap<String, String> map = (HashMap<String,String>)adapterView.getItemAtPosition(i);
-                String result = map.toString();
-                Toast.makeText(getApplicationContext(),result,Toast.LENGTH_LONG).show();
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
 
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                adapter.getFilter().filter(newText);
+                return false;
             }
         });
-        mListview.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                ListView listView = (ListView) adapterView;
-                String name = (String)listView.getItemAtPosition(i);
-                Toast.makeText(getApplicationContext(),name,Toast.LENGTH_LONG).show();
-            }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
 
-            }
-        });
 
 
     }
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
 
-        public void onClick(View v) {
-            switch (v.getId()) {
-                case R.id.btnAddress:
-
-                /*Cursor cursor = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,null,null,null,null);
-                startManagingCursor(cursor);
-
-                String[] from = {ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,ContactsContract.CommonDataKinds.Phone.NUMBER,ContactsContract.CommonDataKinds.Phone._ID};
-
-                int[] to = {android.R.id.text1};
-
-                SimpleCursorAdapter simpleCursorAdapter = new SimpleCursorAdapter(getApplicationContext(),android.R.layout.simple_list_item_2,cursor,from,to);
-                lv.setAdapter(simpleCursorAdapter);
-                lv.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-*/
-                dataList = new ArrayList<HashMap<String, String>>();
-                Cursor c = getContentResolver().query(ContactsContract.Contacts.CONTENT_URI,
-                        null, null, null,
-                        ContactsContract.Contacts.DISPLAY_NAME_PRIMARY + " asc");
+    private void getContacts(){
+        Query q = Contacts.getQuery();
+        q.include(Contact.Field.ContactId, Contact.Field.DisplayName, Contact.Field.PhoneNumber);
+        List<Contact> result = q.find();
 
 
-                while (c.moveToNext()) {
-                    HashMap<String, String> map = new HashMap<String, String>();
-                    // 연락처 id 값
-                    String id = c.getString(c.getColumnIndex(ContactsContract.Contacts._ID));
-                    // 연락처 대표 이름
-                    String name = c.getString(c.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME_PRIMARY));
-                    map.put("name", name);
+        try {
+            String con = new GsonBuilder().setPrettyPrinting().create().toJson(result);
+            JSONArray jsonArr = new JSONArray(con);
+            for (int i = 0; i < jsonArr.length(); i++) {
 
-                    // ID로 전화 정보 조회
-                    Cursor phoneCursor = getContentResolver().query(
-                            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                            null,
-                            ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + id,
-                            null, null);
+                JSONObject object = jsonArr.getJSONObject(i);
+                ContactItem contactItem = new ContactItem();
+                contactItem.setDisplayName(object.getString("displayName"));
+                JSONArray jsonArr2 = object.getJSONArray("phoneNumbers");
 
-                    // 데이터가 있는 경우
-                    if (phoneCursor.moveToFirst()) {
-                        String number = phoneCursor.getString(phoneCursor.getColumnIndex(
-                                ContactsContract.CommonDataKinds.Phone.NUMBER));
-                        map.put("phone", number);
+                for (int j = 0; j < jsonArr2.length(); j++) {
+                    JSONObject object2 = jsonArr2.getJSONObject(j);
+                    contactItem.setPhoneNumbers(object2.getString("number"));
+                    listItem.add(contactItem);
+                }
+            }
+            setupRecyclerView(listItem);
+        } catch (JSONException e) {
+        }
+    }
+
+    private void setupRecyclerView(List<ContactItem> itemList) {
+
+       adapter = new RecyclerViewContactAdapter(this, itemList);
+        Button button = (Button)findViewById(R.id.contact_ok);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String data="";
+                String displayInfo="";
+                int count = 0;
+
+                List<ContactItem> ctList = ((RecyclerViewContactAdapter) adapter).getStudentist();
+                List<ContactItemForServer> ctServer = new ArrayList<>();
+
+
+                for(int i =0; i<ctList.size(); i++){
+                    ContactItem singleContact = ctList.get(i);
+                    if(singleContact.isSelected() == true){
+                        data=data+singleContact.getPhoneNumbers();
+                        displayInfo=displayInfo+singleContact.getDisplayName()+", ";
+                        count++;
+                        ctList.get(i);
+                        ContactItemForServer contactItemForServer = new ContactItemForServer();
+                        contactItemForServer.setName(singleContact.getDisplayName());
+                        contactItemForServer.setNum(singleContact.getPhoneNumbers());
+                        ctServer.add(contactItemForServer);
+
+
                     }
+                }
+                String contact_json = new Gson().toJson(ctServer);
+                Log.d("List",contact_json);
+                int last = displayInfo.length() - 2;
+                if (last > 0 && displayInfo.charAt(last) == ',') {
+                    displayInfo = displayInfo.substring(0, last);
+                }
 
-                    phoneCursor.close();
-                    dataList.add(map);
-                }// end while
-                c.close();
+                Log.d("DisplayInfo",displayInfo);
+                SharedPreferences sharedPreferences = getSharedPreferences("sFile",MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("ContactInfo",displayInfo);
+                editor.putString("contact_json",contact_json);
+                editor.putString("count",String.valueOf(count));
+                editor.putInt("Code",777);
+                editor.apply();
+                editor.commit();
 
-                SimpleAdapter adapter = new SimpleAdapter(getApplicationContext(),
-                        dataList,
-                        android.R.layout.simple_list_item_2,
-                        new String[]{"name", "phone"},
-                        new int[]{android.R.id.text1, android.R.id.text2});
-                mListview.setAdapter(adapter);
-
+                Toast.makeText(ContactActivity.this,
+                        "Selected Students:" +data, Toast.LENGTH_LONG)
+                        .show();
+                finish();
 
             }
+        });
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+        recyclerView.setAdapter(adapter);
+
+    }
+
+    @Override
+    protected void onResume(){
+        checkContactPermission();
+        super.onResume();
+    }
+
+    public static final int MY_PERMISSIONS_REQUEST_CONTACT = 100;
+
+    private void checkContactPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS)
+                == PackageManager.PERMISSION_GRANTED) {
+            Log.d("퍼미션","이미 승인받음");
+            Contacts.initialize(this);
+            getContacts();
+
         }
+        else{
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.READ_CONTACTS)) {
+
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+                new AlertDialog.Builder(this)
+                        .setTitle("Location Permission Needed")
+                        .setMessage("This app needs the Location permission, please accept to use location functionality")
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                //Prompt the user once explanation has been shown
+                                ActivityCompat.requestPermissions(ContactActivity.this,
+                                        new String[]{Manifest.permission.READ_CONTACTS},
+                                        MY_PERMISSIONS_REQUEST_CONTACT);
+                            }
+                        })
+                        .create()
+                        .show();
+
+
+            } else {
+                // No explanation needed, we can request the permission.
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.READ_CONTACTS},
+                        MY_PERMISSIONS_REQUEST_CONTACT);
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_CONTACT: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted, yay! Do the
+                    // location-related task you need to do.
+                    if (ContextCompat.checkSelfPermission(this,
+                            Manifest.permission.READ_CONTACTS)
+                            == PackageManager.PERMISSION_GRANTED) {
+                        Log.d("퍼미션","여기는 왜 못들어와");
+                        Contacts.initialize(this);
+                        getContacts();
+
+                    }
+
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                    Toast.makeText(this, "permission denied", Toast.LENGTH_LONG).show();
+                    finish();
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
+    }
+
+
+
 
 
 }

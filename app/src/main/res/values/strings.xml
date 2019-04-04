@@ -1,3 +1,22 @@
 <resources>
     <string name="app_name">My Application</string>
+    <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
+    <!--
+        This is the name that users will see when interacting with this channel.
+        It should describe the category of notifications that will be sent through this channel
+     -->
+
+    <string name="default_notification_channel_name" translatable="true">Weather</string>
+    <string name="form_hint_title">제목을 입력하세요 (필수)</string>
+    <string name="form_empty_field">(Empty)</string>
+    <string name="form_sending_data_message">추가하는 중</string>
+    <string name="form_discard_question">작성을 취소하시겠습니까?</string>
+    <string name="form_info_will_be_lost">이 페이지를 벗어나면 마지막 저장 후 수정된 내용은 저장되지 않습니다.</string>
+    <string name="form_discard_cancel">취소</string>
+    <string name="form_discard">나가기</string>
+    <string name="add_alarm">확인</string>
+    <string name="error_alarm_name_min_characters">최소 1글자 이상을 입력하세요</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
 </resources>

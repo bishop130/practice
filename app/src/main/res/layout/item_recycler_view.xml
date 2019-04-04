@@ -1,20 +1,291 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:background="#fff"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/container"
     android:layout_width="match_parent"
-    android:layout_height="56dp">
-    <ImageView
-        android:src="@drawable/pin"
-        android:layout_marginStart="16dp"
-        android:layout_centerVertical="true"
-        android:layout_width="40dp"
-        android:layout_height="40dp" />
-    <TextView
-        android:id="@+id/itemNameTv"
-        android:layout_centerVertical="true"
-        android:layout_marginStart="72dp"
-        android:textSize="18sp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-</RelativeLayout>
+    android:layout_height="wrap_content"
+
+    android:layout_marginRight="20dp"
+    android:orientation="vertical"
+
+    >
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/wall_paper2">
+
+        <LinearLayout
+            android:id="@+id/text_wrap"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            >
+
+
+            <RelativeLayout
+                android:id="@+id/shadow_layout"
+                android:layout_width="84dp"
+                android:layout_height="match_parent"
+                android:background="@color/wall_paper2">
+
+                <RelativeLayout
+                    android:layout_width="4dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="40dp"
+                    android:background="@color/time_line">
+
+
+                </RelativeLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/is_today"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="visible"
+
+                        android:background="@color/wall_paper2"
+                        android:gravity="center"
+                        android:text="오늘" />
+
+                    <TextView
+                        android:id="@+id/mission_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@color/wall_paper2"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:text="시간" />
+                </LinearLayout>
+            </RelativeLayout>
+
+
+            <RelativeLayout
+                android:id="@+id/main_wrap"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/shadow_layout"
+                android:background="@drawable/rounded">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <RelativeLayout
+                        android:layout_width="60dp"
+                        android:layout_height="match_parent">
+
+                        <ImageView
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:layout_centerHorizontal="true"
+                            android:layout_centerVertical="true"
+                            android:src="@drawable/check_circle_out" />
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_centerHorizontal="true"
+                            android:layout_centerVertical="true"
+                            android:src="@drawable/check_circle_in" />
+
+                        <ImageView
+                            android:id="@+id/is_status"
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
+                            android:layout_centerHorizontal="true"
+                            android:layout_centerVertical="true" />
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center">
+
+                        <RelativeLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginTop="20dp"
+                            android:layout_marginBottom="20dp"
+                            android:gravity="center">
+
+                            <TextView
+                                android:id="@+id/tv_missionTitle"
+                                android:layout_width="150dp"
+                                android:layout_height="wrap_content"
+                                android:textSize="18sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/tv_missionID"
+                                android:layout_width="150dp"
+                                android:layout_height="wrap_content"
+                                android:layout_below="@id/tv_missionTitle"
+
+                                android:layout_marginTop="8dp"
+                                android:textSize="12sp" />
+                        </RelativeLayout>
+                    </RelativeLayout>
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"/>
+
+                    <RelativeLayout
+                        android:id="@+id/button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="32dp"
+                        android:gravity="center"
+
+                        >
+
+
+                            <View
+                                android:layout_width="36dp"
+                                android:layout_height="36dp"
+                                android:layout_centerHorizontal="true"
+                                android:layout_centerVertical="true"
+                                android:background="@drawable/ic_keyboard_arrow_right_black_24dp" />
+
+                    </RelativeLayout>
+                </LinearLayout>
+            </RelativeLayout>
+        </LinearLayout>
+
+        <com.github.aakira.expandablelayout.ExpandableLinearLayout
+            android:id="@+id/expandableLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/text_wrap"
+            android:background="@color/wall_paper2"
+            android:orientation="vertical"
+            app:ael_duration="200"
+            app:ael_expanded="false"
+
+            >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+
+                >
+
+                <RelativeLayout
+                    android:id="@+id/shadow_layout_expanded"
+                    android:layout_width="84dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/wall_paper2">
+
+                    <RelativeLayout
+                        android:layout_width="4dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="40dp"
+                        android:background="@color/time_line">
+
+                    </RelativeLayout>
+
+                </RelativeLayout>
+
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bottom_rounded"
+
+
+                    >
+
+                    <TextView
+                        android:id="@+id/expand_text_date"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:text="약속기간"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:id="@+id/range_date"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/expand_text_date"
+                        android:layout_marginStart="20dp"
+                        android:text="날짜확인"
+                        android:textSize="16sp" />
+
+                    <RelativeLayout
+                        android:id="@+id/progress_bar_date_shape"
+                        android:layout_width="200dp"
+                        android:layout_height="8dp"
+                        android:layout_below="@id/range_date"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginStart="48dp"
+                        android:layout_marginTop="16dp"
+                        android:background="@drawable/shape_for_progress_date">
+
+                        <RelativeLayout
+                            android:id="@+id/progress_bar_date"
+                            android:layout_width="100dp"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/shape_for_progress" />
+
+                    </RelativeLayout>
+
+                    <TextView
+                        android:id="@+id/expand_text_sample"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/progress_bar_date_shape"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginTop="20dp"
+                        android:text="주소"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:id="@+id/expand_text_contact"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/expand_text_sample"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginTop="20dp"
+                        android:text="연락처" />
+
+                    <TextView
+                        android:id="@+id/display_contact_list"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/expand_text_contact"
+                        android:layout_marginStart="40dp"
+                        android:layout_marginTop="20dp"
+                        android:textSize="12sp" />
+
+                    <Button
+                        android:id="@+id/expand_button_map"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/display_contact_list"
+                        android:layout_marginTop="30dp"
+                        android:layout_marginBottom="30dp"
+                        android:background="@drawable/register_button_shape"
+                        android:layout_marginLeft="40dp"
+                        android:layout_marginRight="40dp"
+
+                        android:text="위치등록"
+                        android:textColor="@color/White" />
+                </RelativeLayout>
+            </LinearLayout>
+        </com.github.aakira.expandablelayout.ExpandableLinearLayout>
+    </RelativeLayout>
+</LinearLayout>

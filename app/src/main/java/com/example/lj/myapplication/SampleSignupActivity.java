@@ -1,15 +1,30 @@
 package com.example.lj.myapplication;
 
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.lj.myapplication.Fragments.HomeFragment;
 import com.kakao.auth.ApiResponseCallback;
+import com.kakao.auth.AuthService;
+import com.kakao.auth.network.response.AccessTokenInfoResponse;
+import com.kakao.kakaotalk.callback.TalkResponseCallback;
+import com.kakao.kakaotalk.response.KakaoTalkProfile;
+import com.kakao.kakaotalk.v2.KakaoTalkService;
 import com.kakao.network.ErrorResult;
 import com.kakao.usermgmt.UserManagement;
+import com.kakao.usermgmt.callback.LogoutResponseCallback;
 import com.kakao.usermgmt.callback.MeV2ResponseCallback;
+import com.kakao.usermgmt.callback.UnLinkResponseCallback;
 import com.kakao.usermgmt.response.MeV2Response;
 import com.kakao.util.helper.log.Logger;
 import com.squareup.picasso.Picasso;
@@ -24,78 +39,110 @@ public class SampleSignupActivity extends AppCompatActivity {
     private TextView name;
     private ImageView profile_image;
 
-    private String userName;
-    private String userId;
-    private String profileUrl;
+    private String nickName;
+    private String profileImageURL;
+    private String thumbnailURL;
+    private String countryISO;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample_signup);
 
-        id = (TextView)findViewById(R.id.id);
-        name=(TextView)findViewById(R.id.name);
-        profile_image = (ImageView)findViewById(R.id.profile_image);
-        requestMe();
-        requestUpdateProfile();
-    }
-
-    private void requestUpdateProfile() {
-        final Map<String, String> properties = new HashMap<String, String>();
-        properties.put("nickname", "Leo");
-        properties.put("age", "33");
-
-        UserManagement.getInstance().requestUpdateProfile(new ApiResponseCallback<Long>() {
+        name=findViewById(R.id.kakao_name);
+        id = findViewById(R.id.kakao_name_detail);
+        profile_image = findViewById(R.id.profile_image);
+        LinearLayout unlink_button = findViewById(R.id.kakao_unlink);
+        unlink_button.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onSuccess(Long userId) {
-                Toast.makeText(SampleSignupActivity.this, "새로받은 userID"+userId, Toast.LENGTH_SHORT).show();
+            public void onClick(View v) {
+                onClickUnlink();
+            }
+        });
+        LinearLayout kakao_logout_button = findViewById(R.id.kakao_logout);
+        kakao_logout_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                UserManagement.getInstance().requestLogout(new LogoutResponseCallback() {
+                    @Override
+                    public void onCompleteLogout() {
+                        Toast.makeText(getApplicationContext(),"로그아웃 완료",Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        });
+
+
+        requestProfile();
+        setLayoutText();
+
+    }
+    private void requestAccessTokenInfo() {
+        AuthService.getInstance().requestAccessTokenInfo(new ApiResponseCallback<AccessTokenInfoResponse>() {
+            @Override
+            public void onSessionClosed(ErrorResult errorResult) {
+                // redirectLoginActivity(self);
+                Toast.makeText(getApplicationContext(),"세션닫힘",Toast.LENGTH_LONG).show();
             }
 
             @Override
             public void onNotSignedUp() {
+                Toast.makeText(getApplicationContext(),"로그인해주세요",Toast.LENGTH_LONG).show();
             }
 
             @Override
             public void onFailure(ErrorResult errorResult) {
-                String message = "failed to get user info. msg=" + errorResult;
-                Logger.e(message);
+                Logger.e("failed to get access token info. msg=" + errorResult);
             }
 
             @Override
-            public void onSessionClosed(ErrorResult errorResult) {
+            public void onSuccess(AccessTokenInfoResponse accessTokenInfoResponse) {
+                String userId = String.valueOf(accessTokenInfoResponse.getUserId());
+                Log.d("토큰확인" ,String.valueOf(userId));
+                requestProfile();
+
+                long expiresInMilis = accessTokenInfoResponse.getExpiresInMillis();
+                Log.d("토큰 만료 됨 " , expiresInMilis + "이후에");
             }
-
-        }, properties);
-    }
-
-    private void requestMe() {
-        List<String> keys = new ArrayList<>();
-        keys.add("properties.nickname");
-        keys.add("properties.profile_image");
-        keys.add("kakao_account.email");
-
-        UserManagement.getInstance().me(keys, new MeV2ResponseCallback() {
-            @Override
-            public void onSessionClosed(ErrorResult errorResult) {
-
-            }
-
-            @Override
-            public void onSuccess(MeV2Response result) {
-                profileUrl = result.getProfileImagePath();
-                userId = String.valueOf(result.getId());
-                userName = result.getNickname();
-                setLayoutText();
-
-            }
-
-            @Override
-            public void onFailure(ErrorResult errorResult){
-
-            }
-
         });
     }
+    public void requestProfile() {
+        KakaoTalkService.getInstance().requestProfile(new KakaoTalkResponseCallback<KakaoTalkProfile>() {
+            @Override
+            public void onSuccess(KakaoTalkProfile talkProfile) {
+                nickName = talkProfile.getNickName();
+                profileImageURL = talkProfile.getProfileImageUrl();
+                thumbnailURL = talkProfile.getThumbnailUrl();
+                countryISO = talkProfile.getCountryISO();
+
+                Log.d("카톡프로필",nickName+"\n"+profileImageURL+"\n"+thumbnailURL+"\n"+countryISO);
+            }
+        });
+    }
+    private abstract class KakaoTalkResponseCallback<T> extends TalkResponseCallback<T> {
+        @Override
+        public void onNotKakaoTalkUser() {
+            Toast.makeText(getApplicationContext(),"카카오톡 유저가 아닙니다.",Toast.LENGTH_LONG).show();
+            Log.d("카카오톡","not a KakaoTalk user");
+        }
+
+        @Override
+        public void onFailure(ErrorResult errorResult) {
+            Logger.e("failure : " + errorResult);
+        }
+
+        @Override
+        public void onSessionClosed(ErrorResult errorResult) {
+            //redirectLoginActivity();
+        }
+
+        @Override
+        public void onNotSignedUp() {
+            //redirectSignupActivity();
+        }
+    }
+
 
     /*
     private void requestMe() {
@@ -131,12 +178,54 @@ public class SampleSignupActivity extends AppCompatActivity {
     */
 
     private void setLayoutText(){
-        id.setText(userId);
-        name.setText(userName);
+        id.setText(countryISO);
+        name.setText(nickName);
 
         Picasso.with(this)
-                .load(profileUrl)
+                .load(thumbnailURL)
                 .fit()
                 .into(profile_image);
+    }
+
+    private void onClickUnlink() {
+        final String appendMessage = getString(R.string.com_kakao_confirm_unlink);
+        new AlertDialog.Builder(this)
+                .setMessage(appendMessage)
+                .setPositiveButton(getString(R.string.com_kakao_ok_button),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                UserManagement.getInstance().requestUnlink(new UnLinkResponseCallback() {
+                                    @Override
+                                    public void onFailure(ErrorResult errorResult) {
+                                        Logger.e(errorResult.toString());
+                                    }
+
+                                    @Override
+                                    public void onSessionClosed(ErrorResult errorResult) {
+                                        //redirectLoginActivity();
+                                    }
+
+                                    @Override
+                                    public void onNotSignedUp() {
+                                        //redirectSignupActivity();
+                                    }
+
+                                    @Override
+                                    public void onSuccess(Long userId) {
+                                        finish();
+                                    }
+                                });
+                                dialog.dismiss();
+                            }
+                        })
+                .setNegativeButton(getString(R.string.com_kakao_cancel_button),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        }).show();
+
     }
 }

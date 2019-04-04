@@ -1,4 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content" />
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/container_total"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+
+    android:layout_marginRight="20dp"
+    android:layout_marginLeft="20dp"
+    android:orientation="vertical"
+
+    >
+
+
+
+
+            <RelativeLayout
+                android:id="@+id/main_wrap"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/shadow_layout"
+                android:background="@drawable/rounded"
+               >
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="20dp"
+                    >
+
+                    <RelativeLayout
+                        android:layout_width="72dp"
+                        android:layout_height="match_parent"
+                       >
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+
+                            android:orientation="vertical"
+                            android:gravity="center">
+                            <TextView
+                                android:id="@+id/register_year"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="2019"
+                                android:textSize="15sp"
+                                android:gravity="center"
+                                />
+                            <TextView
+                                android:id="@+id/register_month_day"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="3.18"
+                                android:layout_marginTop="-4dp"
+                                android:textSize="18sp"
+
+
+                                android:gravity="center"
+                                />
+
+
+                        </LinearLayout>
+
+
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center">
+
+                        <RelativeLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:layout_marginStart="12dp">
+
+                            <TextView
+                                android:id="@+id/mission_title_total"
+                                android:layout_width="160dp"
+                                android:layout_height="wrap_content"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:text="제목"
+                                android:textColor="@color/black"/>
+
+                            <TextView
+                                android:id="@+id/range_date_total"
+                                android:layout_width="160dp"
+                                android:layout_height="wrap_content"
+                                android:layout_below="@id/mission_title_total"
+
+                                android:layout_marginTop="4dp"
+                                android:textSize="12sp" />
+                        </RelativeLayout>
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/button_to_detail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+
+                        >
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true">
+
+                            <View
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:layout_centerHorizontal="true"
+                                android:layout_centerVertical="true"
+                                android:background="@drawable/ic_keyboard_arrow_right_black_24dp" />
+                        </RelativeLayout>
+                    </RelativeLayout>
+                </LinearLayout>
+            </RelativeLayout>
+</LinearLayout>

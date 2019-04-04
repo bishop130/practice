@@ -1,86 +1,108 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:app="http://schemas.android.com/apk/res-auto"
-xmlns:tools="http://schemas.android.com/tools"
-android:layout_width="match_parent"
-android:layout_height="match_parent">
-
-
--
-
-<LinearLayout
-    android:id="@+id/linearLayout"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    app:layout_constraintBottom_toTopOf="@+id/map_layout"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <fragment
-        android:id="@+id/place_autocomplete_fragment"
-        android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/daum_map_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/White"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
+
+    <RelativeLayout
+        android:id="@+id/map_layout"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:elevation="4dp"
+        android:orientation="vertical">
+
+        <fragment
+            android:id="@+id/map_view"
+            class="com.google.android.gms.maps.MapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true" />
+
+        <LinearLayout
+            android:layout_width="40dp"
+            android:layout_height="1dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:background="#653F51B5">
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="1dp"
+            android:layout_height="40dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:background="#653F51B5">
+
+        </LinearLayout>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/radius"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_below="@+id/btn_mission_location"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="12dp"
+            android:layout_marginRight="12dp"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="0.0px"
+            android:elevation="8dp"
+            android:text="현재위치"
+            app:cardCornerRadius="8dp"
+
+            >
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_my_location_black_24dp" />
+        </androidx.cardview.widget.CardView>
+
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/place_recycler"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:scrollbars="vertical"
+            android:tooltipText="장소 검색"
+
+            />
+
+
+
+
+        <Button
+            android:id="@+id/addressConfirmed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/place_recycler"
+            android:layout_alignParentBottom="true"
+            android:background="?attr/colorPrimary"
+            android:text="확인"
+            android:textColor="#ffffff"
+            android:textSize="16sp" />
+    </RelativeLayout>
 </LinearLayout>
-
-<RelativeLayout
-    android:id="@+id/map_layout"
-    android:layout_width="match_parent"
-    android:layout_height="300dp"
-    android:layout_marginBottom="8dp"
-    android:layout_marginTop="8dp"
-    android:orientation="vertical"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintHorizontal_bias="0.594"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/linearLayout">
-
-    <fragment
-        android:id="@+id/map_view"
-        class="com.google.android.gms.maps.MapFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="10dp" />
-
-    <ImageView
-        android:id="@+id/imageView1"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="122dp"
-        android:src="@drawable/pin" />
-
-</RelativeLayout>
-
-<TextView
-    android:id="@+id/address"
-    android:layout_width="match_parent"
-    android:layout_height="200dp"
-    android:layout_marginBottom="8dp"
-    android:layout_marginEnd="8dp"
-    android:layout_marginStart="8dp"
-    android:layout_marginTop="8dp"
-    android:text="테스트"
-    android:textSize="20sp"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/map_layout" />
-
-<Button
-    android:id="@+id/addressConfirmed"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"
-    android:text="확인"
-
-    app:layout_constraintBottom_toBottomOf="parent" />
-
-</android.support.constraint.ConstraintLayout>

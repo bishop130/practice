@@ -23,6 +23,7 @@ import com.kakao.auth.Session;
 import com.kakao.kakaotalk.KakaoTalkService;
 import com.kakao.kakaotalk.response.KakaoTalkProfile;
 import com.kakao.network.ErrorResult;
+import com.kakao.usermgmt.LoginButton;
 import com.kakao.usermgmt.StringSet;
 import com.kakao.usermgmt.UserManagement;
 import com.kakao.usermgmt.callback.LogoutResponseCallback;
@@ -37,11 +38,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
-
-
-public class SampleLoginActivity extends Activity {
+public class SampleLoginActivity extends AppCompatActivity {
 
     private SessionCallback mKakaocallback;
     private static final String URL = "http://bishop130.cafe24.com/user_control.php";
@@ -57,18 +59,27 @@ public class SampleLoginActivity extends Activity {
     private String userId;
     private String profileUrl;
 
-
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calendar);
 
         requestQueue = Volley.newRequestQueue(this);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.recycler_result_toolbar);
+        toolbar.setTitle("내 정보");
+        setSupportActionBar(toolbar);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-
-        tv_user_id = (TextView) findViewById(R.id.tv_user_id);
-        tv_user_name = (TextView) findViewById(R.id.tv_user_name);
-        iv_user_profile = (ImageView) findViewById(R.id.iv_user_profile);
+        Button fake_button = (Button)findViewById(R.id.fake_button);
+        fake_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mKakaocallback = new SessionCallback();
+                Session.getCurrentSession().addCallback(mKakaocallback);
+                Session.getCurrentSession().checkAndImplicitOpen();
+            }
+        });
+        /*
         logout = (Button)findViewById(R.id.logout);
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,10 +95,9 @@ public class SampleLoginActivity extends Activity {
                 startActivity(intent);
             }
         });
+        */
 
-        mKakaocallback = new SessionCallback();
-        Session.getCurrentSession().addCallback(mKakaocallback);
-        Session.getCurrentSession().checkAndImplicitOpen();
+
     }
 
     @Override
@@ -110,9 +120,6 @@ public class SampleLoginActivity extends Activity {
         public void onSessionOpened() {
             Log.d("TAG" , "세션 오픈됨");
 
-            Intent intent = new Intent(SampleLoginActivity.this,SampleSignupActivity.class);
-            startActivity(intent);
-
             // 사용자 정보를 가져옴, 회원가입 미가입시 자동가입 시킴
 
                 List<String> keys = new ArrayList<>();
@@ -131,6 +138,8 @@ public class SampleLoginActivity extends Activity {
                     @Override
                     public void onSuccess(MeV2Response response) {
                         Toast.makeText(SampleLoginActivity.this, "로그인 성공", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(SampleLoginActivity.this,SampleSignupActivity.class);
+                        startActivity(intent);
                         requestUpdateProfile();
 
                         profileUrl = response.getProfileImagePath();
@@ -238,5 +247,6 @@ public class SampleLoginActivity extends Activity {
                 .fit()
                 .into(iv_user_profile);
     }
+
 
 }
