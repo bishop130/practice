@@ -14,95 +14,124 @@
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:id="@+id/map_layout"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:elevation="4dp"
+            android:orientation="vertical">
+
+            <fragment
+                android:id="@+id/map_view"
+                class="com.google.android.gms.maps.MapFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true" />
+
+            <LinearLayout
+                android:layout_width="40dp"
+                android:layout_height="1dp"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:background="#653F51B5">
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="1dp"
+                android:layout_height="40dp"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:background="#653F51B5">
+
+            </LinearLayout>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/radius"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_below="@+id/btn_mission_location"
+                android:layout_alignParentRight="true"
+                android:layout_marginTop="12dp"
+                android:layout_marginRight="12dp"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:divider="@android:color/transparent"
+                android:dividerHeight="0.0px"
+                android:elevation="8dp"
+                android:text="현재위치"
+                app:cardCornerRadius="8dp"
+
+                >
+                <TextView
+                    android:id="@+id/daum_map_location_loading"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="24sp"
+                    android:text="@string/question_mark"
+                    android:textStyle="bold"
+                    android:layout_gravity="center"
+                    android:visibility="visible"
+                    android:textColor="@color/colorPrimary"/>
+
+                <ImageView
+                    android:id="@+id/daum_map_location_loaded"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:visibility="gone"
+                    android:src="@drawable/ic_my_location_black_24dp" />
+            </androidx.cardview.widget.CardView>
+
+
+        </RelativeLayout>
+    </LinearLayout>
 
     <RelativeLayout
-        android:id="@+id/map_layout"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:elevation="4dp"
+        android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <fragment
-            android:id="@+id/map_view"
-            class="com.google.android.gms.maps.MapFragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true" />
 
-        <LinearLayout
-            android:layout_width="40dp"
-            android:layout_height="1dp"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:background="#653F51B5">
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/place_recycler"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:scrollbars="vertical"
+                android:tooltipText="장소 검색"
+                android:layout_above="@+id/address_confired_layout"
+
+                />
 
 
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="1dp"
-            android:layout_height="40dp"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:background="#653F51B5">
-
-        </LinearLayout>
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/radius"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_below="@+id/btn_mission_location"
-            android:layout_alignParentRight="true"
-            android:layout_marginTop="12dp"
-            android:layout_marginRight="12dp"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:divider="@android:color/transparent"
-            android:dividerHeight="0.0px"
-            android:elevation="8dp"
-            android:text="현재위치"
-            app:cardCornerRadius="8dp"
-
-            >
-
-            <ImageView
-                android:layout_width="wrap_content"
+            <RelativeLayout
+                android:id="@+id/address_confired_layout"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:src="@drawable/ic_my_location_black_24dp" />
-        </androidx.cardview.widget.CardView>
+                android:layout_alignParentBottom="true"
+                >
 
+                <Button
+                    android:id="@+id/addressConfirmed"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:layout_gravity="bottom"
+                    android:background="?attr/colorPrimary"
 
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/place_recycler"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:scrollbars="vertical"
-            android:tooltipText="장소 검색"
-
-            />
+                    android:gravity="center"
+                    android:text="확인"
+                    android:textColor="#ffffff"
+                    android:textSize="16sp" />
+            </RelativeLayout>
 
 
 
-
-        <Button
-            android:id="@+id/addressConfirmed"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/place_recycler"
-            android:layout_alignParentBottom="true"
-            android:background="?attr/colorPrimary"
-            android:text="확인"
-            android:textColor="#ffffff"
-            android:textSize="16sp" />
     </RelativeLayout>
 </LinearLayout>

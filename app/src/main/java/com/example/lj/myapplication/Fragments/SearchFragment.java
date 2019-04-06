@@ -23,6 +23,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.lj.myapplication.Adapters.KakaoFriends;
 import com.example.lj.myapplication.Adapters.RecyclerAdapter;
 import com.example.lj.myapplication.Adapters.RecyclerForMissionAdapter;
 import com.example.lj.myapplication.Adapters.RecyclerViewDivider;
@@ -54,22 +55,28 @@ public class SearchFragment extends Fragment {
     private Request request;
     private static final String Mission_List_URL = "http://bishop130.cafe24.com/Mission_List.php";
     private List<RecyclerItem> lstRecyclerItem = new ArrayList<>();
+    private KakaoFriends kakaoFriends = new KakaoFriends();
+    private Context mContext;
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        requestQueue = Volley.newRequestQueue(getContext());
+        requestQueue = Volley.newRequestQueue(mContext);
         final View view = inflater.inflate(R.layout.fragment_search, container, false);
         recyclerView = view.findViewById(R.id.recycler_total);
         recyclerView.addItemDecoration(new RecyclerViewDivider(36));
-        requestAccessTokenInfo();
 
-
-
-
+        String user_id = mContext.getSharedPreferences("Kakao",Context.MODE_PRIVATE).getString("token","");
+        volleyConnect(user_id);
+        kakaoFriends.requestFriends();
 
         return view;
+    }
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mContext = context;
     }
 
     private void setupRecyclerView(List<RecyclerItem> lstRecyclerItem) {
@@ -87,10 +94,10 @@ public class SearchFragment extends Fragment {
         request = new StringRequest(Request.Method.POST, Mission_List_URL, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                final String resultForDate = response;
+
                 Log.d("HomeFragment", "volley connect");
                 CalendarDay calendarDay = CalendarDay.today();
-                onSortMission(resultForDate, calendarDay);
+                onSortMission(response, calendarDay);
 
             }
         }, new Response.ErrorListener() {
@@ -107,37 +114,6 @@ public class SearchFragment extends Fragment {
             }
         };
         requestQueue.add(request);
-    }
-
-    private void requestAccessTokenInfo() {
-        AuthService.getInstance().requestAccessTokenInfo(new ApiResponseCallback<AccessTokenInfoResponse>() {
-            @Override
-            public void onSessionClosed(ErrorResult errorResult) {
-                // redirectLoginActivity(self);
-                Toast.makeText(getContext(), "세션닫힘", Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onNotSignedUp() {
-                Toast.makeText(getContext(), "로그인해주세요", Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onFailure(ErrorResult errorResult) {
-                Logger.e("failed to get access token info. msg=" + errorResult);
-            }
-
-            @Override
-            public void onSuccess(AccessTokenInfoResponse accessTokenInfoResponse) {
-                String userId = String.valueOf(accessTokenInfoResponse.getUserId());
-                Log.d("토큰확인", String.valueOf(userId));
-                //requestProfile();
-
-                volleyConnect(userId);
-                long expiresInMilis = accessTokenInfoResponse.getExpiresInMillis();
-                Log.d("토큰 만료 됨 ", expiresInMilis + "이후에");
-            }
-        });
     }
 
     private void onSortMission(String resultForDate, CalendarDay calendarDay) {
@@ -174,8 +150,6 @@ public class SearchFragment extends Fragment {
             } catch (JSONException e) {
                 Log.d("살펴보자", e + "error");
             }
-        } else {
-
         }
 
 

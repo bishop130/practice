@@ -8,6 +8,8 @@ import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.app.ActivityManager;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -15,6 +17,8 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.PowerManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.widget.CompoundButton;
 import android.widget.Switch;
@@ -31,6 +35,14 @@ public class AutoLocationSetting extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_auto_location_setting);
         auto_register_location_switch = findViewById(R.id.auto_register_location_switch);
+
+        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        Log.d("power","power" +powerManager.isPowerSaveMode());
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1 && powerManager.isPowerSaveMode()) {
+            Intent batterySaverIntent=new Intent(Settings.ACTION_BATTERY_SAVER_SETTINGS);
+            startActivity(batterySaverIntent);
+        }
+
 
         if(!checkLocationPermission()){
             auto_register_location_switch.setChecked(false);
@@ -72,6 +84,7 @@ public class AutoLocationSetting extends AppCompatActivity {
                 } else {
                     Intent serviceIntent = new Intent(AutoLocationSetting.this, LocationService.class);
                     stopService(serviceIntent);
+                    cancelAlarm();
                     SharedPreferences.Editor editor = getSharedPreferences("settings", MODE_PRIVATE).edit();
                     editor.putBoolean("auto_register_location", isChecked);
                     editor.apply();
@@ -80,6 +93,19 @@ public class AutoLocationSetting extends AppCompatActivity {
                 }
             }
         });
+
+
+    }
+    private void cancelAlarm(){
+        AlarmManager am = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this,LocationService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Log.d("서비스","설정전"+(PendingIntent.getForegroundService(this, 123, intent, PendingIntent.FLAG_NO_CREATE) != null));
+            PendingIntent pendingIntent = PendingIntent.getForegroundService(this,123,intent,PendingIntent.FLAG_UPDATE_CURRENT);
+            am.cancel(pendingIntent);
+            Log.d("서비스","설정후"+(PendingIntent.getForegroundService(this, 123, intent, PendingIntent.FLAG_NO_CREATE) != null));
+        }
+
 
 
     }

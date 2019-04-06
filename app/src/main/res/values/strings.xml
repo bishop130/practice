@@ -19,4 +19,40 @@
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="question_mark">\?</string>
+    <string name="content_description">error\?</string>
+
+
+    <string name="location_finding">위치 확인 중..</string>
+    <string name="register_my_location">내 위치 등록</string>
+    <string name="checked_time">시간 확인</string>
+    <string name="checked_date">날짜 확인</string>
+    <string name="success">성공</string>
+    <string name="first_text">Network Error.</string>
+    <string name="bug">현재 개발자가 인지하고 있고 개선해 나갈 문제들 \n\n\n
+
+
+mapview를 2개 이상 중복 호출할 경우 앱이 중지되는 문제\n\n
+
+목표장소 선택시 간헐적으로 마지막 선택 바로 전 좌표값이 호출되는 문제\n\n
+
+네트워크 상태가 전환될 때 http post error로 인해 간헐적으로 앱이 중지되는 문제\n\n
+
+자동위치등록이 실행중일때 배터리 소비 효율 문제\n\n
+
+Android 9.0 (Pie)이상부터 적용되는 http 지원종료 관련 문제\n\n
+
+자동위치등록 실행시 안드로이드 설정에서 위치권한을 꺼도 중지되지 않는 문제\n\n
+
+Android 8.0 (Oreo)이상에서 Foreground가 아닌 Service가 Doze모드에서 종료되는 문제\n\n
+
+Android 8.0 (Oreo)이상에서 Foreground로 실행중인 Service가 없을때 wakelock이 작동하지 않는 문제\n\n
+
+Doze모드가 길어질 경우 다음 알람이 죽는 문제\n\n
+
+디바이스 설정에서 절전모드 실행시 foreground service가 작동상태를 파악하지 못하는 문제\n\n
+
+서버 트래픽 효율성 문제\n\n
+
+카카오 User Token 호출량 문제 </string>
 </resources>

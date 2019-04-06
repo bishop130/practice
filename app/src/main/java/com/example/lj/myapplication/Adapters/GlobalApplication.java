@@ -2,9 +2,11 @@ package com.example.lj.myapplication.Adapters;
 
 import android.app.Activity;
 
+import com.crashlytics.android.Crashlytics;
 import com.kakao.auth.KakaoSDK;
 
 import android.app.Application;
+import io.fabric.sdk.android.Fabric;
 
 public class GlobalApplication extends Application {
     private static volatile GlobalApplication obj = null;
@@ -13,6 +15,7 @@ public class GlobalApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        Fabric.with(this, new Crashlytics());
         obj = this;
         KakaoSDK.init(new KakaoSDKAdapter());
     }

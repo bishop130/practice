@@ -11,6 +11,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.location.Location;
@@ -116,6 +117,7 @@ public class LocationService extends Service {
     String service_date;
     String service_title;
     StringBuffer stringBuffer;
+    boolean is_volley_success;
 
     private SimpleDateFormat date_sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.KOREA);
     private SimpleDateFormat date_time_sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.KOREA);
@@ -136,40 +138,42 @@ public class LocationService extends Service {
         Log.d("서비스", "onCreate");
 
 
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ) {
-            // Permission already Granted
-            //Do your work here
-            //Perform operations here only which requires permission
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             requestQueue = Volley.newRequestQueue(this);
             dtf = new DateTimeFormatter();
             stringBuffer = new StringBuffer();
 
             dbHelper = new DBHelper(LocationService.this, "alarm_manager.db", null, 5);
             mainDB = new MainDB(LocationService.this, "main_manager.db", null, 1);
-            deletePastDB();
             getDBData();
-            makeContentForNotification();
-            stringBuffer.append("start\n");
         } else {
-            instantAlarm("위치정보에 대한 접근이 거부되었습니다.","위치정보에 대한 권한을 허가해주세요.");
+            instantAlarm("위치정보에 대한 접근이 거부되었습니다.", "위치정보에 대한 권한을 허가해주세요.");
 
             stopForeground(true);
             stopSelf();
         }
-
-
-        //locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        //listener = new MyLocationListener();
-
-
     }
 
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
-
         Log.d("서비스", "onStartCommand");
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            // Permission already Granted
+            //Do your work here
+            //Perform operations here only which requires permission
+
+            deletePastDB();
+            makeContentForNotification();
+
+
+            stringBuffer.append("start\n");
+        } else {
+            instantAlarm("위치정보에 대한 접근이 거부되었습니다.", "위치정보에 대한 권한을 허가해주세요.");
+
+            stopForeground(true);
+            stopSelf();
+        }
 
         return START_STICKY;
     }
@@ -178,7 +182,7 @@ public class LocationService extends Service {
         Log.d("서비스", "makeContentForNotification");
 //제일 가까운 60분 내 날짜 뽑기
         String query = "SELECT * FROM alarm_table WHERE strftime('%s', date_time) - strftime('%s', datetime('now','localtime'))<200 " +
-                "AND strftime('%s', date_time) - strftime('%s', datetime('now','localtime'))>0 ORDER BY date_time ASC";
+                "AND strftime('%s', date_time) - strftime('%s', datetime('now','localtime'))>0 ORDER BY date_time ASC LIMIT 1";
         alarmItemList.clear();
         alarmItemList = dbHelper.setNextAlarm(query);
         if (alarmItemList.size() > 0) {
@@ -209,8 +213,243 @@ public class LocationService extends Service {
 
     }
 
-    private void volleyConnectForFail() {
 
+    private void foregroundNotification(String title, String content) {
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+
+        RemoteViews remoteViews = new RemoteViews(getPackageName(), R.layout.drawer_header);
+
+        NotificationCompat.Builder builder;
+        if (Build.VERSION.SDK_INT >= 26) {
+            String CHANNEL_ID = "snow_deer_service_channel";
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "SnowDeer Service Channel", NotificationManager.IMPORTANCE_DEFAULT);
+
+            ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).createNotificationChannel(channel);
+
+            builder = new NotificationCompat.Builder(this, CHANNEL_ID);
+        } else {
+            builder = new NotificationCompat.Builder(this);
+        }
+        builder.setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(title)
+                .setContentText(content)
+                .setDefaults(Notification.DEFAULT_ALL)
+                .setContentIntent(pendingIntent);
+
+        startForeground(1, builder.build());
+    }
+
+    public void onLocationChanged(Location location) {
+        // New location has now been determined
+        String msg = date_time_sdf.format(new Date()) + " ; " + Double.toString(location.getLatitude()) + "," + Double.toString(location.getLongitude());
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+        stringBuffer.append(msg + "\n");
+        Log.d("서비스3", msg);
+
+        //연속으로 약속이 있을때는 else로 넘어가지 않는다. 그러므로 다음 약속을위해 실행되는 onLocationChanged메소드를 활용하여 is_success를 추적한다.
+        String select_is_success = "SELECT * FROM alarm_table WHERE strftime('%s', date_time) < strftime('%s', datetime('now','localtime'))";
+        alarmItemList.clear();
+        alarmItemList = dbHelper.setNextAlarm(select_is_success);
+        if (alarmItemList.size() > 0) {
+            for (int i = 0; i < alarmItemList.size(); i++) {
+
+                String mission_id = alarmItemList.get(i).getMission_id();
+                String date_time = alarmItemList.get(i).getDate_time();
+                String title = alarmItemList.get(i).getTitle();
+                String user_id = alarmItemList.get(i).getUser_id();
+                String date = alarmItemList.get(i).getDate();
+
+                Log.d("서비스", "남아 있다면 실패");
+                String is_failed = "1";
+                volleyConnect(user_id, mission_id, date_time, title, date, is_failed);
+
+                //위치등록 로그 분석용
+
+                instantAlarm(title, "위치등록에 실패했습니다.");
+                Toast.makeText(getApplicationContext(), "위치등록 실패", Toast.LENGTH_LONG).show();
+                Log.d("서비스", "위치등록 실패");
+                String sql = "INSERT INTO main_table (is_success,title,mission_id,date_time) VALUES ('" + stringBuffer.toString() + "','" + title + "','" + mission_id + "','" + date_time + "')";
+                mainDB.update(sql);
+
+
+                deletePastDB();
+                getDBData();
+            }
+        }
+
+        //연속으로 약속이 있을시에 다음 목표를 Foreground에 표시한다. 연속적이라는것은 onLocationChanged가 실행되고있는 동안에 다음 목표시간이 존재할 경우를 말한다.
+        String query = "SELECT * FROM alarm_table WHERE strftime('%s', date_time) - strftime('%s', datetime('now','localtime'))<200 " +
+                "AND strftime('%s', date_time) - strftime('%s', datetime('now','localtime'))>0 "; //3분
+        alarmItemList.clear();
+        alarmItemList = dbHelper.setNextAlarm(query);
+        if (alarmItemList.size() > 0) {
+            for (int i = 0; i < alarmItemList.size(); i++) {
+                String time = alarmItemList.get(i).getTime();
+                String lat = alarmItemList.get(i).getLat();
+                String lng = alarmItemList.get(i).getLng();
+                String mission_id = alarmItemList.get(i).getMission_id();
+                String date = alarmItemList.get(i).getDate();
+                String date_time = alarmItemList.get(i).getDate_time();
+                String title = alarmItemList.get(i).getTitle();
+
+
+                if ((location.getLatitude() - Double.valueOf(lat)) * (location.getLatitude() - Double.valueOf(lat)) + (location.getLongitude() - Double.valueOf(lng)) * (location.getLongitude() - Double.valueOf(lng)) < 0.0005 * 0.0005) {
+                    String user_id = getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
+                    Log.d("서비스", "여기 두번 콜되면 안돼");
+
+                    String is_failed = "0";
+                    volleyConnect(user_id, mission_id, date_time, title, date, is_failed);
+
+
+                    updateDB(mission_id, date_time);
+                    instantAlarm(title, "위치등록에 성공했습니다.");
+                    Toast.makeText(getApplicationContext(), "위치등록 성공", Toast.LENGTH_LONG).show();
+                    Log.d("서비스", "위치등록 성공");
+                    getDBData();
+
+                    String sql2 = "INSERT INTO main_table (is_success,title,mission_id,date_time) VALUES ('" + stringBuffer.toString() + "','" + title + "','" + mission_id + "','" + date_time + "')";
+                    //String sql = "UPDATE alarm_table SET is_success = 'true' WHERE mission_id = '" + mission_id + "' AND date_time = '" + date_time + "'";
+                    //dbHelper.update(sql);
+                    mainDB.update(sql2);
+                }
+            }
+            //foregroundNotification(sb.toString());
+
+        } else {
+            //지정시간에 추적할 약속이 없을 경우 stop한다.
+            Log.d("서비스", "list가 null임  ");
+            //sb.append(date_time);
+            stopLocationUpdates();
+            deletePastDB();
+
+
+            //지정된 시간 외에 설정한 약속이 하나라도 남으면 가장최근 정보 불러오기
+            String query2 = "SELECT * FROM alarm_table ORDER BY date_time ASC LIMIT 1";
+            alarmItemList.clear();
+            alarmItemList = dbHelper.setNextAlarm(query2);
+            if (alarmItemList.size() > 0) {//
+
+                foregroundNotification("다음 목표 : " + alarmItemList.get(0).getTitle() + " - " + monthDayTime(alarmItemList.get(0).getDate(), alarmItemList.get(0).getTime()), "목표시간 30분 전에 자동위치등록이 시작됩니다.");
+            } else {//진짜 아무것도 없으면 포어그라운드 종료
+                stopForeground(true);
+                stopSelf();
+
+            }
+        }
+    }
+
+    private void volleyConnect(final String userId, final String mission_id, final String date_time, final String title, final String date, final String is_failed) {
+
+
+        request = new StringRequest(Request.Method.POST, goURL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+
+                Log.d("서비스", "volley response  ");
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(LocationService.this, "네트워크 연결이 되지않습니다." + error, Toast.LENGTH_LONG).show();
+                is_volley_success = false;
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() {
+                HashMap<String, String> hashMap = new HashMap<String, String>();
+                hashMap.put("user_id", userId);
+                hashMap.put("mission_id", mission_id);
+                hashMap.put("mission_date", date);
+                hashMap.put("is_failed", is_failed);
+                return hashMap;
+            }
+        };
+        requestQueue.add(request);
+
+    }
+
+    // You can now create a LatLng Object for use with maps
+    private void stopLocationUpdates() {
+        getFusedLocationProviderClient(this).removeLocationUpdates(locationCallback);
+
+        Log.d("서비스4", "stopUpdate");
+    }
+
+    private void updateDB(String mission_id, String date_time) {
+
+        dbHelper = new DBHelper(LocationService.this, "alarm_manager.db", null, 5);
+        String query = "DELETE FROM alarm_table WHERE mission_id = '" + mission_id + "' AND date_time = '" + date_time + "'";
+        String query2 = "UPDATE alarm_table SET is_success = 'true' WHERE mission_id = '" + mission_id + "' AND date_time = '" + date_time + "'";
+        dbHelper.update(query);
+    }
+
+    private void deletePastDB() {
+        String sql = "DELETE FROM alarm_table WHERE strftime('%s', date_time) < strftime('%s', datetime('now','localtime'))"; //현재 이전 정보 삭제
+        dbHelper.delete(sql);
+
+    }
+
+    private void getDBData() {
+        String query = "SELECT * FROM alarm_table ORDER BY date_time ASC LIMIT 1";
+        alarmItemList.clear();
+        alarmItemList = dbHelper.setNextAlarm(query);
+        if (alarmItemList.size() > 0) {
+            for (int i = 0; i < alarmItemList.size(); i++) {
+
+                String title = alarmItemList.get(i).getTitle();
+                String time = alarmItemList.get(i).getTime();
+                String mission_id = alarmItemList.get(i).getMission_id();
+                String date = alarmItemList.get(i).getDate();
+                Log.d("서비스", "getDBData   size:" + alarmItemList.size() + "다음목표" + title);
+
+                makeAlarm(time, date, mission_id);
+
+            }
+        }
+        else{
+            foregroundNotification("다음 목표 : 없음", "새로운 목표를 등록해주세요!");
+        }
+    }
+
+    private void makeAlarm(String mission_time, String date, String mission_id) {
+
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        long time = 1000 * 60 * 3;
+
+
+
+
+        Date cur_time = dtf.dateTimeParser(date_time_sdf.format(new Date(System.currentTimeMillis())));
+        Date mission_datetime = dtf.dateTimeParser(date + " " + mission_time);
+        Intent intent = new Intent(this, LocationService.class);
+
+
+        PendingIntent sender = PendingIntent.getService(this, 123, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        if (cur_time.getTime() < mission_datetime.getTime() - time) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                PendingIntent foregroundService_sender = PendingIntent.getForegroundService(this, 123, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, mission_datetime.getTime() - time, foregroundService_sender);
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, mission_datetime.getTime() - time, sender);
+            else
+                alarmManager.set(AlarmManager.RTC_WAKEUP, mission_datetime.getTime() - time, sender);
+        }
+
+
+    }
+
+    private void instantAlarm(String title, String content) {
+        AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, BroadCastAlarm.class);
+        intent.putExtra("title", title);
+        intent.putExtra("is_success", content);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O)
+            am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, (new Date()).getTime() + 5000, pendingIntent);
 
     }
 
@@ -231,16 +470,23 @@ public class LocationService extends Service {
 
             minutes = String.valueOf(min);
         }
-        if (min == 0) {
-            mission_time = "오후\n" + hour + "시 ";
 
-            if (hour == 12) {
-                mission_time = "오후\n" + hour + "시 " + minutes + "분";
 
-            } else if (hour == 0) {
-                mission_time = "오전\n 12시 " + minutes + "분";
-            } else {
-                mission_time = ((hour >= 12) ? "오후\n" : "오전\n") + hour % 12 + "시 " + minutes + "분";
+        if (hour == 12) {
+            mission_time = "오후\n" + hour + "시 " + minutes + "분";
+            if (min == 0) {
+                mission_time = "오후\n" + hour + "시 ";
+            }
+
+        } else if (hour == 0) {
+            mission_time = "오전\n 12시 " + minutes + "분";
+            if (min == 0) {
+                mission_time = "오후\n" + hour + "시 ";
+            }
+        } else {
+            mission_time = ((hour >= 12) ? "오후\n" : "오전\n") + hour % 12 + "시 " + minutes + "분";
+            if (min == 0) {
+                mission_time = ((hour >= 12) ? "오후\n" : "오전\n") + hour % 12 + "시 ";
             }
         }
 
@@ -257,7 +503,6 @@ public class LocationService extends Service {
 
     }
 
-
     public static boolean isTomorrow(Date d) {
         return DateUtils.isToday(d.getTime() - DateUtils.DAY_IN_MILLIS);
     }
@@ -268,6 +513,7 @@ public class LocationService extends Service {
         super.onDestroy();
         // 서비스가 종료될 때 실행
         // 음악 종료
+        cancelAlarm();
         stopLocationUpdates();
         Log.d("서비스", "onDestroy");
 
@@ -301,263 +547,17 @@ public class LocationService extends Service {
 
     }
 
-    private void foregroundNotification(String title, String content) {
-        Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-
-        RemoteViews remoteViews = new RemoteViews(getPackageName(), R.layout.drawer_header);
-
-        NotificationCompat.Builder builder;
-        if (Build.VERSION.SDK_INT >= 26) {
-            String CHANNEL_ID = "snow_deer_service_channel";
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "SnowDeer Service Channel", NotificationManager.IMPORTANCE_DEFAULT);
-
-            ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).createNotificationChannel(channel);
-
-            builder = new NotificationCompat.Builder(this, CHANNEL_ID);
-        } else {
-            builder = new NotificationCompat.Builder(this);
-        }
-        builder.setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle(title)
-                .setContentText(content)
-                .setDefaults(Notification.DEFAULT_ALL)
-                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                .setContentIntent(pendingIntent);
-
-        startForeground(1, builder.build());
-    }
-
-    public void onLocationChanged(Location location) {
-        // New location has now been determined
-        String msg = date_time_sdf.format(new Date()) + " ; " + Double.toString(location.getLatitude()) + "," + Double.toString(location.getLongitude());
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-        stringBuffer.append(msg + "\n");
-        Log.d("서비스3", msg);
-
-        //연속으로 약속이 있을때는 else로 넘어가지 않는다. 그러므로 다음 약속을위해 실행되는 onLocationChanged메소드를 활용하여 is_success를 추적한다.
-        String select_is_success = "SELECT * FROM alarm_table WHERE strftime('%s', date_time) < strftime('%s', datetime('now','localtime'))";
-        alarmItemList.clear();
-        alarmItemList = dbHelper.setNextAlarm(select_is_success);
-        if (alarmItemList.size() > 0) {
-            for (int i = 0; i < alarmItemList.size(); i++) {
-                instantAlarm(alarmItemList.get(i).getTitle(), "위치등록에 실패했습니다.");
-                String mission_id = alarmItemList.get(i).getMission_id();
-                String date_time = alarmItemList.get(i).getDate_time();
-                String title = alarmItemList.get(i).getTitle();
-
-                //위치등록 로그 분석용
-                String sql = "INSERT INTO main_table (is_success,title,mission_id,date_time) VALUES ('" + stringBuffer.toString() + "','" + title + "','" + mission_id + "','" + date_time + "')";
-                mainDB.update(sql);
-
-                deletePastDB();
-            }
-        }
-
-        //연속으로 약속이 있을시에 다음 목표를 Foreground에 표시한다. 연속적이라는것은 onLocationChanged가 실행되고있는 동안에 다음 목표시간이 존재할 경우를 말한다.
-        String query = "SELECT * FROM alarm_table WHERE strftime('%s', date_time) - strftime('%s', datetime('now','localtime'))<200 " +
-                "AND strftime('%s', date_time) - strftime('%s', datetime('now','localtime'))>0 "; //3분
-        alarmItemList.clear();
-        alarmItemList = dbHelper.setNextAlarm(query);
-        if (alarmItemList.size() > 0) {
-            for (int i = 0; i < alarmItemList.size(); i++) {
-                String time = alarmItemList.get(i).getTime();
-                String lat = alarmItemList.get(i).getLat();
-                String lng = alarmItemList.get(i).getLng();
-                String mission_id = alarmItemList.get(i).getMission_id();
-                String date = alarmItemList.get(i).getDate();
-                String date_time = alarmItemList.get(i).getDate_time();
-                String title = alarmItemList.get(i).getTitle();
-
-
-                if ((location.getLatitude() - Double.valueOf(lat)) * (location.getLatitude() - Double.valueOf(lat)) + (location.getLongitude() - Double.valueOf(lng)) * (location.getLongitude() - Double.valueOf(lng)) < 0.0005 * 0.0005) {
-
-                    String date_for_server = date_sdf.format(dtf.dateParser(date));
-                    requestAccessTokenInfo(mission_id, date_time, title, date_for_server);
-                    Log.d("서비스", "위치 성공" + date_for_server);
-                    String sql2 = "INSERT INTO main_table (is_success,title,mission_id,date_time) VALUES ('" + stringBuffer.toString() + "','" + title + "','" + mission_id + "','" + date_time + "')";
-                    //String sql = "UPDATE alarm_table SET is_success = 'true' WHERE mission_id = '" + mission_id + "' AND date_time = '" + date_time + "'";
-                    //dbHelper.update(sql);
-                    mainDB.update(sql2);
-                }
-            }
-            //foregroundNotification(sb.toString());
-
-        } else {
-            //지정시간에 추적할 약속이 없을 경우 stop한다.
-            Log.d("서비스", "list가 null임  ");
-            //sb.append(date_time);
-            stopLocationUpdates();
-            deletePastDB();
-
-
-            //지정된 시간 외에 설정한 약속이 하나라도 남으면 가장최근 정보 불러오기
-            String query2 = "SELECT * FROM alarm_table ORDER BY date_time ASC LIMIT 1";
-            alarmItemList.clear();
-            alarmItemList = dbHelper.setNextAlarm(query2);
-            if (alarmItemList.size() > 0) {//
-
-                foregroundNotification("다음 목표 : " + alarmItemList.get(0).getTitle() + " - " + monthDayTime(alarmItemList.get(0).getDate(), alarmItemList.get(0).getTime()), "목표시간 30분 전에 자동위치등록이 시작됩니다.");
-            } else {//진짜 아무것도 없으면 포어그라운드 종료
-                stopForeground(true);
-                stopSelf();
-
-            }
-
-        }
-
-    }
-
-    private void requestAccessTokenInfo(final String mission_id, final String date_time, final String title, final String date) {
-        AuthService.getInstance().requestAccessTokenInfo(new ApiResponseCallback<AccessTokenInfoResponse>() {
-            @Override
-            public void onSessionClosed(ErrorResult errorResult) {
-                // redirectLoginActivity(self);
-            }
-
-            @Override
-            public void onNotSignedUp() {
-            }
-
-            @Override
-            public void onFailure(ErrorResult errorResult) {
-                Logger.e("failed to get access token info. msg=" + errorResult);
-            }
-
-            @Override
-            public void onSuccess(AccessTokenInfoResponse accessTokenInfoResponse) {
-                String userId = String.valueOf(accessTokenInfoResponse.getUserId());
-                Log.d("서비스", "토큰확인 id" + String.valueOf(userId));
-
-                volleyConnect(userId, mission_id, date_time, title, date);
-
-                long expiresInMilis = accessTokenInfoResponse.getExpiresInMillis();
-                Log.d("토큰 만료 됨 ", expiresInMilis + "이후에");
-            }
-        });
-    }
-
-    private void volleyConnect(final String userId, final String mission_id, final String date_time, final String title, final String date) {
-
-
-        request = new StringRequest(Request.Method.POST, goURL, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                Toast.makeText(getApplicationContext(), "위치등록 성공", Toast.LENGTH_LONG).show();
-                Log.d("서비스", "위치등록 성공");
-                //cancelAlarm();
-                updateDB(mission_id, date_time);
-                instantAlarm(title, "위치등록에 성공했습니다.");
-
-                //updateNotification();
-                //stopForeground(true);
-                //stopSelf();
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(LocationService.this, "전송실패" + error, Toast.LENGTH_LONG).show();
-            }
-        }) {
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                HashMap<String, String> hashMap = new HashMap<String, String>();
-                hashMap.put("user_id", userId);
-                hashMap.put("mission_id", mission_id);
-                hashMap.put("mission_date", date);
-                return hashMap;
-            }
-        };
-        requestQueue.add(request);
-    }
-
-    // You can now create a LatLng Object for use with maps
-    private void stopLocationUpdates() {
-        getFusedLocationProviderClient(this).removeLocationUpdates(locationCallback);
-
-        Log.d("서비스4", "stopUpdate");
-    }
-
-    private void updateDB(String mission_id, String date_time) {
-
-        dbHelper = new DBHelper(LocationService.this, "alarm_manager.db", null, 5);
-        String query = "DELETE FROM alarm_table WHERE mission_id = '" + mission_id + "' AND date_time = '" + date_time + "'";
-        String query2 = "UPDATE alarm_table SET is_success = 'true' WHERE mission_id = '" + mission_id + "' AND date_time = '" + date_time + "'";
-        dbHelper.update(query);
-    }
-
-    private void deletePastDB() {
-        String sql = "DELETE FROM alarm_table WHERE strftime('%s', date_time) < strftime('%s', datetime('now','localtime'))"; //현재 이전 정보 삭제
-        dbHelper.delete(sql);
-
-    }
-
-
-    private void getDBData() {
-        Log.d("서비스", "getDBData");
-        String query = "SELECT * FROM alarm_table";
-        alarmItemList.clear();
-        alarmItemList = dbHelper.setNextAlarm(query);
-        if (alarmItemList.size() > 0) {
-            for (int i = 0; i < alarmItemList.size(); i++) {
-                Log.d("서비스", "getDBData   size:" + alarmItemList.size());
-                String time = alarmItemList.get(i).getTime();
-                String lat = alarmItemList.get(i).getLat();
-                String lng = alarmItemList.get(i).getLng();
-                String mission_id = alarmItemList.get(i).getMission_id();
-                String date = alarmItemList.get(i).getDate();
-                String title = alarmItemList.get(i).getTitle();
-
-
-                makeAlarm(time, date, mission_id, lat, lng, title);
-
-
-            }
-
-
-        }
-    }
-
-    private void makeAlarm(String mission_time, String date, String mission_id, String lat, String lng, String title) {
-
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        long time = 1000 * 60 * 3;
-
-        int requestID = String.valueOf(mission_id + date + time).hashCode();
-
-        Log.d("브로드", String.valueOf(requestID));
-
-        Date cur_time = dtf.dateTimeParser(date_time_sdf.format(new Date(System.currentTimeMillis())));
-        Date mission_datetime = dtf.dateTimeParser(date + " " + mission_time);
-        Intent intent = new Intent(this, BroadCastService.class);
-
-
-        PendingIntent sender = PendingIntent.getBroadcast(this, requestID, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        if (cur_time.getTime() < mission_datetime.getTime() - time) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                PendingIntent foregroundService_sender = PendingIntent.getBroadcast(this, requestID, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, mission_datetime.getTime() - time, foregroundService_sender);
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
-                alarmManager.setExact(AlarmManager.RTC_WAKEUP, mission_datetime.getTime() - time, sender);
-            else
-                alarmManager.set(AlarmManager.RTC_WAKEUP, mission_datetime.getTime() - time, sender);
-        }
-
-
-    }
-
-    private void instantAlarm(String title, String content) {
+    private void cancelAlarm() {
         AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(this, BroadCastAlarm.class);
-        intent.putExtra("title", title);
-        intent.putExtra("is_success", content);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        Intent intent = new Intent(this, LocationService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Log.d("서비스", "설정전" + (PendingIntent.getForegroundService(this, 123, intent, PendingIntent.FLAG_NO_CREATE) != null));
+            PendingIntent pendingIntent = PendingIntent.getForegroundService(this, 123, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            am.cancel(pendingIntent);
+            Log.d("서비스", "설정후" + (PendingIntent.getForegroundService(this, 123, intent, PendingIntent.FLAG_NO_CREATE) != null));
+        }
 
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O)
-            am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, (new Date()).getTime() + 5000, pendingIntent);
 
     }
-
 
 }

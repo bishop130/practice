@@ -93,7 +93,7 @@ public class NewMissionActivity extends AppCompatActivity implements StepperForm
     String token;
     String initiate_date;
     DBHelper dbHelper;
-
+    String mission_time;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,7 +114,6 @@ public class NewMissionActivity extends AppCompatActivity implements StepperForm
         editor.putString("Lat", "1111");
         editor.putInt("ValidCode", 666);
         editor.apply();
-        editor.commit();
 
         SharedPreferences sharedPreferences2 = getSharedPreferences("Contact", MODE_PRIVATE);
         SharedPreferences.Editor editor2 = sharedPreferences2.edit();
@@ -138,85 +137,23 @@ public class NewMissionActivity extends AppCompatActivity implements StepperForm
         final Thread dataSavingThread = saveData();
         requestQueue = Volley.newRequestQueue(this);
         Log.d("완료 데이터", makeTitle.getStepData());
+        mission_time = String.valueOf(makeTimeStep.getStepData().hour) + ":" + String.valueOf(makeTimeStep.getStepData().minutes) + ":00";
+
+        String user_id = getSharedPreferences("Kakao",MODE_PRIVATE).getString("token","");
+
+        userId = String.valueOf(user_id);
+        Log.d("토큰확인", String.valueOf(userId));
+        final SharedPreferences sharedPreferences = getSharedPreferences("sFile", MODE_PRIVATE);
+        lat = sharedPreferences.getString("lat", "");
+        lng = sharedPreferences.getString("lng", "");
+        date_array = sharedPreferences.getString("date_array", "");
+        initiate_date = sharedPreferences.getString("initiate_date", "");
+        date_array_server = sharedPreferences.getString("date_array_server", "");
+        contact_json = sharedPreferences.getString("contact_json", "");
+        token = sharedPreferences.getString("token", "");
 
 
-        final String mission_time = String.valueOf(makeTimeStep.getStepData().hour) + ":" + String.valueOf(makeTimeStep.getStepData().minutes) + ":00";
-
-        AuthService.getInstance().requestAccessTokenInfo(new ApiResponseCallback<AccessTokenInfoResponse>() {
-            @Override
-            public void onSessionClosed(ErrorResult errorResult) {
-                // redirectLoginActivity(self);
-                Toast.makeText(getApplicationContext(), "세션닫힘", Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onNotSignedUp() {
-                Toast.makeText(getApplicationContext(), "로그인해주세요", Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onFailure(ErrorResult errorResult) {
-                Logger.e("failed to get access token info. msg=" + errorResult);
-            }
-
-            @Override
-            public void onSuccess(AccessTokenInfoResponse accessTokenInfoResponse) {
-                userId = String.valueOf(accessTokenInfoResponse.getUserId());
-                Log.d("토큰확인", String.valueOf(userId));
-                final SharedPreferences sharedPreferences = getSharedPreferences("sFile", MODE_PRIVATE);
-                lat = sharedPreferences.getString("lat", "");
-                lng = sharedPreferences.getString("lng", "");
-                date_array = sharedPreferences.getString("date_array", "");
-                initiate_date = sharedPreferences.getString("initiate_date","");
-                date_array_server = sharedPreferences.getString("date_array_server", "");
-                contact_json = sharedPreferences.getString("contact_json", "");
-                token = sharedPreferences.getString("token", "");
-
-
-                request = new StringRequest(Request.Method.POST, goURL, new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        insertDB(mission_time,date_array,CurrentTime+userId,lat,lng,makeTitle.getStepData(),userId);
-                        setAlarm(mission_time, date_array, CurrentTime + userId,lat,lng,makeTitle.getStepData(),initiate_date);
-
-
-                        Toast.makeText(getApplicationContext(), "전송완료" + makeTitle.getStepData(), Toast.LENGTH_LONG).show();
-
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-
-                        Toast.makeText(getApplicationContext(), "전송실패" + error, Toast.LENGTH_LONG).show();
-                    }
-                }) {
-                    @Override
-                    protected Map<String, String> getParams() throws AuthFailureError {
-                        HashMap<String, String> hashMap = new HashMap<String, String>();
-                        hashMap.put("Lat", lat);
-                        hashMap.put("Lng", lng);
-                        hashMap.put("userId", userId);
-                        hashMap.put("MissionID", CurrentTime + userId);
-                        hashMap.put("mission_time", mission_time);
-                        hashMap.put("MissionTitle", makeTitle.getStepData());
-                        hashMap.put("date_array", date_array);
-                        hashMap.put("date_array_server", date_array_server);
-                        hashMap.put("contact_json", contact_json);
-                        hashMap.put("token", token);
-
-                        return hashMap;
-                    }
-                };
-                requestQueue.add(request);
-
-                Intent intent = new Intent(NewMissionActivity.this, MainActivity.class);
-                startActivity(intent);
-
-                long expiresInMilis = accessTokenInfoResponse.getExpiresInMillis();
-                Log.d("토큰 만료 됨 ", expiresInMilis + "이후에");
-            }
-        });
-
+        volleyConnect();
         progressDialog = new ProgressDialog(this);
         progressDialog.setCancelable(true);
         progressDialog.show();
@@ -237,6 +174,46 @@ public class NewMissionActivity extends AppCompatActivity implements StepperForm
             }
         });
 
+    }
+
+    private void volleyConnect() {
+        request = new StringRequest(Request.Method.POST, goURL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                insertDB(mission_time, date_array, CurrentTime + userId, lat, lng, makeTitle.getStepData(), userId);
+                setAlarm(mission_time, date_array, CurrentTime + userId, lat, lng, makeTitle.getStepData(), initiate_date);
+
+
+                Toast.makeText(getApplicationContext(), "전송완료" + makeTitle.getStepData(), Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(NewMissionActivity.this, MainActivity.class);
+                startActivity(intent);
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+                Toast.makeText(getApplicationContext(), "전송실패" + error, Toast.LENGTH_LONG).show();
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                HashMap<String, String> hashMap = new HashMap<String, String>();
+                hashMap.put("Lat", lat);
+                hashMap.put("Lng", lng);
+                hashMap.put("userId", userId);
+                hashMap.put("MissionID", CurrentTime + userId);
+                hashMap.put("mission_time", mission_time);
+                hashMap.put("MissionTitle", makeTitle.getStepData());
+                hashMap.put("date_array", date_array);
+                hashMap.put("date_array_server", date_array_server);
+                hashMap.put("contact_json", contact_json);
+                hashMap.put("token", token);
+
+                return hashMap;
+            }
+        };
+        requestQueue.add(request);
     }
 
     @Override
@@ -444,45 +421,42 @@ public class NewMissionActivity extends AppCompatActivity implements StepperForm
             return dialog;
         }
     }
-    private void insertDB(String mission_time, String date_array, String mission_id, String lat, String lng,String title,String user_id){
+
+    private void insertDB(String mission_time, String date_array, String mission_id, String lat, String lng, String title, String user_id) {
         List<String> items = Arrays.asList(date_array.split("\\s*,\\s*"));
-        dbHelper = new DBHelper(NewMissionActivity.this,"alarm_manager.db",null,5);
+        dbHelper = new DBHelper(NewMissionActivity.this, "alarm_manager.db", null, 5);
 
         for (int i = 0; i < items.size(); i++) {
             try {
                 String date = date_db.format(date_db.parse(items.get(i)));
-                String date_time = date_time_db.format( date_time_db.parse(items.get(i)+ " " + mission_time));
+                String date_time = date_time_db.format(date_time_db.parse(items.get(i) + " " + mission_time));
                 String time = time_db.format(time_db.parse(mission_time));
                 String query = "INSERT INTO alarm_table VALUES(null,'" + time + "','" + lat + "','" + lng + "','" +
-                        mission_id + "','" + date + "','" + date_time + "','false','"+title+"','"+user_id+"')";
+                        mission_id + "','" + date + "','" + date_time + "','false','" + title + "','" + user_id + "')";
                 dbHelper.insert(query);
-            }
-            catch (ParseException e){
+            } catch (ParseException e) {
                 e.printStackTrace();
             }
         }
 
 
-
-
-
     }
 
-    private void setAlarm(String mission_time, String date_array, String mission_id, String lat, String lng,String title,String initiate_date) {
+    private void setAlarm(String mission_time, String date_array, String mission_id, String lat, String lng, String title, String initiate_date) {
 
         Intent service = new Intent(NewMissionActivity.this, LocationService.class);
-        service.putExtra("service_time",mission_time);
-        service.putExtra("date_array",date_array);
-        service.putExtra("service_date",initiate_date);
-        service.putExtra("mission_id",mission_id);
-        service.putExtra("lat",lat);
-        service.putExtra("lng",lng);
-        service.putExtra("service_title",title);
-        service.putExtra("service_flag",false);
+        service.putExtra("service_time", mission_time);
+        service.putExtra("date_array", date_array);
+        service.putExtra("service_date", initiate_date);
+        service.putExtra("mission_id", mission_id);
+        service.putExtra("lat", lat);
+        service.putExtra("lng", lng);
+        service.putExtra("service_title", title);
+        service.putExtra("service_flag", false);
         stopService(service);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            ContextCompat.startForegroundService(this,service);
-        }else{
+            ContextCompat.startForegroundService(this, service);
+        } else {
             startService(service);
         }
 
@@ -534,7 +508,6 @@ public class NewMissionActivity extends AppCompatActivity implements StepperForm
 
 */
     }
-
 
 
 }

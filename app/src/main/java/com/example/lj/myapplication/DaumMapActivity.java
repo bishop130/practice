@@ -30,6 +30,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -102,6 +103,8 @@ public class DaumMapActivity extends AppCompatActivity implements MapView.Curren
     public static Context mContext;
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
     int address_founded;
+    TextView location_loading;
+    ImageView location_loaded;
 
 
     @Override
@@ -111,11 +114,15 @@ public class DaumMapActivity extends AppCompatActivity implements MapView.Curren
         placeList = new ArrayList<>();
         mContext = this;
 
-        recyclerView = (RecyclerView) findViewById(R.id.place_recycler);
+        recyclerView = findViewById(R.id.place_recycler);
         mapView = new MapView(this);
-        ViewGroup mapViewContainer = (ViewGroup) findViewById(R.id.map_view);
+        ViewGroup mapViewContainer = findViewById(R.id.map_view);
         mapViewContainer.addView(mapView);
         mapView.setMapViewEventListener(this);
+        location_loading = findViewById(R.id.daum_map_location_loading);
+        location_loaded = findViewById(R.id.daum_map_location_loaded);
+
+
 
 
         //  setSupportActionBar(toolbar);
@@ -127,15 +134,15 @@ public class DaumMapActivity extends AppCompatActivity implements MapView.Curren
         //mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading);
 
 
-        CardView radius_button = (CardView) findViewById(R.id.radius);
+        CardView radius_button = findViewById(R.id.radius);
         radius_button.setOnClickListener(this);
-        Button address_confirmed = (Button) findViewById(R.id.addressConfirmed);//주소확인버튼
+        Button address_confirmed =  findViewById(R.id.addressConfirmed);//주소확인버튼
         address_confirmed.setOnClickListener(this);
     }
 
 
     private void onAddressSearch() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.daum_map_toolbar);
+        Toolbar toolbar = findViewById(R.id.daum_map_toolbar);
         toolbar.inflateMenu(R.menu.example_menu);
 
         final Retrofit retrofit2 = new Retrofit.Builder().
@@ -243,6 +250,9 @@ public class DaumMapActivity extends AppCompatActivity implements MapView.Curren
                         mapView.moveCamera(CameraUpdateFactory.newMapPoint(MapPoint.mapPointWithGeoCoord(Current_Latitude, Current_Longitude)));
                     }
                 }
+                else{
+                    Toast.makeText(getApplicationContext(),"위치정보를 수신중입니다.",Toast.LENGTH_LONG).show();
+                }
                 break;
 
             case R.id.addressConfirmed:
@@ -321,6 +331,8 @@ public class DaumMapActivity extends AppCompatActivity implements MapView.Curren
         Log.i(TAG, String.format("MapView onCurrentLocationUpdate (%f,%f) accuracy (%f)", mapPointGeo.latitude, mapPointGeo.longitude, v));
         Current_Latitude = mapPointGeo.latitude;
         Current_Longitude = mapPointGeo.longitude;
+        location_loading.setVisibility(View.GONE);
+        location_loaded.setVisibility(View.VISIBLE);
 
     }
 
@@ -491,7 +503,7 @@ public class DaumMapActivity extends AppCompatActivity implements MapView.Curren
                     Toast.makeText(this, "permission denied", Toast.LENGTH_LONG).show();
                     finish();
                 }
-                return;
+                break;
             }
 
             // other 'case' lines to check for other

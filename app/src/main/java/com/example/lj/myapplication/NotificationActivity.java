@@ -74,11 +74,6 @@ public class NotificationActivity extends AppCompatActivity {
 
                     //boolean isWorking = (PendingIntent.getBroadcast(this, 13, intet, PendingIntent.FLAG_NO_CREATE) != null);
                    // Log.d("열열", date_time.format(cur_time)+"alarm is " + (isWorking ? "" : "not") + " working...");
-
-
-
-
-
             }
         });
         service_stop.setOnClickListener(new View.OnClickListener() {

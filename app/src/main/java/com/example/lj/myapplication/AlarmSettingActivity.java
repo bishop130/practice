@@ -49,12 +49,12 @@ public class AlarmSettingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_alarm_setting);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_alarm_setting);
+        Toolbar toolbar =  findViewById(R.id.toolbar_alarm_setting);
         toolbar.setTitle("알람설정");
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        Switch sw = (Switch) findViewById(R.id.switch1);
+        Switch sw =  findViewById(R.id.switch1);
         sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {

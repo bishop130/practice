@@ -1,6 +1,7 @@
 package com.example.lj.myapplication.Fragments;
 
 
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 
@@ -76,25 +77,28 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
     private static final String Mission_List_URL = "http://bishop130.cafe24.com/Mission_List.php";
     private FragmentActivity myContext;
     private RequestQueue requestQueue;
-    private StringRequest request;
     private RecyclerView recyclerView;
     private List<RecyclerItem> lstRecyclerItem = new ArrayList<>();
     private List<CalendarDay> dates = new ArrayList<>();
     private String response_result;
+    private Context mContext;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         calendar = Calendar.getInstance();
-        requestQueue = Volley.newRequestQueue(getContext());
+        requestQueue = Volley.newRequestQueue(mContext);
         year = calendar.get(Calendar.YEAR);
         month = calendar.get(Calendar.MONTH);
         day = calendar.get(Calendar.DAY_OF_MONTH);
-        final Calendar now = Calendar.getInstance();
 
         final View view = inflater.inflate(R.layout.fragment_favorite, container, false);
-        requestAccessTokenInfo();
+
+        String user_id = mContext.getSharedPreferences("Kakao",Context.MODE_PRIVATE).getString("token","");
+        volleyConnect(user_id);
+
         recyclerView = view.findViewById(R.id.recycler_day);
+        recyclerView.setNestedScrollingEnabled(false);
         recyclerView.addItemDecoration(new RecyclerViewDivider(36));
 
 
@@ -109,6 +113,11 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
         setMaterialCalendarView();
 
         return view;
+    }
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mContext = context;
     }
 
     private void setMaterialCalendarView() {
@@ -146,7 +155,7 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
     private void volleyConnect(final String userId) {
 
 
-        request = new StringRequest(Request.Method.POST, Mission_List_URL, new Response.Listener<String>() {
+        StringRequest request = new StringRequest(Request.Method.POST, Mission_List_URL, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 displayDotinCalendar(response);
@@ -308,5 +317,11 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
             e.printStackTrace();
         }
         return result;
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        requestAccessTokenInfo();
     }
 }

@@ -12,6 +12,33 @@ public class DateTimeFormatter {
 
 
     }
+    public Date timeFormatter(Date date){
+        SimpleDateFormat date_sdf = new SimpleDateFormat("HH:mm:ss", Locale.KOREA);
+        String d1 = date_sdf.format(date);
+        Date result = new Date();
+        try {
+            result = date_sdf.parse(d1);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return result;
+
+
+    }
+
+    public Date dateFormatter(Date date){
+        SimpleDateFormat date_sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.KOREA);
+        String d1 = date_sdf.format(date);
+        Date result = new Date();
+        try {
+            result = date_sdf.parse(d1);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return result;
+
+
+    }
     public Date timeParser(String time){
         SimpleDateFormat date_sdf = new SimpleDateFormat("HH:mm:ss", Locale.KOREA);
         Date result = new Date();

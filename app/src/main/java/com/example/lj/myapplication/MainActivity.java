@@ -30,6 +30,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 import com.borax12.materialdaterangepicker.time.TimePickerDialog;
+import com.crashlytics.android.Crashlytics;
 import com.example.lj.myapplication.Adapters.BackPressCloseHandler;
 import com.example.lj.myapplication.Adapters.DBHelper;
 import com.example.lj.myapplication.Adapters.LocationService;
@@ -50,6 +51,7 @@ import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentManager;
+import io.fabric.sdk.android.Fabric;
 
 import android.util.Base64;
 import android.util.Log;
@@ -78,8 +80,6 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
-import com.gun0912.tedpermission.PermissionListener;
-import com.gun0912.tedpermission.TedPermission;
 import com.kakao.auth.ApiResponseCallback;
 import com.kakao.auth.AuthService;
 import com.kakao.auth.ISessionCallback;
@@ -127,41 +127,28 @@ public class MainActivity extends AppCompatActivity {
     private static final String tokenURL = "http://bishop130.cafe24.com/update_token.php";
     private RequestQueue requestQueue;
     private BackPressCloseHandler backPressCloseHandler;
-    private DBHelper dbHelper;
-    LocationManager locationManager;
 
-
-
-
-    private SimpleDateFormat date_time = new SimpleDateFormat("yyyy-M-dd HH:mm:ss", Locale.KOREA);
 
     @SuppressLint("MissingPermission")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Fabric.with(this,new Crashlytics());
         setContentView(R.layout.activity_main);
         requestQueue = Volley.newRequestQueue(this);
 
 
 
+        deletePastDB();
+
+
         mContext = this;
-        myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        myToolbar = findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(navigationItemSelectedListener);
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new HomeFragment()).commit();
 
-
-
-/*
-        SharedPreferences.Editor alarm_setting = getSharedPreferences("alarm_setting", MODE_PRIVATE).edit();
-        alarm_setting.putBoolean("alarm_setting", true);
-        alarm_setting.apply();
-
-*/
-
-        //Intent intent = new Intent(getApplicationContext(), LocationService.class); // 이동할 컴포넌트
-        //stopService(intent);
 
 
         SharedPreferences preferences = getSharedPreferences("alarm_setting_check", MODE_PRIVATE);
@@ -182,22 +169,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        //dbHelper = new DBHelper(MainActivity.this,"alarm_manager.db",null,4);
-        //dbHelper.testDB();
-        //String query = "INSERT INTO alarm_table values(null, '2019-3-25 23:10:00','37.934678','122.293874','29834782934089274','2019-3-26' )";
-        //dbHelper.insert(query);
-
-        //String drop = "DROP TABLE alarm_table";
-        // dbHelper.drop(drop);
-        //String sql = "select * from alarm_table";
-        // dbHelper.selectData(sql);
-
 
         backPressCloseHandler = new BackPressCloseHandler(this);
 
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerLayout =  findViewById(R.id.drawer_layout);
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
+        NavigationView navigationView = findViewById(R.id.navigation_view);
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mDrawerLayout, myToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -206,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
 
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
-            public boolean onNavigationItemSelected(MenuItem menuItem) {
+            public boolean onNavigationItemSelected(@NonNull  MenuItem menuItem) {
                 menuItem.setChecked(true);
                 mDrawerLayout.closeDrawers();
 
@@ -235,8 +212,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         View nav_header_view = navigationView.getHeaderView(0);
-        kakao_name_drawer = (TextView) nav_header_view.findViewById(R.id.kakao_name_drawer);
-        profile_image_drawer = (ImageView) nav_header_view.findViewById(R.id.profile_image_drawer);
+        kakao_name_drawer =  nav_header_view.findViewById(R.id.kakao_name_drawer);
+        profile_image_drawer =  nav_header_view.findViewById(R.id.profile_image_drawer);
         profile_image_drawer.setBackground(new ShapeDrawable(new OvalShape()));
         profile_image_drawer.setClipToOutline(true);
 
@@ -380,6 +357,11 @@ public class MainActivity extends AppCompatActivity {
                 final String userId = String.valueOf(accessTokenInfoResponse.getUserId());
                 Log.d("토큰확인", String.valueOf(userId));
 
+                SharedPreferences sharedPreferences = getSharedPreferences("Kakao",MODE_PRIVATE);
+                SharedPreferences.Editor kakao_token = sharedPreferences.edit();
+                kakao_token.putString("token",userId);
+                kakao_token.apply();
+
 
                 FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(MainActivity.this, new OnSuccessListener<InstanceIdResult>() {
                     @Override
@@ -494,13 +476,19 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        checkPermission();
         requestAccessTokenInfo();
         SharedPreferences sharedPreferences = getSharedPreferences("alarm_setting", Context.MODE_PRIVATE);
         Log.d("확인좀9", String.valueOf(sharedPreferences.getBoolean("alarm_setting", true)));
     }
+    private void deletePastDB() {
+        DBHelper dbHelper = new DBHelper(MainActivity.this, "alarm_manager.db", null, 5);
+        String sql = "DELETE FROM alarm_table WHERE strftime('%s', date_time) < strftime('%s', datetime('now','localtime'))"; //현재 이전 정보 삭제
+        dbHelper.update(sql);
+    }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode,@NonNull String[] permissions,@NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if (requestCode == PERMISSIONS_REQUEST_CODE && grantResults.length == REQUIRED_PERMISSIONS.length) {

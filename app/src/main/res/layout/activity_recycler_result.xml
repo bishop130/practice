@@ -45,15 +45,14 @@
                 android:id="@+id/btn_mission_location"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
-                android:layout_alignParentRight="true"
-                android:layout_marginTop="60dp"
-                android:layout_marginRight="12dp"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="36dp"
+                android:layout_marginEnd="12dp"
                 android:clipChildren="false"
                 android:clipToPadding="false"
                 android:divider="@android:color/transparent"
                 android:dividerHeight="0.0px"
                 android:elevation="8dp"
-                android:text="현재위치"
                 app:cardCornerRadius="8dp"
 
                 >
@@ -62,6 +61,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:contentDescription="@string/content_description"
                     android:src="@drawable/ic_flag_black_24dp" />
             </androidx.cardview.widget.CardView>
 
@@ -70,15 +70,14 @@
                 android:layout_width="36dp"
                 android:layout_height="36dp"
                 android:layout_below="@+id/btn_mission_location"
-                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
                 android:layout_marginTop="12dp"
-                android:layout_marginRight="12dp"
+                android:layout_marginEnd="12dp"
                 android:clipChildren="false"
                 android:clipToPadding="false"
                 android:divider="@android:color/transparent"
                 android:dividerHeight="0.0px"
                 android:elevation="8dp"
-                android:text="현재위치"
                 app:cardCornerRadius="8dp"
 
                 >
@@ -87,7 +86,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="24sp"
-                    android:text="?"
+                    android:text="@string/question_mark"
                     android:textStyle="bold"
                     android:layout_gravity="center"
                     android:visibility="visible"
@@ -99,6 +98,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:visibility="gone"
+                    android:contentDescription="@string/content_description"
                     android:src="@drawable/ic_my_location_black_24dp" />
             </androidx.cardview.widget.CardView>
 
@@ -114,7 +114,7 @@
                 android:background="@drawable/register_button_shape"
                 android:elevation="12dp"
                 android:padding="12dp"
-                android:text="내 위치 등록"
+                android:text="@string/register_my_location"
                 android:textColor="@color/White"
                 android:textSize="18sp"
                 android:visibility="visible"/>
@@ -140,7 +140,7 @@
                     android:id="@+id/text_if_success"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="성공"
+                    android:text="@string/success"
                     android:textSize="30sp" />
 
 
@@ -166,7 +166,8 @@
                         android:id="@+id/unchecked_date_icon"
                         android:layout_width="32dp"
                         android:layout_height="32dp"
-                        android:src="@drawable/unchecked_icon" />
+                        android:src="@drawable/unchecked_icon"
+                        android:contentDescription="@string/content_description"/>
 
                     <TextView
                         android:id="@+id/check_date"
@@ -174,7 +175,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_marginStart="30dp"
-                        android:text="날짜 확인" />
+                        android:text="@string/checked_date" />
 
 
                 </LinearLayout>
@@ -190,7 +191,8 @@
                         android:id="@+id/unchecked_time_icon"
                         android:layout_width="32dp"
                         android:layout_height="32dp"
-                        android:src="@drawable/unchecked_icon" />
+                        android:src="@drawable/unchecked_icon"
+                        android:contentDescription="@string/content_description"/>
 
                     <TextView
                         android:id="@+id/check_time"
@@ -198,7 +200,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_marginStart="30dp"
-                        android:text="시간 확인" />
+                        android:text="@string/checked_time" />
 
 
                 </LinearLayout>
@@ -215,7 +217,8 @@
                         android:id="@+id/unchecked_location_icon"
                         android:layout_width="32dp"
                         android:layout_height="32dp"
-                        android:src="@drawable/unknown_icon" />
+                        android:src="@drawable/unknown_icon"
+                        android:contentDescription="@string/content_description"/>
 
                     <TextView
                         android:id="@+id/check_location"
@@ -223,7 +226,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_marginStart="30dp"
-                        android:text="위치 확인중.." />
+                        android:text="@string/location_finding" />
 
 
                 </LinearLayout>

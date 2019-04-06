@@ -18,6 +18,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -42,8 +43,11 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.lj.myapplication.Adapters.AlarmService;
 
+import com.example.lj.myapplication.Adapters.BroadCastAlarm;
+import com.example.lj.myapplication.Adapters.DBHelper;
 import com.example.lj.myapplication.Adapters.DateTimeFormatter;
 
+import com.example.lj.myapplication.Adapters.LocationService;
 import com.example.lj.myapplication.Adapters.MainDB;
 
 import com.example.lj.myapplication.Items.AlarmItem;
@@ -83,7 +87,7 @@ public class RecyclerResultActivity extends AppCompatActivity implements MapView
     double Current_Longitude = 0.0;
 
     String user_id;
-    String MissionTitle;
+    String mission_title;
     String mission_id;
     Double Latitude;
     Double Longitude;
@@ -107,6 +111,7 @@ public class RecyclerResultActivity extends AppCompatActivity implements MapView
     LinearLayout layout_if_success_not;
     private MapViewLocationManager mapViewLocationManager;
     MainDB mainDB;
+    DBHelper dbHelper;
     List<AlarmItem> alarmItemList = new ArrayList<>();
 
     @Override
@@ -114,7 +119,18 @@ public class RecyclerResultActivity extends AppCompatActivity implements MapView
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recycler_result);
 
-        getIntents();//recyclerView intent 넘겨 받기
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            mission_title = extras.getString("MissionTitle");
+            mission_id = extras.getString("MissionID");
+            Latitude = extras.getDouble("Latitude");
+            Longitude = extras.getDouble("Longitude");
+            mission_time = extras.getString("mission_time");
+            mission_date = extras.getString("mission_date");
+            mission_success = extras.getBoolean("mission_success");
+            mission_date_time = extras.getString("mission_date_time");
+        }
+
 
         mapView = new MapView(this);
         ViewGroup mapViewContainer = findViewById(R.id.map_view2);
@@ -124,6 +140,7 @@ public class RecyclerResultActivity extends AppCompatActivity implements MapView
         requestQueue = Volley.newRequestQueue(this);
         //dbHelper = new DBHelper(this, "alarm_manager.db", null, 5);
         mainDB = new MainDB(this, "main_manager.db", null, 1);
+        dbHelper = new DBHelper(RecyclerResultActivity.this, "alarm_manager.db", null, 5);
         dtf = new DateTimeFormatter();
 
         //setMyLocation();
@@ -203,8 +220,8 @@ public class RecyclerResultActivity extends AppCompatActivity implements MapView
                     if ((Current_Latitude != 0.0) && (Current_Longitude != 0.0)) {
                         mapView.moveCamera(CameraUpdateFactory.newMapPoint(MapPoint.mapPointWithGeoCoord(Current_Latitude, Current_Longitude)));
                     }
-                }else{
-                    Toast.makeText(getApplicationContext(),"위치정보를 수신중입니다.",Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "위치정보를 수신중입니다.", Toast.LENGTH_LONG).show();
                 }
 
             }
@@ -284,17 +301,6 @@ public class RecyclerResultActivity extends AppCompatActivity implements MapView
     }
 
     private void getIntents() {
-        Bundle extras = getIntent().getExtras();
-        if(extras!=null) {
-            MissionTitle = extras.getString("MissionTitle");
-            mission_id = extras.getString("MissionID");
-            Latitude = extras.getDouble("Latitude");
-            Longitude =extras.getDouble("Longitude");
-            mission_time = extras.getString("mission_time");
-            mission_date = extras.getString("mission_date");
-            mission_success =extras.getBoolean("mission_success");
-            mission_date_time = extras.getString("mission_date_time");
-        }
 
 
     }
@@ -436,62 +442,55 @@ public class RecyclerResultActivity extends AppCompatActivity implements MapView
     }
 
     private void checkMission() {
+        SharedPreferences sharedPreferences = getSharedPreferences("Kakao", MODE_PRIVATE);
+        final String user_id = sharedPreferences.getString("token", "");
+
 
         Date set_mission_date = dtf.dateParser(mission_date);
         Date set_mission_time = dtf.timeParser(mission_time);
 
         try {
-            Date cur_time = new Date(System.currentTimeMillis());
-            Date cur_date = new Date(System.currentTimeMillis());
+            Date cur_time = dtf.timeFormatter(new Date(System.currentTimeMillis()));
+            Date cur_date = dtf.dateFormatter(new Date(System.currentTimeMillis()));
 
 
             if ((set_mission_date.getTime() - cur_date.getTime()) == 0) {//당일 확인 현재날짜 - 설정날짜
                 long diff = set_mission_time.getTime() - cur_time.getTime();//시간확인 설정시간 - 현재시간
                 if (((diff >= 0) && (diff < 1000 * 60 * 60 * 2)) && ((Current_Latitude - Latitude) * (Current_Latitude - Latitude) + (Current_Longitude - Longitude) * (Current_Longitude - Longitude) < 0.0005 * 0.0005)) {
 
-                    UserManagement.getInstance().me(new MeV2ResponseCallback() {
+
+                    request = new StringRequest(Request.Method.POST, goURL, new Response.Listener<String>() {
                         @Override
-                        public void onSessionClosed(ErrorResult errorResult) {
-                            Log.d("세션닫힘", " ");
-                        }
+                        public void onResponse(String response) {
 
+                            //cancelAlarm();
+                            deleteDB(user_id, mission_date_time);
+                            instantAlarm(mission_title, "위치등록에 성공했습니다.");
+
+                            Intent intent = new Intent(RecyclerResultActivity.this, MainActivity.class);
+                            startActivity(intent);
+
+
+                        }
+                    }, new Response.ErrorListener() {
                         @Override
-                        public void onSuccess(MeV2Response result) {
-                            user_id = String.valueOf(result.getId());
+                        public void onErrorResponse(VolleyError error) {
 
-                            request = new StringRequest(Request.Method.POST, goURL, new Response.Listener<String>() {
-                                @Override
-                                public void onResponse(String response) {
-                                    if (response.equals("777")) {
-                                        Toast.makeText(getApplicationContext(), "위치등록을 이미 했습니다", Toast.LENGTH_LONG).show();
-                                    } else {
-                                        Toast.makeText(getApplicationContext(), "위치등록 성공", Toast.LENGTH_LONG).show();
-                                        //cancelAlarm();
-                                        Intent intent = new Intent(RecyclerResultActivity.this, MainActivity.class);
-                                        startActivity(intent);
-                                    }
-
-                                }
-                            }, new Response.ErrorListener() {
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
-
-                                    Toast.makeText(getApplicationContext(), "전송실패" + error, Toast.LENGTH_LONG).show();
-                                }
-                            }) {
-                                @Override
-                                protected Map<String, String> getParams() {
-                                    HashMap<String, String> hashMap = new HashMap<>();
-                                    hashMap.put("mission_id", mission_id);
-                                    hashMap.put("mission_date", mission_date);
-                                    hashMap.put("user_id", user_id);
-
-                                    return hashMap;
-                                }
-                            };
-                            requestQueue.add(request);
+                            Toast.makeText(getApplicationContext(), "전송실패" + error, Toast.LENGTH_LONG).show();
                         }
-                    });
+                    }) {
+                        @Override
+                        protected Map<String, String> getParams() {
+                            HashMap<String, String> hashMap = new HashMap<>();
+                            hashMap.put("mission_id", mission_id);
+                            hashMap.put("mission_date", mission_date);
+                            hashMap.put("user_id", user_id);
+
+                            return hashMap;
+                        }
+                    };
+                    requestQueue.add(request);
+
                 } else if (diff > 1000 * 60 * 60 * 2) {
                     check_time.setText("지정된 시간이 아닙니다.");
                     unchecked_time_icon.setImageResource(R.drawable.unchecked_icon);
@@ -509,7 +508,8 @@ public class RecyclerResultActivity extends AppCompatActivity implements MapView
 
             }
 
-        } catch (Exception e) {
+        } catch (
+                Exception e) {
             Log.e("RecyclerResultActivity", "Error!" + e);
 
         }
@@ -539,7 +539,24 @@ public class RecyclerResultActivity extends AppCompatActivity implements MapView
         editor.putString("latitude", String.valueOf(Current_Latitude));
         editor.putString("longitude", String.valueOf(Current_Longitude));
         editor.apply();
-        editor.commit();
+
+    }
+
+    private void deleteDB(String mission_id, String date_time) {
+        dbHelper = new DBHelper(RecyclerResultActivity.this, "alarm_manager.db", null, 5);
+        String query = "DELETE FROM alarm_table WHERE mission_id = '" + mission_id + "' AND date_time = '" + date_time + "'";
+        dbHelper.update(query);
+    }
+
+    private void instantAlarm(String title, String content) {
+        AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, BroadCastAlarm.class);
+        intent.putExtra("title", title);
+        intent.putExtra("is_success", content);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O)
+            am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, (new Date()).getTime() + 5000, pendingIntent);
 
     }
 
@@ -651,6 +668,7 @@ public class RecyclerResultActivity extends AppCompatActivity implements MapView
             asyncDialog.dismiss();
             super.onPostExecute(result);
         }
+
     }
 
     private void cancelAlarm() {

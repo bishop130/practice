@@ -22,6 +22,7 @@ public class RecyclerItem implements Comparable<RecyclerItem> {
     private String completed_dates;
     private String total_dates;
     private boolean success;
+    private boolean is_failed;
     private String register_date;
     private String date;
 
@@ -34,7 +35,7 @@ public class RecyclerItem implements Comparable<RecyclerItem> {
 
 
     public RecyclerItem(String missionTitle, String missionID, Double Latitude, Double Longitude,
-                        String MissionTime, String date_time, String date_array,String contact_json,String completed_dates,String total_dates, boolean success, String register_date, String date) {
+                        String MissionTime, String date_time, String date_array,String contact_json,String completed_dates,String total_dates, boolean success, String register_date, String date,boolean is_failed) {
         this.missionTitle = missionTitle;
         this.missionID = missionID;
         this.Latitude = Latitude;
@@ -48,8 +49,21 @@ public class RecyclerItem implements Comparable<RecyclerItem> {
         this.success = success;
         this.register_date = register_date;
         this.date = date;
+        this.is_failed =is_failed;
 
 
+    }
+
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public boolean isIs_failed() {
+        return is_failed;
+    }
+
+    public void setIs_failed(boolean is_failed) {
+        this.is_failed = is_failed;
     }
 
     public String getDate() {

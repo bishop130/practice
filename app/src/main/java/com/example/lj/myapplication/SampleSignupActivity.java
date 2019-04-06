@@ -4,6 +4,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -35,14 +37,8 @@ import java.util.List;
 import java.util.Map;
 
 public class SampleSignupActivity extends AppCompatActivity {
-    private TextView id;
-    private TextView name;
-    private ImageView profile_image;
-
-    private String nickName;
-    private String profileImageURL;
-    private String thumbnailURL;
-    private String countryISO;
+    private TextView kakao_name_setting;
+    private ImageView profile_image_setting;
 
 
     @Override
@@ -50,141 +46,48 @@ public class SampleSignupActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample_signup);
 
-        name=findViewById(R.id.kakao_name);
-        id = findViewById(R.id.kakao_name_detail);
-        profile_image = findViewById(R.id.profile_image);
+
+        kakao_name_setting = findViewById(R.id.kakao_name);
+        profile_image_setting = findViewById(R.id.profile_image);
         LinearLayout unlink_button = findViewById(R.id.kakao_unlink);
+        LinearLayout kakao_logout_button = findViewById(R.id.kakao_logout);
+        requestProfile();
+
+
         unlink_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onClickUnlink();
             }
         });
-        LinearLayout kakao_logout_button = findViewById(R.id.kakao_logout);
+
         kakao_logout_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 UserManagement.getInstance().requestLogout(new LogoutResponseCallback() {
                     @Override
                     public void onCompleteLogout() {
-                        Toast.makeText(getApplicationContext(),"로그아웃 완료",Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), "로그아웃 완료", Toast.LENGTH_LONG).show();
                     }
                 });
             }
         });
 
-
-        requestProfile();
-        setLayoutText();
-
-    }
-    private void requestAccessTokenInfo() {
-        AuthService.getInstance().requestAccessTokenInfo(new ApiResponseCallback<AccessTokenInfoResponse>() {
-            @Override
-            public void onSessionClosed(ErrorResult errorResult) {
-                // redirectLoginActivity(self);
-                Toast.makeText(getApplicationContext(),"세션닫힘",Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onNotSignedUp() {
-                Toast.makeText(getApplicationContext(),"로그인해주세요",Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onFailure(ErrorResult errorResult) {
-                Logger.e("failed to get access token info. msg=" + errorResult);
-            }
-
-            @Override
-            public void onSuccess(AccessTokenInfoResponse accessTokenInfoResponse) {
-                String userId = String.valueOf(accessTokenInfoResponse.getUserId());
-                Log.d("토큰확인" ,String.valueOf(userId));
-                requestProfile();
-
-                long expiresInMilis = accessTokenInfoResponse.getExpiresInMillis();
-                Log.d("토큰 만료 됨 " , expiresInMilis + "이후에");
-            }
-        });
-    }
-    public void requestProfile() {
-        KakaoTalkService.getInstance().requestProfile(new KakaoTalkResponseCallback<KakaoTalkProfile>() {
-            @Override
-            public void onSuccess(KakaoTalkProfile talkProfile) {
-                nickName = talkProfile.getNickName();
-                profileImageURL = talkProfile.getProfileImageUrl();
-                thumbnailURL = talkProfile.getThumbnailUrl();
-                countryISO = talkProfile.getCountryISO();
-
-                Log.d("카톡프로필",nickName+"\n"+profileImageURL+"\n"+thumbnailURL+"\n"+countryISO);
-            }
-        });
-    }
-    private abstract class KakaoTalkResponseCallback<T> extends TalkResponseCallback<T> {
-        @Override
-        public void onNotKakaoTalkUser() {
-            Toast.makeText(getApplicationContext(),"카카오톡 유저가 아닙니다.",Toast.LENGTH_LONG).show();
-            Log.d("카카오톡","not a KakaoTalk user");
-        }
-
-        @Override
-        public void onFailure(ErrorResult errorResult) {
-            Logger.e("failure : " + errorResult);
-        }
-
-        @Override
-        public void onSessionClosed(ErrorResult errorResult) {
-            //redirectLoginActivity();
-        }
-
-        @Override
-        public void onNotSignedUp() {
-            //redirectSignupActivity();
-        }
     }
 
+    private void requestProfile() {
 
-    /*
-    private void requestMe() {
-        UserManagement.requestMe(new MeResponseCallback() {
-            @Override
-            public void onFailure(ErrorResult errorResult) {
-                String message = "failed to get user info. msg=" + errorResult;
-                Logger.d(message);
+        SharedPreferences sharedPreferences = getSharedPreferences("kakao_profile", MODE_PRIVATE);
+        String name = sharedPreferences.getString("name", "");
+        String profile_image = sharedPreferences.getString("profile_image", "");
 
-            }
-
-            @Override
-            public void onSessionClosed(ErrorResult errorResult) {
-            }
-
-            @Override
-            public void onSuccess(UserProfile userProfile) {
-                Logger.d("UserProfile : " + userProfile);
-                profileUrl = userProfile.getProfileImagePath();
-                userId = String.valueOf(userProfile.getId());
-                userName = userProfile.getNickname();
-
-                setLayoutText();
-
-                
-            }
-
-            @Override
-            public void onNotSignedUp() {
-            }
-        });
-    }
-    */
-
-    private void setLayoutText(){
-        id.setText(countryISO);
-        name.setText(nickName);
-
+        kakao_name_setting.setText(name);
         Picasso.with(this)
-                .load(thumbnailURL)
+                .load(profile_image)
                 .fit()
-                .into(profile_image);
+                .into(profile_image_setting);
+
+
     }
 
     private void onClickUnlink() {
@@ -224,6 +127,9 @@ public class SampleSignupActivity extends AppCompatActivity {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
+                                Intent intent = new Intent (SampleSignupActivity.this,MainActivity.class);
+                                startActivity(intent);
+
                             }
                         }).show();
 
