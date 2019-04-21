@@ -1,10 +1,7 @@
-package com.example.lj.myapplication;
+package com.suji.lj.myapplication;
 
-import android.app.Activity;
-import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -14,44 +11,30 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.example.lj.myapplication.Adapters.DBHelper;
-import com.example.lj.myapplication.Adapters.LocationService;
-import com.example.lj.myapplication.Items.LocationItem;
-import com.example.lj.myapplication.StepperForm.MakeContactStep;
-import com.example.lj.myapplication.StepperForm.MakeDateStep;
-import com.example.lj.myapplication.StepperForm.MakeLocationStep;
-import com.example.lj.myapplication.StepperForm.MakeTimeStep;
-import com.example.lj.myapplication.StepperForm.MakeTitle;
-import com.kakao.auth.ApiResponseCallback;
-import com.kakao.auth.AuthService;
-import com.kakao.auth.network.response.AccessTokenInfoResponse;
-import com.kakao.network.ErrorResult;
-import com.kakao.usermgmt.UserManagement;
-import com.kakao.usermgmt.callback.MeV2ResponseCallback;
-import com.kakao.usermgmt.response.MeV2Response;
-import com.kakao.util.helper.log.Logger;
+import com.suji.lj.myapplication.Adapters.DBHelper;
+import com.suji.lj.myapplication.Adapters.LocationService;
+import com.suji.lj.myapplication.StepperForm.MakeContactStep;
+import com.suji.lj.myapplication.StepperForm.MakeDateStep;
+import com.suji.lj.myapplication.StepperForm.MakeLocationStep;
+import com.suji.lj.myapplication.StepperForm.MakeTimeStep;
+import com.suji.lj.myapplication.StepperForm.MakeTitle;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -94,6 +77,7 @@ public class NewMissionActivity extends AppCompatActivity implements StepperForm
     String initiate_date;
     DBHelper dbHelper;
     String mission_time;
+    String address;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -151,6 +135,7 @@ public class NewMissionActivity extends AppCompatActivity implements StepperForm
         date_array_server = sharedPreferences.getString("date_array_server", "");
         contact_json = sharedPreferences.getString("contact_json", "");
         token = sharedPreferences.getString("token", "");
+        address = sharedPreferences.getString("address", "");
 
 
         volleyConnect();
@@ -197,7 +182,7 @@ public class NewMissionActivity extends AppCompatActivity implements StepperForm
             }
         }) {
             @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
+            protected Map<String, String> getParams() {
                 HashMap<String, String> hashMap = new HashMap<String, String>();
                 hashMap.put("Lat", lat);
                 hashMap.put("Lng", lng);
@@ -209,6 +194,7 @@ public class NewMissionActivity extends AppCompatActivity implements StepperForm
                 hashMap.put("date_array_server", date_array_server);
                 hashMap.put("contact_json", contact_json);
                 hashMap.put("token", token);
+                hashMap.put("address",address);
 
                 return hashMap;
             }
