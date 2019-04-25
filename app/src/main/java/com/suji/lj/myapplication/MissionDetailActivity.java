@@ -36,6 +36,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.threeten.bp.LocalDate;
 
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -278,6 +279,7 @@ public class MissionDetailActivity extends AppCompatActivity implements MapView.
         materialCalendarView.state().edit()
                 .setCalendarDisplayMode(CalendarMode.MONTHS)
                 .commit();
+
         final LocalDate localDate = LocalDate.now();
         materialCalendarView.setSelectedDate(localDate);
         materialCalendarView.addDecorator(new SelectorDecorator(this));

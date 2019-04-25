@@ -40,6 +40,11 @@ android {
             universalApk false
         }
     }
+    compileOptions {
+        sourceCompatibility = '1.8'
+        targetCompatibility = '1.8'
+    }
+    buildToolsVersion = '28.0.3'
 
 }
 configurations.all {
@@ -90,5 +95,5 @@ dependencies {
     implementation 'com.google.firebase:firebase-core:16.0.1'
     implementation 'com.crashlytics.sdk.android:crashlytics:2.9.9'
     implementation 'com.anjlab.android.iab.v3:library:1.0.44'
-
+    implementation 'com.jakewharton.threetenabp:threetenabp:1.0.3'
 }
