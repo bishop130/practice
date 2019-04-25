@@ -171,7 +171,7 @@
             android:layout_below="@id/text_wrap"
             android:background="@color/wall_paper2"
             android:orientation="vertical"
-            app:ael_duration="200"
+            app:ael_duration="50"
             app:ael_expanded="false"
 
             >
@@ -201,6 +201,7 @@
 
 
                 <RelativeLayout
+
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/bottom_rounded"
@@ -214,7 +215,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="20dp"
                         android:text="약속기간"
-                        android:textSize="16sp" />
+                        android:textColor="#A7A6AD"
+                        android:textSize="14sp" />
 
                     <TextView
                         android:id="@+id/range_date"
@@ -223,7 +225,8 @@
                         android:layout_below="@id/expand_text_date"
                         android:layout_marginStart="20dp"
                         android:text="날짜확인"
-                        android:textSize="16sp" />
+
+                        android:textSize="22sp" />
 
                     <RelativeLayout
                         android:id="@+id/progress_bar_date_shape"
@@ -244,44 +247,31 @@
                     </RelativeLayout>
 
                     <TextView
-                        android:id="@+id/expand_text_sample"
+                        android:id="@+id/expand_button_detail"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_below="@id/progress_bar_date_shape"
-                        android:layout_marginStart="20dp"
-                        android:layout_marginTop="20dp"
-                        android:text="주소"
-                        android:textSize="16sp" />
+                        android:layout_marginTop="30dp"
+                        android:background="@drawable/card_button_shape"
+                        android:layout_marginLeft="52dp"
+                        android:layout_marginRight="52dp"
+                        android:padding="12dp"
+                        android:gravity="center"
+                        android:text="자세히 보기"
+                        android:textColor="@color/colorPrimary" />
 
                     <TextView
-                        android:id="@+id/expand_text_contact"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@id/expand_text_sample"
-                        android:layout_marginStart="20dp"
-                        android:layout_marginTop="20dp"
-                        android:text="연락처" />
-
-                    <TextView
-                        android:id="@+id/display_contact_list"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@id/expand_text_contact"
-                        android:layout_marginStart="40dp"
-                        android:layout_marginTop="20dp"
-                        android:textSize="12sp" />
-
-                    <Button
                         android:id="@+id/expand_button_map"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_below="@id/display_contact_list"
-                        android:layout_marginTop="30dp"
+                        android:layout_below="@id/expand_button_detail"
+                        android:layout_marginTop="16dp"
                         android:layout_marginBottom="30dp"
                         android:background="@drawable/register_button_shape"
-                        android:layout_marginLeft="40dp"
-                        android:layout_marginRight="40dp"
-
+                        android:layout_marginLeft="52dp"
+                        android:layout_marginRight="52dp"
+                        android:padding="12dp"
+                        android:gravity="center"
                         android:text="위치등록"
                         android:textColor="@color/White" />
                 </RelativeLayout>

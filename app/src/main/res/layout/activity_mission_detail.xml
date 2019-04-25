@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/wall_paper"
     android:orientation="vertical"
     android:scrollbars="vertical"
     tools:context=".MissionDetailActivity">
@@ -33,125 +34,301 @@
                 android:layout_height="wrap_content"
                 app:mcv_calendarMode="month"
                 app:mcv_tileHeight="34dp"
-                app:mcv_tileWidth="48dp">
+                >
 
             </com.prolificinteractive.materialcalendarview.MaterialCalendarView>
 
-            <LinearLayout
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <RelativeLayout
+                    android:id="@+id/map_layout_detail"
+                    android:layout_width="match_parent"
+                    android:layout_height="300dp"
+                    android:layout_below="@+id/date_range_layout"
+                    android:layout_marginTop="0dp"
+                    android:elevation="4dp">
+
+                    <fragment
+                        android:id="@+id/map_view_detail"
+                        class="com.google.android.gms.maps.MapFragment"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+
+                    <ImageView
+                        android:id="@+id/transparent_image"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@color/transparent" />
+
+
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/mission_location_detail"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginTop="12dp"
+                        android:layout_marginRight="12dp"
+                        android:clipChildren="false"
+                        android:clipToPadding="false"
+                        android:divider="@android:color/transparent"
+                        android:dividerHeight="0.0px"
+                        android:elevation="8dp"
+                        android:text="현재위치"
+                        app:cardCornerRadius="8dp"
+
+                        >
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_flag_black_24dp" />
+                    </androidx.cardview.widget.CardView>
+
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/myLocation_detail"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_below="@id/mission_location_detail"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginTop="12dp"
+                        android:layout_marginRight="12dp"
+                        android:clipChildren="false"
+                        android:clipToPadding="false"
+                        android:divider="@android:color/transparent"
+                        android:dividerHeight="0.0px"
+                        android:elevation="8dp"
+                        android:text="현재위치"
+                        app:cardCornerRadius="8dp"
+
+                        >
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_my_location_black_24dp" />
+                    </androidx.cardview.widget.CardView>
+
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/date_range_layout"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="날짜 선택 결과"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginBottom="20dp"
-                    android:textSize="30sp" />
 
+                    android:orientation="vertical">
 
-            </LinearLayout>
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginStart="24dp"
+                        android:layout_marginEnd="24dp"
+                        android:background="@color/divider_line" />
 
-            <RelativeLayout
-                android:id="@+id/map_layout_detail"
-                android:layout_width="match_parent"
-                android:layout_height="300dp"
-                android:elevation="4dp"
-                android:orientation="vertical">
-
-                <fragment
-                    android:id="@+id/map_view_detail"
-                    class="com.google.android.gms.maps.MapFragment"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    />
-
-                <ImageView
-                    android:id="@+id/transparent_image"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:src="@color/transparent" />
-
-
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/mission_location_detail"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginTop="12dp"
-                    android:layout_marginRight="12dp"
-                    android:clipChildren="false"
-                    android:clipToPadding="false"
-                    android:divider="@android:color/transparent"
-                    android:dividerHeight="0.0px"
-                    android:elevation="8dp"
-                    android:text="현재위치"
-                    app:cardCornerRadius="8dp"
-
-                    >
-
-                    <ImageView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_flag_black_24dp" />
-                </androidx.cardview.widget.CardView>
+                        android:background="@drawable/bottom_rounded"
+                        android:orientation="horizontal">
 
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/myLocation_detail"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:layout_below="@id/mission_location_detail"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginTop="12dp"
-                    android:layout_marginRight="12dp"
-                    android:clipChildren="false"
-                    android:clipToPadding="false"
-                    android:divider="@android:color/transparent"
-                    android:dividerHeight="0.0px"
-                    android:elevation="8dp"
-                    android:text="현재위치"
-                    app:cardCornerRadius="8dp"
 
-                    >
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
 
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_my_location_black_24dp" />
-                </androidx.cardview.widget.CardView>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="20dp"
+                                android:layout_marginTop="20dp"
+                                android:layout_marginBottom="8dp"
+                                android:text="시작일"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/mission_date_start"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="20dp"
+                                android:layout_marginBottom="20dp"
+                                android:text="날짜 선택 결과"
+                                android:textSize="18sp" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center"
+                            android:layout_weight="1"
+                            android:gravity="center"
+
+
+                            >
+
+                            <View
+                                android:layout_width="1dp"
+                                android:layout_height="match_parent"
+                                android:layout_marginTop="20dp"
+                                android:layout_marginBottom="20dp"
+                                android:background="@color/divider_line" />
+
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="end"
+                            android:gravity="end"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="20dp"
+                                android:layout_marginTop="20dp"
+                                android:layout_marginEnd="20dp"
+                                android:layout_marginBottom="8dp"
+                                android:text="종료일"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/mission_date_end"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="20dp"
+                                android:layout_marginBottom="20dp"
+                                android:text="날짜 선택 결과"
+                                android:textSize="18sp" />
+                        </LinearLayout>
+
+
+                    </LinearLayout>
+                </RelativeLayout>
 
 
             </RelativeLayout>
 
             <LinearLayout
+
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="30dp">
+                android:layout_marginTop="20dp"
+                android:background="@drawable/rounded"
+                android:orientation="vertical"
+                android:padding="12dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="주소"
-                    android:textSize="30sp" />
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="40dp"
+                        android:text="주소"
+                        android:textSize="18sp" />
+
+                    <TextView
+                        android:id="@+id/address_detail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="40dp"
+                        android:layout_marginTop="12dp"
+                        android:layout_marginBottom="20dp"
+                        android:text=""
+                        android:textSize="14sp" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginStart="24dp"
+                        android:layout_marginEnd="24dp"
+                        android:background="@color/divider_line" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="40dp"
+                        android:layout_marginTop="20dp"
+                        android:text="벌칙"
+                        android:textSize="18sp" />
+
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="40dp"
+
+                        android:layout_marginTop="12dp"
+                        android:text="*실패시 아래 연락처로 문자알림" />
+
+                    <TextView
+                        android:id="@+id/penalty_name_list"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="40dp"
+                        android:layout_marginTop="12dp"
+                        android:text=""
+                        android:textSize="14sp" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginStart="24dp"
+                        android:layout_marginEnd="24dp"
+                        android:background="@color/divider_line" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="40dp"
+                            android:layout_marginTop="20dp"
+                            android:text="벌칙내용"
+                            android:textSize="18sp" />
+
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="40dp"
+                            android:layout_marginTop="12dp"
+
+
+                            android:text="-문자알림시 문자내용-" />
+
+                        <TextView
+                            android:id="@+id/penalty_content"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="40dp"
+                            android:layout_marginTop="12dp"
+                            android:text="내용" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="40dp"
+                        android:layout_marginTop="12dp"
+                        android:text=""
+                        android:textSize="14sp" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="30dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="알림설정"
-                    android:textSize="30sp" />
-
-            </LinearLayout>
         </LinearLayout>
     </ScrollView>
-
 </LinearLayout>

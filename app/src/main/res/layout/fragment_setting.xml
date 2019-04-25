@@ -3,7 +3,9 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/wall_paper"
+    android:scrollbars="vertical"
     >
+
 
 
     <LinearLayout
@@ -100,6 +102,45 @@
         android:layout_marginTop="32dp"
         android:orientation="vertical"
         >
+        <LinearLayout
+            android:id="@+id/new_register_go"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp">
+            <ImageView
+                android:id="@+id/new_register_icon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/new_register"
+                android:contentDescription="@string/content_description"
+                android:layout_marginStart="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="새 약속 등록"
+                android:textSize="16sp"
+                android:layout_marginStart="24dp"
+                android:layout_gravity="center"
+                android:gravity="center"
+                />
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/right_arrow"
+                android:layout_gravity="center"
+                android:layout_marginEnd="12dp"
+                />
+        </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginStart="80dp"
+            android:layout_marginEnd="24dp"
+            android:background="@color/divider_line"/>
 
         <LinearLayout
             android:id="@+id/faq"
@@ -116,7 +157,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="알려진 버그 안내"
-                android:textSize="18sp"
+                android:textSize="16sp"
                 android:layout_marginStart="24dp"
                 android:layout_gravity="center"
                 android:gravity="center"
@@ -158,7 +199,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="알람설정"
-            android:textSize="18sp"
+            android:textSize="16sp"
             android:layout_marginStart="24dp"
             android:layout_gravity="center"
             android:gravity="center"
@@ -198,7 +239,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="자동위치등록 설정"
-                android:textSize="18sp"
+                android:textSize="16sp"
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:layout_marginStart="24dp"
@@ -239,8 +280,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="친구등록"
-            android:textSize="18sp"
+            android:text="친구관리 (업데이트 예정)"
+            android:textSize="16sp"
             android:layout_gravity="center"
             android:gravity="center"
             android:layout_marginStart="24dp"
@@ -278,8 +319,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="내 정보"
-                android:textSize="18sp"
+                android:text="내 정보 (결제정보 업데이트 예정)"
+                android:textSize="16sp"
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:layout_marginStart="24dp"

@@ -13,7 +13,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:mcv_tileHeight="34dp"
-        app:mcv_tileWidth="48dp"
         android:padding="4dp"
 
         />

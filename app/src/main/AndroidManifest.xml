@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.lj.myapplication">
+    package="com.suji.lj.myapplication">
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -14,7 +14,7 @@
 
 
     <application
-        android:name=".Adapters.GlobalApplication"
+        android:name="com.suji.lj.myapplication.Adapters.GlobalApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -22,7 +22,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".FAQActivity"></activity>
+        <activity android:name="com.suji.lj.myapplication.FAQActivity"></activity>
 
         <uses-library
             android:name="org.apache.http.legacy"
@@ -31,28 +31,29 @@
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-3940256099942544/6300978111"/>
 
-        <activity android:name=".AutoLocationSetting" />
-        <activity android:name=".AlarmSettingActivity" />
-        <activity android:name=".NotificationActivity" />
-        <activity android:name=".MissionDetailActivity" />
-        <activity android:name=".MainActivity">
+        <activity android:name="com.suji.lj.myapplication.AutoLocationSetting" />
+        <activity android:name="com.suji.lj.myapplication.AlarmSettingActivity" />
+        <activity android:name="com.suji.lj.myapplication.NotificationActivity" />
+        <activity android:name="com.suji.lj.myapplication.MissionDetailActivity" />
+        <activity android:name="com.suji.lj.myapplication.MainActivity"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SampleLoginActivity" />
-        <activity android:name=".SampleSignupActivity" />
-        <activity android:name=".ContactActivity" />
-        <activity android:name=".DaumMapActivity" />
-        <activity android:name=".RecyclerActivity" />
-        <activity android:name=".RecyclerResultActivity" />
-        <activity android:name=".MissionSetActivity" />
-        <activity android:name=".NewMissionActivity" />
+        <activity android:name="com.suji.lj.myapplication.SampleLoginActivity" />
+        <activity android:name="com.suji.lj.myapplication.SampleSignupActivity" />
+        <activity android:name="com.suji.lj.myapplication.ContactActivity" />
+        <activity android:name="com.suji.lj.myapplication.DaumMapActivity" />
+        <activity android:name="com.suji.lj.myapplication.RecyclerActivity" />
+        <activity android:name="com.suji.lj.myapplication.RecyclerResultActivity" />
+        <activity android:name="com.suji.lj.myapplication.MissionSetActivity" />
+        <activity android:name="com.suji.lj.myapplication.NewMissionActivity" />
 
         <receiver
-            android:name=".Adapters.BroadCastService"
+            android:name="com.suji.lj.myapplication.Adapters.BroadCastService"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
@@ -60,7 +61,7 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".Adapters.BroadCastAlarm"
+            android:name="com.suji.lj.myapplication.Adapters.BroadCastAlarm"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
@@ -68,16 +69,16 @@
             </intent-filter>
         </receiver>
 
-        <service android:name=".Adapters.MyFirebaseMessagingService">
+        <service android:name="com.suji.lj.myapplication.Adapters.MyFirebaseMessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
         <service
-            android:name=".Adapters.LocationService"
+            android:name="com.suji.lj.myapplication.Adapters.LocationService"
             android:enabled="true" />
         <service
-            android:name=".Adapters.AlarmService"
+            android:name="com.suji.lj.myapplication.Adapters.AlarmService"
             android:enabled="true" />
 
         <meta-data

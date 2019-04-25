@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.example.lj.myapplication.SampleSignupActivity">
+    tools:context="com.suji.lj.myapplication.SampleSignupActivity">
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/sample_signup_toolbar"
         android:layout_width="match_parent"
@@ -58,7 +58,6 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/kakao_logout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="60dp"
@@ -66,6 +65,7 @@
         android:orientation="vertical">
 
         <LinearLayout
+            android:id="@+id/kakao_logout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="12dp">

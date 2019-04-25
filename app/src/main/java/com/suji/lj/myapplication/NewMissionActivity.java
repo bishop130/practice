@@ -78,6 +78,7 @@ public class NewMissionActivity extends AppCompatActivity implements StepperForm
     DBHelper dbHelper;
     String mission_time;
     String address;
+    String user_name;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,10 +124,9 @@ public class NewMissionActivity extends AppCompatActivity implements StepperForm
         Log.d("완료 데이터", makeTitle.getStepData());
         mission_time = String.valueOf(makeTimeStep.getStepData().hour) + ":" + String.valueOf(makeTimeStep.getStepData().minutes) + ":00";
 
-        String user_id = getSharedPreferences("Kakao",MODE_PRIVATE).getString("token","");
-
+        String user_id = getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
+        user_name = getSharedPreferences("kakao_profile", MODE_PRIVATE).getString("name", "");
         userId = String.valueOf(user_id);
-        Log.d("토큰확인", String.valueOf(userId));
         final SharedPreferences sharedPreferences = getSharedPreferences("sFile", MODE_PRIVATE);
         lat = sharedPreferences.getString("lat", "");
         lng = sharedPreferences.getString("lng", "");
@@ -171,6 +171,7 @@ public class NewMissionActivity extends AppCompatActivity implements StepperForm
 
                 Toast.makeText(getApplicationContext(), "전송완료" + makeTitle.getStepData(), Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(NewMissionActivity.this, MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP|Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
 
             }
@@ -194,7 +195,8 @@ public class NewMissionActivity extends AppCompatActivity implements StepperForm
                 hashMap.put("date_array_server", date_array_server);
                 hashMap.put("contact_json", contact_json);
                 hashMap.put("token", token);
-                hashMap.put("address",address);
+                hashMap.put("address", address);
+                hashMap.put("user_name", user_name);
 
                 return hashMap;
             }
@@ -446,53 +448,6 @@ public class NewMissionActivity extends AppCompatActivity implements StepperForm
             startService(service);
         }
 
-/*
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        long[] interval = {1000 * 60 * 5, 1000 * 60 * 4, 1000 * 60 * 3};
-
-
-
-        List<String> items = Arrays.asList(date_array.split("\\s*,\\s*"));
-
-        for (int i = 0; i < items.size(); i++) {
-            for (int j = 0; j < interval.length; j++) {
-                int requestID = String.valueOf(mission_id + items.get(i) + interval[j]).hashCode();
-                try {
-                    Log.d("확인좀",String.valueOf(requestID));
-
-                    Date cur_time = date_time.parse(date_time.format(new Date(System.currentTimeMillis())));
-                    Date mission_datetime = date_time.parse(items.get(i) + " " + mission_time);
-                    Intent intent = new Intent(this, BroadCastService.class);
-                    intent.putExtra("mission_name", makeTitle.getStepData());
-                    long days = TimeUnit.MILLISECONDS.toDays(interval[i]);
-                    long remainingHoursInMillis = interval[i] - TimeUnit.DAYS.toMillis(days);
-                    long hours = TimeUnit.MILLISECONDS.toHours(remainingHoursInMillis);
-                    long remainingMinutesInMillis = remainingHoursInMillis - TimeUnit.HOURS.toMillis(hours);
-                    long minutes = TimeUnit.MILLISECONDS.toMinutes(remainingMinutesInMillis);
-                    intent.putExtra("hour", hours);
-                    intent.putExtra("min", minutes);
-
-
-                    PendingIntent sender = PendingIntent.getBroadcast(this, requestID, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-                    if (cur_time.getTime() < mission_datetime.getTime() - interval[j]) {
-                        Log.d("확인좀2",String.valueOf(mission_datetime.getTime()));
-                        Log.d("확인좀3",String.valueOf(cur_time.getTime()));
-                        Log.d("확인좀4",date_time.format(mission_datetime.getTime() - interval[j]));
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-                            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, mission_datetime.getTime() - interval[j], sender);
-                        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
-                            alarmManager.setExact(AlarmManager.RTC_WAKEUP, mission_datetime.getTime() - interval[j], sender);
-                        else
-                            alarmManager.set(AlarmManager.RTC_WAKEUP, mission_datetime.getTime() - interval[j], sender);
-                    }
-                } catch (ParseException e) {
-
-                }
-            }
-        }
-
-*/
     }
 
 

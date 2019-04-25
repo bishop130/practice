@@ -40,25 +40,12 @@
 
                             android:orientation="vertical"
                             android:gravity="center">
-                            <TextView
-                                android:id="@+id/register_year"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="2019"
-                                android:textSize="15sp"
-                                android:gravity="center"
-                                />
-                            <TextView
-                                android:id="@+id/register_month_day"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="3.18"
-                                android:layout_marginTop="-4dp"
-                                android:textSize="18sp"
-
-
-                                android:gravity="center"
-                                />
+                            <ImageView
+                                android:id="@+id/mission_state"
+                                android:layout_width="36dp"
+                                android:layout_height="36dp"
+                                android:src="@drawable/ready_to_check"
+                                android:contentDescription="@string/content_description"/>
 
 
                         </LinearLayout>
@@ -115,7 +102,7 @@
                                 android:layout_height="32dp"
                                 android:layout_centerHorizontal="true"
                                 android:layout_centerVertical="true"
-                                android:background="@drawable/ic_keyboard_arrow_right_black_24dp" />
+                                android:background="@drawable/right_arrow" />
                         </RelativeLayout>
                     </RelativeLayout>
                 </LinearLayout>
