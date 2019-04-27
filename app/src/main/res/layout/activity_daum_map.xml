@@ -124,6 +124,7 @@
                     android:layout_height="60dp"
                     android:layout_gravity="bottom"
                     android:background="?attr/colorPrimary"
+                    android:visibility="visible"
 
                     android:gravity="center"
                     android:text="확인"

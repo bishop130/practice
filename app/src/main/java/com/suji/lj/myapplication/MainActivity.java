@@ -226,8 +226,6 @@ public class MainActivity extends AppCompatActivity {
         editor1.apply();
 
 
-
-
     }
 
 

@@ -12,8 +12,8 @@
         android:id="@+id/material_calendar_day"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:mcv_tileHeight="34dp"
-        android:padding="4dp"
+        app:mcv_tileHeight="36dp"
+        android:padding="8dp"
 
         />
 

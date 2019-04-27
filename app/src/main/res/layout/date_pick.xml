@@ -2,6 +2,20 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <TextView
+        android:id="@+id/clear_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="선택 초기화"
+        android:background="@drawable/card_button_shape"
+        android:padding="12dp"
+        android:textColor="@color/colorPrimary"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        android:layout_marginStart="40dp"
+
+        />
+
 
     <com.prolificinteractive.materialcalendarview.MaterialCalendarView
         xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -13,5 +27,7 @@
         app:mcv_showOtherDates="all"
         app:mcv_selectionColor="#00F"
         />
+
+
 
 </LinearLayout>

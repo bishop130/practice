@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.TextView;
 
 import com.suji.lj.myapplication.R;
 import com.google.gson.GsonBuilder;
@@ -32,12 +33,13 @@ import ernestoyaquello.com.verticalstepperform.Step;
 public class MakeDateStep extends Step<String> {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("EEE, d MMM yyyy");
-    MaterialCalendarView materialCalendarView;
+    private MaterialCalendarView materialCalendarView;
     private String days_result;
     private StringBuffer sb = null;
     private String con;
     private int count = 0;
     private SimpleDateFormat date_sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.KOREA);
+    TextView clear_selection;
 
 
     public MakeDateStep(String title) {
@@ -59,7 +61,7 @@ public class MakeDateStep extends Step<String> {
 
         LayoutInflater inflater = LayoutInflater.from(getContext());
         View view = inflater.inflate(R.layout.date_pick, null, false);
-        materialCalendarView = (MaterialCalendarView) view.findViewById(R.id.material_calendarView);
+        materialCalendarView = view.findViewById(R.id.material_calendarView);
 
         Calendar min = Calendar.getInstance();
 
@@ -87,6 +89,7 @@ public class MakeDateStep extends Step<String> {
         materialCalendarView.setSelectionMode(MaterialCalendarView.SELECTION_MODE_MULTIPLE);
 
 
+
         materialCalendarView.setOnDateChangedListener(new OnDateSelectedListener() {
 
             @Override
@@ -102,6 +105,17 @@ public class MakeDateStep extends Step<String> {
                 }
                 markAsCompletedOrUncompleted(true);
                 Log.d("날짜열", con);
+            }
+        });
+
+        clear_selection = view.findViewById(R.id.clear_date);
+        clear_selection.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                materialCalendarView.clearSelection();
+                con = null;
+                count = 0;
+                markAsCompletedOrUncompleted(true);
             }
         });
 
@@ -172,8 +186,8 @@ public class MakeDateStep extends Step<String> {
                         maxDay = Integer.valueOf(day);
                     }
 
-                    minDate = String.valueOf(minYear) + "-" + String.valueOf(minMonth) + "-" + String.valueOf(minDay) + " ";
-                    maxDate = " " + String.valueOf(maxYear) + "-" + String.valueOf(maxMonth) + "-" + String.valueOf(maxDay);
+                    minDate = minYear + "-" + minMonth + "-" + minDay + " ";
+                    maxDate = " " + maxYear + "-" + maxMonth + "-" + maxDay;
                 }
 
                 String result = sb.toString();

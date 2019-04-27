@@ -8,34 +8,64 @@
     android:clickable="true"
     android:focusable="true">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:layout_marginBottom="12dp">
+        android:layout_marginBottom="12dp"
+        android:orientation="vertical">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="38dp"
             android:id="@+id/place_name"
             android:textSize="16sp"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/road_address"
-            android:layout_marginStart="38dp"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_marginTop="4dp"
-            android:layout_below="@+id/place_name"
-            android:textSize="12sp"/>
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/address_shape"
+                android:text="지번"
+                android:padding="2dp"
+                android:textSize="10sp"
+
+                android:layout_marginStart="38dp"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/old_address"
-            android:layout_marginStart="38dp"
-            android:layout_marginTop="4dp"
-            android:layout_below="@+id/road_address"
-            android:textSize="12sp"/>
+            android:layout_marginStart="8dp"
 
-    </RelativeLayout>
+            android:textSize="12sp"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/address_shape"
+                android:text="도로"
+                android:padding="2dp"
+                android:textSize="10sp"
+
+                android:layout_marginStart="38dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/road_address"
+            android:layout_marginStart="8dp"
+
+            android:textSize="12sp"
+            android:visibility="visible"/>
+        </LinearLayout>
+
+
+    </LinearLayout>
 
 </RelativeLayout>

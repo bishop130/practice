@@ -334,6 +334,10 @@ public class DaumMapActivity extends AppCompatActivity implements MapView.Curren
         MapPoint.GeoCoordinate geoCoordinate = mapView.getMapCenterPoint().getMapPointGeoCoord();
         Mission_Latitude = geoCoordinate.latitude; // 위도
         Mission_Longitude = geoCoordinate.longitude; // 경도
+        String lat = getSharedPreferences("sFile",MODE_PRIVATE).getString("lat",String.valueOf(geoCoordinate.latitude));
+        String lng = getSharedPreferences("sFile",MODE_PRIVATE).getString("lng",String.valueOf(geoCoordinate.longitude));
+        Mission_Latitude = Double.valueOf(lat);
+        Mission_Longitude = Double.valueOf(lng);
         mapView.removeAllCircles();
         MapCircle circle = new MapCircle(
                 MapPoint.mapPointWithGeoCoord(Mission_Latitude, Mission_Longitude), // center
