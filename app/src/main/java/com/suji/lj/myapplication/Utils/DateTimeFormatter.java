@@ -1,4 +1,4 @@
-package com.suji.lj.myapplication.Adapters;
+package com.suji.lj.myapplication.Utils;
 
 import android.text.format.DateFormat;
 

@@ -7,7 +7,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
@@ -16,22 +16,18 @@ import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.ViewPager;
 
+import com.google.android.material.tabs.TabLayout;
+import com.suji.lj.myapplication.Adapters.ContactResponse;
 import com.suji.lj.myapplication.Adapters.RecyclerViewContactAdapter;
 import com.suji.lj.myapplication.Items.ContactItem;
 import com.suji.lj.myapplication.Items.ContactItemForServer;
-import com.github.tamir7.contacts.Contact;
 import com.github.tamir7.contacts.Contacts;
-import com.github.tamir7.contacts.Query;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.suji.lj.myapplication.Utils.Utils;
 
 import java.util.ArrayList;
 
@@ -39,31 +35,30 @@ import java.util.List;
 
 public class ContactActivity extends AppCompatActivity {
 
-    private final String TAG = "MainActivity";
-    private RecyclerView recyclerView;
     RecyclerViewContactAdapter adapter;
-    ArrayList<ContactItem> listItem;
-    LinearLayoutManager layoutManager;
+    ContactResponse contactResponse;
+    List<ContactItem> listItem;
+    List<ContactItem> selected_item = new ArrayList<>();
+    Utils utils = new Utils();
+    RecyclerView recyclerView;
+    RecyclerView confirmed_recycler;
+
+    public ContactActivity(){
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contact);
-        listItem = new ArrayList<>();
+
+        Contacts.initialize(this);
+
+
         recyclerView = findViewById(R.id.recycler_view_contact);
-        recyclerView.setLayoutManager(layoutManager);
-        //recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
-
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.contact_toolbar);
-        toolbar.setTitle("연락처 선택");
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-
-
-
-        SearchView searchView = (SearchView)findViewById(R.id.contact_search);
+        confirmed_recycler= findViewById(R.id.recycler_view_confirmed);
+        SearchView searchView = findViewById(R.id.contact_search);
+        TextView button = findViewById(R.id.contact_confirmed);
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -74,51 +69,11 @@ public class ContactActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextChange(String newText) {
                 adapter.getFilter().filter(newText);
-                return false;
+                return true;
             }
         });
 
 
-
-
-    }
-    @Override
-    public boolean onSupportNavigateUp() {
-        onBackPressed();
-        return true;
-    }
-
-    private void getContacts(){
-        Query q = Contacts.getQuery();
-        q.include(Contact.Field.ContactId, Contact.Field.DisplayName, Contact.Field.PhoneNumber);
-        List<Contact> result = q.find();
-
-
-        try {
-            String con = new GsonBuilder().setPrettyPrinting().create().toJson(result);
-            JSONArray jsonArr = new JSONArray(con);
-            for (int i = 0; i < jsonArr.length(); i++) {
-
-                JSONObject object = jsonArr.getJSONObject(i);
-                ContactItem contactItem = new ContactItem();
-                contactItem.setDisplayName(object.getString("displayName"));
-                JSONArray jsonArr2 = object.getJSONArray("phoneNumbers");
-
-                for (int j = 0; j < jsonArr2.length(); j++) {
-                    JSONObject object2 = jsonArr2.getJSONObject(j);
-                    contactItem.setPhoneNumbers(object2.getString("number"));
-                    listItem.add(contactItem);
-                }
-            }
-            setupRecyclerView(listItem);
-        } catch (JSONException e) {
-        }
-    }
-
-    private void setupRecyclerView(List<ContactItem> itemList) {
-
-       adapter = new RecyclerViewContactAdapter(this, itemList);
-        Button button = (Button)findViewById(R.id.contact_ok);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -126,24 +81,25 @@ public class ContactActivity extends AppCompatActivity {
                 String displayInfo="";
                 int count = 0;
 
-                List<ContactItem> ctList = ((RecyclerViewContactAdapter) adapter).getStudentist();
+                List<ContactItem> ctList = selected_item;
                 List<ContactItemForServer> ctServer = new ArrayList<>();
+
 
 
                 for(int i =0; i<ctList.size(); i++){
                     ContactItem singleContact = ctList.get(i);
-                    if(singleContact.isSelected() == true){
-                        data=data+singleContact.getPhoneNumbers();
-                        displayInfo=displayInfo+singleContact.getDisplayName()+", ";
-                        count++;
-                        ctList.get(i);
-                        ContactItemForServer contactItemForServer = new ContactItemForServer();
-                        contactItemForServer.setName(singleContact.getDisplayName());
-                        contactItemForServer.setNum(singleContact.getPhoneNumbers());
-                        ctServer.add(contactItemForServer);
+                    //if(singleContact.isSelected() == true){
+                    data=data+singleContact.getPhoneNumbers();
+                    displayInfo=displayInfo+singleContact.getDisplayName()+", ";
+                    count++;
+                    ctList.get(i);
+                    ContactItemForServer contactItemForServer = new ContactItemForServer();
+                    contactItemForServer.setName(singleContact.getDisplayName());
+                    contactItemForServer.setNum(singleContact.getPhoneNumbers());
+                    ctServer.add(contactItemForServer);
 
 
-                    }
+                    //}
                 }
                 String contact_json = new Gson().toJson(ctServer);
                 Log.d("List",contact_json);
@@ -153,15 +109,18 @@ public class ContactActivity extends AppCompatActivity {
                 }
 
                 Log.d("DisplayInfo",displayInfo);
+                Log.d("DisplayInfo","연락처 개수     "+ctList.size());
                 SharedPreferences sharedPreferences = getSharedPreferences("sFile",MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putString("ContactInfo",displayInfo);
                 editor.putString("contact_json",contact_json);
+                editor.putString("contact_count",String.valueOf(ctList.size()));
                 editor.putString("count",String.valueOf(count));
+                editor.putInt("contact_num",ctList.size());
                 editor.putInt("Code",777);
                 editor.apply();
 
-                Toast.makeText(ContactActivity.this,
+                Toast.makeText(getApplicationContext(),
                         "Selected Friends:" +data, Toast.LENGTH_LONG)
                         .show();
                 finish();
@@ -169,10 +128,38 @@ public class ContactActivity extends AppCompatActivity {
             }
         });
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-        recyclerView.setAdapter(adapter);
+
+        listItem = utils.getContacts();
+
+        setupRecyclerView(listItem);
+        recyclerViewConfirmed(selected_item);
 
     }
+    private void setupRecyclerView(List<ContactItem> itemList) {
+
+        adapter = new RecyclerViewContactAdapter(this, itemList);
+        //adapter.notifyDataSetChanged();
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(adapter);
+
+
+
+    }
+    public void recyclerViewConfirmed(List<ContactItem> itemList){
+
+        contactResponse = new ContactResponse(this,itemList);
+        confirmed_recycler.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false));
+        confirmed_recycler.setAdapter(contactResponse);
+    }
+
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
+
 
     @Override
     protected void onResume(){
@@ -187,7 +174,8 @@ public class ContactActivity extends AppCompatActivity {
                 == PackageManager.PERMISSION_GRANTED) {
             Log.d("퍼미션","이미 승인받음");
             Contacts.initialize(this);
-            getContacts();
+            initiateTab();
+
 
         }
         else{
@@ -238,7 +226,6 @@ public class ContactActivity extends AppCompatActivity {
                             == PackageManager.PERMISSION_GRANTED) {
                         Log.d("퍼미션","여기는 왜 못들어와");
                         Contacts.initialize(this);
-                        getContacts();
 
                     }
 
@@ -256,6 +243,67 @@ public class ContactActivity extends AppCompatActivity {
             // permissions this app might request
         }
     }
+
+    private void initiateTab(){
+
+
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.contact_toolbar);
+        toolbar.setTitle("연락처 선택");
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+    }
+    public void refreshSelection(List<ContactItem> itemList, int position){
+        //Log.d("라니스터","포지션 activity"+ position+"   "+listItem.get(position).isSelected());
+        listItem.get(position).setSelected(false);
+
+        //listItem.remove(position);
+        //contactResponse.notifyItemRemoved(position);
+        contactResponse.notifyDataSetChanged();
+        adapter.notifyDataSetChanged();
+        //setupRecyclerView(listItem);
+
+
+    }
+    public void refreshThumb(List<ContactItem> selected,List<ContactItem>original_item){
+
+        Log.d("라니스터","refreshThumb호출");
+        selected_item = selected;
+
+        listItem=original_item;
+        contactResponse.notifyDataSetChanged();
+
+    }
+    public void test(ContactItem itemList){
+        selected_item.add(itemList);
+
+        Log.d("라니스터","test호출");
+        contactResponse.notifyDataSetChanged();
+        adapter.notifyDataSetChanged();
+
+
+
+    }
+    public void testDelete(int position){
+        for(int i=0; i<selected_item.size(); i++){
+            ContactItem ct = selected_item.get(i);
+            if (ct.getPosition() == position) {
+                int idx = i;
+                selected_item.remove(idx);
+            }
+        }
+
+
+        Log.d("라니스터","test호출");
+        contactResponse.notifyDataSetChanged();
+        adapter.notifyDataSetChanged();
+
+
+
+    }
+
 
 
 

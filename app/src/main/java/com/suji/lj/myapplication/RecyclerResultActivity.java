@@ -40,11 +40,10 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 
 import com.android.volley.toolbox.Volley;
-import com.suji.lj.myapplication.Adapters.AlarmService;
 
 import com.suji.lj.myapplication.Adapters.BroadCastAlarm;
 import com.suji.lj.myapplication.Adapters.DBHelper;
-import com.suji.lj.myapplication.Adapters.DateTimeFormatter;
+import com.suji.lj.myapplication.Utils.DateTimeFormatter;
 
 import com.suji.lj.myapplication.Adapters.MainDB;
 
@@ -367,7 +366,7 @@ public class RecyclerResultActivity extends AppCompatActivity implements MapView
         location_loading.setVisibility(View.GONE);
         location_founded.setVisibility(View.VISIBLE);
 
-        if ((Current_Latitude - Latitude) * (Current_Latitude - Latitude) + (Current_Longitude - Longitude) * (Current_Longitude - Longitude) < 0.0005 * 0.0005) {
+        if ((Current_Latitude - Latitude) * (Current_Latitude - Latitude) + (Current_Longitude - Longitude) * (Current_Longitude - Longitude) < 0.0007 * 0.0007) {
             unchecked_location_icon.setImageResource(R.drawable.checked_icon);
             check_location.setText("위치 확인");
 

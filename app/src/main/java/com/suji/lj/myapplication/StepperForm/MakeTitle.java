@@ -5,12 +5,15 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
 import com.suji.lj.myapplication.R;
 import com.google.android.material.textfield.TextInputEditText;
 
 import ernestoyaquello.com.verticalstepperform.Step;
+
+import static android.content.Context.INPUT_METHOD_SERVICE;
 
 public class MakeTitle extends Step<String> {
 
@@ -36,6 +39,7 @@ public class MakeTitle extends Step<String> {
 
         textInputEditText = new TextInputEditText(getContext());
         textInputEditText.setHint(R.string.form_hint_title);
+
         textInputEditText.setSingleLine(true);
         textInputEditText.addTextChangedListener(new TextWatcher() {
             @Override

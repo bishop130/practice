@@ -1,4 +1,4 @@
-package com.suji.lj.myapplication.Adapters;
+package com.suji.lj.myapplication.Utils;
 
 public class HangulUtils {
 

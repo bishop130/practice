@@ -2,6 +2,7 @@ package com.suji.lj.myapplication.Fragments;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -29,11 +30,13 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.borax12.materialdaterangepicker.date.DatePickerDialog;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.suji.lj.myapplication.Adapters.RecyclerAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerViewDivider;
 import com.suji.lj.myapplication.Decorators.EventDecorator;
 import com.suji.lj.myapplication.Decorators.SelectorDecorator;
 import com.suji.lj.myapplication.Items.RecyclerItem;
+import com.suji.lj.myapplication.NewMissionActivity;
 import com.suji.lj.myapplication.R;
 import com.kakao.auth.ApiResponseCallback;
 import com.kakao.auth.AuthService;
@@ -81,6 +84,7 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
     private List<CalendarDay> dates = new ArrayList<>();
     private String response_result;
     private Context mContext;
+    Bundle args;
 
     @Nullable
     @Override
@@ -93,6 +97,7 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
         month = calendar.get(Calendar.MONTH);
         day = calendar.get(Calendar.DAY_OF_MONTH);
 
+
         final View view = inflater.inflate(R.layout.fragment_favorite, container, false);
         SharedPreferences Preferences = mContext.getSharedPreferences("timer_control",Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = Preferences.edit();
@@ -101,6 +106,7 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
 
         String user_id = mContext.getSharedPreferences("Kakao",Context.MODE_PRIVATE).getString("token","");
         volleyConnect(user_id);
+        FloatingActionButton fab = view.findViewById(R.id.fab_new);
 
         recyclerView = view.findViewById(R.id.recycler_day);
         recyclerView.setNestedScrollingEnabled(false);
@@ -116,6 +122,14 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
         });
 
         setMaterialCalendarView();
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getContext(), NewMissionActivity.class);
+                startActivity(intent);
+
+            }
+        });
 
         return view;
     }
@@ -128,7 +142,7 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
                 .commit();
         final LocalDate calendar = LocalDate.now();
         materialCalendarView.setSelectedDate(calendar);
-        materialCalendarView.addDecorator(new SelectorDecorator(getActivity()));
+        //materialCalendarView.addDecorator(new SelectorDecorator(getActivity()));
 
         materialCalendarView.setTitleFormatter(new TitleFormatter() {
             @Override
@@ -296,11 +310,16 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
     @Override
     public void onPause(){
         super.onPause();
-        Log.d("홈프레그","onPause_SearchFragment");
+        Log.d("타이머","onPause_SearchFragment");
         SharedPreferences sharedPreferences = mContext.getSharedPreferences("timer_control",Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean("timer_switch",false);
         editor.apply();
+
+        boolean timer_switch = mContext.getSharedPreferences("timer_control",Context.MODE_PRIVATE).getBoolean("timer_switch",true);
+
+
+        Log.d("타이머"," "+timer_switch);
 
 
     }
@@ -313,7 +332,7 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
         editor.putBoolean("timer_switch",true);
         editor.apply();
         String user_id = mContext.getSharedPreferences("Kakao",Context.MODE_PRIVATE).getString("token","");
-        volleyConnect(user_id);
+        //volleyConnect(user_id);
 
     }
     @Override

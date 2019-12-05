@@ -20,6 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/White"
+        app:titleTextColor="@color/colorPrimary"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
 
@@ -50,13 +51,5 @@
         </RelativeLayout>
     </RelativeLayout>
 
-    <com.google.android.material.navigation.NavigationView
-        android:id="@+id/navigation_view"
-        android:layout_width="240dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        app:itemTextColor="@color/mdtp_transparent_black"
-        app:headerLayout="@layout/drawer_header"
-        app:menu="@menu/drawer"/>
 
 </androidx.drawerlayout.widget.DrawerLayout>

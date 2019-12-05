@@ -1,38 +1,46 @@
 package com.suji.lj.myapplication.Adapters;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.suji.lj.myapplication.ContactActivity;
 import com.suji.lj.myapplication.Items.ContactItem;
 
 import com.suji.lj.myapplication.R;
+import com.suji.lj.myapplication.Utils.HangulUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class RecyclerViewContactAdapter extends RecyclerView.Adapter<RecyclerViewContactAdapter.RecyclerViewContactHolder> implements Filterable {
 
     private List<ContactItem> itemList;
     private List<ContactItem> exampleListFull;
+    private List<ContactItem> selected_contact = new ArrayList<>();
     private Context context;
-
+    private int count = 0;
+    private static final int MAX_CONTACTS = 10;
 
 
     public RecyclerViewContactAdapter(Context context, List<ContactItem> itemList) {
         this.itemList = itemList;
         this.context = context;
         this.exampleListFull = new ArrayList<>(itemList);
+
     }
 
     @NonNull
@@ -42,7 +50,7 @@ public class RecyclerViewContactAdapter extends RecyclerView.Adapter<RecyclerVie
         View view;
         LayoutInflater inflater = LayoutInflater.from(context);
         view = inflater.inflate(R.layout.contact_item, parent, false);
-        final RecyclerViewContactHolder recyclerViewContactHolder = new RecyclerViewContactHolder(view);
+        RecyclerViewContactHolder recyclerViewContactHolder = new RecyclerViewContactHolder(view);
 
         return recyclerViewContactHolder;
     }
@@ -50,39 +58,153 @@ public class RecyclerViewContactAdapter extends RecyclerView.Adapter<RecyclerVie
     @Override
     public void onBindViewHolder(@NonNull final RecyclerViewContactHolder holder, final int position) {
 
-        final int pos = position;
-
         holder.name.setText(itemList.get(position).getDisplayName());
         holder.phone_number.setText(itemList.get(position).getPhoneNumbers());
+        holder.first_name.setText(String.valueOf(itemList.get(position).getDisplayName().charAt(0)));
+        holder.contact_container.setBackgroundColor(itemList.get(position).isSelected() ? Color.WHITE : Color.WHITE);
+        holder.first_name.setBackgroundResource(itemList.get(position).isSelected() ? R.drawable.checked_contact : R.drawable.contact_circle);
+        holder.first_name.setText(itemList.get(position).isSelected() ? "" : String.valueOf(itemList.get(position).getDisplayName().charAt(0)));
 
-        holder.checkBox.setChecked(itemList.get(position).isSelected());
-        holder.checkBox.setTag(itemList.get(position));
 
-        holder.checkBox.setOnClickListener(new View.OnClickListener() {
+        holder.contact_container.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                CheckBox cb = (CheckBox) v;
-                ContactItem contactItem = (ContactItem)cb.getTag();
+                itemList.get(position).setSelected(!itemList.get(position).isSelected()); //스위치
+                Log.d("라니스터","position  "+position+"\n"+"isture"+itemList.get(position).isSelected());
+                if(itemList.get(position).isSelected()) {
+                    ContactItem contactItem = new ContactItem();
+                    contactItem.setDisplayName(itemList.get(position).getDisplayName());
+                    contactItem.setPhoneNumbers(itemList.get(position).getPhoneNumbers());
+                    contactItem.setPosition(position);
 
-                contactItem.setSelected(cb.isChecked());
-                itemList.get(pos).setSelected(cb.isChecked());
 
-                Toast.makeText(v.getContext(),"Clicked on Checkbox: " + cb.getText() + " is "
-                        + cb.isChecked(), Toast.LENGTH_LONG).show();
+                    ((ContactActivity) context).test(contactItem);
+                }
+                else{
+
+
+
+                    ((ContactActivity) context).testDelete(position);
+
+                }
             }
         });
 
+
+        //((ContactActivity) context).refreshThumb(selected_contact);
+/*
+        holder.name.setText(itemList.get(position).getDisplayName());
+        holder.phone_number.setText(itemList.get(position).getPhoneNumbers());
+        holder.first_name.setText(String.valueOf(itemList.get(position).getDisplayName().charAt(0)));
+
+        holder.contact_container.setBackgroundColor(itemList.get(position).isSelected() ? Color.WHITE : Color.WHITE);
+        holder.first_name.setBackgroundResource(itemList.get(position).isSelected() ? R.drawable.checked_contact : R.drawable.contact_circle);
+        holder.first_name.setText(itemList.get(position).isSelected() ? "" : String.valueOf(itemList.get(position).getDisplayName().charAt(0)));
+        //holder.first_name.setVisibility(itemList.get(position).isSelected() ? View.INVISIBLE : View.VISIBLE);
+        //holder.checked_contact.setVisibility(itemList.get(position).isSelected() ? View.GONE : View.VISIBLE);
+        //holder.first_name.setImageResource(R.drawable.account);
+        Log.d("라니스터","onBindViewHolder_recyclerViewContact");
+        holder.contact_container.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (count < MAX_CONTACTS) {
+
+                    //((ContactActivity) context).refreshSelection(position);
+                    itemList.get(position).setSelected(!itemList.get(position).isSelected());
+
+
+                    if (itemList.get(position).isSelected()) {
+                        Log.d("라니스터","포지션 선택"+ position+"   "+itemList.get(position).isSelected());
+                        count = count + 1;
+                        ContactItem contactItem = new ContactItem();
+                        contactItem.setDisplayName(itemList.get(position).getDisplayName());
+                        contactItem.setPhoneNumbers(itemList.get(position).getPhoneNumbers());
+                        contactItem.setPosition(position);
+
+                        selected_contact.add(contactItem);
+                        //contactActivity.recyclerViewConfirmed(selected_contact);
+                        //((ContactActivity) context).recyclerViewConfirmed(selected_contact);
+
+                        ((ContactActivity) context).refreshThumb(selected_contact, itemList);
+                        //notifyDataSetChanged();
+
+                        holder.contact_container.setBackgroundColor(itemList.get(position).isSelected() ? Color.WHITE : Color.WHITE);
+                        holder.first_name.setBackgroundResource(itemList.get(position).isSelected() ? R.drawable.checked_contact : R.drawable.contact_circle);
+                        holder.first_name.setText(itemList.get(position).isSelected() ? "" : String.valueOf(itemList.get(position).getDisplayName().charAt(0)));
+
+
+                        checkcontact();
+
+                    } else {
+                        Log.d("라니스터","포지션 선택해제"+ position+"   "+itemList.get(position).isSelected());
+                        ContactItem contactItem = new ContactItem();
+                        contactItem.setDisplayName(itemList.get(position).getDisplayName());
+                        contactItem.setPhoneNumbers(itemList.get(position).getPhoneNumbers());
+                        contactItem.setPosition(position);
+
+                        count = count - 1;
+                        iterator(position);
+
+                        ((ContactActivity) context).refreshThumb(selected_contact,itemList);
+
+                        holder.contact_container.setBackgroundColor(itemList.get(position).isSelected() ? Color.WHITE : Color.WHITE);
+                        holder.first_name.setBackgroundResource(itemList.get(position).isSelected() ? R.drawable.checked_contact : R.drawable.contact_circle);
+                        holder.first_name.setText(itemList.get(position).isSelected() ? "" : String.valueOf(itemList.get(position).getDisplayName().charAt(0)));
+
+
+                        checkcontact();
+                    }
+                } else {
+                    Toast.makeText(context, "전송 최대 인원은 10명입니다.", Toast.LENGTH_LONG).show();
+                    if(itemList.get(position).isSelected()){
+                        itemList.get(position).setSelected(!itemList.get(position).isSelected());
+                        holder.contact_container.setBackgroundColor(itemList.get(position).isSelected() ? Color.WHITE : Color.WHITE);
+                        holder.first_name.setBackgroundResource(itemList.get(position).isSelected() ? R.drawable.checked_contact : R.drawable.contact_circle);
+                        holder.first_name.setText(itemList.get(position).isSelected() ? "" : String.valueOf(itemList.get(position).getDisplayName().charAt(0)));
+
+                        ContactItem contactItem = new ContactItem();
+                        contactItem.setDisplayName(itemList.get(position).getDisplayName());
+                        contactItem.setPhoneNumbers(itemList.get(position).getPhoneNumbers());
+                        contactItem.setPosition(position);
+                        count = count-1;
+                        iterator(position);
+
+                        checkcontact();
+                    }
+
+                }
+
+
+                Log.d("숫자", count + "");
+                //itemList.get(holder.getAdapterPosition()).setContact_count(itemList.get(holder.getAdapterPosition()).getContact_count() + 1);
+
+
+            }
+        });
+        */
+
+
     }
+
     @Override
-    public void onViewRecycled(RecyclerViewContactHolder holder) {
+    public void onViewRecycled(@NonNull RecyclerViewContactHolder holder) {
         super.onViewRecycled(holder);
 
-        holder.checkBox.setOnCheckedChangeListener(null);
     }
 
     @Override
     public int getItemCount() {
         return this.itemList.size();
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return position;
     }
 
     @Override
@@ -123,30 +245,65 @@ public class RecyclerViewContactAdapter extends RecyclerView.Adapter<RecyclerVie
         }
     };
 
+    private void checkcontact() {
+        for (int i = 0; i < selected_contact.size(); i++) {
+            ContactItem ct = selected_contact.get(i);
+            String name = ct.getDisplayName();
+            //Log.d("라니스터",name);
+        }
+
+
+    }
+
+    private void iterator(int position) {
+        for (int i = 0; i < selected_contact.size(); i++) {
+            ContactItem ct = selected_contact.get(i);
+            if (ct.getPosition() == position) {
+                int idx = i;
+                selected_contact.remove(idx);
+
+
+            }
+
+
+        }
+        ((ContactActivity) context).recyclerViewConfirmed(selected_contact);
+    }
+
 
     public static class RecyclerViewContactHolder extends RecyclerView.ViewHolder {
 
         TextView name;
         TextView phone_number;
-        RelativeLayout view_container;
-        CheckBox checkBox;
+        RelativeLayout contact_container;
+        TextView first_name;
+        ImageView checked_contact;
 
         public RecyclerViewContactHolder(@NonNull View itemView) {
             super(itemView);
-            view_container = itemView.findViewById(R.id.contact_container);
-            name = (TextView) itemView.findViewById(R.id.contact_name);
-            phone_number = (TextView) itemView.findViewById(R.id.contact_num);
-            checkBox = (CheckBox) itemView.findViewById(R.id.check_box);
-
+            contact_container = itemView.findViewById(R.id.contact_container);
+            name = itemView.findViewById(R.id.contact_name);
+            phone_number = itemView.findViewById(R.id.contact_num);
+            first_name = itemView.findViewById(R.id.first_name);
+            checked_contact = itemView.findViewById(R.id.checked_contact);
 
 
         }
 
     }
+
     public List<ContactItem> getStudentist() {
         return itemList;
     }
 
+    public List<ContactItem> getSelected_contact() {
+        return selected_contact;
+    }
+
+    public void contactSelect() {
+
+
+    }
 
 
 }

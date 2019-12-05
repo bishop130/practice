@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.suji.lj.myapplication.DaumMapActivity;
@@ -85,7 +84,7 @@ public class MakeLocationStep extends Step<String> {
     protected View createStepContentLayout() {
         Log.d("반복", "createStepContentLayout");
         LayoutInflater inflater = LayoutInflater.from(getContext());
-        final View locationStepContent = inflater.inflate(R.layout.make_location_step, null, false);
+        final View locationStepContent = inflater.inflate(R.layout.step_location, null, false);
         resultView = (TextView) locationStepContent.findViewById(R.id.location_text);
         open_map = locationStepContent.findViewById(R.id.open_map);
         open_map.setOnClickListener(new View.OnClickListener() {

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/wall_paper"
+    android:background="@color/wall_paper2"
     android:orientation="vertical"
     android:scrollbars="vertical"
     tools:context=".MissionDetailActivity">
@@ -15,7 +15,8 @@
         android:layout_height="?attr/actionBarSize"
         android:background="@color/White"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        app:titleTextColor="@color/colorPrimary"/>
 
     <ScrollView
         android:id="@+id/main_scroll_view"
@@ -148,6 +149,7 @@
                                 android:layout_marginTop="20dp"
                                 android:layout_marginBottom="8dp"
                                 android:text="시작일"
+                                android:textColor="@color/colorPrimary"
                                 android:textSize="14sp" />
 
                             <TextView
@@ -155,9 +157,16 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="20dp"
-                                android:layout_marginBottom="20dp"
+                                android:layout_marginBottom="8dp"
                                 android:text="날짜 선택 결과"
                                 android:textSize="18sp" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/mission_time_start"
+                                android:layout_marginStart="20dp"
+                                android:layout_marginBottom="8dp"
+                                />
                         </LinearLayout>
 
                         <LinearLayout
@@ -194,6 +203,7 @@
                                 android:layout_marginTop="20dp"
                                 android:layout_marginEnd="20dp"
                                 android:layout_marginBottom="8dp"
+                                android:textColor="@color/colorPrimary"
                                 android:text="종료일"
                                 android:textSize="14sp" />
 
@@ -202,10 +212,17 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginEnd="20dp"
-                                android:layout_marginBottom="20dp"
+                                android:layout_marginBottom="8dp"
                                 android:text="날짜 선택 결과"
                                 android:textSize="18sp" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/mission_time_end"
+                                android:layout_marginEnd="20dp"
+                                android:layout_marginBottom="8dp"/>
                         </LinearLayout>
+
 
 
                     </LinearLayout>

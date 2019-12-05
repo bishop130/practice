@@ -129,7 +129,7 @@ public class AlarmService extends Service {
     private void makeForeGround(String title) {
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-        RemoteViews remoteViews = new RemoteViews(getPackageName(), R.layout.drawer_header);
+        //RemoteViews remoteViews = new RemoteViews(getPackageName(), R.layout.drawer_header);
 
         NotificationCompat.Builder builder;
         if (Build.VERSION.SDK_INT >= 26) {

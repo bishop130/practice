@@ -1,10 +1,16 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">Carrot And Stick</string>
     <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
-    <!--
-        This is the name that users will see when interacting with this channel.
-        It should describe the category of notifications that will be sent through this channel
-     -->
+
+
+    <string-array name="stepLabels">
+        <item>Approval</item>
+        <item>333</item>
+        <item>222</item>
+        <item>111</item>
+        <item>0999</item>
+
+    </string-array>
 
     <string name="default_notification_channel_name" translatable="true">Weather</string>
     <string name="form_hint_title">제목을 입력하세요 (필수)</string>
@@ -54,5 +60,10 @@ Doze모드가 길어질 경우 다음 알람이 죽는 문제\n\n
 
 서버 트래픽 효율성 문제\n\n
 
-카카오 User Token 호출량 문제 </string>
+카카오 User Token 호출량 문제 \n\n
+    디테일 액티비티에서 뒤로가면 약속 레이아웃이 사라지는 현상\n\n
+    악성 사용자의 부정결제 방지를 위한 구글 리시트 검증</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

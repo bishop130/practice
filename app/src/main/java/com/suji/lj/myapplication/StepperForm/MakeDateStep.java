@@ -60,7 +60,7 @@ public class MakeDateStep extends Step<String> {
     protected View createStepContentLayout() {
 
         LayoutInflater inflater = LayoutInflater.from(getContext());
-        View view = inflater.inflate(R.layout.date_pick, null, false);
+        View view = inflater.inflate(R.layout.step_date_pick, null, false);
         materialCalendarView = view.findViewById(R.id.material_calendarView);
 
         Calendar min = Calendar.getInstance();

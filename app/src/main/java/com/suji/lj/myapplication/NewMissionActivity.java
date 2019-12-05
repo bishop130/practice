@@ -21,6 +21,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.suji.lj.myapplication.Adapters.DBHelper;
 import com.suji.lj.myapplication.Adapters.LocationService;
+import com.suji.lj.myapplication.StepperForm.MakeAccountStep;
 import com.suji.lj.myapplication.StepperForm.MakeContactStep;
 import com.suji.lj.myapplication.StepperForm.MakeDateStep;
 import com.suji.lj.myapplication.StepperForm.MakeLocationStep;
@@ -42,6 +43,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 import ernestoyaquello.com.verticalstepperform.VerticalStepperFormView;
 import ernestoyaquello.com.verticalstepperform.listener.StepperFormListener;
+import es.dmoral.toasty.Toasty;
 
 public class NewMissionActivity extends AppCompatActivity implements StepperFormListener, DialogInterface.OnClickListener {
 
@@ -51,6 +53,7 @@ public class NewMissionActivity extends AppCompatActivity implements StepperForm
     private MakeTimeStep makeTimeStep;
     private MakeDateStep makeDateStep;
     private MakeContactStep makeContactStep;
+    private MakeAccountStep makeAccountStep;
 
     private VerticalStepperFormView verticalStepperForm;
     private MakeLocationStep makeLocationStep;
@@ -62,6 +65,7 @@ public class NewMissionActivity extends AppCompatActivity implements StepperForm
     public static final String VALIDE_CODE = "777";
     private StringRequest request;
     private static final String goURL = "http://bishop130.cafe24.com/test.php";
+    private static final String consumeURL = "http://bishop130.cafe24.com/consume_coin.php";
     private RequestQueue requestQueue;
     private SimpleDateFormat date_time_db = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.KOREA);
     private SimpleDateFormat date_db = new SimpleDateFormat("yyyy-MM-dd", Locale.KOREA);
@@ -79,6 +83,7 @@ public class NewMissionActivity extends AppCompatActivity implements StepperForm
     String mission_time;
     String address;
     String user_name;
+    int contact_num;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,15 +116,16 @@ public class NewMissionActivity extends AppCompatActivity implements StepperForm
         makeDateStep = new MakeDateStep(stepTitles[2]);
         makeLocationStep = new MakeLocationStep(stepTitles[1]);
         makeContactStep = new MakeContactStep(stepTitles[4]);
+        makeAccountStep = new MakeAccountStep(stepTitles[5]);
 
         verticalStepperForm = findViewById(R.id.stepper_form);
-        verticalStepperForm.setup(this, makeTitle, makeLocationStep, makeDateStep, makeTimeStep, makeContactStep).init();
+        verticalStepperForm.setup(this, makeTitle, makeLocationStep, makeDateStep, makeTimeStep, makeContactStep, makeAccountStep).init();
 
     }
 
     @Override
     public void onCompletedForm() {
-        final Thread dataSavingThread = saveData();
+        //final Thread dataSavingThread = saveData();
         requestQueue = Volley.newRequestQueue(this);
         Log.d("완료 데이터", makeTitle.getStepData());
         mission_time = String.valueOf(makeTimeStep.getStepData().hour) + ":" + String.valueOf(makeTimeStep.getStepData().minutes) + ":00";
@@ -136,28 +142,11 @@ public class NewMissionActivity extends AppCompatActivity implements StepperForm
         contact_json = sharedPreferences.getString("contact_json", "");
         token = sharedPreferences.getString("token", "");
         address = sharedPreferences.getString("address", "");
+        contact_num = sharedPreferences.getInt("contact_num",0);
 
 
-        volleyConnect();
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setCancelable(true);
-        progressDialog.show();
-        progressDialog.setMessage(getString(R.string.form_sending_data_message));
-        progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialogInterface) {
+        alertDialog();
 
-                try {
-                    dataSavingThread.interrupt();
-                } catch (RuntimeException e) {
-
-                    // No need to do anything here
-                } finally {
-
-                    verticalStepperForm.cancelFormCompletionOrCancellationAttempt();
-                }
-            }
-        });
 
     }
 
@@ -168,8 +157,6 @@ public class NewMissionActivity extends AppCompatActivity implements StepperForm
                 insertDB(mission_time, date_array, CurrentTime + userId, lat, lng, makeTitle.getStepData(), userId);
                 setAlarm(mission_time, date_array, CurrentTime + userId, lat, lng, makeTitle.getStepData(), initiate_date);
 
-
-                Toast.makeText(getApplicationContext(), "전송완료" + makeTitle.getStepData(), Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(NewMissionActivity.this, MainActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP|Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
@@ -323,6 +310,8 @@ public class NewMissionActivity extends AppCompatActivity implements StepperForm
         makeLocationStep.isStepDataValid(" ");
         makeContactStep.restoreStepData(" ");
         makeContactStep.isStepDataValid(" ");
+        makeAccountStep.restoreStepData(" ");
+        //makeAccountStep.isStepDataValid(" ");
 
 
     }
@@ -335,7 +324,7 @@ public class NewMissionActivity extends AppCompatActivity implements StepperForm
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.clear();
         editor.apply();
-        editor.commit();
+
     }
 
     @Override
@@ -447,6 +436,80 @@ public class NewMissionActivity extends AppCompatActivity implements StepperForm
         } else {
             startService(service);
         }
+
+    }
+
+    private void alertDialog(){
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("다음 약관에 동의하십니까?");
+        builder.setMessage("새로운 약속을 생성하면, 본 서비스의 과실(서버이상) 이외에 어떠한 사유(배터리 부족, " +
+                "기기 고장, 천재지변 등)로도 취소 및 환불이 되지 않습니다.");
+        builder.setCancelable(false);
+
+        builder.setPositiveButton("동의합니다", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //final Thread dataSavingThread = saveData();
+                //volleyConnect();
+                consumeCoinVolleyConnect();
+                //Toast.makeText(getApplicationContext(),"전송",Toast.LENGTH_LONG).show();
+                Toasty.success(getApplicationContext(),"전송성공",Toasty.LENGTH_LONG,true).show();
+            }
+        });
+        builder.setNegativeButton("동의하지 않습니다", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                verticalStepperForm.cancelFormCompletionOrCancellationAttempt();
+
+            }
+        });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.setCanceledOnTouchOutside(false);
+        alertDialog.show();
+
+    }
+
+    private void consumeCoinVolleyConnect(){
+        request = new StringRequest(Request.Method.POST, consumeURL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.d("코인",response);
+
+                if(response.equals("666")){
+                    //잔액이 부족합니다.
+                    Log.d("코인",response+"들어옴"+contact_num*7);
+                    //Toast.makeText(getApplicationContext(),"코인이 부족합니다.",Toast.LENGTH_LONG).show();
+                    Toasty.warning(getApplicationContext(),"코인이 부족합니다.",Toasty.LENGTH_LONG,true).show();
+                    verticalStepperForm.cancelFormCompletionOrCancellationAttempt();
+                }else{
+                    Log.d("코인",response+"들어오지"+contact_num*7);
+                    volleyConnect();
+                }
+
+
+
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+                Toasty.error(getApplicationContext(),"전송실패",Toasty.LENGTH_LONG,true).show();
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() {
+                HashMap<String, String> hashMap = new HashMap<String, String>();
+                hashMap.put("user_id", userId);
+                hashMap.put("consume_coin",String.valueOf(contact_num*7));
+
+
+                return hashMap;
+            }
+        };
+        requestQueue.add(request);
 
     }
 

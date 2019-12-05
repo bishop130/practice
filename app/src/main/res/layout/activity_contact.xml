@@ -1,53 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
+
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/contact_toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/White"
-        android:elevation="4dp"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
-    <androidx.appcompat.widget.SearchView
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:id="@+id/contact_search"
-        />
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="선택완료"
+            android:textSize="18sp"
+            android:textColor="@color/colorPrimary"
+            android:layout_gravity="right"
+
+            android:layout_marginEnd="12dp"
+            android:padding="12dp"
+
+            android:textStyle="bold"
+            android:id="@+id/contact_confirmed"/>
+
+
+    </androidx.appcompat.widget.Toolbar>
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view_contact_selected"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:scrollbars = "horizontal">
+        android:orientation="horizontal"
+        android:id="@+id/recycler_view_confirmed"/>
 
-    </androidx.recyclerview.widget.RecyclerView>
 
-<RelativeLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/activity_contact">
+        <androidx.appcompat.widget.SearchView
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:id="@+id/contact_search"
+            />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view_contact"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scrollbars="vertical"
-        android:layout_above="@+id/contact_ok"/>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view_contact"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical"
+            android:layout_below="@+id/contact_search"
+            android:splitMotionEvents="false"
+            android:clipToPadding="false"
+            android:paddingBottom="80dp"
+            />
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/contact_ok"
-        android:layout_alignParentBottom="true"
-        android:text="확인"
-        android:textColor="@color/White"
-        android:textSize="20sp"
-        android:background="?attr/colorPrimary"/>
-</RelativeLayout>
+
 
 
 

@@ -1,19 +1,19 @@
-package com.suji.lj.myapplication.Adapters;
+package com.suji.lj.myapplication.Utils;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
-public abstract class PreciseTimer extends Timer {
+public abstract class PreciseCountdown  extends Timer {
     private long totalTime, interval, delay;
     private TimerTask task;
     private long startTime = -1;
     private boolean restart = false, wasCancelled = false, wasStarted = false;
 
-    public PreciseTimer(long totalTime, long interval) {
+    public PreciseCountdown(long totalTime, long interval) {
         this(totalTime, interval, 0);
     }
 
-    public PreciseTimer(long totalTime, long interval, long delay) {
+    public PreciseCountdown(long totalTime, long interval, long delay) {
         super("PreciseCountdown", true);
         this.delay = delay;
         this.interval = interval;

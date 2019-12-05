@@ -36,6 +36,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
+import es.dmoral.toasty.Toasty;
 import io.fabric.sdk.android.Fabric;
 
 import android.util.Base64;
@@ -69,6 +71,7 @@ import com.kakao.network.ErrorResult;
 import com.kakao.util.exception.KakaoException;
 import com.kakao.util.helper.log.Logger;
 import com.squareup.picasso.Picasso;
+import com.suji.lj.myapplication.Utils.Utils;
 
 
 import org.json.JSONArray;
@@ -85,8 +88,6 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
 
 
-    private static final String goURL = "http://bishop130.cafe24.com/Mission_Control.php";
-    private static final String Mission_List_URL = "http://bishop130.cafe24.com/Mission_List.php";
     private static final String refreshDatabaseURL = "http://bishop130.cafe24.com/refreshDB.php";
     private SessionCallback mKakaocallback;
     Toolbar myToolbar;
@@ -94,9 +95,6 @@ public class MainActivity extends AppCompatActivity {
     String[] REQUIRED_PERMISSIONS = {Manifest.permission.ACCESS_FINE_LOCATION, // 카메라
             Manifest.permission.READ_CONTACTS};
     private static final int PERMISSIONS_REQUEST_CODE = 100;
-    DrawerLayout mDrawerLayout;
-    TextView kakao_name_drawer;
-    ImageView profile_image_drawer;
     public static Context mContext;
     private StringRequest request;
     private static final String tokenURL = "http://bishop130.cafe24.com/update_token.php";
@@ -113,19 +111,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         requestQueue = Volley.newRequestQueue(this);
         dbHelper = new DBHelper(MainActivity.this, "alarm_manager.db", null, 5);
-        try {
-            PackageInfo info = getPackageManager().getPackageInfo("com.suji.lj.myapplication", PackageManager.GET_SIGNATURES);
-            for (Signature signature : info.signatures) {
-                MessageDigest md = MessageDigest.getInstance("SHA");
-                md.update(signature.toByteArray());
-                Log.d("KeyHash:", Base64.encodeToString(md.digest(), Base64.DEFAULT));
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
 
+
+        Toasty.Config.getInstance()
+                .setTextSize(14) // optional
+                .apply(); // required
 /*
         byte[] sha1 = {
                 0x58, 0x64, 0x4B, (byte)0xF6, (byte)0x86, 0x44, (byte)0xE5, 0x27, (byte)0xF0, (byte)0xBB, (byte)0xEF, 0x12, 0x4C, (byte)0x9A,(byte)0xDA, (byte)0xA3,         (byte)0xB5, (byte)0xB5, (byte)0x84, (byte)0xBB
@@ -139,83 +129,15 @@ public class MainActivity extends AppCompatActivity {
         deletePastDB();
 
 
-
         mContext = this;
         myToolbar = findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(navigationItemSelectedListener);
-        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new HomeFragment()).commit();
-
-
-        SharedPreferences preferences = getSharedPreferences("alarm_setting_check", MODE_PRIVATE);
-        List<String> date_array = new ArrayList<>();
-
-        Map<String, ?> allEntries = preferences.getAll();
-
-        for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
-            Log.d("맵밸류", entry.getKey() + ": " + entry.getValue().toString());
-            if (Boolean.valueOf(entry.getValue().toString())) {
-                date_array.add(entry.getKey());
-
-            }
-        }
-        for (int i = 0; i < date_array.size(); i++) {
-
-            Log.d("유유", date_array.get(i));
-        }
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new FavoriteFragment()).commit();
 
 
         backPressCloseHandler = new BackPressCloseHandler(this);
-
-        /*
-        mDrawerLayout = findViewById(R.id.drawer_layout);
-
-        NavigationView navigationView = findViewById(R.id.navigation_view);
-
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, mDrawerLayout, myToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        mDrawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
-
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-                menuItem.setChecked(true);
-                mDrawerLayout.closeDrawers();
-
-                int id = menuItem.getItemId();
-                switch (id) {
-                    case R.id.new_mission_make:
-                        Toast.makeText(MainActivity.this, menuItem.getTitle(), Toast.LENGTH_LONG).show();
-                        Intent intent = new Intent(MainActivity.this, NewMissionActivity.class);
-                        startActivity(intent);
-                        break;
-
-                    case R.id.check_last_mission:
-                        Toast.makeText(MainActivity.this, menuItem.getTitle(), Toast.LENGTH_LONG).show();
-                        break;
-
-                    case R.id.setting:
-                        Toast.makeText(MainActivity.this, menuItem.getTitle(), Toast.LENGTH_LONG).show();
-                        Intent intent_setting = new Intent(MainActivity.this, SampleLoginActivity.class);
-                        startActivity(intent_setting);
-                        break;
-
-
-                }
-
-                return true;
-            }
-        });
-
-        View nav_header_view = navigationView.getHeaderView(0);
-
-        kakao_name_drawer = nav_header_view.findViewById(R.id.kakao_name_drawer);
-        profile_image_drawer = nav_header_view.findViewById(R.id.profile_image_drawer);
-        profile_image_drawer.setBackground(new ShapeDrawable(new OvalShape()));
-        profile_image_drawer.setClipToOutline(true);
- */
 
         SharedPreferences.Editor editor = getSharedPreferences("sFile", MODE_PRIVATE).edit();
         editor.clear();
@@ -242,9 +164,6 @@ public class MainActivity extends AppCompatActivity {
                     Fragment selectedFragment = null;
 
                     switch (item.getItemId()) {
-                        case R.id.nav_home:
-                            selectedFragment = new HomeFragment();
-                            break;
                         case R.id.nav_favorite:
                             selectedFragment = new FavoriteFragment();
                             break;
@@ -263,7 +182,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        //return super.onCreateOptionsMenu(menu);
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.toolbar_option, menu);
         return true;
@@ -288,11 +206,10 @@ public class MainActivity extends AppCompatActivity {
                 return true;
                 */
             case R.id.notification_icon:
-                startActivity(new Intent(MainActivity.this, NotificationActivity.class));
+                startActivity(new Intent(MainActivity.this, OpenBankingActivity.class));
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
-                Toast.makeText(getApplicationContext(), "나머지 버튼 클릭됨", Toast.LENGTH_LONG).show();
                 return super.onOptionsItemSelected(item);
 
         }
@@ -303,24 +220,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSessionClosed(ErrorResult errorResult) {
                 //redirectLoginActivity(self);
-                Toast.makeText(getApplicationContext(), "세션닫힘", Toast.LENGTH_LONG).show();
+                //Toast.makeText(getApplicationContext(), "세션닫힘", Toast.LENGTH_LONG).show();
+                Toasty.error(getApplicationContext(), "세셩닫힘", Toast.LENGTH_LONG, true).show();
                 Intent intent = new Intent(MainActivity.this, SampleLoginActivity.class);
                 startActivity(intent);
                 finish();
 
- /*
-                kakao_name_drawer.setText("로그인 해주세요");
-
-                LinearLayout kakao_login = (LinearLayout) dialog.findViewById(R.id.kakao_layout);
-                kakao_login.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Toast.makeText(getApplicationContext(), "로그인 확인좀", Toast.LENGTH_LONG).show();
-
-
-                    }
-                });
-                */
             }
 
             @Override
@@ -339,68 +244,17 @@ public class MainActivity extends AppCompatActivity {
             public void onSuccess(AccessTokenInfoResponse accessTokenInfoResponse) {
                 final String userId = String.valueOf(accessTokenInfoResponse.getUserId());
                 Log.d("토큰확인", String.valueOf(userId));
-
                 SharedPreferences sharedPreferences = getSharedPreferences("Kakao", MODE_PRIVATE);
                 SharedPreferences.Editor kakao_token = sharedPreferences.edit();
                 kakao_token.putString("token", userId);
                 kakao_token.apply();
 
-/*
-                FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(MainActivity.this, new OnSuccessListener<InstanceIdResult>() {
-                    @Override
-                    public void onSuccess(InstanceIdResult instanceIdResult) {
-                        String newToken = instanceIdResult.getToken();
-                        Log.d("newToken", newToken);
-                        SharedPreferences sharedPreferences = getSharedPreferences("token", MODE_PRIVATE);
-                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putString("token", newToken);
-                        editor.apply();
-
-                        updateToken(newToken, userId);
-
-
-                    }
-                });
-                */
-                refreshDatabase(userId);
+                Utils.refreshDatabase(getApplicationContext(),userId);
                 requestProfile();
-                Toast.makeText(getApplicationContext(), "토큰확인 로그인 성공", Toast.LENGTH_LONG).show();
 
-                long expiresInMilis = accessTokenInfoResponse.getExpiresInMillis();
-                Log.d("토큰 만료 됨 ", expiresInMilis + "이후에");
+                Toasty.success(getApplicationContext(),"로그인 성공",Toasty.LENGTH_LONG,true).show();
             }
         });
-    }
-
-    private void updateToken(final String token, final String user_id) {
-
-        request = new StringRequest(Request.Method.POST, tokenURL, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-
-                Log.d("토큰", "전송성공");
-
-
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-                Toast.makeText(getApplicationContext(), "전송실패" + error, Toast.LENGTH_LONG).show();
-            }
-        }) {
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                HashMap<String, String> hashMap = new HashMap<String, String>();
-
-                hashMap.put("token", token);
-                hashMap.put("user_id", user_id);
-
-                return hashMap;
-            }
-        };
-        requestQueue.add(request);
-
     }
 
     private class SessionCallback implements ISessionCallback {
@@ -465,7 +319,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void deletePastDB() {
-        DBHelper dbHelper = new DBHelper(MainActivity.this, "alarm_manager.db", null, 5);
+        //DBHelper dbHelper = new DBHelper(MainActivity.this, "alarm_manager.db", null, 5);
         String sql = "DELETE FROM alarm_table WHERE strftime('%s', date_time) < strftime('%s', datetime('now','localtime'))"; //현재 이전 정보 삭제
         dbHelper.update(sql);
     }
@@ -511,24 +365,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(KakaoTalkProfile talkProfile) {
                 final String nickName = talkProfile.getNickName();
-                final String profileImageURL = talkProfile.getProfileImageUrl();
                 final String thumbnailURL = talkProfile.getThumbnailUrl();
-                final String countryISO = talkProfile.getCountryISO();
 
 
                 SharedPreferences.Editor editor = getSharedPreferences("kakao_profile", MODE_PRIVATE).edit();
                 editor.putString("name", nickName);
                 editor.putString("profile_image", thumbnailURL);
                 editor.apply();
-/*
-                Log.d("카톡프로필", nickName + "\n" + profileImageURL + "\n" + thumbnailURL + "\n" + countryISO);
-                kakao_name_drawer.setText(nickName);
-                Picasso.with(getApplicationContext())
-                        .load(thumbnailURL)
-                        .fit()
-                        .into(profile_image_drawer);
-                        */
-
 
             }
         });
@@ -556,76 +399,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void refreshDatabase(final String user_id) {
-       // SharedPreferences prefs = getSharedPreferences("com.suji.lj", MODE_PRIVATE);
-       // if (prefs.getBoolean("firstrun", true)) {
-            // Do first run stuff here then set 'firstrun' as false
-            // using the following line to edit/commit prefs
-
-
-            request = new StringRequest(Request.Method.POST, refreshDatabaseURL, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-
-                    Log.d("메인", "DB_refresh");
-                    String sql = "DELETE FROM alarm_table";
-                    dbHelper.selectData(sql);
-                    try {
-                        JSONArray jsonArray = new JSONArray(response);
-                        for (int i = 0; i < jsonArray.length(); i++) {
-                            JSONObject jsonObject = jsonArray.getJSONObject(i);
-                            String mission_id = jsonObject.getString("mission_id");
-                            String time = jsonObject.getString("mission_time");
-                            String lat = jsonObject.getString("mission_lat");
-                            String lng = jsonObject.getString("mission_lng");
-                            String title = jsonObject.getString("mission_name");
-                            String date = jsonObject.getString("time");
-                            String date_time = date+" "+time;
-
-                            String query = "INSERT INTO alarm_table VALUES(null,'" + time + "','" + lat + "','" + lng + "','" +
-                                    mission_id + "','" + date + "','" + date_time + "','false','" + title + "','" + user_id + "')";
-                            Log.d("메인", "   lat:" + String.valueOf(lat) + "   " +
-                                    "lng:" + String.valueOf(lng) + "     time:" + time + "     mission_id:" + mission_id + "   " +
-                                    "  date:" + date + "     date+time:" + date_time + "      title:" + title + "       user_id:" + user_id);
-                            dbHelper.insert(query);
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
-
-
-
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-
-                    Toast.makeText(getApplicationContext(), "전송실패" + error, Toast.LENGTH_LONG).show();
-                }
-            }) {
-                @Override
-                protected Map<String, String> getParams() throws AuthFailureError {
-                    HashMap<String, String> hashMap = new HashMap<String, String>();
-                    hashMap.put("user_id", user_id);
-
-                    return hashMap;
-                }
-            };
-            requestQueue.add(request);
-
-
-         //   prefs.edit().putBoolean("firstrun", false).apply();
-
-
-
-    }
 
 
 }
-
-
-
 
 
 

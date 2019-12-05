@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -11,13 +12,20 @@ import android.graphics.Color;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -79,6 +87,8 @@ public class DaumMapActivity extends AppCompatActivity implements MapView.Curren
     int address_founded;
     TextView location_loading;
     ImageView location_loaded;
+    TextView address_confirmed_recycler;
+    RelativeLayout map_layout;
 
 
     @Override
@@ -95,13 +105,14 @@ public class DaumMapActivity extends AppCompatActivity implements MapView.Curren
         mapView.setMapViewEventListener(this);
         location_loading = findViewById(R.id.daum_map_location_loading);
         location_loaded = findViewById(R.id.daum_map_location_loaded);
+        map_layout = findViewById(R.id.map_layout);
+        Toolbar toolbar = (Toolbar)findViewById(R.id.daum_map_toolbar);
+        toolbar.setTitle("장소 선택");
 
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-
-
-        //  setSupportActionBar(toolbar);
-        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        // getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         onAddressSearch();
 
@@ -110,99 +121,39 @@ public class DaumMapActivity extends AppCompatActivity implements MapView.Curren
 
         CardView radius_button = findViewById(R.id.radius);
         radius_button.setOnClickListener(this);
-        Button address_confirmed =  findViewById(R.id.addressConfirmed);//주소확인버튼
-        address_confirmed.setOnClickListener(this);
+        TextView select_completed = findViewById(R.id.address_confirmed_recycler);
+        select_completed.setOnClickListener(this);
     }
 
 
     private void onAddressSearch() {
-        Toolbar toolbar = findViewById(R.id.daum_map_toolbar);
-        toolbar.inflateMenu(R.menu.example_menu);
-
-        final Retrofit retrofit2 = new Retrofit.Builder().
-                addConverterFactory(GsonConverterFactory.create()).
-                baseUrl(KeywordSearch.base).
-                build();
 
 
-        SearchView searchView = (SearchView) toolbar.getMenu().findItem(R.id.action_search).getActionView();
+
+        SearchView searchView = findViewById(R.id.daum_map_search);
+        //SearchView searchView = (SearchView) toolbar.getMenu().findItem(R.id.action_search).getActionView();
+        searchView.setQueryHint("장소,주소 검색..");
+
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(final String query) {
                 mapView.removeAllPOIItems();
                 placeList.clear();
-                KeywordSearch keywordSearch = retrofit2.create(KeywordSearch.class);
-                Call<JsonObject> call = keywordSearch.keywordSearch(KeywordSearch.key, query);
-
-                call.enqueue(new Callback<JsonObject>() {
-                    @Override
-                    public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                        String con = new GsonBuilder().setPrettyPrinting().create().toJson(response.body());
-                        Log.d(TAG, "검색" + con);
-                        try {
-
-                            JSONObject obj = new JSONObject(con);
-                            String check_string = obj.getJSONObject("meta").getString("total_count");
-                            if (Integer.valueOf(check_string) == 0) {
-                                PlaceItem placeItem = new PlaceItem();
-                                placeItem.setPlaceName(query + "(와)과 일치하는 검색결과가 없습니다");
-                                placeList.add(placeItem);
-                            } else {
-                                JSONArray jsonArray = obj.getJSONArray("documents");
-                                for (int i = 0; i < jsonArray.length(); i++) {
-                                    PlaceItem placeItem = new PlaceItem();
-                                    JSONObject object = (JSONObject) jsonArray.get(i);
-                                    if ((object.getString("road_address_name") == null)) {
-                                        placeItem.setRoadAddress(object.getString("address_name"));
-                                        placeItem.setOldAddress(" ");
-
-                                    } else {
-                                        placeItem.setRoadAddress(object.getString("road_address_name"));
-                                        placeItem.setOldAddress(object.getString("address_name"));
-                                    }
-                                    placeItem.setPlaceName(object.getString("place_name"));
-                                    placeItem.setLatitude(object.getDouble("y"));
-                                    placeItem.setLongitude(object.getDouble("x"));
-                                    MapPOIItem customMarker = new MapPOIItem();
-                                    customMarker.setItemName(object.getString("place_name"));
-                                    customMarker.setTag(1);
-                                    customMarker.setMapPoint(MapPoint.mapPointWithGeoCoord(object.getDouble("y"), object.getDouble("x")));
-                                    customMarker.setMarkerType(MapPOIItem.MarkerType.BluePin); // 마커타입을 커스텀 마커로 지정.
-                                    customMarker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin);
+                loadAddress(query);
+                final float scale = getApplicationContext().getResources().getDisplayMetrics().density;
+                int pixels = (int) (300 * scale + 0.5f);
+                map_layout.getLayoutParams().height = pixels;
+                searchView.clearFocus();
 
 
-                                    mapView.addPOIItem(customMarker);
-                                    Log.d("장소", object.getString("place_name"));
-
-
-                                    placeList.add(placeItem);
-
-                                    //  String address = ((JSONObject) tempObj.get("address")).get("address_name").toString();
-
-                                }
-                            }
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                        setupRecyclerView(placeList);
-
-
-                    }
-
-                    @Override
-                    public void onFailure(Call<JsonObject> call, Throwable t) {
-
-                    }
-                });
-
-                return false;
+                return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                return false;
+
+
+                return true;
             }
         });
 
@@ -228,11 +179,10 @@ public class DaumMapActivity extends AppCompatActivity implements MapView.Curren
                     Toast.makeText(getApplicationContext(),"위치정보를 수신중입니다.",Toast.LENGTH_LONG).show();
                 }
                 break;
-
-            case R.id.addressConfirmed:
-
-                CheckTypesTask task = new CheckTypesTask();
-                task.execute();
+            case R.id.address_confirmed_recycler:
+                CheckTypesTask task2 = new CheckTypesTask();
+                task2.execute();
+                break;
 
 
         }
@@ -261,6 +211,7 @@ public class DaumMapActivity extends AppCompatActivity implements MapView.Curren
         checkLocationPermission();
 
     }
+
 
     //oncreate
 
@@ -519,6 +470,87 @@ public class DaumMapActivity extends AppCompatActivity implements MapView.Curren
             super.onPostExecute(result);
         }
     }
+
+    private void loadAddress(String query){
+        final Retrofit retrofit2 = new Retrofit.Builder().
+                addConverterFactory(GsonConverterFactory.create()).
+                baseUrl(KeywordSearch.base).
+                build();
+        KeywordSearch keywordSearch = retrofit2.create(KeywordSearch.class);
+        Call<JsonObject> call = keywordSearch.keywordSearch(KeywordSearch.key, query);
+
+        call.enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                String con = new GsonBuilder().setPrettyPrinting().create().toJson(response.body());
+                Log.d(TAG, "검색" + con);
+                try {
+
+                    JSONObject obj = new JSONObject(con);
+                    String check_string = obj.getJSONObject("meta").getString("total_count");
+                    if (Integer.valueOf(check_string) == 0) {
+                        PlaceItem placeItem = new PlaceItem();
+                        placeItem.setPlaceName(query + "(와)과 일치하는 검색결과가 없습니다");
+                        placeList.add(placeItem);
+                    } else {
+                        JSONArray jsonArray = obj.getJSONArray("documents");
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            PlaceItem placeItem = new PlaceItem();
+                            JSONObject object = (JSONObject) jsonArray.get(i);
+                            if ((object.getString("road_address_name") == null)) {
+                                placeItem.setRoadAddress(object.getString("address_name"));
+                                placeItem.setOldAddress(" ");
+
+                            } else {
+                                placeItem.setRoadAddress(object.getString("road_address_name"));
+                                placeItem.setOldAddress(object.getString("address_name"));
+                            }
+                            placeItem.setPlaceName(object.getString("place_name"));
+                            placeItem.setLatitude(object.getDouble("y"));
+                            placeItem.setLongitude(object.getDouble("x"));
+                            MapPOIItem customMarker = new MapPOIItem();
+                            customMarker.setItemName(object.getString("place_name"));
+                            customMarker.setTag(1);
+                            customMarker.setMapPoint(MapPoint.mapPointWithGeoCoord(object.getDouble("y"), object.getDouble("x")));
+                            customMarker.setMarkerType(MapPOIItem.MarkerType.BluePin); // 마커타입을 커스텀 마커로 지정.
+                            customMarker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin);
+
+
+                            mapView.addPOIItem(customMarker);
+                            Log.d("장소", object.getString("place_name"));
+
+
+                            placeList.add(placeItem);
+
+                            //  String address = ((JSONObject) tempObj.get("address")).get("address_name").toString();
+
+
+
+                        }
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                setupRecyclerView(placeList);
+
+
+            }
+
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+
+                Toast.makeText(getApplicationContext(),"주소를 불러올 수 없습니다.",Toast.LENGTH_LONG).show();
+
+            }
+        });
+
+    }
+
+
+
+
 
 
 

@@ -35,6 +35,8 @@ import java.util.Map;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import es.dmoral.toasty.Toasty;
+
 public class SampleLoginActivity extends AppCompatActivity {
 
     private SessionCallback mKakaocallback;
@@ -128,48 +130,14 @@ public class SampleLoginActivity extends AppCompatActivity {
         @Override
         public void onSessionOpenFailed(KakaoException exception) {
             if(exception != null) {
-                Toast.makeText(SampleLoginActivity.this, "세션실패"+exception.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.d("TAG" , exception.getMessage());
+                //Toast.makeText(SampleLoginActivity.this, "세션실패"+exception.getMessage(), Toast.LENGTH_SHORT).show();
+                Toasty.error(getApplicationContext(),"세션실패",Toasty.LENGTH_LONG,true).show();
             }
         }
     }
     /**
      * 사용자의 상태를 알아 보기 위해 me API 호출을 한다.
      */
-
-    private void requestUpdateProfile() {
-        final Map<String, String> properties = new HashMap<String, String>();
-        properties.put("nickname", "Leo");
-        properties.put("profile_image", "Leo");
-
-        UserManagement.getInstance().requestUpdateProfile(new ApiResponseCallback<Long> () {
-            @Override
-            public void onSuccess(Long userId) {
-                Toast.makeText(SampleLoginActivity.this, "새로받은 userID"+userId, Toast.LENGTH_SHORT).show();
-
-            }
-
-            @Override
-            public void onNotSignedUp() {
-                Toast.makeText(SampleLoginActivity.this, "사인업안됨", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onFailure(ErrorResult errorResult) {
-                String message = "failed to get user info. msg=" + errorResult;
-                Logger.e(message);
-                Toast.makeText(SampleLoginActivity.this, "실패!! "+errorResult, Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onSessionClosed(ErrorResult errorResult) {
-                Toast.makeText(SampleLoginActivity.this, "세션닫힘"+userId, Toast.LENGTH_SHORT).show();
-            }
-
-        }, properties);
-
-        Toast.makeText(SampleLoginActivity.this, "프로퍼티  "+properties, Toast.LENGTH_SHORT).show();
-    }
 
     private void setLayoutText(){
         tv_user_id.setText(userId);
@@ -197,6 +165,7 @@ public class SampleLoginActivity extends AppCompatActivity {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+
 
 
             }

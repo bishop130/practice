@@ -6,12 +6,13 @@
     app:form_last_button_text="@string/add_alarm"
     app:form_circle_background_color="@color/colorPrimary"
     app:form_next_button_background_color="@color/colorPrimary"
-    app:form_next_button_pressed_background_color="@color/colorPrimaryDark"
+    app:form_next_button_pressed_background_color="@color/colorPrimary"
     app:form_display_cancel_button_in_last_step="true"
     app:form_cancel_button_background_color="@android:color/transparent"
     app:form_cancel_button_pressed_background_color="@android:color/transparent"
     app:form_cancel_button_text_color="@color/colorPrimary"
-    app:form_cancel_button_pressed_text_color="@color/colorPrimaryDark">
+    app:form_cancel_button_pressed_text_color="@color/colorPrimary"
+    android:background="@color/wall_paper2">
 
 
 

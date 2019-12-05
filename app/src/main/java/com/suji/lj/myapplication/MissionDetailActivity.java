@@ -18,9 +18,9 @@ import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import com.suji.lj.myapplication.Adapters.DateTimeFormatter;
+import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
+import com.suji.lj.myapplication.Utils.DateTimeFormatter;
 import com.suji.lj.myapplication.Decorators.EventDecorator;
-import com.suji.lj.myapplication.Decorators.SelectorDecorator;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.CalendarMode;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
@@ -34,7 +34,9 @@ import net.daum.mf.map.api.MapView;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.threeten.bp.Instant;
 import org.threeten.bp.LocalDate;
+import org.threeten.bp.ZoneId;
 
 
 import java.text.ParseException;
@@ -44,9 +46,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
-public class MissionDetailActivity extends AppCompatActivity implements MapView.MapViewEventListener, MapView.CurrentLocationEventListener {
+public class MissionDetailActivity extends AppCompatActivity implements MapView.MapViewEventListener, MapView.CurrentLocationEventListener,OnDateSelectedListener {
     MapView mapView;
     MaterialCalendarView materialCalendarView;
     CardView button_location;
@@ -73,7 +74,10 @@ public class MissionDetailActivity extends AppCompatActivity implements MapView.
     TextView mission_date_start;
     TextView mission_date_end;
     TextView penalty_content;
+    TextView mission_time_start;
+    TextView mission_time_end;
     DateTimeFormatter dtf = new DateTimeFormatter();
+    Date initial_date;
 
 
     @Override
@@ -105,8 +109,13 @@ public class MissionDetailActivity extends AppCompatActivity implements MapView.
         mission_date_start = findViewById(R.id.mission_date_start);
         mission_date_end = findViewById(R.id.mission_date_end);
         penalty_content = findViewById(R.id.penalty_content);
+        mission_time_start = findViewById(R.id.mission_time_start);
+        mission_time_end = findViewById(R.id.mission_time_end);
 
 
+
+
+        materialCalendarView.setOnDateChangedListener(this);
         setMaterialCalendarView();
         drawMissionRadius();
         displayContactList();
@@ -172,6 +181,9 @@ public class MissionDetailActivity extends AppCompatActivity implements MapView.
         }
         return super.onOptionsItemSelected(item);
     }
+
+
+
     private void displayPenaltyContent(){
         String user_name = getSharedPreferences("kakao_profile", MODE_PRIVATE).getString("name", "");
         String content = user_name+"님이 '"+mission_title+"' 미션에 실패하셨습니다. 테스트중입니다.";
@@ -199,10 +211,13 @@ public class MissionDetailActivity extends AppCompatActivity implements MapView.
                 min_date = date_arr;
             }
         }
+        initial_date = min_date;
 
         Log.d("date_check_count", String.valueOf(date_count));
         mission_date_start.setText(dtf.dateReadable(min_date));
         mission_date_end.setText(dtf.dateReadable(max_date));
+        mission_time_start.setText(readableTime(mission_time));
+        mission_time_end.setText(readableTime(mission_time));
 
         //holder.range_date.setText(sdf_array.format(min_date) + "~" + sdf_array.format(max_date));
 
@@ -279,19 +294,43 @@ public class MissionDetailActivity extends AppCompatActivity implements MapView.
         materialCalendarView.state().edit()
                 .setCalendarDisplayMode(CalendarMode.MONTHS)
                 .commit();
+        List<String> date_array = Arrays.asList(mission_date_array.split("\\s*,\\s*"));
+        int date_count = 0;
+        Date max_date = dtf.dateParser(date_array.get(0));
+        Date min_date = dtf.dateParser(date_array.get(0));
 
-        final LocalDate localDate = LocalDate.now();
+        for (int i = 0; i < date_array.size(); i++) {
+            String date = date_array.get(i);
+            Log.d("date_check", date);
+            date_count++;
+
+            Date date_arr = dtf.dateParser(date);
+            if (date_arr.getTime() >= max_date.getTime()) {
+                max_date = date_arr;
+            }
+            if (date_arr.getTime() <= min_date.getTime()) {
+                min_date = date_arr;
+            }
+        }
+        initial_date = min_date;
+
+
+        final LocalDate localDate = Instant.ofEpochMilli(initial_date.getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
+
+                //LocalDate.now();
         materialCalendarView.setSelectedDate(localDate);
-        materialCalendarView.addDecorator(new SelectorDecorator(this));
+        materialCalendarView.setCurrentDate(localDate);
+        //materialCalendarView.addDecorator(new SelectorDecorator(this));
+
 
 
 
         try {
 
-            List<String> date_array = Arrays.asList(mission_date_array.split("\\s*,\\s*"));
-            for (int i = 0; i < date_array.size(); i++) {
+            List<String> date_arrays = Arrays.asList(mission_date_array.split("\\s*,\\s*"));
+            for (int i = 0; i < date_arrays.size(); i++) {
 
-                Date date = simpleDateFormat.parse(date_array.get(i));
+                Date date = simpleDateFormat.parse(date_arrays.get(i));
 
 
                 String day = (String) DateFormat.format("d", date); // 20
@@ -404,5 +443,62 @@ public class MissionDetailActivity extends AppCompatActivity implements MapView.
         finish();
     }
 
+    public String readableTime(String time){
+        String mission_time_readable;
+        String minutes;
+        String[] date_array = time.split(":");
+        int hour = Integer.valueOf(date_array[0]);
+        int min = Integer.valueOf(date_array[1]);
+        if (min < 10) {
+            minutes = "0" + String.valueOf(min);
+        } else {
 
+            minutes = String.valueOf(min);
+        }
+
+
+        if (hour == 12) {
+            mission_time_readable = "오후 " + hour + "시 " + minutes + "분";
+            if (min == 0) {
+                mission_time_readable = "오후 " + hour + "시 ";
+            }
+
+        } else if (hour == 0) {
+            mission_time_readable = "오전  12시 " + minutes + "분";
+            if (min == 0) {
+                mission_time_readable = "오후 " + hour + "시 ";
+            }
+        } else {
+            mission_time_readable = ((hour >= 12) ? "오후 " : "오전 ") + hour % 12 + "시 " + minutes + "분";
+            if (min == 0) {
+                mission_time_readable = ((hour >= 12) ? "오후 " : "오전 ") + hour % 12 + "시 ";
+            }
+        }
+        return mission_time_readable;
+
+    }
+
+
+    @Override
+    public void onDateSelected(@NonNull MaterialCalendarView materialCalendarView2, @NonNull CalendarDay calendarDay, boolean b) {
+
+        ArrayList<CalendarDay> selected_date = new ArrayList<>();
+        selected_date.add(calendarDay);
+        //materialCalendarView.invalidateDecorators();
+        if(is_failed.equals("1")){
+            materialCalendarView.addDecorator(new EventDecorator(Color.RED, dates));
+        }else{
+            materialCalendarView.addDecorator(new EventDecorator(Color.YELLOW, dates));
+        }
+        materialCalendarView.addDecorator(new EventDecorator(Color.BLUE, completed_date_array));
+
+
+        Log.d("캘린더","선택");
+        if(b) {
+            Log.d("캘린더","선택");
+            materialCalendarView.addDecorator(new EventDecorator(Color.WHITE, selected_date));
+        }
+
+
+    }
 }

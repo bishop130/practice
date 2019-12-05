@@ -7,61 +7,8 @@
     android:orientation="vertical"
     tools:context=".NotificationActivity">
 
-    <Button
-        android:id="@+id/service_start"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="service_start"
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="16dp" />
-
-    <Button
-        android:id="@+id/service_stop"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="service_stop"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="130dp" />
-    <Button
-        android:id="@+id/service_check"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="service_check"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="130dp" />
-    <Button
-        android:id="@+id/service_alarm"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="service_alarm"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="130dp" />
-    <Button
-        android:id="@+id/service_alarm_stop"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="service_alarm_stop"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="130dp" />
-    <Button
-        android:id="@+id/check_db"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="check_db"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="130dp" />
-    <Button
-    android:id="@+id/check_db2"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="check_db2"
-    tools:layout_editor_absoluteX="0dp"
-    tools:layout_editor_absoluteY="130dp" />
-    <Button
-        android:id="@+id/broadcast_notification"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="notification"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="130dp" />
+   <TextView
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:text="알림 준비중"/>
 </LinearLayout>

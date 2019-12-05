@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.suji.lj.myapplication.ContactActivity;
@@ -16,7 +15,7 @@ import com.suji.lj.myapplication.R;
 public class MakeContactStep extends Step<String> {
 
     private TextView textView;
-    private Button open_contact;
+    private TextView open_contact;
 
 
     public MakeContactStep(String title) {
@@ -76,9 +75,9 @@ public class MakeContactStep extends Step<String> {
     @Override
     protected View createStepContentLayout() {
         LayoutInflater inflater = LayoutInflater.from(getContext());
-        View view = inflater.inflate(R.layout.activity_make_contact, null, false);
-        textView=(TextView)view.findViewById(R.id.contact);
-        open_contact=(Button)view.findViewById(R.id.open_contact);
+        View view = inflater.inflate(R.layout.step_contact, null, false);
+        textView=view.findViewById(R.id.contact);
+        open_contact=view.findViewById(R.id.open_contact);
         open_contact.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

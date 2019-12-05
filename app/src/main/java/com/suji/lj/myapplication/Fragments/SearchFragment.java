@@ -160,12 +160,16 @@ public class SearchFragment extends Fragment {
     @Override
     public void onPause(){
         super.onPause();
-        Log.d("홈프레그","onPause_SearchFragment");
+        Log.d("타이머","onPause_SearchFragment");
         SharedPreferences sharedPreferences = mContext.getSharedPreferences("timer_control",Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean("timer_switch",false);
         editor.apply();
 
+        boolean timer_switch = mContext.getSharedPreferences("timer_control",Context.MODE_PRIVATE).getBoolean("timer_switch",true);
+
+
+        Log.d("타이머"," "+timer_switch);
 
     }
 }

@@ -1,8 +1,6 @@
 package com.suji.lj.myapplication.Adapters;
 
 import android.animation.ObjectAnimator;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -18,7 +16,6 @@ import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -32,12 +29,12 @@ import com.github.aakira.expandablelayout.ExpandableLayout;
 import com.github.aakira.expandablelayout.ExpandableLayoutListenerAdapter;
 import com.github.aakira.expandablelayout.ExpandableLinearLayout;
 import com.github.aakira.expandablelayout.Utils;
+import com.suji.lj.myapplication.Utils.DateTimeFormatter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -89,7 +86,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
                 intent.putExtra("mission_date", mData.get(viewHolder.getAdapterPosition()).getDate());
                 intent.putExtra("mission_success", mData.get(viewHolder.getAdapterPosition()).getSuccess());
                 intent.putExtra("mission_date_time", mData.get(viewHolder.getAdapterPosition()).getDate_time());
-                intent.putExtra("is_failed",mData.get(viewHolder.getAdapterPosition()).getIs_failed());
+                intent.putExtra("is_failed", mData.get(viewHolder.getAdapterPosition()).getIs_failed());
                 mContext.startActivity(intent);
             }
         });
@@ -103,11 +100,11 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
                 intent.putExtra("Longitude", mData.get(viewHolder.getAdapterPosition()).getLongitude());
                 intent.putExtra("mission_time", mData.get(viewHolder.getAdapterPosition()).getMissionTime());
                 intent.putExtra("mission_date_array", mData.get(viewHolder.getAdapterPosition()).getDate_array());
-                intent.putExtra("address",mData.get(viewHolder.getAdapterPosition()).getAddress());
-                intent.putExtra("contact_list",mData.get(viewHolder.getAdapterPosition()).getContact_json());
-                intent.putExtra("completed_dates",mData.get(viewHolder.getAdapterPosition()).getCompleted_dates());
-                intent.putExtra("is_failed",mData.get(viewHolder.getAdapterPosition()).getIs_failed());
-                intent.putExtra("completed",mData.get(viewHolder.getAdapterPosition()).getCompleted());
+                intent.putExtra("address", mData.get(viewHolder.getAdapterPosition()).getAddress());
+                intent.putExtra("contact_list", mData.get(viewHolder.getAdapterPosition()).getContact_json());
+                intent.putExtra("completed_dates", mData.get(viewHolder.getAdapterPosition()).getCompleted_dates());
+                intent.putExtra("is_failed", mData.get(viewHolder.getAdapterPosition()).getIs_failed());
+                intent.putExtra("completed", mData.get(viewHolder.getAdapterPosition()).getCompleted());
 
                 mContext.startActivity(intent);
             }
@@ -121,16 +118,15 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
     public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
 
 
-            holder.tv_missionTitle.setText(mData.get(position).getMissionTitle());
+        holder.tv_missionTitle.setText(mData.get(position).getMissionTitle());
 
-            expandableRecyclerView(holder, position);
-            setMinMaxDate(holder, position);
-            calculateRestTime(holder, position);
-            setMissionTime(holder, position);
-            displayRestDate(holder, position);
-            //displayContacts(holder, position);
-            //Alarm(holder,position);
-
+        expandableRecyclerView(holder, position);
+        setMinMaxDate(holder, position);
+        calculateRestTime(holder, position);
+        setMissionTime(holder, position);
+        displayRestDate(holder, position);
+        //displayContacts(holder, position);
+        //Alarm(holder,position);
 
 
     }
@@ -144,18 +140,27 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
         holder.expandableLayout.setListener(new ExpandableLayoutListenerAdapter() {
             @Override
             public void onPreOpen() {
-                holder.main_wrap.setBackground(ContextCompat.getDrawable(mContext, R.drawable.toggle_rounded));
-                createRotateAnimator(holder.buttonLayout, 0f, 180f).start();
-                expandState.put(position, true);
+                //holder.main_wrap.setBackground(ContextCompat.getDrawable(mContext, R.drawable.toggle_rounded));
+                //createRotateAnimator(holder.buttonLayout, 0f, 180f).start();
+                //expandState.put(position, true);
 
-                /*
-                if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN)
+
+                if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
                     holder.main_wrap.setBackground(mContext.getResources().getDrawable(R.drawable.toggle_rounded));
-                else if(android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP_MR1)
+                    createRotateAnimator(holder.buttonLayout, 0f, 180f).start();
+                    expandState.put(position, true);
+                }
+                else if(android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP_MR1) {
                     holder.main_wrap.setBackground(mContext.getResources().getDrawable(R.drawable.toggle_rounded));
-                else
+                    createRotateAnimator(holder.buttonLayout, 0f, 180f).start();
+                    expandState.put(position, true);
+                }
+                else {
                     holder.main_wrap.setBackground(ContextCompat.getDrawable(mContext, R.drawable.toggle_rounded));
-                    */
+                    createRotateAnimator(holder.buttonLayout, 0f, 180f).start();
+                    expandState.put(position, true);
+                }
+
 
                 Log.d("이거열림", "열림: " + String.valueOf(expandState.get(position)) + "\n포지션" + position);
             }
@@ -169,15 +174,14 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
                     public void run() {
                         try {
                             sleep(50);
-                            holder.main_wrap.setBackground(ContextCompat.getDrawable(mContext, R.drawable.rounded));
-/*
+
                             if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN)
                                 holder.main_wrap.setBackground(mContext.getResources().getDrawable(R.drawable.rounded));
                             else if(android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP_MR1)
                                 holder.main_wrap.setBackground(mContext.getResources().getDrawable(R.drawable.rounded));
                             else
                                 holder.main_wrap.setBackground(ContextCompat.getDrawable(mContext, R.drawable.rounded));
-                            */
+
 
                         } catch (InterruptedException e) {
                             e.printStackTrace();
@@ -353,8 +357,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
         RelativeLayout main_wrap;
         TextView is_today;
         ImageView is_status;
-        PreciseTimer preciseTimer;
-
 
         public ItemViewHolder(View itemView) {
             super(itemView);
@@ -383,13 +385,11 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
 
     private void calculateRestTime(final ItemViewHolder holder, final int position) {
 
-        Date mission_time = dtf.dateTimeParser(mData.get(position).getDate_time());
-        Date current_time = new Date(System.currentTimeMillis());
-        if(mData.get(position).getIs_failed().equals("1")){
+        if (mData.get(position).getIs_failed().equals("1")) {
             holder.tv_missionID.setText("종료");
+
             holder.is_status.setImageResource(R.drawable.fail);
-        }
-        else {
+        } else {
 
             if (!mData.get(position).getSuccess()) {
 
@@ -402,8 +402,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
                     holder.countDownTimer = new CountDownTimer(diff, 5000) {
                         @Override
                         public void onTick(long l) {
-                            boolean timer_switch = mContext.getSharedPreferences("timer_control",Context.MODE_PRIVATE).getBoolean("timer_switch",true);
-                            if(timer_switch) {
+                            boolean timer_switch = mContext.getSharedPreferences("timer_control", Context.MODE_PRIVATE).getBoolean("timer_switch", true);
+                            if (timer_switch) {
                                 long days = TimeUnit.MILLISECONDS.toDays(l);
                                 long remainingHoursInMillis = l - TimeUnit.DAYS.toMillis(days);
                                 long hours = TimeUnit.MILLISECONDS.toHours(remainingHoursInMillis);
@@ -411,20 +411,21 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
                                 long minutes = TimeUnit.MILLISECONDS.toMinutes(remainingMinutesInMillis);
                                 long remainingSecondsInMillis = remainingMinutesInMillis - TimeUnit.MINUTES.toMillis(minutes);
                                 long seconds = TimeUnit.MILLISECONDS.toSeconds(remainingSecondsInMillis);
-                                Log.d("타이머", "position" + position + "   " + holder.getAdapterPosition() + "time:" + l);
+                                Log.d("타이머", "position" + position + "   " + holder.getAdapterPosition() + "time:" + l + " " + timer_switch);
                                 if (days == 0) {
                                     String time = "+ " + hours + "시간 " + minutes + "분";
 
                                     holder.tv_missionID.setText(time);
+
                                     if (l < 2 * 60 * 60 * 1000) { //2시간
                                         holder.is_status.setImageResource(R.drawable.ready_to_check);
                                     }
                                 } else {
                                     String time = "+ " + days + "일 " + hours + "시간 " + minutes + "분";
                                     holder.tv_missionID.setText(time);
+
                                 }
-                            }
-                            else{
+                            } else {
                                 holder.countDownTimer.cancel();
                                 Log.d("타이머", "position 취소");
                             }
@@ -455,8 +456,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
     private static boolean isTomorrow(Date d) {
         return DateUtils.isToday(d.getTime() - DateUtils.DAY_IN_MILLIS);
     }
-
-
 
 
 }

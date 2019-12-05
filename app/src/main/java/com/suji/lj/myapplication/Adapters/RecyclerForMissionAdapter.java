@@ -17,6 +17,7 @@ import com.suji.lj.myapplication.Items.RecyclerItem;
 import com.suji.lj.myapplication.MissionDetailActivity;
 import com.suji.lj.myapplication.R;
 import com.github.aakira.expandablelayout.ExpandableLayout;
+import com.suji.lj.myapplication.Utils.DateTimeFormatter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,6 +41,7 @@ public class RecyclerForMissionAdapter extends RecyclerView.Adapter<RecyclerForM
     private List<RecyclerItem> mData;
     String CDT;
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-M-d", Locale.KOREA);
+    DateTimeFormatter dtf = new DateTimeFormatter();
 
 
     public RecyclerForMissionAdapter(Context mContext, List<RecyclerItem> mData) {
@@ -68,11 +70,11 @@ public class RecyclerForMissionAdapter extends RecyclerView.Adapter<RecyclerForM
                 intent.putExtra("Longitude", mData.get(viewHolder.getAdapterPosition()).getLongitude());
                 intent.putExtra("mission_time", mData.get(viewHolder.getAdapterPosition()).getMissionTime());
                 intent.putExtra("mission_date_array", mData.get(viewHolder.getAdapterPosition()).getDate_array());
-                intent.putExtra("address",mData.get(viewHolder.getAdapterPosition()).getAddress());
-                intent.putExtra("contact_list",mData.get(viewHolder.getAdapterPosition()).getContact_json());
-                intent.putExtra("completed_dates",mData.get(viewHolder.getAdapterPosition()).getCompleted_dates());
-                intent.putExtra("is_failed",mData.get(viewHolder.getAdapterPosition()).getIs_failed());
-                intent.putExtra("completed",mData.get(viewHolder.getAdapterPosition()).getCompleted());
+                intent.putExtra("address", mData.get(viewHolder.getAdapterPosition()).getAddress());
+                intent.putExtra("contact_list", mData.get(viewHolder.getAdapterPosition()).getContact_json());
+                intent.putExtra("completed_dates", mData.get(viewHolder.getAdapterPosition()).getCompleted_dates());
+                intent.putExtra("is_failed", mData.get(viewHolder.getAdapterPosition()).getIs_failed());
+                intent.putExtra("completed", mData.get(viewHolder.getAdapterPosition()).getCompleted());
 
                 mContext.startActivity(intent);
             }
@@ -93,22 +95,25 @@ public class RecyclerForMissionAdapter extends RecyclerView.Adapter<RecyclerForM
         //displayRestDate(holder, position);
         //displayContacts(holder, position);
         displayRegisteredDate(holder, position);
-        displayState(holder,position);
+        displayState(holder, position);
 
 
     }
-    private void displayState(ItemViewHolder holder, int position){
+
+    private void displayState(ItemViewHolder holder, int position) {
         int total_dates = Integer.valueOf(mData.get(position).getTotal_dates());
-      int completed_dates = Integer.valueOf(mData.get(position).getCompleted());
-        if(total_dates==completed_dates){
+        int completed_dates = Integer.valueOf(mData.get(position).getCompleted());
+        if (total_dates == completed_dates) {
             holder.mission_state.setImageResource(R.drawable.checked_icon);
-        }else if(mData.get(position).getIs_failed().equals("1")){
+        } else if (mData.get(position).getIs_failed().equals("1")) {
             holder.mission_state.setImageResource(R.drawable.fail);
 
         }
+        else{
+            holder.mission_state.setImageResource(R.drawable.ready_to_check);
+        }
 
     }
-
 
 
     private void displayRegisteredDate(ItemViewHolder holder, int position) {
@@ -132,36 +137,27 @@ public class RecyclerForMissionAdapter extends RecyclerView.Adapter<RecyclerForM
     }
 
     private void setMinMaxDate(final ItemViewHolder holder, final int position) {
-        String array = mData.get(position).getDate_array();
 
-
-        List<String> date_array = Arrays.asList(array.split("\\s*,\\s*"));
-
-        SimpleDateFormat sdf_array = new SimpleDateFormat("yyyy-MM-dd", Locale.KOREA);
+        List<String> date_array = Arrays.asList(mData.get(position).getDate_array().split("\\s*,\\s*"));
         int date_count = 0;
-        long now = System.currentTimeMillis();
-        Date max_date = new Date(now);
-        String str = sdf_array.format(max_date);
-        Date min_date = new Date(now);
-        try {
-            max_date = sdf_array.parse(str);
-            min_date = sdf_array.parse(str);
-            for (int i = 0; i < date_array.size(); i++) {
-                String date = date_array.get(i);
-                Log.d("date_check", date);
-                date_count++;
+        Date max_date = dtf.dateParser(date_array.get(0));
+        Date min_date = dtf.dateParser(date_array.get(0));
 
-                Date date_arr = sdf_array.parse(date);
-                if (date_arr.getTime() >= max_date.getTime()) {
-                    max_date = date_arr;
-                }
-                if (date_arr.getTime() <= min_date.getTime()) {
-                    min_date = date_arr;
-                }
+
+        for (int i = 0; i < date_array.size(); i++) {
+            String date = date_array.get(i);
+            date_count++;
+            Date date_arr = dtf.dateParser(date);
+
+            //Date date_arr = sdf_array.parse(date);
+            if (date_arr.getTime() >= max_date.getTime()) {
+                max_date = date_arr;
             }
-        } catch (Exception e) {
-
+            if (date_arr.getTime() <= min_date.getTime()) {
+                min_date = date_arr;
+            }
         }
+
         String min_day = (String) DateFormat.format("d", min_date); // 20
         String min_month = (String) DateFormat.format("M", min_date); // 6
         String min_year = (String) DateFormat.format("yyyy", min_date); // 2013
@@ -169,7 +165,7 @@ public class RecyclerForMissionAdapter extends RecyclerView.Adapter<RecyclerForM
         String max_month = (String) DateFormat.format("M", max_date); // 6
         String max_year = (String) DateFormat.format("yyyy", max_date); // 2013
 
-        holder.range_date_total.setText(min_month+"."+min_day + " ~ " + max_month+"."+max_day);
+        holder.range_date_total.setText(min_month + "." + min_day + " ~ " + max_month + "." + max_day);
 
 
     }
@@ -242,7 +238,7 @@ public class RecyclerForMissionAdapter extends RecyclerView.Adapter<RecyclerForM
         relativeParams.width = pixel;
         holder.progress_bar_date.setLayoutParams(relativeParams);
         String rest_dates = mData.get(position).getCompleted_dates() + "/" + mData.get(position).getTotal_dates();
-       // holder.range_date.setText(rest_dates);
+        // holder.range_date.setText(rest_dates);
 
 
     }
@@ -276,13 +272,13 @@ public class RecyclerForMissionAdapter extends RecyclerView.Adapter<RecyclerForM
             super(itemView);
             view_container = itemView.findViewById(R.id.container_total);
             mission_title_total = itemView.findViewById(R.id.mission_title_total);
-            tv_missionID =itemView.findViewById(R.id.tv_missionID);
+            tv_missionID = itemView.findViewById(R.id.tv_missionID);
             buttonLayout = itemView.findViewById(R.id.button);
             tv_mission_time = itemView.findViewById(R.id.mission_time);
-            button_to_detail =  itemView.findViewById(R.id.button_to_detail);
-            progress_bar_date =  itemView.findViewById(R.id.progress_bar_date);
-            range_date_total =  itemView.findViewById(R.id.range_date_total);
-            main_wrap =  itemView.findViewById(R.id.main_wrap);
+            button_to_detail = itemView.findViewById(R.id.button_to_detail);
+            progress_bar_date = itemView.findViewById(R.id.progress_bar_date);
+            range_date_total = itemView.findViewById(R.id.range_date_total);
+            main_wrap = itemView.findViewById(R.id.main_wrap);
             mission_state = itemView.findViewById(R.id.mission_state);
 
 

@@ -25,6 +25,7 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import com.suji.lj.myapplication.Adapters.LocationService;
+import com.suji.lj.myapplication.Utils.Utils;
 
 public class AutoLocationSetting extends AppCompatActivity {
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
@@ -35,6 +36,8 @@ public class AutoLocationSetting extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_auto_location_setting);
         auto_register_location_switch = findViewById(R.id.auto_register_location_switch);
+
+
 
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         Log.d("power","power" +powerManager.isPowerSaveMode());

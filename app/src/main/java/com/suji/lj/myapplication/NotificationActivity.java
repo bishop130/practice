@@ -44,14 +44,7 @@ public class NotificationActivity extends AppCompatActivity {
         toolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(toolbar);
 
-        Button service_start = findViewById(R.id.service_start);
-        Button service_stop = findViewById(R.id.service_stop);
-        Button service_check = findViewById(R.id.service_check);
-        Button service_alarm = findViewById(R.id.service_alarm);
-        Button service_alarm_stop = findViewById(R.id.service_alarm_stop);
-        Button check_db = findViewById(R.id.check_db);
-        Button check_db2 = findViewById(R.id.check_db2);
-        Button broadcast_notification = findViewById(R.id.broadcast_notification);
+
 /*
         service_start.setOnClickListener(new View.OnClickListener() {
             @Override

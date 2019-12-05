@@ -1,0 +1,419 @@
+package com.suji.lj.myapplication.Utils;
+
+import android.app.ActivityManager;
+import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
+import android.text.format.DateUtils;
+import android.util.Base64;
+import android.util.Log;
+import android.widget.Toast;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.github.tamir7.contacts.Contact;
+import com.github.tamir7.contacts.Contacts;
+import com.github.tamir7.contacts.Query;
+import com.google.gson.GsonBuilder;
+import com.kakao.usermgmt.response.model.User;
+import com.suji.lj.myapplication.Adapters.DBHelper;
+import com.suji.lj.myapplication.Items.ContactItem;
+import com.suji.lj.myapplication.Items.UserAccountItem;
+import com.suji.lj.myapplication.MainActivity;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.StringTokenizer;
+
+public class Utils {
+
+    public Utils(){
+
+    }
+    public static String getParamValFromUrlString(String url, String paramKey){
+
+        Log.d("## url", url);
+        String[] urlParamPair = url.split("\\?");
+        if(urlParamPair.length < 2){
+            Log.d("##", "파라미터가 존재하지 않는 URL 입니다.");
+            return "";
+        }
+        String queryString = urlParamPair[1];
+        Log.d("## queryString", queryString);
+        StringTokenizer st = new StringTokenizer(queryString, "&");
+        while(st.hasMoreTokens()){
+            String pair = st.nextToken();
+            Log.d("## pair", pair);
+            String[] pairArr = pair.split("=");
+            if(paramKey.equals(pairArr[0])){
+                return pairArr[1]; // 찾았을 경우
+            }
+        }
+        return "";
+    }
+
+
+    public ArrayList<ContactItem> getContacts(){
+        ArrayList<ContactItem> listItem = new ArrayList<>();
+        Query q = Contacts.getQuery();
+        q.include(Contact.Field.ContactId, Contact.Field.DisplayName, Contact.Field.PhoneNumber);
+        List<Contact> result = q.find();
+
+        try {
+            String con = new GsonBuilder().setPrettyPrinting().create().toJson(result);
+            Log.d("연락처",con);
+            JSONArray jsonArr = new JSONArray(con);
+            for (int i = 0; i < jsonArr.length(); i++) {
+
+                JSONObject object = jsonArr.getJSONObject(i);
+                ContactItem contactItem = new ContactItem();
+                contactItem.setDisplayName(object.getString("displayName"));
+
+                JSONArray jsonArr2 = object.getJSONArray("phoneNumbers");
+
+                for (int j = 0; j < jsonArr2.length(); j++) {
+                    JSONObject object2 = jsonArr2.getJSONObject(j);
+                    contactItem.setPhoneNumbers(object2.getString("number"));
+
+                }
+                listItem.add(contactItem);
+            }
+            //setupRecyclerView(listItem);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return listItem;
+    }
+
+    public static String getValueFromJson(String jsonStr, String key) {
+        try {
+            JSONObject jsonObject = new JSONObject(jsonStr);
+            return jsonObject.getString(key);
+        } catch (JSONException e) {
+            //Timber.d(key + " 값이 없음");
+            return "";
+        }
+    }
+
+    public static String getCurrentTime() {
+        return new SimpleDateFormat("yyyyMMddHHmmss", Locale.KOREA).format(new Date());
+    }
+    public static String makeBankTranId(){
+
+        return getServiceCode()+"U"+ new SimpleDateFormat("HHmmssSSS",Locale.KOREA).format(new Date());
+
+
+    }
+
+    public static String getServiceCode(){
+
+
+        String service_code;
+        service_code = "111";
+        return service_code;
+
+
+
+    }
+
+    public static List<UserAccountItem> UserInfoResponseJsonParse(String body){
+        List<UserAccountItem> userAccountItemList = new ArrayList<>();
+        Log.d("오픈뱅킹","리스트만들기 ");
+
+        try {
+            JSONObject obj = new JSONObject(body);
+            JSONArray jsonArray = obj.getJSONArray("res_list");
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject object = (JSONObject) jsonArray.get(i);
+                UserAccountItem userAccountItem = new UserAccountItem();
+                userAccountItem.setApi_tran_id(obj.getString("api_tran_id"));
+                userAccountItem.setApi_tran_dtm(obj.getString("api_tran_dtm"));
+                userAccountItem.setRsp_code(obj.getString("rsp_code"));
+                userAccountItem.setRsp_message(obj.getString("rsp_message"));
+                userAccountItem.setUser_seq_no(obj.getString("user_seq_no"));
+                userAccountItem.setUser_ci(obj.getString("user_ci"));
+                userAccountItem.setUser_name(obj.getString("user_name"));
+                userAccountItem.setRes_cnt(obj.getString("res_cnt"));
+////
+
+
+                userAccountItem.setFintech_use_num(object.getString("fintech_use_num"));
+                userAccountItem.setAccount_alias(object.getString("account_alias"));
+                userAccountItem.setBank_code_std(object.getString("bank_code_std"));
+                userAccountItem.setBank_code_sub(object.getString("bank_code_sub"));
+                userAccountItem.setBank_name(object.getString("bank_name"));
+                //userAccountItem.setAccount_num(object.getString("account_num"));
+                userAccountItem.setAccount_num_masked(object.getString("account_num_masked"));
+                userAccountItem.setAccount_holder_name(object.getString("account_holder_name"));
+                userAccountItem.setAccount_type(object.getString("account_type"));
+                userAccountItem.setInquiry_agree_yn(object.getString("inquiry_agree_yn"));
+                userAccountItem.setInquiry_agree_dtime(object.getString("inquiry_agree_dtime"));
+                userAccountItem.setTransfer_agree_yn(object.getString("transfer_agree_yn"));
+                userAccountItem.setTransfer_agree_dtime(object.getString("transfer_agree_dtime"));
+                userAccountItem.setPayer_num(object.getString("payer_num"));
+
+                userAccountItemList.add(userAccountItem);
+
+            }
+
+
+
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return userAccountItemList;
+
+
+    }
+
+
+    public static String monthDayTime(String date, String time) {
+
+        String mission_time;
+        DateTimeFormatter dtf = new DateTimeFormatter();
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(dtf.dateParser(date));
+        int month = cal.get(Calendar.MONTH) + 1;
+        int day = cal.get(Calendar.DATE);
+        String minutes;
+        String[] date_array = time.split(":");
+        int hour = Integer.valueOf(date_array[0]);
+        int min = Integer.valueOf(date_array[1]);
+        if (min < 10) {
+            minutes = "0" + String.valueOf(min);
+        } else {
+
+            minutes = String.valueOf(min);
+        }
+
+
+        if (hour == 12) {
+            mission_time = "오후\n" + hour + "시 " + minutes + "분";
+            if (min == 0) {
+                mission_time = "오후\n" + hour + "시 ";
+            }
+
+        } else if (hour == 0) {
+            mission_time = "오전\n 12시 " + minutes + "분";
+            if (min == 0) {
+                mission_time = "오후\n" + hour + "시 ";
+            }
+        } else {
+            mission_time = ((hour >= 12) ? "오후\n" : "오전\n") + hour % 12 + "시 " + minutes + "분";
+            if (min == 0) {
+                mission_time = ((hour >= 12) ? "오후\n" : "오전\n") + hour % 12 + "시 ";
+            }
+        }
+
+
+        if (DateUtils.isToday(dtf.dateParser(date).getTime())) {
+            return "오늘 " + mission_time;
+
+        } else if (isTomorrow(dtf.dateParser(date))) {
+            return "내일 " + mission_time;
+
+        } else {
+            return month + "월 " + day + "일 " + mission_time;
+        }
+
+    }
+
+    public static boolean isTomorrow(Date d) {
+        return DateUtils.isToday(d.getTime() - DateUtils.DAY_IN_MILLIS);
+    }
+
+    public static void getKeyHash(Context context){
+        try {
+            PackageInfo info = context.getPackageManager().getPackageInfo("com.suji.lj.myapplication", PackageManager.GET_SIGNATURES);
+            for (Signature signature : info.signatures) {
+                MessageDigest md = MessageDigest.getInstance("SHA");
+                md.update(signature.toByteArray());
+                Log.d("KeyHash:", Base64.encodeToString(md.digest(), Base64.DEFAULT));
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public static void volleyConnection(Context context, HashMap<String,String> hashMap, VolleyResponseListener listener) {
+        RequestQueue requestQueue = Volley.newRequestQueue(context);
+        StringRequest request;
+        String getURL = "http://bishop130.cafe24.com/Mission_List.php";
+
+        request = new StringRequest(Request.Method.POST, getURL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+
+                Log.d("서비스", "전송성공");
+                listener.onResponse(response);
+
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                listener.onError(error.toString());
+
+                Toast.makeText(context, "전송실패" + error, Toast.LENGTH_LONG).show();
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                //HashMap<String, String> hashMap = new HashMap<String, String>();
+
+               // hashMap.put("token", token);
+               // hashMap.put("user_id", user_id);
+
+                return hashMap;
+            }
+        };
+        requestQueue.add(request);
+
+
+    }
+    public interface VolleyResponseListener {
+        void onError(String message);
+
+        void onResponse(Object response);
+    }
+
+
+    public static Map<String, Object> jsonToMap(JSONObject json) throws JSONException {
+        Map<String, Object> retMap = new HashMap<String, Object>();
+
+        if(json != JSONObject.NULL) {
+            retMap = toMap(json);
+        }
+        return retMap;
+    }
+
+    public static Map<String, Object> toMap(JSONObject object) throws JSONException {
+        Map<String, Object> map = new HashMap<String, Object>();
+
+        Iterator<String> keysItr = object.keys();
+        while(keysItr.hasNext()) {
+            String key = keysItr.next();
+            Object value = object.get(key);
+
+            if(value instanceof JSONArray) {
+                value = toList((JSONArray) value);
+            }
+
+            else if(value instanceof JSONObject) {
+                value = toMap((JSONObject) value);
+            }
+            map.put(key, value);
+        }
+        return map;
+    }
+
+    public static List<Object> toList(JSONArray array) throws JSONException {
+        List<Object> list = new ArrayList<Object>();
+        for(int i = 0; i < array.length(); i++) {
+            Object value = array.get(i);
+            if(value instanceof JSONArray) {
+                value = toList((JSONArray) value);
+            }
+
+            else if(value instanceof JSONObject) {
+                value = toMap((JSONObject) value);
+            }
+            list.add(value);
+        }
+        return list;
+    }
+
+    public static boolean isServiceRunningInForeground(Context context, Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                if (service.foreground) {
+                    return true;
+                }
+
+            }
+        }
+        return false;
+    }
+
+
+    public static void refreshDatabase(Context context, final String user_id) {
+        RequestQueue requestQueue = Volley.newRequestQueue(context);
+        String refreshDatabaseURL = "http://bishop130.cafe24.com/refreshDB.php";
+
+        DBHelper dbHelper = new DBHelper(context, "alarm_manager.db", null, 5);
+        StringRequest request = new StringRequest(Request.Method.POST, refreshDatabaseURL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+
+                Log.d("메인", "DB_refresh");
+                String sql = "DELETE FROM alarm_table";
+                dbHelper.selectData(sql);
+                try {
+                    JSONArray jsonArray = new JSONArray(response);
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+                        String mission_id = jsonObject.getString("mission_id");
+                        String time = jsonObject.getString("mission_time");
+                        String lat = jsonObject.getString("mission_lat");
+                        String lng = jsonObject.getString("mission_lng");
+                        String title = jsonObject.getString("mission_name");
+                        String date = jsonObject.getString("time");
+                        String date_time = date + " " + time;
+
+                        String query = "INSERT INTO alarm_table VALUES(null,'" + time + "','" + lat + "','" + lng + "','" +
+                                mission_id + "','" + date + "','" + date_time + "','false','" + title + "','" + user_id + "')";
+                        Log.d("메인", "   lat:" + String.valueOf(lat) + "   " +
+                                "lng:" + String.valueOf(lng) + "     time:" + time + "     mission_id:" + mission_id + "   " +
+                                "  date:" + date + "     date+time:" + date_time + "      title:" + title + "       user_id:" + user_id);
+                        dbHelper.insert(query);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+                //Toast.makeText(context, "전송실패" + error, Toast.LENGTH_LONG).show();
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                HashMap<String, String> hashMap = new HashMap<String, String>();
+                hashMap.put("user_id", user_id);
+
+                return hashMap;
+            }
+        };
+        requestQueue.add(request);
+
+    }
+}

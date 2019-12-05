@@ -17,7 +17,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -26,8 +25,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.suji.lj.myapplication.Adapters.DBHelper;
-import com.suji.lj.myapplication.Adapters.DateTimeFormatter;
-import com.suji.lj.myapplication.Adapters.PreciseTimer;
+import com.suji.lj.myapplication.Utils.DateTimeFormatter;
 import com.suji.lj.myapplication.Adapters.RecyclerViewDivider;
 import com.suji.lj.myapplication.NewMissionActivity;
 import com.suji.lj.myapplication.R;
@@ -51,6 +49,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import es.dmoral.toasty.Toasty;
+
 public class HomeFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
     private static final String Mission_List_URL = "http://bishop130.cafe24.com/Mission_List.php";
@@ -63,7 +63,6 @@ public class HomeFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private DateTimeFormatter dtf = new DateTimeFormatter();
     private SwipeRefreshLayout srl;
     RecyclerAdapter recyclerAdapter;
-    PreciseTimer preciseTimer;
     private DBHelper dbHelper;
 
     @Nullable
@@ -163,7 +162,8 @@ public class HomeFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(getContext(), "전송실패" + error, Toast.LENGTH_LONG).show();
+                //Toast.makeText(getContext(), "전송실패" + error, Toast.LENGTH_LONG).show();
+                Toasty.error(getContext(),"전송실패",Toasty.LENGTH_LONG,true).show();
             }
         }) {
             @Override
@@ -210,11 +210,12 @@ public class HomeFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                         String date_time = items.get(j) + " " + jsonObject.getString("mission_time");
 
                         Date set_time = dtf.dateTimeParser(date_time);
-                        if ((set_time.getTime() - cur_time.getTime() >= 0) && (set_time.getTime() - cur_time.getTime() <= 24 * 60 * 60 * 1000)) {//24시간
+                        //if ((set_time.getTime() - cur_time.getTime() >= 0) && (set_time.getTime() - cur_time.getTime() <= 24 * 60 * 60 * 1000)) {//24시간
+                        if (set_time.getTime() - cur_time.getTime() >= 0) {
                             String check = jsonObject.getString("is_failed");
-                            if(check.equals("1")) {
+                            if (check.equals("1")) {
 
-                            }else {
+                            } else {
 
                                 RecyclerItem recyclerItem = new RecyclerItem();
 
@@ -244,10 +245,8 @@ public class HomeFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                                 }
                                 lstRecyclerItem.add(recyclerItem);
                             }
-
                         }
                     }
-
                 }
 
             }
@@ -300,17 +299,18 @@ public class HomeFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         Log.d("홈프레그","onPause");
         SharedPreferences sharedPreferences = mContext.getSharedPreferences("timer_control",Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("timer_switch",false);
         editor.apply();
 
-        editor.putBoolean("timer_switch",false);
+        boolean timer_switch = mContext.getSharedPreferences("timer_control",Context.MODE_PRIVATE).getBoolean("timer_switch",true);
 
+        Log.d("타이머"," "+timer_switch);
     }
     private void deletePastDB(String mission_id) {
         String sql = "DELETE FROM alarm_table WHERE mission_id = '"+mission_id+"'"; //실패한 정보 삭제
         dbHelper.delete(sql);
 
     }
-
 
     @Override
     public void onRefresh() {

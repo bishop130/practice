@@ -6,10 +6,12 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -47,6 +49,7 @@ class StepHelper implements Step.InternalFormStepListener {
     private View lineView2;
     private View stepAndButtonView;
     private View errorMessageContainerView;
+    Context context;
 
     StepHelper(Step.InternalFormStepListener formListener, @NonNull Step step) {
         this(formListener, step, false);
@@ -62,7 +65,7 @@ class StepHelper implements Step.InternalFormStepListener {
         if (step.getEntireStepLayout() == null) {
             formStyle = form.style;
 
-            Context context = form.getContext();
+            context = form.getContext();
             LayoutInflater inflater = LayoutInflater.from(context);
             View stepLayout = inflater.inflate(R.layout.step_layout, parent, false);
 
@@ -79,7 +82,7 @@ class StepHelper implements Step.InternalFormStepListener {
 
     private void setupStepViews(
             final VerticalStepperFormView form,
-            View stepLayout,
+            final View stepLayout,
             final int position,
             boolean isLast) {
 
@@ -153,6 +156,13 @@ class StepHelper implements Step.InternalFormStepListener {
             @Override
             public void onClick(View view) {
                 form.goToStep(position + 1, true);
+                Log.d("지션",position+" ");
+
+                InputMethodManager imm = (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
+                if(position==0) {
+                    imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+                }
+
             }
         });
         cancelButtonView.setOnClickListener(new View.OnClickListener() {
