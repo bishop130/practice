@@ -34,7 +34,7 @@ public class NormalCalendarFragment extends Fragment{
     private MaterialCalendarView materialCalendarView;
     private RadioGroup selection_mode_radio_group;
     List<CalendarDay> calendarDayList = new ArrayList<>();
-    RealmList<DateItem> dateList = new RealmList<DateItem>();
+    RealmList<DateItem> dateList = new RealmList<>();
     OnDateChangedListener onDateChangedListener;
     Realm realm;
 

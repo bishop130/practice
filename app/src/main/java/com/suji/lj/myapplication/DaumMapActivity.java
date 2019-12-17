@@ -199,9 +199,7 @@ public class DaumMapActivity extends AppCompatActivity implements MapView.Curren
                 break;
             case R.id.address_confirmed_recycler:
 
-                Intent intent = new Intent(getApplicationContext(), SingleModeActivity.class);
-                intent.putExtra("address",address );
-                setResult(1,intent);
+
 
                 CheckTypesTask task2 = new CheckTypesTask();
                 task2.execute();
@@ -244,7 +242,10 @@ public class DaumMapActivity extends AppCompatActivity implements MapView.Curren
 
         onFinishReverseGeoCoding(s);
 
-        address = s;
+        Intent intent = new Intent(getApplicationContext(), SingleModeActivity.class);
+        intent.putExtra("address",s );
+        setResult(1,intent);
+
         SharedPreferences sharedPreferences = getSharedPreferences("sFile", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         String lat = String.format("%.6f", Mission_Latitude);

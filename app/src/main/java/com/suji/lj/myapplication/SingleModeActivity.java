@@ -156,7 +156,8 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
                 break;
             case R.id.mission_basic_send:
                 realm.commitTransaction();
-
+                Intent intent = new Intent();
+                setResult(1,intent);
                 finish();
                 break;
 

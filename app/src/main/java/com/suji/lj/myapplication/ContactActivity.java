@@ -2,6 +2,7 @@ package com.suji.lj.myapplication;
 
 import android.Manifest;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -33,12 +34,22 @@ import java.util.ArrayList;
 
 import java.util.List;
 
-public class ContactActivity extends AppCompatActivity {
+public class ContactActivity extends AppCompatActivity implements View.OnClickListener {
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.contact_confirmed:
+                contactSorting();
+                break;
+        }
+
+
+    }
 
     RecyclerViewContactAdapter adapter;
     ContactResponse contactResponse;
     List<ContactItem> listItem;
-    List<ContactItem> selected_item = new ArrayList<>();
+    ArrayList<ContactItem> selected_item = new ArrayList<>();
     Utils utils = new Utils();
     RecyclerView recyclerView;
     RecyclerView confirmed_recycler;
@@ -74,6 +85,8 @@ public class ContactActivity extends AppCompatActivity {
         });
 
 
+        button.setOnClickListener(this);
+        /*
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -127,6 +140,7 @@ public class ContactActivity extends AppCompatActivity {
 
             }
         });
+*/
 
 
         listItem = utils.getContacts();
@@ -267,15 +281,6 @@ public class ContactActivity extends AppCompatActivity {
 
 
     }
-    public void refreshThumb(List<ContactItem> selected,List<ContactItem>original_item){
-
-        Log.d("라니스터","refreshThumb호출");
-        selected_item = selected;
-
-        listItem=original_item;
-        contactResponse.notifyDataSetChanged();
-
-    }
     public void test(ContactItem itemList){
         selected_item.add(itemList);
 
@@ -300,6 +305,22 @@ public class ContactActivity extends AppCompatActivity {
         contactResponse.notifyDataSetChanged();
         adapter.notifyDataSetChanged();
 
+
+
+    }
+    private void contactSorting(){
+        if(selected_item.size()==0){
+            Toast.makeText(getApplicationContext(),"연락처를 선택해주세요",Toast.LENGTH_LONG).show();
+
+        }else {
+
+            Intent intent = new Intent();
+            intent.putParcelableArrayListExtra("contact_list", selected_item);
+            intent.putExtra("test","123");
+            setResult(2, intent);
+            Log.d("미션카트",selected_item.size()+"");
+            finish();
+        }
 
 
     }

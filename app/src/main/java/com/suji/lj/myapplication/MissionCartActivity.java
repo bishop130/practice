@@ -6,12 +6,19 @@ import android.os.Parcel;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.flexbox.AlignItems;
+import com.google.android.flexbox.FlexDirection;
+import com.google.android.flexbox.FlexboxLayoutManager;
+import com.google.android.flexbox.JustifyContent;
+import com.suji.lj.myapplication.Adapters.FlexBoxAdapter;
 import com.suji.lj.myapplication.Adapters.MissionCartListAdapter;
+import com.suji.lj.myapplication.Items.ContactItem;
 import com.suji.lj.myapplication.Items.DateItem;
 import com.suji.lj.myapplication.Items.MissionCartItem;
 
@@ -26,11 +33,16 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
 
     RecyclerView recyclerView;
     ArrayList<DateItem> dateItemArrayList = new ArrayList<>();
+    ArrayList<ContactItem> contactItemArrayList = new ArrayList<>();
     List<MissionCartItem> missionCartItemList = new ArrayList<>();
+    MissionCartListAdapter missionCartListAdapter;
     String title;
     Realm realm;
-    ImageView add_mission;
-    ImageView delete_mission;
+    LinearLayout add_mission;
+    LinearLayout add_contact;
+    RecyclerView contact_recyclerView;
+    FlexBoxAdapter flexBoxAdapter;
+
 
 
     @Override
@@ -40,9 +52,10 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
 
 
         add_mission = findViewById(R.id.add_mission);
-        delete_mission = findViewById(R.id.delete_mission);
+        add_contact = findViewById(R.id.add_contact);
+        contact_recyclerView = findViewById(R.id.contact_recyclerView);
         add_mission.setOnClickListener(this);
-        delete_mission.setOnClickListener(this);
+        add_contact.setOnClickListener(this);
 
 
 
@@ -83,6 +96,7 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
 
 //         Log.d("리절트",dateItemArrayList.get(0).getYear()+"");
          setRecyclerView(missionCartItemList);
+         setContactRecyclerView(contactItemArrayList);
 
 
     }
@@ -90,7 +104,7 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
     public void setRecyclerView(List<MissionCartItem> missionCartItemList){
 
 
-        MissionCartListAdapter missionCartListAdapter = new MissionCartListAdapter(this,missionCartItemList);
+        missionCartListAdapter = new MissionCartListAdapter(this,missionCartItemList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(missionCartListAdapter);
 
@@ -111,7 +125,7 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
     private void addMission(){
 
         Intent intent = new Intent(this,SingleModeActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent,1);
 
     }
     private void registerSend(){
@@ -129,10 +143,9 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
         switch(v.getId()){
             case R.id.add_mission:
                 addMission();
-
                 break;
-            case R.id.delete_mission:
-                deleteMission();
+            case R.id.add_contact:
+                startActivityForResult(new Intent(this,ContactActivity.class),2);
                 break;
             case R.id.register_send:
                 registerSend();
@@ -140,4 +153,44 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
         }
 
     }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+
+        if(resultCode==2) {
+            Log.d("미션카트", data.getStringExtra("test") + "test");
+
+
+            contactItemArrayList = data.getParcelableArrayListExtra("contact_list");
+            Log.d("미션카트", contactItemArrayList.size() + "result");
+            flexBoxAdapter.notifyDataSetChanged();
+            setContactRecyclerView(contactItemArrayList);
+        }
+        if(resultCode==1){
+
+            missionCartListAdapter.notifyDataSetChanged();
+
+
+        }
+
+
+    }
+
+    private void setContactRecyclerView(ArrayList<ContactItem> contactItemArrayList){
+
+
+        FlexboxLayoutManager layoutManager = new FlexboxLayoutManager(this);
+        layoutManager.setFlexDirection(FlexDirection.ROW);
+        layoutManager.setJustifyContent(JustifyContent.CENTER);
+        layoutManager.setAlignItems(AlignItems.CENTER);
+        contact_recyclerView.setLayoutManager(layoutManager);
+        flexBoxAdapter = new FlexBoxAdapter(this, contactItemArrayList);
+        contact_recyclerView.setAdapter(flexBoxAdapter);
+
+
+    }
+
 }
