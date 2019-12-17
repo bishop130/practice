@@ -159,7 +159,7 @@ public class LocationService extends Service {
     private void makeContentForNotification() {
         Log.d("서비스", "makeContentForNotification");
 //제일 가까운 30분 내 날짜 뽑기
-        String query = "SELECT * FROM alarm_table WHERE strftime('%s', date_time) - strftime('%s', datetime('now','localtime'))<1810 " +
+        String query = "SELECT * FROM alarm_table WHERE strftime('%s', date_time) - strftime('%s', datetime('now','localtime'))<60 " +
                 "AND strftime('%s', date_time) - strftime('%s', datetime('now','localtime'))>0 ORDER BY date_time ASC LIMIT 1";
         alarmItemList.clear();
         alarmItemList = dbHelper.setNextAlarm(query);
@@ -244,7 +244,7 @@ public class LocationService extends Service {
         }
 
         //연속으로 약속이 있을시에 다음 목표를 Foreground에 표시한다. 연속적이라는것은 onLocationChanged가 실행되고있는 동안에 다음 목표시간이 존재할 경우를 말한다.
-        String query = "SELECT * FROM alarm_table WHERE strftime('%s', date_time) - strftime('%s', datetime('now','localtime'))<1810 " +
+        String query = "SELECT * FROM alarm_table WHERE strftime('%s', date_time) - strftime('%s', datetime('now','localtime'))<60 " +
                 "AND strftime('%s', date_time) - strftime('%s', datetime('now','localtime'))>0 "; //30분
         alarmItemList.clear();
         alarmItemList = dbHelper.setNextAlarm(query);
@@ -391,7 +391,7 @@ public class LocationService extends Service {
         long diff = mission_date_time.getTime() - current_date_time.getTime();
         //countDownTimer.cancel();
 
-         preciseCountdown= new PreciseCountdown(diff - 1000 * 60 * 30 + 3000,1000) {
+         preciseCountdown= new PreciseCountdown(diff - 1000 * 60 * 3,1000) {
             @Override
             public void onTick(long timeLeft) {
                 Log.d("서비스", "" + timeLeft);

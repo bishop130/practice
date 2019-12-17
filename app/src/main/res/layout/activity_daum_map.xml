@@ -65,13 +65,20 @@
             android:orientation="vertical">
 
 
+            <LinearLayout
+                android:id="@+id/map_capture_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
             <fragment
                 android:id="@+id/map_view"
                 class="com.google.android.gms.maps.MapFragment"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+
                 android:layout_alignParentStart="true"
                 android:layout_alignParentTop="true" />
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="40dp"

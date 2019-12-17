@@ -7,12 +7,15 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.graphics.Rect;
+import android.opengl.GLException;
+import android.opengl.GLSurfaceView;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -34,6 +37,7 @@ import com.suji.lj.myapplication.Items.PlaceItem;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import com.suji.lj.myapplication.Utils.Utils;
 
 import net.daum.mf.map.api.CameraUpdateFactory;
 import net.daum.mf.map.api.MapCircle;
@@ -47,6 +51,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,6 +62,11 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import javax.microedition.khronos.egl.EGL10;
+import javax.microedition.khronos.egl.EGLContext;
+import javax.microedition.khronos.opengles.GL10;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -89,7 +99,10 @@ public class DaumMapActivity extends AppCompatActivity implements MapView.Curren
     ImageView location_loaded;
     TextView address_confirmed_recycler;
     RelativeLayout map_layout;
-
+    Bitmap bm;
+    LinearLayout map_capture_layout;
+    LinearLayout daum_map_loot_view;
+    String address;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +110,9 @@ public class DaumMapActivity extends AppCompatActivity implements MapView.Curren
         setContentView(R.layout.activity_daum_map);
         placeList = new ArrayList<>();
         mContext = this;
+
+
+
 
         recyclerView = findViewById(R.id.place_recycler);
         mapView = new MapView(this);
@@ -106,6 +122,8 @@ public class DaumMapActivity extends AppCompatActivity implements MapView.Curren
         location_loading = findViewById(R.id.daum_map_location_loading);
         location_loaded = findViewById(R.id.daum_map_location_loaded);
         map_layout = findViewById(R.id.map_layout);
+        map_capture_layout = findViewById(R.id.map_capture_layout);
+        daum_map_loot_view = findViewById(R.id.daum_map_loot_view);
         Toolbar toolbar = (Toolbar)findViewById(R.id.daum_map_toolbar);
         toolbar.setTitle("장소 선택");
 
@@ -180,6 +198,11 @@ public class DaumMapActivity extends AppCompatActivity implements MapView.Curren
                 }
                 break;
             case R.id.address_confirmed_recycler:
+
+                Intent intent = new Intent(getApplicationContext(), SingleModeActivity.class);
+                intent.putExtra("address",address );
+                setResult(1,intent);
+
                 CheckTypesTask task2 = new CheckTypesTask();
                 task2.execute();
                 break;
@@ -221,6 +244,7 @@ public class DaumMapActivity extends AppCompatActivity implements MapView.Curren
 
         onFinishReverseGeoCoding(s);
 
+        address = s;
         SharedPreferences sharedPreferences = getSharedPreferences("sFile", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         String lat = String.format("%.6f", Mission_Latitude);
@@ -441,6 +465,8 @@ public class DaumMapActivity extends AppCompatActivity implements MapView.Curren
             mapReverseGeoCoder = new MapReverseGeoCoder("7ff2c8cb39b23bad249dc2f805898a69", mapView.getMapCenterPoint(), DaumMapActivity.this, DaumMapActivity.this);
             mapReverseGeoCoder.startFindingAddress();
 
+
+
             asyncDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
             asyncDialog.setMessage("로딩중입니다..");
 
@@ -603,6 +629,5 @@ public class DaumMapActivity extends AppCompatActivity implements MapView.Curren
         Call<JsonObject> getAddress(@Header("Authorization") String key, @Query("x") String lon, @Query("y") String lat);
     }
     */
-
 
 }

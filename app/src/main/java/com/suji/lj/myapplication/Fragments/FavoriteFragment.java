@@ -31,6 +31,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.borax12.materialdaterangepicker.date.DatePickerDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.suji.lj.myapplication.Adapters.MainRecyclerAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerViewDivider;
 import com.suji.lj.myapplication.Decorators.EventDecorator;
@@ -162,8 +163,9 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
 
         RecyclerAdapter recyclerAdapter = new RecyclerAdapter(getContext(), lstRecyclerItem);
         recyclerAdapter.notifyDataSetChanged();
+        MainRecyclerAdapter mainRecyclerAdapter = new MainRecyclerAdapter(getContext(),lstRecyclerItem);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(recyclerAdapter);
+        recyclerView.setAdapter(mainRecyclerAdapter);
 
     }
 
@@ -254,7 +256,7 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
                     List<String> completed_dates_item = Arrays.asList(completed_dates_array.split("\\s*,\\s*"));
 
                     for (int j = 0; j < items.size(); j++) {
-                        if (FORMATTER.format(calendarDay.getDate()).equals(items.get(j))) {
+                        //if (FORMATTER.format(calendarDay.getDate()).equals(items.get(j))) {
                             RecyclerItem recyclerItem = new RecyclerItem();
                             for (int k = 0; k < completed_dates_item.size(); k++) {
                                 if (items.get(j).equals(completed_dates_item.get(k))) {
@@ -282,7 +284,7 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
 
 
                         }
-                    }
+                  //  }
                 }
                 Collections.sort(lstRecyclerItem);
                 setupRecyclerView(lstRecyclerItem);

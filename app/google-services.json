@@ -10,7 +10,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:912262880074:android:927931c72c264b7f",
         "android_client_info": {
-          "package_name": "com.suji.lj.myapplication"
+          "package_name": "com.example.lj.myapplication"
         }
       },
       "oauth_client": [
@@ -25,15 +25,50 @@
         }
       ],
       "services": {
-        "analytics_service": {
-          "status": 1
-        },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "912262880074-rlgseojb3ct48ftlgvmairs8trm4ud9r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:912262880074:android:0213ae4b4791b2f81dbfb3",
+        "android_client_info": {
+          "package_name": "com.suji.lj.myapplication"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "912262880074-n4tugp2gpdghg1bnevqqn44jjb272kv6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.suji.lj.myapplication",
+            "certificate_hash": "4139fefb804a289f096bf878449cf902212dc264"
+          }
         },
-        "ads_service": {
-          "status": 2
+        {
+          "client_id": "912262880074-rlgseojb3ct48ftlgvmairs8trm4ud9r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDSOLjtE5pyDu4KT-oA_NI5Atc8aySn1RE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "912262880074-rlgseojb3ct48ftlgvmairs8trm4ud9r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

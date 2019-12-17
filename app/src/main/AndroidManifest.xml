@@ -54,6 +54,7 @@
         <activity android:name=".RecyclerActivity" />
         <activity android:name=".RecyclerResultActivity" />
         <activity android:name=".NewMissionActivity" />
+        <activity android:name=".MissionCartActivity"/>
 
         <receiver
             android:name=".Adapters.BroadCastService"

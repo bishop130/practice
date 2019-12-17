@@ -21,13 +21,16 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.suji.lj.myapplication.Adapters.DBHelper;
 import com.suji.lj.myapplication.Adapters.LocationService;
+import com.suji.lj.myapplication.Adapters.OpenBanking;
 import com.suji.lj.myapplication.StepperForm.MakeAccountStep;
 import com.suji.lj.myapplication.StepperForm.MakeContactStep;
 import com.suji.lj.myapplication.StepperForm.MakeDateStep;
 import com.suji.lj.myapplication.StepperForm.MakeLocationStep;
 import com.suji.lj.myapplication.StepperForm.MakeTimeStep;
 import com.suji.lj.myapplication.StepperForm.MakeTitle;
+import com.suji.lj.myapplication.Utils.Utils;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -44,6 +47,8 @@ import androidx.fragment.app.DialogFragment;
 import ernestoyaquello.com.verticalstepperform.VerticalStepperFormView;
 import ernestoyaquello.com.verticalstepperform.listener.StepperFormListener;
 import es.dmoral.toasty.Toasty;
+import okhttp3.Call;
+import okhttp3.Callback;
 
 public class NewMissionActivity extends AppCompatActivity implements StepperFormListener, DialogInterface.OnClickListener {
 
@@ -84,6 +89,22 @@ public class NewMissionActivity extends AppCompatActivity implements StepperForm
     String address;
     String user_name;
     int contact_num;
+
+    OpenBanking openBanking = OpenBanking.getInstance();
+
+    private final Callback transfer_callback = new Callback() {
+        @Override
+        public void onFailure(Call call, IOException e) {
+            //Log.d(TAG, "콜백오류:" + e.getMessage());
+        }
+
+        @Override
+        public void onResponse(Call call, okhttp3.Response response) throws IOException {
+            final String body = response.body().string();
+            Log.d("송금", "서버에서 응답한 Body:" + body);
+
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -144,6 +165,11 @@ public class NewMissionActivity extends AppCompatActivity implements StepperForm
         address = sharedPreferences.getString("address", "");
         contact_num = sharedPreferences.getInt("contact_num",0);
 
+        SharedPreferences open_banking = getSharedPreferences("OpenBanking", MODE_PRIVATE);
+
+
+
+
 
         alertDialog();
 
@@ -157,8 +183,12 @@ public class NewMissionActivity extends AppCompatActivity implements StepperForm
                 insertDB(mission_time, date_array, CurrentTime + userId, lat, lng, makeTitle.getStepData(), userId);
                 setAlarm(mission_time, date_array, CurrentTime + userId, lat, lng, makeTitle.getStepData(), initiate_date);
 
+                openBanking.requestTransfer(transfer_callback,getApplicationContext());
+
+
                 Intent intent = new Intent(NewMissionActivity.this, MainActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
                 startActivity(intent);
 
             }
@@ -184,6 +214,9 @@ public class NewMissionActivity extends AppCompatActivity implements StepperForm
                 hashMap.put("token", token);
                 hashMap.put("address", address);
                 hashMap.put("user_name", user_name);
+                hashMap.put("user_me",getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("user_me",""));
+                hashMap.put("transfer_amount",getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("transfer_amount",""));
+                hashMap.put("bank_tran_id","T991596920U"+ Utils.getCurrentTimeForBankNum());
 
                 return hashMap;
             }

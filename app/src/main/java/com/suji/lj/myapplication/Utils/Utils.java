@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.text.format.DateUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -31,6 +33,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
@@ -128,7 +131,7 @@ public class Utils {
 
 
         String service_code;
-        service_code = "111";
+        service_code = "T991596920";
         return service_code;
 
 
@@ -416,4 +419,26 @@ public class Utils {
         requestQueue.add(request);
 
     }
+
+    public static String getCurrentTimeForBankNum() {
+        return new SimpleDateFormat("HHmmssSSS", Locale.KOREA).format(new Date());
+    }
+
+    public static String getBase64String(Bitmap bitmap)
+    {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+
+        byte[] imageBytes = byteArrayOutputStream.toByteArray();
+
+        return Base64.encodeToString(imageBytes, Base64.NO_WRAP);
+    }
+
+    public static Bitmap getBitmapFromString(String bitmap_string){
+
+        byte[] decodedByteArray = Base64.decode(bitmap_string, Base64.NO_WRAP);
+        return BitmapFactory.decodeByteArray(decodedByteArray, 0, decodedByteArray.length);
+    }
+
 }

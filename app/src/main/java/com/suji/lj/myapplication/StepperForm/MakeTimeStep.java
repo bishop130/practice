@@ -163,7 +163,7 @@ public class MakeTimeStep extends Step<MakeTimeStep.TimeHolder> {
 
                         current_time = date_time.parse(date_time.format(new Date(System.currentTimeMillis())));
                         target_time = date_time.parse(myList.get(i) + " " + stepData.hour + ":" + stepData.minutes + ":0");
-                        if (target_time.getTime() < current_time.getTime() + 1000 * 60 * 30) {  //+1800000
+                        if (target_time.getTime() < current_time.getTime() + 1000 * 60 * 3) {  //+1800000
                             return new IsDataValid(false, "현재시간 기준, 30분뒤 부터 선택할 수 있습니다.");
 
                         } else {

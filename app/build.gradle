@@ -9,6 +9,7 @@ buildscript {
 }
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
+apply plugin: 'realm-android'
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
@@ -90,6 +91,7 @@ dependencies {
     implementation group: project.KAKAO_SDK_GROUP, name: 'kakaotalk', version: project.KAKAO_SDK_VERSION
     implementation group: 'com.kakao.sdk', name: 'usermgmt', version: project.KAKAO_SDK_VERSION
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'com.google.firebase:firebase-database:19.2.0'
     testImplementation 'junit:junit:4.12'
 
     implementation 'com.google.firebase:firebase-messaging:17.3.4'
@@ -105,4 +107,5 @@ dependencies {
 
     implementation 'com.github.bootpay:client_android_java:2.143'
     implementation 'com.github.badoualy:stepper-indicator:1.0.7'
+
 }

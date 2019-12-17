@@ -3,6 +3,7 @@ package com.suji.lj.myapplication;
 import android.Manifest;
 import android.annotation.SuppressLint;
 
+import android.app.Notification;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -206,7 +207,7 @@ public class MainActivity extends AppCompatActivity {
                 return true;
                 */
             case R.id.notification_icon:
-                startActivity(new Intent(MainActivity.this, OpenBankingActivity.class));
+                startActivity(new Intent(MainActivity.this, MissionCartActivity.class));
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.

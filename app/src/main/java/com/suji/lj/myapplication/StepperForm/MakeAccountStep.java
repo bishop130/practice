@@ -25,7 +25,9 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import ernestoyaquello.com.verticalstepperform.Step;
 import okhttp3.Call;
@@ -87,11 +89,16 @@ public class MakeAccountStep extends Step<String> implements TextWatcher{
         public void onResponse(Call call, Response response) throws IOException {
             final String body = response.body().string();
             //Log.d(TAG, "서버에서 응답한 Body:" + body);
+
+            SharedPreferences.Editor editor = getContext().getSharedPreferences("OpenBanking",MODE_PRIVATE).edit();
+            editor.putString("user_me",body);
+            editor.apply();
+
             String rsp_code = Utils.getValueFromJson(body, "rsp_code");
             Log.d("오픈뱅킹","핀테크응답결과 "+ body);
 
-
-            displayBankAccount(body);
+            userAccountItemList = Utils.UserInfoResponseJsonParse(body);
+            displayBankAccount(userAccountItemList);
 
         }
     };
@@ -224,6 +231,10 @@ public class MakeAccountStep extends Step<String> implements TextWatcher{
     protected void onStepClosed(boolean animated) {
         InputMethodManager imm = (InputMethodManager) getContext().getSystemService(INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(et.getWindowToken(), 0);
+        SharedPreferences.Editor editor = getContext().getSharedPreferences("OpenBanking",MODE_PRIVATE).edit();
+        editor.putString("transfer_amount", String.valueOf(contact_num * amount));
+        editor.apply();
+
 
     }
 
@@ -236,8 +247,8 @@ public class MakeAccountStep extends Step<String> implements TextWatcher{
     protected void onStepMarkedAsUncompleted(boolean animated) {
 
     }
-    private void displayBankAccount(String body){
-        userAccountItemList = Utils.UserInfoResponseJsonParse(body);
+    private void displayBankAccount(List<UserAccountItem> userAccountItemList){
+
         String user_name = userAccountItemList.get(0).getUser_name();
         String res_cnt = userAccountItemList.get(0).getRes_cnt();
         String fintech_num = userAccountItemList.get(0).getFintech_use_num();

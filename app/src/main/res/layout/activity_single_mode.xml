@@ -32,13 +32,20 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="@color/divider_line" />
-
-        <EditText
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:id="@+id/mission_basic_inputLayout">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/mission_basic_editText"
             android:layout_marginTop="8dp"
             android:layout_margin="12dp"
             android:hint="제목을 입력하세요"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
 
 
     </LinearLayout>
@@ -64,7 +71,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center">
+            android:layout_gravity="center"
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/single_mode_search_map"
@@ -79,6 +87,10 @@
                 android:layout_marginStart="40dp"
 
                 />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/selected_address"/>
 
         </LinearLayout>
 
@@ -205,61 +217,31 @@
         </LinearLayout>
 
     </LinearLayout>
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+/>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-
-        android:layout_marginTop="16dp"
-        android:background="@color/White"
-        android:orientation="vertical"
-
-        >
+        android:layout_gravity="bottom">
         <TextView
-            android:layout_width="wrap_content"
+            android:id="@+id/mission_basic_send"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="5.벌칙선택"
-            android:textSize="20sp"
-            android:layout_gravity="left"
-            android:layout_margin="8dp"
-            />
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/divider_line" />
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            >
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="친구에게 송금"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="친구에게 선물"/>
+            android:text="다음"
+            android:background="@color/colorPrimary"
+            android:textColor="@color/White"
+            android:textSize="18sp"
+            android:padding="12dp"
+            android:layout_gravity="center"
+            android:gravity="center"/>
 
-        </LinearLayout>
 
     </LinearLayout>
-    <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
 
-        android:layout_margin="16dp"
-        app:cardCornerRadius="8dp"
-        >
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="6.계좌선택"
-            android:textSize="24sp"
-            android:layout_gravity="center"
-            android:layout_margin="8dp"
-            />
 
-    </androidx.cardview.widget.CardView>
 
 
 

@@ -1,5 +1,6 @@
 package com.suji.lj.myapplication;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
@@ -14,24 +15,45 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.suji.lj.myapplication.Adapters.AlarmService;
 import com.suji.lj.myapplication.Adapters.BroadCastAlarm;
 import com.suji.lj.myapplication.Adapters.DBHelper;
 import com.suji.lj.myapplication.Adapters.LocationService;
 import com.suji.lj.myapplication.Adapters.MainDB;
 import com.suji.lj.myapplication.Items.AlarmItem;
+import com.suji.lj.myapplication.Utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class NotificationActivity extends AppCompatActivity {
     Toolbar toolbar;
     DBHelper dbHelper;
     MainDB mainDB;
     private List<AlarmItem> alarmItem = new ArrayList<>();
+    private String goURL = "http://bishop130.cafe24.com/transfer_test.php";
+    StringRequest request;
+    RequestQueue requestQueue;
+
+    DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
+    //DatabaseReference conditionRef = mRootRef.child("users");
 
 
     @Override
@@ -39,10 +61,47 @@ public class NotificationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notification);
 
-        dbHelper = new DBHelper(NotificationActivity.this,"alarm_manager.db",null,5);
-        mainDB= new MainDB(NotificationActivity.this,"main_manager.db",null,1);
-        toolbar = (Toolbar) findViewById(R.id.my_toolbar);
-        setSupportActionBar(toolbar);
+        requestQueue = Volley.newRequestQueue(getApplicationContext());
+        Log.d("송금전",getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("user_me",""));
+        Button button = findViewById(R.id.firebase_test);
+
+        Map<String, User> users = new HashMap<>();
+        users.put("alanisawesome3", new User("June 23, 1912", "Alan Turing"));
+        users.put("gracehop3", new User("December 9, 1906", "Grace Hopper"));
+
+
+
+        volleyConnect();
+
+        mRootRef.child("users").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                //String text = dataSnapshot.getValue(String.class);
+               // Log.d("실시간",text);
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        HashMap<String, Object> result = new HashMap<>();
+        result.put("date_of_birth", "COMPLETED");
+
+        button.setOnClickListener(new View.OnClickListener() {
+
+            String user_id = getSharedPreferences("Kakao", MODE_PRIVATE).getString("token","");
+            @Override
+            public void onClick(View v) {
+               //conditionRef.push().setValue(users);
+               //mRootRef.child("users").child(user_id).setValue(new User("123","345"));
+                mRootRef.child("users_info").child(user_id).updateChildren(result);
+            }
+        });
+
+
 
 
 /*
@@ -171,4 +230,49 @@ public class NotificationActivity extends AppCompatActivity {
         return false;
     }
 
+
+    private void volleyConnect() {
+        request = new StringRequest(Request.Method.POST, goURL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+
+                Log.d("송금",response);
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+                Toast.makeText(getApplicationContext(), "전송실패" + error, Toast.LENGTH_LONG).show();
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() {
+                HashMap<String, String> hashMap = new HashMap<String, String>();
+                hashMap.put("user_me",getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("user_me",""));
+                hashMap.put("transfer_amount",getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("transfer_amount",""));
+                hashMap.put("bank_tran_id","T991596920U"+ Utils.getCurrentTimeForBankNum());
+
+                return hashMap;
+            }
+        };
+        requestQueue.add(request);
+    }
+
+    public static class User {
+
+        public String date_of_birth;
+        public String full_name;
+        public String nickname;
+
+        public User(String dateOfBirth, String fullName) {
+            date_of_birth=dateOfBirth;
+            full_name=fullName;
+        }
+
+        public User(String dateOfBirth, String fullName, String nickname) {
+            // ...
+        }
+
+    }
 }
