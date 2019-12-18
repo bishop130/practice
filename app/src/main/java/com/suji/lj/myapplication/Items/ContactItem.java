@@ -4,7 +4,9 @@ import android.app.Person;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class ContactItem implements Parcelable {
+import io.realm.RealmObject;
+
+public class ContactItem extends RealmObject implements Parcelable {
 
     private String displayName;
     private String phoneNumbers;

@@ -15,7 +15,7 @@
         android:padding="5dp"
         android:text="Nilesh"
         android:textColor="#000"
-        android:textSize="20sp"
-        android:textStyle="bold" />
+        android:textSize="18sp"
+        />
 
 </LinearLayout>

@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.suji.lj.myapplication.ContactActivity;
 import com.suji.lj.myapplication.Items.ContactItem;
 
+import com.suji.lj.myapplication.MissionCartActivity;
 import com.suji.lj.myapplication.R;
 import com.suji.lj.myapplication.Utils.HangulUtils;
 
@@ -34,6 +35,7 @@ public class RecyclerViewContactAdapter extends RecyclerView.Adapter<RecyclerVie
     private Context context;
     private int count = 0;
     private static final int MAX_CONTACTS = 10;
+
 
 
     public RecyclerViewContactAdapter(Context context, List<ContactItem> itemList) {

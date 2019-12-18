@@ -196,7 +196,7 @@
                     android:text="시간제한 설정"/>
 
                 <Switch
-                    android:id="@+id/auto_register_location_switch"
+                    android:id="@+id/no_time_switch"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_gravity="right"
@@ -207,6 +207,10 @@
                     android:textOff="OFF"
                     android:textOn="ON" />
             </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
 
             <TimePicker
@@ -214,8 +218,27 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:timePickerMode="spinner"
+                android:visibility="visible"
                 android:layout_marginTop="16dp"/>
-
+            <TextView
+                android:layout_margin="28dp"
+                android:id="@+id/no_time_limit_tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="@color/colorPrimary"
+                android:visibility="gone"
+                android:text="* 시간제한을 00:00:00 부터 23:59:59 까지 설정합니다."/>
+                <TextView
+                    android:layout_margin="28dp"
+                    android:id="@+id/wrong_time_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="@color/red"
+                    android:visibility="gone"
+                    android:text="* 오늘 현재시각 기준, 30분 후 부터 설정가능합니다."/>
+            </LinearLayout>
 
         </LinearLayout>
 

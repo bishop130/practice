@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -18,14 +19,18 @@ import com.suji.lj.myapplication.R;
 
 import java.util.List;
 
+import io.realm.Realm;
+
 public class MissionCartListAdapter extends RecyclerView.Adapter<MissionCartListAdapter.RecyclerViewContactHolder>  {
     Context context;
     List<MissionCartItem> missionCartItemList;
+    Realm realm;
 
-    public MissionCartListAdapter(Context context , List<MissionCartItem> missionCartItemList){
+    public MissionCartListAdapter(Context context , List<MissionCartItem> missionCartItemList, Realm realm){
 
         this.context = context;
         this.missionCartItemList = missionCartItemList;
+        this.realm = realm;
 
     }
 
@@ -47,6 +52,16 @@ public class MissionCartListAdapter extends RecyclerView.Adapter<MissionCartList
     public void onBindViewHolder(@NonNull RecyclerViewContactHolder holder, int position) {
 
         holder.title.setText(missionCartItemList.get(position).getTitle());
+        holder.delete_item.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                realm.beginTransaction();
+                missionCartItemList.get(position).deleteFromRealm();
+                realm.commitTransaction();
+                notifyItemRemoved(position);
+                notifyItemRangeChanged(position,missionCartItemList.size());
+            }
+        });
 
 
     }
@@ -60,6 +75,7 @@ public class MissionCartListAdapter extends RecyclerView.Adapter<MissionCartList
 
         CheckBox checkBox;
         TextView title;
+        LinearLayout delete_item;
 
 
         public RecyclerViewContactHolder(@NonNull View itemView) {
@@ -67,6 +83,7 @@ public class MissionCartListAdapter extends RecyclerView.Adapter<MissionCartList
 
             checkBox = itemView.findViewById(R.id.mission_cart_list_check_box);
             title = itemView.findViewById(R.id.mission_cart_list_title);
+            delete_item = itemView.findViewById(R.id.delete_item);
 
 
 

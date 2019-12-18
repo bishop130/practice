@@ -22,6 +22,7 @@ import com.suji.lj.myapplication.R;
 import org.threeten.bp.LocalDate;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -46,6 +47,15 @@ public class NormalCalendarFragment extends Fragment{
         // Inflate the layout for this fragment
         materialCalendarView = view.findViewById(R.id.material_calendarView);
         selection_mode_radio_group = view.findViewById(R.id.normal_calendar_radio_group);
+
+
+        materialCalendarView.state().edit()
+                .setMinimumDate(CalendarDay.today())
+                .commit();
+        materialCalendarView.setSelectedDate(CalendarDay.today());
+
+
+
         realm = Realm.getDefaultInstance();
         selection_mode_radio_group.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -62,17 +72,20 @@ public class NormalCalendarFragment extends Fragment{
         materialCalendarView.setOnDateChangedListener(new OnDateSelectedListener() {
             @Override
             public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
+                dateList.clear();
                 calendarDayList = widget.getSelectedDates();
 
                 DateItem dateItem = realm.createObject(DateItem.class);
-                for(int i =0; i<calendarDayList.size(); i++){
-                    dateItem.setYear(calendarDayList.get(i).getYear());
-                    dateItem.setMonth(calendarDayList.get(i).getMonth());
-                    dateItem.setDay(calendarDayList.get(i).getDay());
+
+                    for (int i = 0; i < calendarDayList.size(); i++) {
+                        dateItem.setYear(calendarDayList.get(i).getYear());
+                        dateItem.setMonth(calendarDayList.get(i).getMonth());
+                        dateItem.setDay(calendarDayList.get(i).getDay());
 
 
-                    dateList.add(dateItem);
-                }
+                        dateList.add(dateItem);
+                    }
+
                 onDateChangedListener.onDateChanged(dateList);
 
 

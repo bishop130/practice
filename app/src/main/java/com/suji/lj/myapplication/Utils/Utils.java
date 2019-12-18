@@ -36,6 +36,8 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -439,6 +441,57 @@ public class Utils {
 
         byte[] decodedByteArray = Base64.decode(bitmap_string, Base64.NO_WRAP);
         return BitmapFactory.decodeByteArray(decodedByteArray, 0, decodedByteArray.length);
+    }
+
+    public static boolean compareNowAndInput(int sel_hour, int sel_min){
+
+        long now = System.currentTimeMillis();
+        DateFormat dateFormat = new SimpleDateFormat("HH:mm",Locale.KOREA);
+
+
+        Date date_now = new Date(now);
+
+        try {
+
+            Date date_input = dateFormat.parse(sel_hour+":"+sel_min); //String을 포맷에 맞게 변경
+            long duration = date_now.getTime() - date_input.getTime(); // 현재시간 - 입력시간
+            long min = duration/60000;
+            Log.d("싱글",min+"duration");
+
+            if (min>=30) { // 30분이상 지났을때
+
+               return true;
+            }
+
+        } catch (ParseException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public static boolean checkIsToday(int sel_year, int sel_month, int sel_day){
+
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH)+1;
+        int day = calendar.get(Calendar.DATE);
+        Log.d("싱글",year+"year");
+        Log.d("싱글",month+"month");
+        Log.d("싱글",day+"day");
+        Log.d("싱글",sel_year+"sel_year");
+        Log.d("싱글",sel_month+"ser_month");
+        Log.d("싱글",sel_day+"sel_day");
+
+        if((year==sel_year)&&(month==sel_month)&&(day==sel_day)){
+            return true;
+        }else{
+            return false;
+        }
+
+
+
     }
 
 }
