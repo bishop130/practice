@@ -96,7 +96,7 @@ public class NotificationActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                //conditionRef.push().setValue(users);
-               //mRootRef.child("users").child(user_id).setValue(new User("123","345"));
+                mRootRef.child("users").child(user_id).setValue(new User("123","345"));
                 mRootRef.child("users_info").child(user_id).updateChildren(result);
             }
         });

@@ -116,7 +116,7 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
                 .replace(R.id.fragment_calendar_container, new NormalCalendarFragment())
                 .commit();
 
-        textInputEditText.setText("수정제목");
+        //textInputEditText.setText("수정제목");
         selected_address.setText("수정주소");
         if(Build.VERSION.SDK_INT > 23){
             timePicker.setHour(1);
@@ -161,17 +161,19 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
     }
 
     @Override
-    public void onDateChanged(RealmList<DateItem> dateItemList) {
+    public void onDateChanged(RealmList<DateItem> dateItemList,String minDate,String maxDate) {
 
         int min_position =0;
 
         if (dateItemList.size() == 0) {
 
         } else {//선택한 날짜가 오늘과 같다면
-            min_date = dateItemList.get(dateItemList.size()-1).getMin_date();
+            min_date = minDate;
 
             missionCartItem.setCalendarDayList(dateItemList);
-            Log.d("싱글",min_date + "최소");
+            for(int i =0; i<dateItemList.size(); i++) {
+
+            }
             checkDateTime();
 
 
@@ -237,9 +239,13 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
         Log.d("목장",realm.isInTransaction()+"isInTransaction");
         data.getExtras().getString("key");
         String address = data.getExtras().getString("address");
+        double lat = data.getExtras().getDouble("lat");
+        double lng = data.getExtras().getDouble("lng");
         selected_address.setText(address);
 
         missionCartItem.setAddress(address);
+        missionCartItem.setLat(lat);
+        missionCartItem.setLng(lng);
 
 
 

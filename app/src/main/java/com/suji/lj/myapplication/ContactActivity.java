@@ -34,8 +34,10 @@ import com.suji.lj.myapplication.Utils.Utils;
 import java.util.ArrayList;
 
 import java.util.List;
+import java.util.TreeSet;
 
 import io.realm.Realm;
+import io.realm.RealmResults;
 
 public class ContactActivity extends AppCompatActivity implements View.OnClickListener {
     @Override
@@ -325,15 +327,51 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
 
             Realm realm = Realm.getDefaultInstance();
 
+            RealmResults<ContactItem> realmResults = realm.where(ContactItem.class).findAll();
+
 
             for(int i=0; i<selected_item.size();i++){
-                realm.beginTransaction();
-                ContactItem contactItem = realm.createObject(ContactItem.class);
-                contactItem.setDisplayName(selected_item.get(i).getDisplayName());
-                contactItem.setPhoneNumbers(selected_item.get(i).getPhoneNumbers());
-                contactItem.setPosition(selected_item.get(i).getPosition());
-                contactItem.setSelected(selected_item.get(i).isSelected());
-                realm.commitTransaction();
+
+                Log.d("렐름","선택"+selected_item.get(i).getDisplayName()+"   포지션 : "+selected_item.get(i).getPosition());
+
+                if(realmResults.size()==0){
+                    realm.beginTransaction();
+                    ContactItem contactItem = realm.createObject(ContactItem.class);
+                    contactItem.setDisplayName(selected_item.get(i).getDisplayName());
+                    contactItem.setPhoneNumbers(selected_item.get(i).getPhoneNumbers());
+                    contactItem.setPosition(selected_item.get(i).getPosition());
+                    contactItem.setSelected(selected_item.get(i).isSelected());
+                    realm.commitTransaction();
+
+                }
+
+                for(int j =0; j<realmResults.size(); j++){
+
+                    Log.d("렐름","렐름"+realmResults.get(j).getDisplayName()+"   포지션 : "+realmResults.get(j).getPosition());
+
+
+                    if(!selected_item.get(i).getPhoneNumbers().equals(realmResults.get(j).getPhoneNumbers())){
+                        Log.d("렐름","뭐야.. 같잖아?");
+                        realm.beginTransaction();
+                        ContactItem contactItem = realm.createObject(ContactItem.class);
+                        contactItem.setDisplayName(selected_item.get(i).getDisplayName());
+                        contactItem.setPhoneNumbers(selected_item.get(i).getPhoneNumbers());
+                        contactItem.setPosition(selected_item.get(i).getPosition());
+                        contactItem.setSelected(selected_item.get(i).isSelected());
+                        realm.commitTransaction();
+                        break;
+
+
+
+                    }
+
+
+                }
+
+
+
+
+
             }
 
 

@@ -244,6 +244,8 @@ public class DaumMapActivity extends AppCompatActivity implements MapView.Curren
 
         Intent intent = new Intent(getApplicationContext(), SingleModeActivity.class);
         intent.putExtra("address",s );
+        intent.putExtra("lat",Mission_Latitude);
+        intent.putExtra("lng",Mission_Longitude);
         setResult(1,intent);
 
         SharedPreferences sharedPreferences = getSharedPreferences("sFile", MODE_PRIVATE);

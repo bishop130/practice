@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import android.os.Parcelable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,71 +70,16 @@ public class NormalCalendarFragment extends Fragment{
             }
         });
 
+        calendarDayList = materialCalendarView.getSelectedDates();
+        sortingCalendar(calendarDayList);
+
         materialCalendarView.setOnDateChangedListener(new OnDateSelectedListener() {
             @Override
             public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
-                dateList.clear();
+
                 calendarDayList = widget.getSelectedDates();
 
-                //String max_date_string = max_date.getYear()+"-"+max_date.getMonth()+"-"+max_date.getDate();
-                int maxYear = 0;
-                int maxMonth = 0;
-                int maxDay = 0;
-                int minYear = 2100;
-                int minMonth = 13;
-                int minDay = 40;
-
-                DateItem dateItem = realm.createObject(DateItem.class);
-
-                    for (int i = 0; i < calendarDayList.size(); i++) {
-                        int year = calendarDayList.get(i).getYear();
-                        int month = calendarDayList.get(i).getMonth();
-                        int day = calendarDayList.get(i).getDay();
-                        dateItem.setYear(calendarDayList.get(i).getYear());
-                        dateItem.setMonth(calendarDayList.get(i).getMonth());
-                        dateItem.setDay(calendarDayList.get(i).getDay());
-
-                        if (minYear == year) {
-                            if (minMonth == month) {
-                                if (minDay > day) {
-                                    minDay = day;
-                                }
-                            } else if (minMonth > month) {
-                                minMonth = month;
-                                minDay = day;
-                            }
-                        } else if (minYear > year) {
-                            minYear = year;
-                            minMonth = month;
-                            minDay = day;
-                        }
-                        if (maxYear == year) {
-                            if (maxMonth == month) {
-                                if (maxDay < day) {
-                                    maxDay = day;
-                                }
-                            } else if (maxMonth < month) {
-                                maxMonth = month;
-                                maxDay = day;
-                            }
-                        } else if (maxYear < year) {
-                            maxYear = year;
-                            maxMonth = month;
-                            maxDay = day;
-                        }
-                        String minDate = minYear + "-" + minMonth + "-" + minDay;
-                        String maxDate = maxYear + "-" + maxMonth + "-" + maxDay;
-
-                        if(i==calendarDayList.size()-1) {
-                            dateItem.setMin_date(minDate);
-                            dateItem.setMax_date(maxDate);
-                        }
-
-
-                        dateList.add(dateItem);
-                    }
-
-                onDateChangedListener.onDateChanged(dateList);
+               sortingCalendar(calendarDayList);
 
 
             }
@@ -161,7 +107,7 @@ public class NormalCalendarFragment extends Fragment{
 
     public interface OnDateChangedListener{
 
-        void onDateChanged(RealmList<DateItem> DateItemArrayList);
+        void onDateChanged(RealmList<DateItem> DateItemArrayList,String minDate,String maxDate);
     }
 
     @Override
@@ -178,5 +124,81 @@ public class NormalCalendarFragment extends Fragment{
     public void onDetach() {
         super.onDetach();
         onDateChangedListener = null;
+        dateList.clear();
+    }
+
+    private void sortingCalendar(List<CalendarDay> calendarDayList){
+        //String max_date_string = max_date.getYear()+"-"+max_date.getMonth()+"-"+max_date.getDate();
+        int maxYear = 0;
+        int maxMonth = 0;
+        int maxDay = 0;
+        int minYear = 2100;
+        int minMonth = 13;
+        int minDay = 40;
+        String minDate = "";
+        String maxDate = "";
+
+        Log.d("파베", "날짜갯수"+calendarDayList.size()+"");
+
+        for (int i = 0; i < calendarDayList.size(); i++) {
+
+            DateItem dateItem = realm.createObject(DateItem.class);
+
+            int year = calendarDayList.get(i).getYear();
+            int month = calendarDayList.get(i).getMonth();
+            int day = calendarDayList.get(i).getDay();
+            dateItem.setYear(calendarDayList.get(i).getYear());
+            dateItem.setMonth(calendarDayList.get(i).getMonth());
+            dateItem.setDay(calendarDayList.get(i).getDay());
+
+            if (minYear == year) {
+                if (minMonth == month) {
+                    if (minDay > day) {
+                        minDay = day;
+                    }
+                } else if (minMonth > month) {
+                    minMonth = month;
+                    minDay = day;
+                }
+            } else if (minYear > year) {
+                minYear = year;
+                minMonth = month;
+                minDay = day;
+            }
+            if (maxYear == year) {
+                if (maxMonth == month) {
+                    if (maxDay < day) {
+                        maxDay = day;
+                    }
+                } else if (maxMonth < month) {
+                    maxMonth = month;
+                    maxDay = day;
+                }
+            } else if (maxYear < year) {
+                maxYear = year;
+                maxMonth = month;
+                maxDay = day;
+            }
+            minDate = minYear + "-" + minMonth + "-" + minDay;
+            maxDate = maxYear + "-" + maxMonth + "-" + maxDay;
+
+/*
+            if(i==calendarDayList.size()) {
+                dateItem.setMin_date(minDate);
+                dateItem.setMax_date(maxDate);
+            }
+
+ */
+            dateList.add(dateItem);
+        }
+
+        for(int j=0; j<dateList.size();j++) {
+            Log.d("파베", dateList.get(j).getYear() + "-" + dateList.get(j).getMonth() + "-" + dateList.get(j).getDay());
+        }
+
+        onDateChangedListener.onDateChanged(dateList,minDate,maxDate);
+        dateList.clear();
+
+
     }
 }
