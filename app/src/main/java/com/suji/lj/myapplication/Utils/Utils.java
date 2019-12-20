@@ -445,30 +445,33 @@ public class Utils {
 
     public static boolean compareNowAndInput(int sel_hour, int sel_min){
 
-        long now = System.currentTimeMillis();
         DateFormat dateFormat = new SimpleDateFormat("HH:mm",Locale.KOREA);
 
-
-        Date date_now = new Date(now);
+        int now_hour = Calendar.getInstance().get(Calendar.HOUR);
+        int now_min = Calendar.getInstance().get(Calendar.MINUTE);
+        long min=0;
 
         try {
 
+            Date date_now = dateFormat.parse(now_hour+":"+now_min);
             Date date_input = dateFormat.parse(sel_hour+":"+sel_min); //String을 포맷에 맞게 변경
-            long duration = date_now.getTime() - date_input.getTime(); // 현재시간 - 입력시간
-            long min = duration/60000;
+            long duration = date_input.getTime() - date_now.getTime(); // 입력시간-현재시간
+            min = duration/60000;
             Log.d("싱글",min+"duration");
 
-            if (min>=30) { // 30분이상 지났을때
-
-               return true;
-            }
 
         } catch (ParseException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        if (min>=30) { // 30분이상 지났을때
 
-        return false;
+            return true;
+        }else{
+            return false;
+        }
+
+
     }
 
     public static boolean checkIsToday(int sel_year, int sel_month, int sel_day){

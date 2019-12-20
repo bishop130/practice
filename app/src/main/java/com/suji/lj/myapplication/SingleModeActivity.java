@@ -8,6 +8,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -35,17 +36,14 @@ import com.suji.lj.myapplication.Fragments.NormalCalendarFragment;
 import com.suji.lj.myapplication.Fragments.PeriodCalendarFragment;
 import com.suji.lj.myapplication.Items.DateItem;
 import com.suji.lj.myapplication.Items.MissionCartItem;
-import com.suji.lj.myapplication.Utils.Utils;
-
-import net.daum.mf.map.api.CameraUpdateFactory;
-import net.daum.mf.map.api.MapPoint;
-
-import org.threeten.bp.LocalDate;
-
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import io.realm.Realm;
 import io.realm.RealmList;
@@ -72,16 +70,22 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
     TextView no_time_limit_tv;
     TextView wrong_time_tv;
 
+
+    int selected_year = calendar.get(Calendar.YEAR);
+    int selected_month = calendar.get(Calendar.MONTH)+1;
+    int selected_day = calendar.get(Calendar.DATE);
     int hour;
     int min;
+    String min_date=selected_year+"-"+selected_month+"-"+selected_day;
 
-    boolean is_today=true;
+    boolean is_today = true;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_single_mode);
+        Log.d("목장","onCreate");
 
         calendar_radio_group = findViewById(R.id.calendar_radio_group);
         normal_calendar_radio_button = findViewById(R.id.normal_calendar_radio_button);
@@ -105,13 +109,26 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
         timePicker.setOnTimeChangedListener(this);
         no_time_switch.setOnCheckedChangeListener(this);
 
-
-
-        hour = calendar.get(Calendar.HOUR);
+        hour = calendar.get(Calendar.HOUR_OF_DAY);
         min = calendar.get(Calendar.MINUTE);
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_calendar_container, new NormalCalendarFragment())
+                .commit();
+
+        textInputEditText.setText("수정제목");
+        selected_address.setText("수정주소");
+        if(Build.VERSION.SDK_INT > 23){
+            timePicker.setHour(1);
+            timePicker.setMinute(11);
+        }else{
+            timePicker.setCurrentHour(1);
+            timePicker.setCurrentMinute(11);
+        }
 
 
         realmInit();
+        checkDateTime();
 
     }
 
@@ -146,15 +163,17 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
     @Override
     public void onDateChanged(RealmList<DateItem> dateItemList) {
 
+        int min_position =0;
 
         if (dateItemList.size() == 0) {
 
         } else {//선택한 날짜가 오늘과 같다면
-            int selected_year = dateItemList.get(0).getYear();
-            int selected_month= dateItemList.get(0).getMonth();
-            int selected_day = dateItemList.get(0).getDay();
-           is_today = Utils.checkIsToday(selected_year,selected_month,selected_day);
-           Log.d("싱글",is_today+"is_today");
+            min_date = dateItemList.get(dateItemList.size()-1).getMin_date();
+
+            missionCartItem.setCalendarDayList(dateItemList);
+            Log.d("싱글",min_date + "최소");
+            checkDateTime();
+
 
         }
     }
@@ -164,25 +183,7 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
 
         hour = hourOfDay;
         min = minute;
-        if(is_today){
-            if(!Utils.compareNowAndInput(hour,min)){
-                Log.d("싱글",hour+min+"compare완료");
-                wrong_time_tv.setVisibility(View.VISIBLE);
-                //오늘 현재시각 30분 후 부터 시간설정이 가능합니다.
-            }else{
-                wrong_time_tv.setVisibility(View.GONE);
-
-                missionCartItem.setHour(hour);
-                missionCartItem.setMin(min);
-                //숨김
-            }
-
-        }else{
-            wrong_time_tv.setVisibility(View.GONE);
-            missionCartItem.setHour(hour);
-            missionCartItem.setMin(min);
-        }
-
+        checkDateTime();
 
 
     }
@@ -232,10 +233,15 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        Log.d("목장","onActivityResult");
+        Log.d("목장",realm.isInTransaction()+"isInTransaction");
         data.getExtras().getString("key");
         String address = data.getExtras().getString("address");
         selected_address.setText(address);
+
         missionCartItem.setAddress(address);
+
+
 
 
         //Log.d("리절트",map_preview);
@@ -247,10 +253,15 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
         Realm.init(this);
         realm = Realm.getDefaultInstance();
 
-        realm.beginTransaction();
-        missionCartItem = realm.createObject(MissionCartItem.class);
-        missionCartItem.setTitle("");
-        missionCartItem.setAddress("");
+        if(!realm.isInTransaction()) {
+
+            realm.beginTransaction();
+            missionCartItem = realm.createObject(MissionCartItem.class);
+            missionCartItem.setTitle("");
+            missionCartItem.setAddress("");
+            missionCartItem.setNo_time_limit(false);
+        }
+        Log.d("목장",realm.isInTransaction()+"isInTransaction");
 
     }
 
@@ -285,20 +296,83 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
 
     }
 
-    @Override
+    @Override//스위치 온오프
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (isChecked) {
 
             timePicker.setVisibility(View.VISIBLE);
             no_time_limit_tv.setVisibility(View.GONE);
+            missionCartItem.setNo_time_limit(false);
+            checkDateTime();
 
 
         } else {
 
             timePicker.setVisibility(View.GONE);
             no_time_limit_tv.setVisibility(View.VISIBLE);
+            wrong_time_tv.setVisibility(View.GONE);
+            missionCartItem.setNo_time_limit(true);
 
 
         }
     }
+
+    private void checkDateTime() {
+        long diff = 0;
+        long now = System.currentTimeMillis();
+        DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.KOREA);
+        String input_time = min_date + " " + hour + ":" + min;
+        Log.d("싱글", input_time + "  inputdate");
+        try {
+            Date input_date = sdf.parse(input_time);
+            diff = (input_date.getTime() - now) / 60000;
+            Log.d("싱글", now + "\n" + input_date.getTime() + "\n" + diff);
+        } catch (ParseException e) {
+            e.getErrorOffset();
+        }
+
+        if (diff >= 30) {
+
+            wrong_time_tv.setVisibility(View.GONE);
+            missionCartItem.setHour(hour);
+            missionCartItem.setMin(min);
+        } else {
+
+            if (!no_time_switch.isChecked()) {
+
+                wrong_time_tv.setVisibility(View.GONE);
+            } else {
+
+                wrong_time_tv.setVisibility(View.VISIBLE);
+            }
+
+        }
+
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        Log.d("목장","onDestroy");
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //realm.beginTransaction();
+        Log.d("목장","onResume");
+
+    }
+    @Override
+    public void onBackPressed() {
+        realm.cancelTransaction();
+        finish();
+        super.onBackPressed();
+    }
+
+
+
 }

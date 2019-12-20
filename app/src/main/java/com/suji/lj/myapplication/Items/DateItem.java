@@ -13,13 +13,20 @@ public class DateItem extends RealmObject {
     int year;
     int month;
     int day;
+    String min_date;
+    String max_date;
+
 
     public DateItem(){}
-    public DateItem(int year, int month, int day) {
+
+    public DateItem(int year, int month, int day, String min_date, String max_date) {
         this.year = year;
         this.month = month;
         this.day = day;
+        this.min_date = min_date;
+        this.max_date = max_date;
     }
+
     public int getYear() {
         return year;
     }
@@ -42,5 +49,21 @@ public class DateItem extends RealmObject {
 
     public void setDay(int day) {
         this.day = day;
+    }
+
+    public String getMin_date() {
+        return min_date;
+    }
+
+    public void setMin_date(String min_date) {
+        this.min_date = min_date;
+    }
+
+    public String getMax_date() {
+        return max_date;
+    }
+
+    public void setMax_date(String max_date) {
+        this.max_date = max_date;
     }
 }

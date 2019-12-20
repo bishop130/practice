@@ -75,12 +75,59 @@ public class NormalCalendarFragment extends Fragment{
                 dateList.clear();
                 calendarDayList = widget.getSelectedDates();
 
+                //String max_date_string = max_date.getYear()+"-"+max_date.getMonth()+"-"+max_date.getDate();
+                int maxYear = 0;
+                int maxMonth = 0;
+                int maxDay = 0;
+                int minYear = 2100;
+                int minMonth = 13;
+                int minDay = 40;
+
                 DateItem dateItem = realm.createObject(DateItem.class);
 
                     for (int i = 0; i < calendarDayList.size(); i++) {
+                        int year = calendarDayList.get(i).getYear();
+                        int month = calendarDayList.get(i).getMonth();
+                        int day = calendarDayList.get(i).getDay();
                         dateItem.setYear(calendarDayList.get(i).getYear());
                         dateItem.setMonth(calendarDayList.get(i).getMonth());
                         dateItem.setDay(calendarDayList.get(i).getDay());
+
+                        if (minYear == year) {
+                            if (minMonth == month) {
+                                if (minDay > day) {
+                                    minDay = day;
+                                }
+                            } else if (minMonth > month) {
+                                minMonth = month;
+                                minDay = day;
+                            }
+                        } else if (minYear > year) {
+                            minYear = year;
+                            minMonth = month;
+                            minDay = day;
+                        }
+                        if (maxYear == year) {
+                            if (maxMonth == month) {
+                                if (maxDay < day) {
+                                    maxDay = day;
+                                }
+                            } else if (maxMonth < month) {
+                                maxMonth = month;
+                                maxDay = day;
+                            }
+                        } else if (maxYear < year) {
+                            maxYear = year;
+                            maxMonth = month;
+                            maxDay = day;
+                        }
+                        String minDate = minYear + "-" + minMonth + "-" + minDay;
+                        String maxDate = maxYear + "-" + maxMonth + "-" + maxDay;
+
+                        if(i==calendarDayList.size()-1) {
+                            dateItem.setMin_date(minDate);
+                            dateItem.setMax_date(maxDate);
+                        }
 
 
                         dateList.add(dateItem);

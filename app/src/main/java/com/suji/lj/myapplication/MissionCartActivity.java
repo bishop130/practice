@@ -35,6 +35,7 @@ import java.util.List;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
+import io.realm.RealmList;
 import io.realm.RealmResults;
 
 public class MissionCartActivity extends AppCompatActivity implements View.OnClickListener, TextWatcher, FlexBoxAdapter.OnFriendsNumListener {
@@ -62,6 +63,7 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
     String user_seq_num;
     String bank_name;
     String account_num;
+    RealmResults<ContactItem> contactItemRealmResults;
 
     // 세자리로 끊어서 쉼표 보여주고, 소숫점 셋째짜리까지 보여준다.
     //DecimalFormat df = new DecimalFormat("###,###.####");
@@ -126,18 +128,7 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
 
 
         RealmResults<MissionCartItem> realmResults = realm.where(MissionCartItem.class).findAll();
-        /*
-        Log.d("렐름",realmResults.get(0).getAddress());
-        Log.d("렐름",realmResults.get(0).getTitle());
-        Log.d("렐름",realmResults.get(0).getHour()+"");
-        Log.d("렐름",realmResults.get(0).getMin()+"");
-        Log.d("렐름",realmResults.get(0).getCalendarDayList().get(0).getDay()+"");
-
-         */
-
-
-
-
+        contactItemRealmResults = realm.where(ContactItem.class).findAll();
 
         missionCartItemList = realmResults;
         Log.d("렐름",realmResults.size()+"");
@@ -150,7 +141,7 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
 
 //         Log.d("리절트",dateItemArrayList.get(0).getYear()+"");
          setRecyclerView(missionCartItemList);
-         setContactRecyclerView(contactItemArrayList);
+         setContactRecyclerView(contactItemRealmResults);
 
          //flexBoxAdapter.setOnSampleReceivedEvent(this);
 
@@ -190,9 +181,6 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
 
     }
 
-
-
-
     @Override
     public void onClick(View v) {
 
@@ -223,19 +211,24 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
             contactItemArrayList = data.getParcelableArrayListExtra("contact_list");
             Log.d("미션카트", contactItemArrayList.size() + "result");
             flexBoxAdapter.notifyDataSetChanged();
-            setContactRecyclerView(contactItemArrayList);
+            contactItemRealmResults = realm.where(ContactItem.class).findAll();
+
+            setContactRecyclerView(contactItemRealmResults);
+
+
+
+
+
+
+
         }
         if(resultCode==1){
 
             missionCartListAdapter.notifyDataSetChanged();
-
-
         }
-
-
     }
 
-    private void setContactRecyclerView(ArrayList<ContactItem> contactItemArrayList){
+    private void setContactRecyclerView(RealmResults<ContactItem> contactItemArrayList){
 
 
         FlexboxLayoutManager layoutManager = new FlexboxLayoutManager(this);
@@ -243,7 +236,7 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
         layoutManager.setJustifyContent(JustifyContent.CENTER);
         layoutManager.setAlignItems(AlignItems.CENTER);
         contact_recyclerView.setLayoutManager(layoutManager);
-        flexBoxAdapter = new FlexBoxAdapter(this, contactItemArrayList,this);
+        flexBoxAdapter = new FlexBoxAdapter(this, contactItemArrayList,this,realm);
         contact_recyclerView.setAdapter(flexBoxAdapter);
 
 
@@ -287,16 +280,8 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
 
 
                 Log.d("오픈뱅킹", "정상    " + etl.isErrorEnabled() );
-
-
-
             }
         }
-
-
-
-
-
 
         if (s.toString().contains(String.valueOf(df.getDecimalFormatSymbols().getDecimalSeparator())))
         {

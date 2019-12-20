@@ -28,11 +28,14 @@ import com.suji.lj.myapplication.Items.ContactItem;
 import com.suji.lj.myapplication.Items.ContactItemForServer;
 import com.github.tamir7.contacts.Contacts;
 import com.google.gson.Gson;
+import com.suji.lj.myapplication.Items.MissionCartItem;
 import com.suji.lj.myapplication.Utils.Utils;
 
 import java.util.ArrayList;
 
 import java.util.List;
+
+import io.realm.Realm;
 
 public class ContactActivity extends AppCompatActivity implements View.OnClickListener {
     @Override
@@ -318,6 +321,22 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
             intent.putParcelableArrayListExtra("contact_list", selected_item);
             intent.putExtra("test","123");
             setResult(2, intent);
+
+
+            Realm realm = Realm.getDefaultInstance();
+
+
+            for(int i=0; i<selected_item.size();i++){
+                realm.beginTransaction();
+                ContactItem contactItem = realm.createObject(ContactItem.class);
+                contactItem.setDisplayName(selected_item.get(i).getDisplayName());
+                contactItem.setPhoneNumbers(selected_item.get(i).getPhoneNumbers());
+                contactItem.setPosition(selected_item.get(i).getPosition());
+                contactItem.setSelected(selected_item.get(i).isSelected());
+                realm.commitTransaction();
+            }
+
+
             Log.d("미션카트",selected_item.size()+"");
             finish();
         }

@@ -14,17 +14,23 @@ import com.suji.lj.myapplication.MissionCartActivity;
 import com.suji.lj.myapplication.R;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import io.realm.Realm;
+import io.realm.RealmResults;
 
 public class FlexBoxAdapter extends RecyclerView.Adapter<FlexBoxAdapter.ViewHolder> {
 
     Context context;
-    ArrayList<ContactItem> arrayList = new ArrayList<>();
+    RealmResults<ContactItem> arrayList;
     OnFriendsNumListener onFriendsNumListener;
+    Realm realm;
 
-    public FlexBoxAdapter(Context context, ArrayList<ContactItem> arrayList,OnFriendsNumListener onFriendsNumListener) {
+    public FlexBoxAdapter(Context context, RealmResults<ContactItem> arrayList, OnFriendsNumListener onFriendsNumListener, Realm realm) {
         this.context = context;
         this.arrayList = arrayList;
         this.onFriendsNumListener = onFriendsNumListener;
+        this.realm = realm;
     }
 
     @Override
@@ -40,7 +46,10 @@ public class FlexBoxAdapter extends RecyclerView.Adapter<FlexBoxAdapter.ViewHold
         holder.title.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                arrayList.remove(position);
+                realm.beginTransaction();
+                arrayList.deleteFromRealm(position);
+                realm.commitTransaction();
+
                 notifyItemRemoved(position);
                 notifyItemRangeChanged(position, arrayList.size());
                 onFriendsNumListener.onFriendsNum(arrayList.size());

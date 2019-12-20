@@ -17,16 +17,20 @@ public class MissionCartItem extends RealmObject {
     RealmList<DateItem> calendarDayList = new RealmList<>();
     int hour;
     int min;
+    boolean no_time_limit;
 
     public MissionCartItem(){}
 
-    public MissionCartItem(String title, String date, String address, RealmList<DateItem> calendarDayList, int hour, int min) {
+
+
+    public MissionCartItem(String title, String date, String address, RealmList<DateItem> calendarDayList, int hour, int min, boolean no_time_limit) {
         this.title = title;
         this.date = date;
         this.address = address;
         this.calendarDayList = calendarDayList;
         this.hour = hour;
         this.min = min;
+        this.no_time_limit = no_time_limit;
     }
 
     public String getTitle() {
@@ -75,5 +79,13 @@ public class MissionCartItem extends RealmObject {
 
     public void setCalendarDayList(RealmList<DateItem> calendarDayList) {
         this.calendarDayList = calendarDayList;
+    }
+
+    public boolean isNo_time_limit() {
+        return no_time_limit;
+    }
+
+    public void setNo_time_limit(boolean no_time_limit) {
+        this.no_time_limit = no_time_limit;
     }
 }
