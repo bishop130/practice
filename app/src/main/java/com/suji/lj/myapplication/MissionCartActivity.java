@@ -146,20 +146,12 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
 //         Log.d("리절트",dateItemArrayList.get(0).getYear()+"");
         setRecyclerView(realmResults);
         setContactRecyclerView(contactItemRealmResults);
-
-        //flexBoxAdapter.setOnSampleReceivedEvent(this);
-
-
     }
 
     public void setRecyclerView(List<MissionCartItem> missionCartItemList) {
-
-
         missionCartListAdapter = new MissionCartListAdapter(this, missionCartItemList, realm);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(missionCartListAdapter);
-
-
     }
 
     private void addMission() {
@@ -174,73 +166,18 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
 
         Log.d("베이스", "전송완료");
         String user_id = getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
+        String mission_id = Utils.getCurrentTime() + "U" + user_id;
 
         DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
 
-        Map<String, Object> mission_info_list = new HashMap<>();
-        Map<String, Object> mission_info_root = new HashMap<>();
-        Map<String, Object> mission_dates = new HashMap<>();
-        Map<String, Object> mission_children = new HashMap<>();
 
+        //registerUserMissionList(mRootRef, user_id, mission_id);
+        //registerMissionInfoList(mRootRef, user_id, mission_id);
+        //registerMissionInfoRoot(mRootRef, user_id, mission_id);
+        //registerCheckForServer(mRootRef, user_id, mission_id);
+        testtest(mRootRef);
 
-        ArrayList<String> gogo = new ArrayList<>();
-        gogo.add("123");
-        gogo.add("456");
-
-        String mission_id = Utils.getCurrentTime() + user_id;
-
-        for (int i = 0; i < missionCartItemList.size(); i++) {
-            MissionInfoList missionInfoList = new MissionInfoList();
-
-            missionInfoList.setMission_title(missionCartItemList.get(i).getTitle());
-            missionInfoList.setMission_time(missionCartItemList.get(i).getHour() + ":" + missionCartItemList.get(i).getMin());
-            missionInfoList.setAddress(missionCartItemList.get(i).getAddress());
-            missionInfoList.setIs_success(false);
-            missionInfoList.setLat(missionCartItemList.get(i).getLat());
-            missionInfoList.setLng(missionCartItemList.get(i).getLng());
-            Log.d("파베", "있기는한가" + missionCartItemList.get(i).getCalendarDayList().size());
-            for (int j = 0; j < missionCartItemList.get(i).getCalendarDayList().size(); j++) {
-                int year = missionCartItemList.get(i).getCalendarDayList().get(j).getYear();
-                int month = missionCartItemList.get(i).getCalendarDayList().get(j).getMonth();
-                int day = missionCartItemList.get(i).getCalendarDayList().get(j).getDay();
-                String date = year + "" + month + "" + day;
-                Log.d("파베", "날짜" + date);
-                mission_dates.put(date, true);
-            }
-            missionInfoList.setMission_dates(mission_dates);
-            missionInfoList.setArrayList(gogo);
-            missionInfoList.setMission_info_root_id("S"+mission_id);
-
-
-            mission_info_list.put("E"+mission_id + "" + i, missionInfoList);
-            mission_children.put("E"+mission_id,true);
-        }
-
-
-        ArrayList<ContactItem> friends_selected_array = new ArrayList<>();
-        for(int i=0; i<contactItemRealmResults.size();i++) {
-            ContactItem contactItem = new ContactItem();
-            contactItem.setDisplayName(contactItemRealmResults.get(i).getDisplayName());
-            contactItem.setPhoneNumbers(contactItemRealmResults.get(i).getPhoneNumbers());
-            friends_selected_array.add(contactItem);
-        }
-
-
-        Log.d("파베",friends_selected_array.size()+"");
-
-
-        MissionInfoRoot missionInfoRoot = new MissionInfoRoot();
-        missionInfoRoot.setPenalty_amt(5000);
-        missionInfoRoot.setMission_registered_date_time(Utils.getCurrentTime());
-        missionInfoRoot.setFriends_selected_list(friends_selected_array);
-        missionInfoRoot.setChildren_id(mission_children);
-
-
-        mRootRef.child("mission_info_list").child(user_id).updateChildren(mission_info_list);
-        mission_info_root.put("S"+mission_id,missionInfoRoot);
-        mRootRef.child("mission_info_root").child(user_id).updateChildren(mission_info_root);
-
-
+        //Log.d("파베", friends_selected_array.size() + "");
 
 
         mRootRef.child("mission_info_list").addValueEventListener(new ValueEventListener() {
@@ -256,6 +193,194 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
         });
 
 
+    }
+
+    private void registerMissionInfoRoot(DatabaseReference databaseReference, String user_id, String mission_id) {
+
+        Map<String, Object> mission_info_root = new HashMap<>();
+
+        ArrayList<ContactItem> friends_selected_array = new ArrayList<>();
+        for (int i = 0; i < contactItemRealmResults.size(); i++) {
+            ContactItem contactItem = new ContactItem();
+            contactItem.setDisplayName(contactItemRealmResults.get(i).getDisplayName());
+            contactItem.setPhoneNumbers(contactItemRealmResults.get(i).getPhoneNumbers());
+            friends_selected_array.add(contactItem);
+        }
+
+        Map<String, Object> mission_children = new HashMap<>();
+        for (int i = 0; i < missionCartItemList.size(); i++) {
+            mission_children.put("E" + mission_id + "U" + i, true);
+        }
+
+        MissionInfoRoot missionInfoRoot = new MissionInfoRoot();
+        missionInfoRoot.setPenalty_amt(5000);
+        missionInfoRoot.setMission_registered_date_time(Utils.getCurrentTime());
+        missionInfoRoot.setFriends_selected_list(friends_selected_array);
+        missionInfoRoot.setChildren_id(mission_children);
+
+
+        mission_info_root.put("S" + mission_id, missionInfoRoot);
+
+
+        databaseReference.child("mission_info_root").child(user_id).updateChildren(mission_info_root);
+    }
+
+
+    private void registerUserMissionList(DatabaseReference databaseReference, String user_id, String mission_id) {
+
+
+        Map<String, Object> objectMap = new HashMap<>();
+        ArrayList<String> arrayList = new ArrayList<>();
+        arrayList.add("E1234");
+        arrayList.add("E4567");
+
+        objectMap.put("20191224", arrayList);
+
+
+        databaseReference.child("users_mission_list").child(user_id).updateChildren(objectMap);
+
+
+    }
+
+    private void registerMissionInfoList(DatabaseReference databaseReference, String user_id, String mission_id) {
+
+        Map<String, Object> mission_info_list = new HashMap<>();
+
+
+        for (int i = 0; i < missionCartItemList.size(); i++) {
+            MissionInfoList missionInfoList = new MissionInfoList();
+            Map<String, Object> mission_dates = new HashMap<>();
+
+            missionInfoList.setMission_title(missionCartItemList.get(i).getTitle());
+            missionInfoList.setMission_time(missionCartItemList.get(i).getHour() + ":" + missionCartItemList.get(i).getMin());
+            missionInfoList.setAddress(missionCartItemList.get(i).getAddress());
+            missionInfoList.setIs_success(false);
+            missionInfoList.setLat(missionCartItemList.get(i).getLat());
+            missionInfoList.setLng(missionCartItemList.get(i).getLng());
+            //Log.d("파베", "있기는한가" + missionCartItemList.get(i).getCalendarDayList().size());
+            for (int j = 0; j < missionCartItemList.get(i).getCalendarDayList().size(); j++) {
+                int year = missionCartItemList.get(i).getCalendarDayList().get(j).getYear();
+                int month = missionCartItemList.get(i).getCalendarDayList().get(j).getMonth();
+                int day = missionCartItemList.get(i).getCalendarDayList().get(j).getDay();
+                String date = year + "" + month + "" + day;
+                //Log.d("파베", "날짜" + date);
+                mission_dates.put(date, true);
+            }
+            missionInfoList.setMission_dates(mission_dates);
+            //missionInfoList.setArrayList(gogo);
+            missionInfoList.setMission_info_root_id("S" + mission_id);
+
+            mission_info_list.put("E" + mission_id + "N" + i, missionInfoList);
+
+        }
+
+
+        databaseReference.child("mission_info_list").child(user_id).updateChildren(mission_info_list);
+    }
+
+    private void registerCheckForServer(DatabaseReference databaseReference, String user_id, String mission_id) {
+
+
+        for (int i = 0; i < missionCartItemList.size(); i++) {
+            for (int j = 0; j < missionCartItemList.get(i).getCalendarDayList().size(); j++) {
+                Map<String, Object> objectMap = new HashMap<>();
+                ArrayList<ItemForServer> itemForServerArrayList = new ArrayList<>();
+
+
+                int year = missionCartItemList.get(i).getCalendarDayList().get(j).getYear();
+                int month = missionCartItemList.get(i).getCalendarDayList().get(j).getMonth();
+                int day = missionCartItemList.get(i).getCalendarDayList().get(j).getDay();
+                String date = year + "" + month + "" + day;
+                int hour = missionCartItemList.get(i).getHour();
+                int min = missionCartItemList.get(i).getMin();
+                String time_id = Utils.makeTimeForServer(hour, min);
+
+
+                ItemForServer itemForServer = new ItemForServer();
+
+                itemForServer.setUser_id(user_id);
+                itemForServer.setIs_success(false);
+                itemForServer.setRoot_id("S" + mission_id);
+                itemForServer.setChildren_id("E" + mission_id + "N" + i);
+                itemForServerArrayList.add(itemForServer);
+
+
+                objectMap.put(time_id, itemForServerArrayList);
+                databaseReference.child("check_for_server").child(date).updateChildren(objectMap);
+
+            }
+
+
+        }
+
+
+    }
+
+    private void testtest(DatabaseReference databaseReference) {
+
+        Map<String, Object> objectMap = new HashMap<>();
+        ItemForServer itemForServer = new ItemForServer();
+        ArrayList<ItemForServer> arrayList = new ArrayList<>();
+
+        itemForServer.setUser_id("123");
+        itemForServer.setIs_success(false);
+        itemForServer.setRoot_id("S" + "123");
+        itemForServer.setChildren_id("E" + "123" + "N" + "1");
+        arrayList.add(itemForServer);
+        objectMap.put("T231700", arrayList);
+
+        databaseReference.child("check_for_server").child("20191220").updateChildren(objectMap);
+    }
+
+    public class ItemForServer {
+
+        String user_id;
+        boolean is_success;
+        String root_id;
+        String children_id;
+
+        public ItemForServer() {
+
+        }
+
+        public ItemForServer(String user_id, boolean is_success, String root_id, String children_id) {
+            this.user_id = user_id;
+            this.is_success = is_success;
+            this.root_id = root_id;
+            this.children_id = children_id;
+        }
+
+        public String getUser_id() {
+            return user_id;
+        }
+
+        public void setUser_id(String user_id) {
+            this.user_id = user_id;
+        }
+
+        public boolean isIs_success() {
+            return is_success;
+        }
+
+        public void setIs_success(boolean is_success) {
+            this.is_success = is_success;
+        }
+
+        public String getRoot_id() {
+            return root_id;
+        }
+
+        public void setRoot_id(String root_id) {
+            this.root_id = root_id;
+        }
+
+        public String getChildren_id() {
+            return children_id;
+        }
+
+        public void setChildren_id(String children_id) {
+            this.children_id = children_id;
+        }
     }
 
     @Override
@@ -407,7 +532,7 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
     }
 
 
-    public class MissionInfoRoot{
+    public class MissionInfoRoot {
 
         public int penalty_amt;
         public String mission_registered_date_time;
@@ -421,7 +546,7 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
             this.friends_selected_list = friends_selected_list;
         }
 
-        public MissionInfoRoot(){
+        public MissionInfoRoot() {
 
         }
 

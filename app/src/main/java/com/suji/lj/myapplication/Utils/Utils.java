@@ -497,4 +497,26 @@ public class Utils {
 
     }
 
+    public static String makeTimeForServer(int gethour, int getmin){
+
+        String hour;
+        String min;
+        String result;
+
+        if(gethour<10){
+            hour = "0"+gethour;
+        }else{
+            hour = gethour+"";
+        }if(getmin<10){
+            min = "0"+getmin;
+        }else{
+            min = getmin+"";
+        }
+
+        result = "T"+hour+min+"00";
+
+
+        return result;
+    }
+
 }
