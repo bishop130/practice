@@ -24,7 +24,14 @@ public class FlexBoxAdapter extends RecyclerView.Adapter<FlexBoxAdapter.ViewHold
     Context context;
     RealmResults<ContactItem> arrayList;
     OnFriendsNumListener onFriendsNumListener;
+    OnFriendsListListener onFriendsListListener;
     Realm realm;
+    public FlexBoxAdapter(OnFriendsListListener onFriendsListListener){
+        this.onFriendsListListener = onFriendsListListener;
+
+
+    }
+    public FlexBoxAdapter(){}
 
     public FlexBoxAdapter(Context context, RealmResults<ContactItem> arrayList, OnFriendsNumListener onFriendsNumListener, Realm realm) {
         this.context = context;
@@ -53,6 +60,7 @@ public class FlexBoxAdapter extends RecyclerView.Adapter<FlexBoxAdapter.ViewHold
                 notifyItemRemoved(position);
                 notifyItemRangeChanged(position, arrayList.size());
                 onFriendsNumListener.onFriendsNum(arrayList.size());
+                onFriendsListListener.onFriendsList(arrayList);
 
             }
         });
@@ -81,6 +89,9 @@ public class FlexBoxAdapter extends RecyclerView.Adapter<FlexBoxAdapter.ViewHold
         void onFriendsNum(int friends_num);
 
 
+    }
+    public interface OnFriendsListListener{
+        void onFriendsList(RealmResults<ContactItem> realmResults);
     }
 
 

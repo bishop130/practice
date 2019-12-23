@@ -23,6 +23,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 import com.crashlytics.android.Crashlytics;
+import com.google.android.material.tabs.TabLayout;
 import com.suji.lj.myapplication.Adapters.BackPressCloseHandler;
 import com.suji.lj.myapplication.Adapters.DBHelper;
 import com.suji.lj.myapplication.Fragments.SettingFragment;
@@ -90,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private static final String refreshDatabaseURL = "http://bishop130.cafe24.com/refreshDB.php";
-    private SessionCallback mKakaocallback;
+    //private SessionCallback mKakaocallback;
     Toolbar myToolbar;
     private static final String URL = "http://bishop130.cafe24.com/user_control.php";
     String[] REQUIRED_PERMISSIONS = {Manifest.permission.ACCESS_FINE_LOCATION, // 카메라
@@ -102,6 +103,7 @@ public class MainActivity extends AppCompatActivity {
     private RequestQueue requestQueue;
     private BackPressCloseHandler backPressCloseHandler;
     DBHelper dbHelper;
+
 
 
     @SuppressLint("MissingPermission")
@@ -155,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Session.getCurrentSession().removeCallback(mKakaocallback);
+        //Session.getCurrentSession().removeCallback(mKakaocallback);
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener navigationItemSelectedListener =
@@ -257,7 +259,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
+/*
     private class SessionCallback implements ISessionCallback {
         @Override
         public void onSessionOpened() {
@@ -275,6 +277,8 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+ */
 
     private void checkPermission() {
         int locationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);

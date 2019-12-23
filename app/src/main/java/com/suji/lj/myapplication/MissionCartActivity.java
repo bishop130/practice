@@ -6,6 +6,7 @@ import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
@@ -22,6 +23,7 @@ import com.google.android.flexbox.AlignItems;
 import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexboxLayoutManager;
 import com.google.android.flexbox.JustifyContent;
+import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.database.DataSnapshot;
@@ -31,11 +33,19 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.suji.lj.myapplication.Adapters.FlexBoxAdapter;
 import com.suji.lj.myapplication.Adapters.MissionCartListAdapter;
+import com.suji.lj.myapplication.Adapters.OpenBanking;
+import com.suji.lj.myapplication.Fragments.TransferEqualModeFragment;
+import com.suji.lj.myapplication.Fragments.TransferRespectivelyModeFragment;
 import com.suji.lj.myapplication.Items.ContactItem;
 import com.suji.lj.myapplication.Items.DateItem;
+import com.suji.lj.myapplication.Items.ItemForServer;
 import com.suji.lj.myapplication.Items.MissionCartItem;
+import com.suji.lj.myapplication.Items.MissionInfoList;
+import com.suji.lj.myapplication.Items.MissionInfoRoot;
+import com.suji.lj.myapplication.Items.UserAccountItem;
 import com.suji.lj.myapplication.Utils.Utils;
 
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -49,6 +59,9 @@ import io.realm.RealmChangeListener;
 import io.realm.RealmConfiguration;
 import io.realm.RealmList;
 import io.realm.RealmResults;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 public class MissionCartActivity extends AppCompatActivity implements View.OnClickListener, TextWatcher, FlexBoxAdapter.OnFriendsNumListener {
 
@@ -73,11 +86,14 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
     //TextView nick_name;
     TextView friends_num;
     TextView transfer_amount;
-    String user_seq_num;
-    String bank_name;
-    String account_num;
+    OpenBanking openBanking = OpenBanking.getInstance();
+    List<UserAccountItem> userAccountItemList = new ArrayList<>();
+    LinearLayout ly_add_new_account;
+
     RealmResults<ContactItem> contactItemRealmResults;
     RealmResults<ContactItem> contactItemRealmResultsOverlap;
+    TextView firebase_read;
+    TabLayout ly_tab_select_penalty_mode;
 
     // 세자리로 끊어서 쉼표 보여주고, 소숫점 셋째짜리까지 보여준다.
     //DecimalFormat df = new DecimalFormat("###,###.####");
@@ -85,6 +101,30 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
     private DecimalFormat dfnd = new DecimalFormat("#,###");
     // 값 셋팅시, StackOverFlow를 막기 위해서, 바뀐 변수를 저장해준다.
     String result = "";
+    private final Callback user_account_info_callback = new Callback() {
+        @Override
+        public void onFailure(Call call, IOException e) {
+            //Log.d(TAG, "콜백오류:" + e.getMessage());
+        }
+
+        @Override
+        public void onResponse(Call call, Response response) throws IOException {
+            final String body = response.body().string();
+            //Log.d(TAG, "서버에서 응답한 Body:" + body);
+
+            SharedPreferences.Editor editor = getSharedPreferences("OpenBanking",MODE_PRIVATE).edit();
+            editor.putString("user_me",body);
+            editor.apply();
+
+            String rsp_code = Utils.getValueFromJson(body, "rsp_code");
+            Log.d("오픈뱅킹","핀테크응답결과 "+ body);
+
+            userAccountItemList = Utils.UserInfoResponseJsonParse(body);
+
+            //displayBankAccount(userAccountItemList);
+
+        }
+    };
 
 
     @Override
@@ -106,14 +146,51 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
 
         etl = findViewById(R.id.text_input_layout);
         et = findViewById(R.id.transfer_input);
+        firebase_read = findViewById(R.id.firebase_read);
+        ly_add_new_account = findViewById(R.id.ly_add_new_account);
+        ly_tab_select_penalty_mode = findViewById(R.id.ly_tab_select_penalty_mode);
 
         //numberTextWatcher = new NumberTextWatcher(textInputEditText,textInputLayout,contact_num,transfer_amount,context);
 
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.transfer_container, new TransferEqualModeFragment()).commit();
 
+        ly_tab_select_penalty_mode.addTab(ly_tab_select_penalty_mode.newTab().setText("같은금액으로 송금"));
+        ly_tab_select_penalty_mode.addTab(ly_tab_select_penalty_mode.newTab().setText("다른금액으로 송금"));
+        ly_tab_select_penalty_mode.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                int position = tab.getPosition();
+                switch (position){
+                    case 0:
+                        getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.transfer_container, new TransferEqualModeFragment()).commit();
+                        break;
+                    case 1:
+                        getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.transfer_container, new TransferRespectivelyModeFragment(getApplicationContext(),realm)).commit();
+
+
+                }
+
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
+        firebase_read.setOnClickListener(this);
         et.addTextChangedListener(this);
         add_mission.setOnClickListener(this);
         add_contact.setOnClickListener(this);
         register_send.setOnClickListener(this);
+        ly_add_new_account.setOnClickListener(this);
         etl.setHintTextColor(ColorStateList.valueOf(this.getResources().getColor(R.color.mdtp_accent_color_dark)));
         etl.setDefaultHintTextColor(ColorStateList.valueOf(this.getResources().getColor(R.color.mdtp_accent_color)));
 
@@ -146,7 +223,31 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
 //         Log.d("리절트",dateItemArrayList.get(0).getYear()+"");
         setRecyclerView(realmResults);
         setContactRecyclerView(contactItemRealmResults);
+        openBankingSetting();
     }
+
+    private void openBankingSetting(){
+        SharedPreferences sharedPreferences = getSharedPreferences("OpenBanking", MODE_PRIVATE);
+        String access_token = sharedPreferences.getString("access_token","");
+        String user_seq_num = sharedPreferences.getString("user_seq_num","");
+        Log.d("오픈뱅킹","사용자토큰"+access_token);
+
+        if(TextUtils.isEmpty(access_token)){
+            //register_account.setText("처음사용자");
+            ly_add_new_account.setVisibility(View.VISIBLE);
+            Log.d("오픈뱅킹","처음사용자");
+        }else{
+            Log.d("오픈뱅킹","기사용자정보요청");
+            ly_add_new_account.setVisibility(View.GONE);
+            openBanking.requestUserAccountInfo(user_account_info_callback,access_token,user_seq_num);
+
+
+        }
+
+
+
+    }
+
 
     public void setRecyclerView(List<MissionCartItem> missionCartItemList) {
         missionCartListAdapter = new MissionCartListAdapter(this, missionCartItemList, realm);
@@ -174,8 +275,8 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
         //registerUserMissionList(mRootRef, user_id, mission_id);
         //registerMissionInfoList(mRootRef, user_id, mission_id);
         //registerMissionInfoRoot(mRootRef, user_id, mission_id);
-        //registerCheckForServer(mRootRef, user_id, mission_id);
-        testtest(mRootRef);
+        registerCheckForServer(mRootRef, user_id, mission_id);
+        //testtest(mRootRef);
 
         //Log.d("파베", friends_selected_array.size() + "");
 
@@ -306,7 +407,7 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
 
 
                 objectMap.put(time_id, itemForServerArrayList);
-                databaseReference.child("check_for_server").child(date).updateChildren(objectMap);
+                databaseReference.child("check_for_server").child(date).child(time_id).push().setValue(itemForServer);
 
             }
 
@@ -316,72 +417,7 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
 
     }
 
-    private void testtest(DatabaseReference databaseReference) {
 
-        Map<String, Object> objectMap = new HashMap<>();
-        ItemForServer itemForServer = new ItemForServer();
-        ArrayList<ItemForServer> arrayList = new ArrayList<>();
-
-        itemForServer.setUser_id("123");
-        itemForServer.setIs_success(false);
-        itemForServer.setRoot_id("S" + "123");
-        itemForServer.setChildren_id("E" + "123" + "N" + "1");
-        arrayList.add(itemForServer);
-        objectMap.put("T231700", arrayList);
-
-        databaseReference.child("check_for_server").child("20191220").updateChildren(objectMap);
-    }
-
-    public class ItemForServer {
-
-        String user_id;
-        boolean is_success;
-        String root_id;
-        String children_id;
-
-        public ItemForServer() {
-
-        }
-
-        public ItemForServer(String user_id, boolean is_success, String root_id, String children_id) {
-            this.user_id = user_id;
-            this.is_success = is_success;
-            this.root_id = root_id;
-            this.children_id = children_id;
-        }
-
-        public String getUser_id() {
-            return user_id;
-        }
-
-        public void setUser_id(String user_id) {
-            this.user_id = user_id;
-        }
-
-        public boolean isIs_success() {
-            return is_success;
-        }
-
-        public void setIs_success(boolean is_success) {
-            this.is_success = is_success;
-        }
-
-        public String getRoot_id() {
-            return root_id;
-        }
-
-        public void setRoot_id(String root_id) {
-            this.root_id = root_id;
-        }
-
-        public String getChildren_id() {
-            return children_id;
-        }
-
-        public void setChildren_id(String children_id) {
-            this.children_id = children_id;
-        }
-    }
 
     @Override
     public void onClick(View v) {
@@ -395,13 +431,51 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
                 break;
             case R.id.register_send:
                 registerSend();
-
+                break;
+            case R.id.firebase_read:
+                checkResult();
                 break;
 
         }
 
     }
 
+    private void checkResult(){
+
+        List<ItemForServer> itemForServerList = new ArrayList<>();
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+
+        databaseReference = databaseReference.child("check_for_server").child("20191220").child("T231700");
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+
+                Log.d("파베", dataSnapshot.getChildrenCount()+"");
+
+                for(DataSnapshot post : dataSnapshot.getChildren()) {
+                    ItemForServer itemForServer = post.getValue(ItemForServer.class);
+
+
+                    itemForServerList.add(itemForServer);
+                    Log.d("파베", itemForServer.getUser_id() + "");
+                    Log.d("파베", itemForServer.getRoot_id());
+                    Log.d("파베", itemForServer.getChildren_id());
+                    Log.d("파베", itemForServer.isIs_success() + "");
+                }
+
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+
+
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -532,156 +606,5 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
     }
 
 
-    public class MissionInfoRoot {
 
-        public int penalty_amt;
-        public String mission_registered_date_time;
-        public Map<String, Object> children_id;
-        public ArrayList<ContactItem> friends_selected_list;
-
-        public MissionInfoRoot(int penalty_amt, String mission_registered_date_time, Map<String, Object> children_id, ArrayList<ContactItem> friends_selected_list) {
-            this.penalty_amt = penalty_amt;
-            this.mission_registered_date_time = mission_registered_date_time;
-            this.children_id = children_id;
-            this.friends_selected_list = friends_selected_list;
-        }
-
-        public MissionInfoRoot() {
-
-        }
-
-        public int getPenalty_amt() {
-            return penalty_amt;
-        }
-
-        public void setPenalty_amt(int penalty_amt) {
-            this.penalty_amt = penalty_amt;
-        }
-
-        public String getMission_registered_date_time() {
-            return mission_registered_date_time;
-        }
-
-        public void setMission_registered_date_time(String mission_registered_date_time) {
-            this.mission_registered_date_time = mission_registered_date_time;
-        }
-
-        public Map<String, Object> getChildren_id() {
-            return children_id;
-        }
-
-        public void setChildren_id(Map<String, Object> children_id) {
-            this.children_id = children_id;
-        }
-
-        public ArrayList<ContactItem> getFriends_selected_list() {
-            return friends_selected_list;
-        }
-
-        public void setFriends_selected_list(ArrayList<ContactItem> friends_selected_list) {
-            this.friends_selected_list = friends_selected_list;
-        }
-    }
-
-    public class MissionInfoList {
-
-        public MissionInfoList() {
-
-        }
-
-        public String mission_title;
-        public String mission_time;
-        public String address;
-        public boolean is_success;
-        public double lat;
-        public double lng;
-        public ArrayList<String> arrayList;
-        public Map<String, Object> mission_dates;
-        public String mission_info_root_id;
-
-        public MissionInfoList(String mission_title, String mission_time, String address, boolean is_success, double lat, double lng, ArrayList<String> arrayList, Map<String, Object> mission_dates, String mission_info_root_id) {
-            this.mission_title = mission_title;
-            this.mission_time = mission_time;
-            this.address = address;
-            this.is_success = is_success;
-            this.lat = lat;
-            this.lng = lng;
-            this.arrayList = arrayList;
-            this.mission_dates = mission_dates;
-            this.mission_info_root_id = mission_info_root_id;
-        }
-
-        public String getMission_title() {
-            return mission_title;
-        }
-
-        public void setMission_title(String mission_title) {
-            this.mission_title = mission_title;
-        }
-
-        public String getMission_time() {
-            return mission_time;
-        }
-
-        public void setMission_time(String mission_time) {
-            this.mission_time = mission_time;
-        }
-
-        public String getAddress() {
-            return address;
-        }
-
-        public void setAddress(String address) {
-            this.address = address;
-        }
-
-        public boolean isIs_success() {
-            return is_success;
-        }
-
-        public void setIs_success(boolean is_success) {
-            this.is_success = is_success;
-        }
-
-        public double getLat() {
-            return lat;
-        }
-
-        public void setLat(double lat) {
-            this.lat = lat;
-        }
-
-        public double getLng() {
-            return lng;
-        }
-
-        public void setLng(double lng) {
-            this.lng = lng;
-        }
-
-        public ArrayList<String> getArrayList() {
-            return arrayList;
-        }
-
-        public void setArrayList(ArrayList<String> arrayList) {
-            this.arrayList = arrayList;
-        }
-
-        public Map<String, Object> getMission_dates() {
-            return mission_dates;
-        }
-
-        public void setMission_dates(Map<String, Object> mission_dates) {
-            this.mission_dates = mission_dates;
-        }
-
-
-        public String getMission_info_root_id() {
-            return mission_info_root_id;
-        }
-
-        public void setMission_info_root_id(String mission_info_root_id) {
-            this.mission_info_root_id = mission_info_root_id;
-        }
-    }
 }
