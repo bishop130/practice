@@ -24,11 +24,13 @@ public class ContactResponse extends RecyclerView.Adapter<ContactResponse.Contac
     private ContactResponse.ContactResponseHolder contactResponseHolder;
     RecyclerViewContactAdapter adapter;
     List<ContactItem> itemList;
+    OnFriendsCountListener onFriendsCountListener;
 
-    public ContactResponse(Context context, List<ContactItem> itemList) {
+    public ContactResponse(Context context, List<ContactItem> itemList,OnFriendsCountListener onFriendsCountListener) {
 
         this.context = context;
         this.itemList=itemList;
+        this.onFriendsCountListener = onFriendsCountListener;
 
 
     }
@@ -39,7 +41,7 @@ public class ContactResponse extends RecyclerView.Adapter<ContactResponse.Contac
 
         View view;
         LayoutInflater inflater = LayoutInflater.from(context);
-        view = inflater.inflate(R.layout.test_recycler, parent, false);
+        view = inflater.inflate(R.layout.item_flexbox, parent, false);
         contactResponseHolder = new ContactResponse.ContactResponseHolder(view);
 
         return contactResponseHolder;
@@ -49,19 +51,21 @@ public class ContactResponse extends RecyclerView.Adapter<ContactResponse.Contac
     public void onBindViewHolder(@NonNull ContactResponseHolder holder, int position) {
         //List<ContactItem> ctList = ((RecyclerViewContactAdapter) adapter).getSelected_contact();
 
-        holder.name.setText(itemList.get(position).getDisplayName());
+        holder.title.setText("#"+itemList.get(position).getDisplayName());
         //holder.phone_number.setText(itemList.get(position).getPhoneNumbers());
         //holder.first_name.setText(String.valueOf(itemList.get(position).getDisplayName().charAt(0)));
         Log.d("라니스터","onBindViewHolder_contactResponse"+ position);
 
-        holder.selected_container.setOnClickListener(new View.OnClickListener() {
+        holder.title.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 int pos = itemList.get(position).getPosition();
                 itemList.remove(position);
 
-                notifyDataSetChanged();
-                //notifyItemRemoved(position);
+                //notifyDataSetChanged();
+                notifyItemRemoved(position);
+                notifyItemRangeChanged(position,itemList.size());
+                onFriendsCountListener.onFriendsCount(itemList.size());
 
 
 
@@ -84,6 +88,7 @@ public class ContactResponse extends RecyclerView.Adapter<ContactResponse.Contac
         TextView phone_number;
         LinearLayout selected_container;
         TextView first_name;
+        TextView title;
 
         public ContactResponseHolder(@NonNull View itemView){
             super(itemView);
@@ -91,7 +96,13 @@ public class ContactResponse extends RecyclerView.Adapter<ContactResponse.Contac
             phone_number = itemView.findViewById(R.id.contact_num);
             first_name = itemView.findViewById(R.id.first_name);
             selected_container = itemView.findViewById(R.id.selected_container);
+            title = itemView.findViewById(R.id.tvTitle);
         }
+
+    }
+    public interface OnFriendsCountListener{
+        void onFriendsCount(int num);
+
 
     }
 

@@ -35,14 +35,16 @@ public class RecyclerViewContactAdapter extends RecyclerView.Adapter<RecyclerVie
     private Context context;
     private int count = 0;
     private static final int MAX_CONTACTS = 10;
+    OnFriendsCountFromContactListener onFriendsCountFromContactListener;
 
 
 
-    public RecyclerViewContactAdapter(Context context, List<ContactItem> itemList) {
+    public RecyclerViewContactAdapter(Context context, List<ContactItem> itemList, OnFriendsCountFromContactListener onFriendsCountFromContactListener) {
         this.itemList = itemList;
         this.context = context;
         this.exampleListFull = new ArrayList<>(itemList);
 
+        this.onFriendsCountFromContactListener = onFriendsCountFromContactListener;
     }
 
     @NonNull
@@ -78,13 +80,14 @@ public class RecyclerViewContactAdapter extends RecyclerView.Adapter<RecyclerVie
                     contactItem.setDisplayName(itemList.get(position).getDisplayName());
                     contactItem.setPhoneNumbers(itemList.get(position).getPhoneNumbers());
                     contactItem.setPosition(position);
+                    //onFriendsCountFromContactListener.onFriendsCountFromContact(itemList.size());
 
 
                     ((ContactActivity) context).test(contactItem);
                 }
                 else{
 
-
+                    //onFriendsCountFromContactListener.onFriendsCountFromContact(itemList.size());
 
                     ((ContactActivity) context).testDelete(position);
 
@@ -302,8 +305,8 @@ public class RecyclerViewContactAdapter extends RecyclerView.Adapter<RecyclerVie
         return selected_contact;
     }
 
-    public void contactSelect() {
-
+    public interface OnFriendsCountFromContactListener{
+        void onFriendsCountFromContact(int num);
 
     }
 

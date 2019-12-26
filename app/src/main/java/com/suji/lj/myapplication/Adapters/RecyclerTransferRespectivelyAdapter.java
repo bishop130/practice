@@ -22,6 +22,7 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 
 import io.realm.Realm;
+import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 
 public class RecyclerTransferRespectivelyAdapter extends RecyclerView.Adapter<RecyclerTransferRespectivelyAdapter.ViewHolder>{
@@ -33,17 +34,18 @@ public class RecyclerTransferRespectivelyAdapter extends RecyclerView.Adapter<Re
     private boolean hasFractionalPart;
 
 
-    public RecyclerTransferRespectivelyAdapter(RealmResults<ContactItem> realmResults){
+    public RecyclerTransferRespectivelyAdapter(RealmResults<ContactItem> realmResults, Realm realm){
 
         this.realmResults = realmResults;
+        this.realm = realm;
 
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
-        holder.name.setText(realmResults.get(position).getDisplayName());
-        holder.et.setText("10,000");
+        holder.name.setText("# "+realmResults.get(position).getDisplayName());
+        holder.et.setText(df.format(realmResults.get(position).getAmount()));
         holder.et.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -63,6 +65,25 @@ public class RecyclerTransferRespectivelyAdapter extends RecyclerView.Adapter<Re
 
             @Override
             public void afterTextChanged(Editable s) {
+                if(s.toString().length()==0){
+
+                }
+                else {
+                    int amount = Integer.valueOf(s.toString().replaceAll(",", ""));
+
+                    ContactItem contactItem = realm.where(ContactItem.class).equalTo("phoneNumbers",realmResults.get(position).getPhoneNumbers()).findFirst();
+                    realm.beginTransaction();
+                    contactItem.setAmount(amount);
+                    realm.commitTransaction();
+                }
+                /*
+                realmResults.get(position).setAmount(amount);
+
+
+
+                 */
+
+
                 Log.d("오픈뱅킹", "after_changed");
                 holder.et.removeTextChangedListener(this);
 

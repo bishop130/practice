@@ -8,12 +8,14 @@ import io.realm.RealmObject;
 
 public class ContactItem extends RealmObject implements Parcelable {
 
+
     private String displayName;
     private String phoneNumbers;
-    private  boolean isSelected;
+    private boolean isSelected;
     private int position;
+    private int amount;
 
-    public ContactItem(){
+    public ContactItem() {
 
     }
 
@@ -30,6 +32,7 @@ public class ContactItem extends RealmObject implements Parcelable {
         dest.writeString(this.phoneNumbers);
         dest.writeByte((byte) (this.isSelected ? 1 : 0));
         dest.writeInt(this.position);
+        dest.writeInt(this.amount);
 
 
     }
@@ -39,18 +42,22 @@ public class ContactItem extends RealmObject implements Parcelable {
         this.phoneNumbers = phoneNumbers;
 
     }
-    public ContactItem(String displayName, String phoneNumbers, boolean isSelected, int position){
-        this.displayName=displayName;
-        this.phoneNumbers=phoneNumbers;
-        this.isSelected=isSelected;
+
+    public ContactItem(String displayName, String phoneNumbers, boolean isSelected, int position, int amount) {
+        this.displayName = displayName;
+        this.phoneNumbers = phoneNumbers;
+        this.isSelected = isSelected;
         this.position = position;
+        this.amount = amount;
 
     }
+
     public ContactItem(Parcel in) {
         this.displayName = in.readString();
         this.phoneNumbers = in.readString();
-        this.isSelected = in.readByte() !=0;
+        this.isSelected = in.readByte() != 0;
         this.position = in.readInt();
+        this.amount = in.readInt();
     }
 
 
@@ -84,6 +91,14 @@ public class ContactItem extends RealmObject implements Parcelable {
 
     public void setSelected(boolean selected) {
         this.isSelected = selected;
+    }
+
+    public int getAmount() {
+        return amount;
+    }
+
+    public void setAmount(int amount) {
+        this.amount = amount;
     }
 
     @SuppressWarnings("rawtypes")
