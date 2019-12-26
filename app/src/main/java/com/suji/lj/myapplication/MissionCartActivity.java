@@ -118,7 +118,7 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
             editor.apply();
 
             String rsp_code = Utils.getValueFromJson(body, "rsp_code");
-            Log.d("유아이", "핀테크응답결과 " + body);
+            Log.d("유아", "핀테크응답결과 " + body);
 
             userAccountItemList = Utils.UserInfoResponseJsonParse(body);
 
@@ -190,9 +190,10 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
         contactItemRealmResults = realm.where(ContactItem.class).findAll();
         missionCartItemList = realmResults;
 
-        List<ContactItem> contactItemList = contactItemRealmResults;
-        Log.d("렐름", realmResults.size() + "");
-        Log.d("렐름", missionCartItemList.size() + "");
+
+        RealmResults<ContactItem> realmResults2 = realm.where(ContactItem.class).equalTo("isSelected",true).findAll();
+        Log.d("교수님", realmResults2.size() + "");
+
 
         //dateItemArrayList = getIntent().getParcelableArrayListExtra("date_list");
 
@@ -200,7 +201,7 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
 //         Log.d("리절트",dateItemArrayList.get(0).getYear()+"");
         setRecyclerView(realmResults);
         //setContactRecyclerView(contactItemRealmResults);
-        setTransferRecyclerView(contactItemRealmResults);
+        setTransferRecyclerView(realmResults2);
 
     }
 
@@ -435,6 +436,7 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
         realmResults.deleteAllFromRealm();
 
         realm.commitTransaction();
+        missionCartListAdapter.notifyDataSetChanged();
 
     }
 

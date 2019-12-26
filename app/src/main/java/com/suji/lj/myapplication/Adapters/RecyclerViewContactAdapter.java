@@ -74,24 +74,33 @@ public class RecyclerViewContactAdapter extends RecyclerView.Adapter<RecyclerVie
             @Override
             public void onClick(View v) {
                 itemList.get(position).setSelected(!itemList.get(position).isSelected()); //스위치
-                Log.d("라니스터","position  "+position+"\n"+"isture"+itemList.get(position).isSelected());
+                itemList.get(position).setPosition(position);
+                //Log.d("라니스터","position  "+position+"\n"+"isture"+itemList.get(position).isSelected());
+
                 if(itemList.get(position).isSelected()) {
+
                     ContactItem contactItem = new ContactItem();
                     contactItem.setDisplayName(itemList.get(position).getDisplayName());
                     contactItem.setPhoneNumbers(itemList.get(position).getPhoneNumbers());
                     contactItem.setPosition(position);
+                    contactItem.setSelected(true);
                     //onFriendsCountFromContactListener.onFriendsCountFromContact(itemList.size());
 
 
-                    ((ContactActivity) context).test(contactItem);
+                    ((ContactActivity) context).selectedList(contactItem);
+
+                   // notifyDataSetChanged();
                 }
                 else{
 
                     //onFriendsCountFromContactListener.onFriendsCountFromContact(itemList.size());
 
                     ((ContactActivity) context).testDelete(position);
+                    //notifyDataSetChanged();
 
                 }
+
+
             }
         });
 
@@ -272,7 +281,7 @@ public class RecyclerViewContactAdapter extends RecyclerView.Adapter<RecyclerVie
 
 
         }
-        ((ContactActivity) context).recyclerViewConfirmed(selected_contact);
+        //((ContactActivity) context).recyclerViewConfirmed(selected_contact);
     }
 
 

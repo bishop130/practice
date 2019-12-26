@@ -62,9 +62,9 @@ public class ContactResponse extends RecyclerView.Adapter<ContactResponse.Contac
                 int pos = itemList.get(position).getPosition();
                 itemList.remove(position);
 
-                //notifyDataSetChanged();
-                notifyItemRemoved(position);
-                notifyItemRangeChanged(position,itemList.size());
+                notifyDataSetChanged();
+                notifyItemChanged(position,itemList);
+                //notifyItemRemoved(position);
                 onFriendsCountListener.onFriendsCount(itemList.size());
 
 
