@@ -31,11 +31,18 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.borax12.materialdaterangepicker.date.DatePickerDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.suji.lj.myapplication.Adapters.MainRecyclerAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerViewDivider;
 import com.suji.lj.myapplication.Decorators.EventDecorator;
 import com.suji.lj.myapplication.Decorators.SelectorDecorator;
+import com.suji.lj.myapplication.Items.ItemForServer;
+import com.suji.lj.myapplication.Items.MissionInfoList;
 import com.suji.lj.myapplication.Items.RecyclerItem;
 import com.suji.lj.myapplication.NewMissionActivity;
 import com.suji.lj.myapplication.R;
@@ -68,6 +75,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static android.content.Context.MODE_PRIVATE;
+
 public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDateSetListener {
 
 
@@ -77,7 +86,6 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
     int year, month, day;
     private Calendar calendar;
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private static final String Mission_List_URL = "http://bishop130.cafe24.com/Mission_List.php";
     private FragmentActivity myContext;
     private RequestQueue requestQueue;
     private RecyclerView recyclerView;
@@ -85,13 +93,12 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
     private List<CalendarDay> dates = new ArrayList<>();
     private String response_result;
     private Context mContext;
-    Bundle args;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        Log.d("홈프레그","onCreateView");
+        Log.d("홈프레그", "onCreateView");
         calendar = Calendar.getInstance();
         requestQueue = Volley.newRequestQueue(mContext);
         year = calendar.get(Calendar.YEAR);
@@ -100,13 +107,13 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
 
 
         final View view = inflater.inflate(R.layout.fragment_favorite, container, false);
-        SharedPreferences Preferences = mContext.getSharedPreferences("timer_control",Context.MODE_PRIVATE);
+        SharedPreferences Preferences = mContext.getSharedPreferences("timer_control", MODE_PRIVATE);
         SharedPreferences.Editor editor = Preferences.edit();
-        editor.putBoolean("timer_switch",true);
+        editor.putBoolean("timer_switch", true);
         editor.apply();
 
-        String user_id = mContext.getSharedPreferences("Kakao",Context.MODE_PRIVATE).getString("token","");
-        volleyConnect(user_id);
+        String user_id = mContext.getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
+        //volleyConnect(user_id);
         FloatingActionButton fab = view.findViewById(R.id.fab_new);
 
         recyclerView = view.findViewById(R.id.recycler_day);
@@ -118,7 +125,7 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
         materialCalendarView.setOnDateChangedListener(new OnDateSelectedListener() {
             @Override
             public void onDateSelected(@NonNull MaterialCalendarView materialCalendarView, @NonNull CalendarDay calendarDay, boolean b) {
-                onSortMission(response_result, calendarDay);
+                //onSortMission(response_result, calendarDay);
             }
         });
 
@@ -131,6 +138,8 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
 
             }
         });
+
+        checkResult();
 
         return view;
     }
@@ -163,40 +172,85 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
 
         RecyclerAdapter recyclerAdapter = new RecyclerAdapter(getContext(), lstRecyclerItem);
         recyclerAdapter.notifyDataSetChanged();
-        MainRecyclerAdapter mainRecyclerAdapter = new MainRecyclerAdapter(getContext(),lstRecyclerItem);
+        MainRecyclerAdapter mainRecyclerAdapter = new MainRecyclerAdapter(getContext(), lstRecyclerItem);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(mainRecyclerAdapter);
 
     }
 
-    private void volleyConnect(final String userId) {
+    private void checkResult() {
 
+        String user_id = mContext.getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
+        List<MissionInfoList> missionInfoLists = new ArrayList<>();
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
 
-        StringRequest request = new StringRequest(Request.Method.POST, Mission_List_URL, new Response.Listener<String>() {
+        databaseReference = databaseReference.child("mission_info_list").child(user_id);
+        databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onResponse(String response) {
-                displayDotinCalendar(response);
-                response_result = response;
-                Log.d("HomeFragment", "volley connect");
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-                CalendarDay calendarDay = CalendarDay.today();
-                onSortMission(response, calendarDay);
+
+                Log.d("파베", dataSnapshot.getChildrenCount() + "");
+
+                for (DataSnapshot post : dataSnapshot.getChildren()) {
+                    MissionInfoList missionInfoList = post.getValue(MissionInfoList.class);
+
+
+                    missionInfoLists.add(missionInfoList);
+                    Log.d("파베", missionInfoList.getMission_title() + "");
+                    Log.d("파베", missionInfoList.getMission_time());
+                    Log.d("파베", missionInfoList.getLat() + "");
+                    Log.d("파베", missionInfoList.getMission_info_root_id() + "");
+
+                    for (String date : missionInfoList.getMission_dates().keySet()) {
+                        Log.d("파베", date);
+                    }
+                }
+
+                sortMissions(missionInfoLists);
 
             }
-        }, new Response.ErrorListener() {
+
             @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(getContext(), "전송실패" + error, Toast.LENGTH_LONG).show();
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
             }
-        }) {
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                HashMap<String, String> hashMap = new HashMap<String, String>();
-                hashMap.put("userId", userId);
-                return hashMap;
+        });
+
+
+    }
+
+    private void sortMissions(List<MissionInfoList> missionInfoLists) {
+
+
+        for (int i = 0; i < missionInfoLists.size(); i++) {
+            for (String date : missionInfoLists.get(i).getMission_dates().keySet()) {
+                Log.d("파베", date);
+                RecyclerItem recyclerItem = new RecyclerItem();
+                recyclerItem.setMissionTitle(missionInfoLists.get(i).getMission_title());
+                recyclerItem.setMissionID("missionid");
+                recyclerItem.setLatitude(missionInfoLists.get(i).getLat());
+                recyclerItem.setLongitude(missionInfoLists.get(i).getLng());
+                recyclerItem.setMissionTime(missionInfoLists.get(i).getMission_time());
+                //recyclerItem.setDate_array(jsonObject.getString("date_array"));
+                Log.d("파베",date+" "+missionInfoLists.get(i).getMission_time());
+                recyclerItem.setDate_time(date + " " + missionInfoLists.get(i).getMission_time());
+                //recyclerItem.setContact_json(jsonObject.getString("mission_contacts"));
+                //recyclerItem.setCompleted(jsonObject.getString("completed_dates"));
+                //recyclerItem.setCompleted_dates(jsonObject.getString("completed_dates_array"));
+                //recyclerItem.setTotal_dates(jsonObject.getString("total_dates"));
+                //recyclerItem.setIs_failed(jsonObject.getString("is_failed"));
+                recyclerItem.setAddress(missionInfoLists.get(i).getAddress());
+                recyclerItem.setDate(date);
+                lstRecyclerItem.add(recyclerItem);
             }
-        };
-        requestQueue.add(request);
+        }
+
+
+        Collections.sort(lstRecyclerItem);
+        setupRecyclerView(lstRecyclerItem);
+
+        //  }
     }
 
 
@@ -257,34 +311,34 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
 
                     for (int j = 0; j < items.size(); j++) {
                         //if (FORMATTER.format(calendarDay.getDate()).equals(items.get(j))) {
-                            RecyclerItem recyclerItem = new RecyclerItem();
-                            for (int k = 0; k < completed_dates_item.size(); k++) {
-                                if (items.get(j).equals(completed_dates_item.get(k))) {
-                                    recyclerItem.setSuccess(true);
-                                } else {
-                                    recyclerItem.setSuccess(false);
-                                }
+                        RecyclerItem recyclerItem = new RecyclerItem();
+                        for (int k = 0; k < completed_dates_item.size(); k++) {
+                            if (items.get(j).equals(completed_dates_item.get(k))) {
+                                recyclerItem.setSuccess(true);
+                            } else {
+                                recyclerItem.setSuccess(false);
                             }
-                            recyclerItem.setMissionTitle(jsonObject.getString("mission_name"));
-                            recyclerItem.setMissionID(jsonObject.getString("mission_id"));
-                            recyclerItem.setLatitude(jsonObject.getDouble("mission_lat"));
-                            recyclerItem.setLongitude(jsonObject.getDouble("mission_lng"));
-                            recyclerItem.setMissionTime(jsonObject.getString("mission_time"));
-                            recyclerItem.setDate_array(jsonObject.getString("date_array"));
-                            recyclerItem.setDate_time(items.get(j) + " " + jsonObject.getString("mission_time"));
-                            recyclerItem.setContact_json(jsonObject.getString("mission_contacts"));
-                            recyclerItem.setCompleted(jsonObject.getString("completed_dates"));
-                            recyclerItem.setCompleted_dates(jsonObject.getString("completed_dates_array"));
-                            recyclerItem.setTotal_dates(jsonObject.getString("total_dates"));
-                            recyclerItem.setIs_failed(jsonObject.getString("is_failed"));
-                            recyclerItem.setAddress(jsonObject.getString("address"));
-                            recyclerItem.setDate(items.get(j));
-
-                            lstRecyclerItem.add(recyclerItem);
-
-
                         }
-                  //  }
+                        recyclerItem.setMissionTitle(jsonObject.getString("mission_name"));
+                        recyclerItem.setMissionID(jsonObject.getString("mission_id"));
+                        recyclerItem.setLatitude(jsonObject.getDouble("mission_lat"));
+                        recyclerItem.setLongitude(jsonObject.getDouble("mission_lng"));
+                        recyclerItem.setMissionTime(jsonObject.getString("mission_time"));
+                        recyclerItem.setDate_array(jsonObject.getString("date_array"));
+                        recyclerItem.setDate_time(items.get(j) + " " + jsonObject.getString("mission_time"));
+                        recyclerItem.setContact_json(jsonObject.getString("mission_contacts"));
+                        recyclerItem.setCompleted(jsonObject.getString("completed_dates"));
+                        recyclerItem.setCompleted_dates(jsonObject.getString("completed_dates_array"));
+                        recyclerItem.setTotal_dates(jsonObject.getString("total_dates"));
+                        recyclerItem.setIs_failed(jsonObject.getString("is_failed"));
+                        recyclerItem.setAddress(jsonObject.getString("address"));
+                        recyclerItem.setDate(items.get(j));
+
+                        lstRecyclerItem.add(recyclerItem);
+
+
+                    }
+                    //  }
                 }
                 Collections.sort(lstRecyclerItem);
                 setupRecyclerView(lstRecyclerItem);
@@ -310,37 +364,39 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
 
 
     @Override
-    public void onPause(){
+    public void onPause() {
         super.onPause();
-        Log.d("타이머","onPause_SearchFragment");
-        SharedPreferences sharedPreferences = mContext.getSharedPreferences("timer_control",Context.MODE_PRIVATE);
+        Log.d("타이머", "onPause_SearchFragment");
+        SharedPreferences sharedPreferences = mContext.getSharedPreferences("timer_control", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean("timer_switch",false);
+        editor.putBoolean("timer_switch", false);
         editor.apply();
 
-        boolean timer_switch = mContext.getSharedPreferences("timer_control",Context.MODE_PRIVATE).getBoolean("timer_switch",true);
+        boolean timer_switch = mContext.getSharedPreferences("timer_control", MODE_PRIVATE).getBoolean("timer_switch", true);
 
 
-        Log.d("타이머"," "+timer_switch);
+        Log.d("타이머", " " + timer_switch);
 
 
     }
+
     @Override
     public void onResume() {
         super.onResume();
-        Log.d("홈프레그","onResume_SearchFragment");
-        SharedPreferences sharedPreferences = mContext.getSharedPreferences("timer_control",Context.MODE_PRIVATE);
+        Log.d("홈프레그", "onResume_SearchFragment");
+        SharedPreferences sharedPreferences = mContext.getSharedPreferences("timer_control", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean("timer_switch",true);
+        editor.putBoolean("timer_switch", true);
         editor.apply();
-        String user_id = mContext.getSharedPreferences("Kakao",Context.MODE_PRIVATE).getString("token","");
+        String user_id = mContext.getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
         //volleyConnect(user_id);
 
     }
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        Log.d("홈프레그","onAttach_SearchFragment");
+        Log.d("홈프레그", "onAttach_SearchFragment");
         mContext = context;
 
     }

@@ -88,35 +88,42 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
 
 
         confirm_button.setOnClickListener(this);
-        tempList2 = realm.where(ContactItem.class).equalTo("isSelected",true).findAll();
-
+        tempList2 = realm.where(ContactItem.class).equalTo("isSelected", true).findAll();
+        listItem = utils.getContacts();
         if (realm.where(ContactItem.class).findAll().size() == 0) {
             Log.d("셀렉트", "처음선택");
-            listItem = utils.getContacts();
+
             setupRecyclerView(listItem);
             recyclerViewConfirmed(selected_item);
         } else {
             Log.d("셀렉트", "재선택");
             tempList = realm.where(ContactItem.class).findAll();
-            listItem = realm.copyFromRealm(tempList);
+            selected_item = realm.copyFromRealm(tempList);
 
             //selected_item = realm.copyFromRealm(tempList2);
+
+            for (int i = 0; i < selected_item.size(); i++) {
+
+
+                listItem.get(selected_item.get(i).getPosition()).setPosition(selected_item.get(i).getPosition());
+                listItem.get(selected_item.get(i).getPosition()).setSelected(true);
+            }
+            selected_item.clear();
             setupRecyclerView(listItem);
             recyclerViewConfirmed(selected_item);
+
             for (int i = 0; i < listItem.size(); i++) {
                 if (listItem.get(i).isSelected()) {
-
+                    Log.d("뭐가달라", listItem.get(i).getDisplayName());
+                    Log.d("뭐가달라", listItem.get(i).getPosition() + "");
+                    Log.d("뭐가달라", listItem.get(i).isSelected() + "");
+                    Log.d("뭐가달라", " ");
                     selected_item.add(listItem.get(i));
                     contactResponse.notifyItemChanged(listItem.get(i).getPosition());
                 }
             }
             for (int i = 0; i < selected_item.size(); i++) {
-                Log.d("뭐가달라", i + "");
-                Log.d("뭐가달라", selected_item.get(i).getDisplayName());
-                Log.d("뭐가달라", selected_item.get(i).getPhoneNumbers());
-                Log.d("뭐가달라", selected_item.get(i).getPosition() + "");
-                Log.d("뭐가달라", selected_item.get(i).isSelected() + "");
-                Log.d("뭐가달라", " ");
+
             }
 
 
@@ -313,55 +320,33 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
 
  */
 
-            if (tempList2.size() == 0) {
-                for (int i = 0; i < listItem.size(); i++) {
+            realm.beginTransaction();
+            realm.where(ContactItem.class).findAll().deleteAllFromRealm();
+            realm.commitTransaction();
 
-                    //Log.d("렐름","선택"+selected_item.get(i).getDisplayName()+"   포지션 : "+selected_item.get(i).getPosition());
+            for (int i = 0; i < selected_item.size(); i++) {
 
-
-                    //Log.d("렐름확인", selected_item.get(i).getPhoneNumbers());
-
-                    realm.beginTransaction();
-                    ContactItem contactItem = realm.createObject(ContactItem.class);
-                    contactItem.setDisplayName(listItem.get(i).getDisplayName());
-                    contactItem.setPhoneNumbers(listItem.get(i).getPhoneNumbers());
-                    contactItem.setPosition(listItem.get(i).getPosition());
-                    contactItem.setSelected(listItem.get(i).isSelected());
-                    contactItem.setAmount(10000);
-                    realm.commitTransaction();
-
-                }
-
-            }else{
-                tempList2 = realm.where(ContactItem.class).equalTo("isSelected", true).findAll();
-                for (int i = 0; i < selected_item.size(); i++) {
-                    int count = 0;
-
-                    for (int j = 0; j < tempList2.size(); j++) {
-
-                        boolean test = tempList2.get(j).getPhoneNumbers().equals(selected_item.get(i).getPhoneNumbers());
-                        if (test) {
-                            Log.d("이게달라", "원래이름" + tempList2.get(j).getPhoneNumbers() + "\n 새이름" + selected_item.get(i).getPhoneNumbers() + "\n 같은지확인" + test + "\n");
-                            count++;
-                        }
-                        if((j==tempList2.size()-1)&&(count==0)){//같은게 하나도 없다면 새로운 목록
-                            Log.d("이게달라", "들어와야돼");
-                            realm.beginTransaction();
-                            ContactItem contactItem = realm.createObject(ContactItem.class);
-                            contactItem.setDisplayName(selected_item.get(i).getDisplayName());
-                            contactItem.setPhoneNumbers(selected_item.get(i).getPhoneNumbers());
-                            contactItem.setPosition(selected_item.get(i).getPosition());
-                            contactItem.setSelected(true);
-                            contactItem.setAmount(10000);
-                            realm.commitTransaction();
-                        }
+                //Log.d("렐름","선택"+selected_item.get(i).getDisplayName()+"   포지션 : "+selected_item.get(i).getPosition());
 
 
-                    }
+                //Log.d("렐름확인", selected_item.get(i).getPhoneNumbers());
 
-                }
+                realm.beginTransaction();
+                ContactItem contactItem = realm.createObject(ContactItem.class);
+                contactItem.setDisplayName(selected_item.get(i).getDisplayName());
+                contactItem.setPhoneNumbers(selected_item.get(i).getPhoneNumbers());
+                contactItem.setPosition(selected_item.get(i).getPosition());
+                contactItem.setSelected(selected_item.get(i).isSelected());
+                contactItem.setAmount(10000);
+                realm.commitTransaction();
+                Log.d("뭐가달라", i + "");
+                Log.d("뭐가달라", selected_item.get(i).getDisplayName());
+                Log.d("뭐가달라", selected_item.get(i).getPhoneNumbers());
+                Log.d("뭐가달라", selected_item.get(i).getPosition() + "");
+                Log.d("뭐가달라", selected_item.get(i).isSelected() + "");
+                Log.d("뭐가달라", " ");
+
             }
-
 
 
         }

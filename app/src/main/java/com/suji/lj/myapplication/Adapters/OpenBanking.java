@@ -120,77 +120,73 @@ public class OpenBanking {
 
     public void requestTransfer(Callback callback, Context context){
 
-        String user_me_body = context.getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("user_me","");
-        String access_token = context.getSharedPreferences("OpenBanking",MODE_PRIVATE).getString("access_token","");
-        int pos = 0;
-        List<UserAccountItem> userAccountItemList = Utils.UserInfoResponseJsonParse(user_me_body);
+            int amount = 5300;
+            String user_me_body = context.getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("user_me","");
+            String access_token = context.getSharedPreferences("OpenBanking",MODE_PRIVATE).getString("access_token","");
+            int pos = 0;
+            List<UserAccountItem> userAccountItemList = Utils.UserInfoResponseJsonParse(user_me_body);
 
-        String url = "https://testapi.openbanking.or.kr/v2.0/transfer/withdraw/fin_num";
+            String url = "https://testapi.openbanking.or.kr/v2.0/transfer/withdraw/fin_num";
 
-/*
-        HttpUrl.Builder urlBuilder = HttpUrl.parse("https://testapi.openbanking.or.kr/v2.0/transfer/withdraw/fin_num").newBuilder();
-        urlBuilder.addQueryParameter("bank_tran_id", Utils.makeBankTranId());
-        Log.d("송금",Utils.makeBankTranId());
-        urlBuilder.addQueryParameter("cntr_account_type", "N");
-        urlBuilder.addQueryParameter("cntr_account_num", "29030204202663");
-        urlBuilder.addQueryParameter("dps_print_content", "이불안은위험해");
-        urlBuilder.addQueryParameter("fintech_use_num", userAccountItemList.get(pos).getFintech_use_num());
+    /*
+            HttpUrl.Builder urlBuilder = HttpUrl.parse("https://testapi.openbanking.or.kr/v2.0/transfer/withdraw/fin_num").newBuilder();
+            urlBuilder.addQueryParameter("bank_tran_id", Utils.makeBankTranId());
+            Log.d("송금",Utils.makeBankTranId());
+            urlBuilder.addQueryParameter("cntr_account_type", "N");
+            urlBuilder.addQueryParameter("cntr_account_num", "29030204202663");
+            urlBuilder.addQueryParameter("dps_print_content", "이불안은위험해");
+            urlBuilder.addQueryParameter("fintech_use_num", userAccountItemList.get(pos).getFintech_use_num());
 
-        urlBuilder.addQueryParameter("tran_amt", context.getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("transfer_amount",""));
-        Log.d("송금",context.getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("transfer_amount",""));
-        urlBuilder.addQueryParameter("tran_dtime", Utils.getCurrentTime());
-        Log.d("송금",Utils.getCurrentTime());
-        urlBuilder.addQueryParameter("req_client_name", userAccountItemList.get(pos).getUser_name());
-        Log.d("송금",userAccountItemList.get(pos).getUser_name());
-        urlBuilder.addQueryParameter("req_client_num",userAccountItemList.get(pos).getUser_seq_no());
-        Log.d("송금",userAccountItemList.get(pos).getUser_seq_no());
-        urlBuilder.addQueryParameter("transfer_purpose","TR");
-*/
-        MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("bank_tran_id", Utils.makeBankTranId());
-        params.put("cntr_account_type", "N");
-        params.put("cntr_account_num", "85768576");
-        params.put("dps_print_content", "이불안은위험해");
-        params.put("fintech_use_num", userAccountItemList.get(pos).getFintech_use_num());
-        params.put("wd_print_content","오픈");
-        params.put("tran_amt", "1000");
-        params.put("tran_dtime", Utils.getCurrentTime());
-        params.put("req_client_name", userAccountItemList.get(pos).getUser_name());
-        params.put("req_client_num","HONG1234");
-        params.put("transfer_purpose","TR");
-        params.put("req_client_bank_code","004");
-        params.put("req_client_account_num","01030331130");
-        params.put("req_client_fintech_use _num",userAccountItemList.get(0).getFintech_use_num());
-        params.put("sub_frnc_name","이름");
-        params.put("sub_frnc_num","12345678");
-        params.put("sub_frnc_business_num","12345678");
-        params.put("recv_client_name","이불안");
-        params.put("recv_client_bank_code","004");
-        params.put("recv_client_account_num","85768576");
+            urlBuilder.addQueryParameter("tran_amt", context.getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("transfer_amount",""));
+            Log.d("송금",context.getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("transfer_amount",""));
+            urlBuilder.addQueryParameter("tran_dtime", Utils.getCurrentTime());
+            Log.d("송금",Utils.getCurrentTime());
+            urlBuilder.addQueryParameter("req_client_name", userAccountItemList.get(pos).getUser_name());
+            Log.d("송금",userAccountItemList.get(pos).getUser_name());
+            urlBuilder.addQueryParameter("req_client_num",userAccountItemList.get(pos).getUser_seq_no());
+            Log.d("송금",userAccountItemList.get(pos).getUser_seq_no());
+            urlBuilder.addQueryParameter("transfer_purpose","TR");
+    */
+            MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+            Map<String, String> params = new HashMap<String, String>();
+            params.put("bank_tran_id", Utils.makeBankTranId());
+            params.put("cntr_account_type", "N");
+            params.put("cntr_account_num", "85768576");
+            params.put("dps_print_content", "이불안은위험해");
+            params.put("fintech_use_num", userAccountItemList.get(pos).getFintech_use_num());
+            params.put("wd_print_content","오픈");
+            params.put("tran_amt", String.valueOf(1000));
+            params.put("tran_dtime", Utils.getCurrentTime());
+            params.put("req_client_name", userAccountItemList.get(pos).getUser_name());
+            params.put("req_client_num","HONG1234");
+            params.put("transfer_purpose","TR");
+            params.put("req_client_bank_code","004");
+            params.put("req_client_account_num","01030331130");
+            params.put("req_client_fintech_use _num",userAccountItemList.get(0).getFintech_use_num());
+            params.put("sub_frnc_name","이름");
+            params.put("sub_frnc_num","12345678");
+            params.put("sub_frnc_business_num","12345678");
+            params.put("recv_client_name","이불안");
+            params.put("recv_client_bank_code","004");
+            params.put("recv_client_account_num","85768576");
 
+            JSONObject parameter = new JSONObject(params);
+            RequestBody formBody = RequestBody.create(JSON,parameter.toString());
 
-
-
-
-
-        JSONObject parameter = new JSONObject(params);
-        RequestBody formBody = RequestBody.create(JSON,parameter.toString());
-
-        Log.d("송금",userAccountItemList.get(pos).getFintech_use_num());
+            Log.d("송금",userAccountItemList.get(pos).getFintech_use_num());
 
 
-        Log.d("송금",context.getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("transfer_amount",""));
-        Log.d("송금",Utils.getCurrentTime());
-        Log.d("송금","핀테크"+userAccountItemList.get(pos).getFintech_use_num());
-        Log.d("송금",userAccountItemList.get(pos).getUser_seq_no());
+            Log.d("송금",context.getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("transfer_amount",""));
+            Log.d("송금",Utils.getCurrentTime());
+            Log.d("송금","핀테크"+userAccountItemList.get(pos).getFintech_use_num());
+            Log.d("송금",userAccountItemList.get(pos).getUser_seq_no());
 
-/*
-        RequestBody formBody = new FormBody.Builder()
-        .add("bank_tran_id", Utils.makeBankTranId())
-        .add("cntr_account_type", "N")
-        .add("cntr_account_num", "29030204202663")
-        .add("dps_print_content", "이불안은 위험해")
+    /*
+            RequestBody formBody = new FormBody.Builder()
+            .add("bank_tran_id", Utils.makeBankTranId())
+            .add("cntr_account_type", "N")
+            .add("cntr_account_num", "29030204202663")
+            .add("dps_print_content", "이불안은 위험해")
         .add("fintech_use_num", userAccountItemList.get(pos).getFintech_use_num())
         .add("tran_amt", context.getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("transfer_amount",""))
         .add("tran_dtime", Utils.getCurrentTime())

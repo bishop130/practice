@@ -34,6 +34,7 @@ public class RecyclerTransferRespectivelyAdapter extends RecyclerView.Adapter<Re
     private boolean hasFractionalPart;
 
 
+
     public RecyclerTransferRespectivelyAdapter(RealmResults<ContactItem> realmResults, Realm realm){
 
         this.realmResults = realmResults;
@@ -46,15 +47,16 @@ public class RecyclerTransferRespectivelyAdapter extends RecyclerView.Adapter<Re
 
         holder.name.setText("# "+realmResults.get(position).getDisplayName());
         holder.et.setText(df.format(realmResults.get(position).getAmount()));
+
+
         holder.et.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                Log.d("오픈뱅킹", "on_changed");
+
 
                 if (s.toString().contains(String.valueOf(df.getDecimalFormatSymbols().getDecimalSeparator()))) {
                     hasFractionalPart = true;
@@ -65,13 +67,13 @@ public class RecyclerTransferRespectivelyAdapter extends RecyclerView.Adapter<Re
 
             @Override
             public void afterTextChanged(Editable s) {
+
                 if(s.toString().length()==0){
 
                 }
                 else {
+                    ContactItem contactItem = realm.where(ContactItem.class).equalTo("position",realmResults.get(position).getPosition()).findFirst();
                     int amount = Integer.valueOf(s.toString().replaceAll(",", ""));
-
-                    ContactItem contactItem = realm.where(ContactItem.class).equalTo("phoneNumbers",realmResults.get(position).getPhoneNumbers()).findFirst();
                     realm.beginTransaction();
                     contactItem.setAmount(amount);
                     realm.commitTransaction();
@@ -145,6 +147,7 @@ public class RecyclerTransferRespectivelyAdapter extends RecyclerView.Adapter<Re
         TextInputEditText textInputEditText;
         private TextInputEditText et;
         private TextInputLayout etl;
+
 
 
         public ViewHolder(@NonNull View itemView) {

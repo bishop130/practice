@@ -5,13 +5,13 @@ import java.util.Map;
 
 public class MissionInfoRoot {
 
-    public int penalty_amt;
+
     public String mission_registered_date_time;
     public Map<String, Object> children_id;
     public ArrayList<ContactItem> friends_selected_list;
 
-    public MissionInfoRoot(int penalty_amt, String mission_registered_date_time, Map<String, Object> children_id, ArrayList<ContactItem> friends_selected_list) {
-        this.penalty_amt = penalty_amt;
+    public MissionInfoRoot(String mission_registered_date_time, Map<String, Object> children_id, ArrayList<ContactItem> friends_selected_list) {
+
         this.mission_registered_date_time = mission_registered_date_time;
         this.children_id = children_id;
         this.friends_selected_list = friends_selected_list;
@@ -19,14 +19,6 @@ public class MissionInfoRoot {
 
     public MissionInfoRoot() {
 
-    }
-
-    public int getPenalty_amt() {
-        return penalty_amt;
-    }
-
-    public void setPenalty_amt(int penalty_amt) {
-        this.penalty_amt = penalty_amt;
     }
 
     public String getMission_registered_date_time() {

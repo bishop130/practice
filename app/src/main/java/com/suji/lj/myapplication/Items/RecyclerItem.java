@@ -193,8 +193,8 @@ public class RecyclerItem implements Comparable<RecyclerItem> {
     @Override
     public int compareTo(RecyclerItem o) {
 
-        Date newDate = formatDateTime(o.getDate_time(), "yyyy-MM-dd HH:mm:ss");
-        Date inputDate = formatDateTime(getDate_time(), "yyyy-MM-dd HH:mm:ss");
+        Date newDate = formatDateTime(o.getDate_time(), "yyyyMMdd HH:mm");
+        Date inputDate = formatDateTime(getDate_time(), "yyyyMMdd HH:mm");
 
         return inputDate.compareTo(newDate);
     }

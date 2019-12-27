@@ -134,6 +134,34 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
 
         }
     };
+    private final Callback transfer_openbanking = new Callback(){
+        @Override
+        public void onFailure(Call call, IOException e) {
+
+        }
+
+        @Override
+        public void onResponse(Call call, Response response) throws IOException {
+
+            final String body = response.body().string();
+            Log.d("송금테스트", "핀테크응답결과" + body);
+            String rsp_code = Utils.getValueFromJson(body, "rsp_code");
+            if(rsp_code.equals("A0000")){
+                Log.d("송금테스트", "이체성공");
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        registerSend();
+                    }
+                });
+
+            }else{
+                Log.d("송금테스트", Utils.getValueFromJson(body, "rsp_message"));
+
+            }
+
+        }
+    };
 
 
     @Override
@@ -253,21 +281,25 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void addMission() {
-
         Intent intent = new Intent(this, SingleModeActivity.class);
         startActivityForResult(intent, 1);
+    }
 
+    private void transferOpenBanking(){
+        openBanking.requestTransfer(transfer_openbanking,this);
     }
 
     private void registerSend() {
         //파이어베이스
-
         Log.d("베이스", "전송완료");
         String user_id = getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
         String mission_id = Utils.getCurrentTime() + "U" + user_id;
 
         DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
         registerCheckForServer(mRootRef, user_id, mission_id);
+        registerMissionInfoRoot(mRootRef,user_id,mission_id);
+        registerUserMissionList(mRootRef,user_id,mission_id);
+        registerMissionInfoList(mRootRef,user_id,mission_id);
         //testtest(mRootRef);
 
 
@@ -295,6 +327,7 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
             ContactItem contactItem = new ContactItem();
             contactItem.setDisplayName(contactItemRealmResults.get(i).getDisplayName());
             contactItem.setPhoneNumbers(contactItemRealmResults.get(i).getPhoneNumbers());
+            contactItem.setAmount(contactItemRealmResults.get(i).getAmount());
             friends_selected_array.add(contactItem);
         }
 
@@ -304,7 +337,6 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
         }
 
         MissionInfoRoot missionInfoRoot = new MissionInfoRoot();
-        missionInfoRoot.setPenalty_amt(5000);
         missionInfoRoot.setMission_registered_date_time(Utils.getCurrentTime());
         missionInfoRoot.setFriends_selected_list(friends_selected_array);
         missionInfoRoot.setChildren_id(mission_children);
@@ -419,11 +451,13 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
                 startActivityForResult(new Intent(this, ContactActivity.class), 2);
                 break;
             case R.id.register_send:
-                registerSend();
+                //registerSend();
+                transferOpenBanking();
                 break;
             case R.id.firebase_read:
                 //checkResult();
                 deleteRealm();
+
                 break;
 
         }
@@ -440,41 +474,6 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
 
     }
 
-    private void checkResult() {
-
-        List<ItemForServer> itemForServerList = new ArrayList<>();
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-
-        databaseReference = databaseReference.child("check_for_server").child("20191220").child("T231700");
-        databaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-
-                Log.d("파베", dataSnapshot.getChildrenCount() + "");
-
-                for (DataSnapshot post : dataSnapshot.getChildren()) {
-                    ItemForServer itemForServer = post.getValue(ItemForServer.class);
-
-
-                    itemForServerList.add(itemForServer);
-                    Log.d("파베", itemForServer.getUser_id() + "");
-                    Log.d("파베", itemForServer.getRoot_id());
-                    Log.d("파베", itemForServer.getChildren_id());
-                    Log.d("파베", itemForServer.isIs_success() + "");
-                }
-
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
-
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
