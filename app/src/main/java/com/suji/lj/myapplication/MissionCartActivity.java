@@ -385,7 +385,7 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
                 int year = missionCartItemList.get(i).getCalendarDayList().get(j).getYear();
                 int month = missionCartItemList.get(i).getCalendarDayList().get(j).getMonth();
                 int day = missionCartItemList.get(i).getCalendarDayList().get(j).getDay();
-                String date = year + "" + month + "" + day;
+                String date = Utils.makeDateForServer(year,month,day);
                 //Log.d("파베", "날짜" + date);
                 mission_dates.put(date, true);
             }
@@ -413,7 +413,10 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
                 int year = missionCartItemList.get(i).getCalendarDayList().get(j).getYear();
                 int month = missionCartItemList.get(i).getCalendarDayList().get(j).getMonth();
                 int day = missionCartItemList.get(i).getCalendarDayList().get(j).getDay();
-                String date = year + "" + month + "" + day;
+
+                String date = Utils.makeDateForServer(year,month,day);
+
+
                 int hour = missionCartItemList.get(i).getHour();
                 int min = missionCartItemList.get(i).getMin();
                 String time_id = Utils.makeTimeForServer(hour, min);

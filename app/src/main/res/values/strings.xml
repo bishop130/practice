@@ -12,6 +12,16 @@
 
     </string-array>
 
+
+    <string name="txt_sun">일</string>
+    <string name="txt_mon">월</string>
+    <string name="txt_tue">화</string>
+    <string name="txt_wed">수</string>
+    <string name="txt_thu">목</string>
+    <string name="txt_fri">금</string>
+    <string name="txt_sat">토</string>
+
+
     <string name="default_notification_channel_name" translatable="true">Weather</string>
     <string name="form_hint_title">제목을 입력하세요 (필수)</string>
     <string name="form_empty_field">(Empty)</string>

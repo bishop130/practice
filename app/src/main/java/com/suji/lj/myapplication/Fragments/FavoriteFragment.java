@@ -36,6 +36,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.prolificinteractive.materialcalendarview.OnMonthChangedListener;
+import com.prolificinteractive.materialcalendarview.format.WeekDayFormatter;
 import com.suji.lj.myapplication.Adapters.MainRecyclerAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerViewDivider;
@@ -60,6 +62,7 @@ import com.prolificinteractive.materialcalendarview.format.TitleFormatter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.threeten.bp.DayOfWeek;
 import org.threeten.bp.LocalDate;
 import org.threeten.bp.format.DateTimeFormatter;
 
@@ -122,10 +125,21 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
 
 
         materialCalendarView = view.findViewById(R.id.material_calendar_day);
+        materialCalendarView.setTopbarVisible(true);
+
+        materialCalendarView.setOnMonthChangedListener(new OnMonthChangedListener() {
+            @Override
+            public void onMonthChanged(MaterialCalendarView widget, CalendarDay date) {
+
+            }
+        });
+
+
         materialCalendarView.setOnDateChangedListener(new OnDateSelectedListener() {
             @Override
             public void onDateSelected(@NonNull MaterialCalendarView materialCalendarView, @NonNull CalendarDay calendarDay, boolean b) {
                 //onSortMission(response_result, calendarDay);
+                Log.d("달력",calendarDay.getMonth()+"");
             }
         });
 
@@ -340,7 +354,7 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
                     }
                     //  }
                 }
-                Collections.sort(lstRecyclerItem);
+                //Collections.sort(lstRecyclerItem);
                 setupRecyclerView(lstRecyclerItem);
 
 

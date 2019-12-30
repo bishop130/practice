@@ -18,6 +18,7 @@ import com.github.aakira.expandablelayout.ExpandableLinearLayout;
 import com.suji.lj.myapplication.Items.RecyclerItem;
 import com.suji.lj.myapplication.R;
 import com.suji.lj.myapplication.Utils.DateTimeFormatter;
+import com.suji.lj.myapplication.Utils.Utils;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -57,6 +58,8 @@ public class MainRecyclerAdapter extends RecyclerView.Adapter<MainRecyclerAdapte
     public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
 
         holder.tv_missionTitle.setText(recyclerItemList.get(position).getMissionTitle());
+        holder.tv_address.setText(recyclerItemList.get(position).getAddress()+" 인근");
+        setDisplayDateTime(holder,position);
 
     }
 
@@ -67,6 +70,9 @@ public class MainRecyclerAdapter extends RecyclerView.Adapter<MainRecyclerAdapte
 
     public static class ItemViewHolder extends RecyclerView.ViewHolder {
         TextView tv_missionTitle;
+        TextView tv_date;
+        TextView tv_time;
+        TextView tv_address;
 
         LinearLayout view_container;
 
@@ -75,11 +81,21 @@ public class MainRecyclerAdapter extends RecyclerView.Adapter<MainRecyclerAdapte
             super(itemView);
             view_container = itemView.findViewById(R.id.main_recycler_view_container);
             tv_missionTitle = itemView.findViewById(R.id.tv_mission_title);
+            tv_date = itemView.findViewById(R.id.date_display);
+            tv_time = itemView.findViewById(R.id.time_display);
+            tv_address = itemView.findViewById(R.id.address_display);
 
         }
     }
+    private void setDisplayDateTime(ItemViewHolder holder,final int position){
+        String time = Utils.monthDayTime(recyclerItemList.get(position).getDate(),recyclerItemList.get(position).getMissionTime());
+        holder.tv_date.setText(time);
+        holder.tv_time.setText(recyclerItemList.get(position).getDate_time());
 
-    private void setMinMaxDate(final RecyclerAdapter.ItemViewHolder holder, final int position) {
+
+    }
+
+    private void setMinMaxDate(final ItemViewHolder holder, final int position) {
 
         String array = recyclerItemList.get(position).getDate_array();
 
@@ -104,7 +120,7 @@ public class MainRecyclerAdapter extends RecyclerView.Adapter<MainRecyclerAdapte
         }
 
         Log.d("date_check_count", String.valueOf(date_count));
-        holder.range_date.setText(simpleDateFormat.format(min_date) + "~" + simpleDateFormat.format(max_date));
+        //holder.range_date.setText(simpleDateFormat.format(min_date) + "~" + simpleDateFormat.format(max_date));
 
 
     }

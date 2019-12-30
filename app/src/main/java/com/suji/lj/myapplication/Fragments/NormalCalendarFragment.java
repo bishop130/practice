@@ -147,6 +147,7 @@ public class NormalCalendarFragment extends Fragment{
             int year = calendarDayList.get(i).getYear();
             int month = calendarDayList.get(i).getMonth();
             int day = calendarDayList.get(i).getDay();
+
             dateItem.setYear(calendarDayList.get(i).getYear());
             dateItem.setMonth(calendarDayList.get(i).getMonth());
             dateItem.setDay(calendarDayList.get(i).getDay());

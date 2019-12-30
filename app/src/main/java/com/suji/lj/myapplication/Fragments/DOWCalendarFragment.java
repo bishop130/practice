@@ -61,8 +61,21 @@ public class DOWCalendarFragment extends Fragment {
     // when dialog box is closed, below method will be called.
     private DatePickerDialog.OnDateSetListener datePickerListener = (view, selectedYear, selectedMonth, selectedDay) -> {
         String year1 = String.valueOf(selectedYear);
-        String month1 = String.valueOf(selectedMonth + 1);
-        String day1 = String.valueOf(selectedDay);
+        String month1;
+        String day1;
+        if(selectedMonth+1<10){
+             month1 = "0"+String.valueOf(selectedMonth+1);
+        }
+        else{
+            month1 = String.valueOf(selectedMonth + 1);
+        }
+        if(selectedDay<10){
+            day1 = "0"+String.valueOf(selectedDay);
+        }else{
+            day1 = String.valueOf(selectedDay);
+        }
+
+
 
         Toast.makeText(getActivity(),year1+month1+day1,Toast.LENGTH_LONG).show();
         date_show.setText(year1+month1+day1);

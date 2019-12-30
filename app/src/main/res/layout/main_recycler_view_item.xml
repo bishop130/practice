@@ -11,6 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:layout_margin="12dp"
         android:layout_gravity="end">
 
 
@@ -27,7 +28,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="30dp"
-                android:layout_marginTop="20dp"
+                android:layout_gravity="center"
                 android:text="제목"
                 android:textColor="@color/black"
                 android:textSize="24sp" />
@@ -36,25 +37,24 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="30dp"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="20dp"
+        android:layout_gravity="center"
                 android:orientation="horizontal">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="date"
-                    android:textSize="20sp"
+                    android:textSize="14sp"
                     android:id="@+id/date_display"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
                     android:text="time"
-                    android:id="@+id/time"
+                    android:id="@+id/time_display"
                     android:layout_marginEnd="20dp"
-                    android:textSize="20sp"/>
-                    
+                    android:textSize="14sp"/>
+
 
 
             </LinearLayout>
@@ -79,6 +79,29 @@
                 android:layout_gravity="center"
                 android:src="@drawable/right_arrow" />
         </LinearLayout>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:layout_marginBottom="12dp"
+
+
+
+        >
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/location_pin"/>
+        <TextView
+            android:id="@+id/address_display"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="주소"
+            android:layout_gravity="center"
+            android:layout_marginStart="24dp"/>
+
+
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
