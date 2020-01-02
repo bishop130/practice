@@ -54,7 +54,7 @@ public class DateTimeFormatter {
     }
 
     public Date dateParser(String date) {
-        SimpleDateFormat date_sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.KOREA);
+        SimpleDateFormat date_sdf = new SimpleDateFormat("yyyyMMdd", Locale.KOREA);
         Date result = new Date();
         try {
             result = date_sdf.parse(date);

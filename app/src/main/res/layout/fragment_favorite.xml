@@ -8,6 +8,7 @@
 
 
 
+
     <com.prolificinteractive.materialcalendarview.MaterialCalendarView
         android:id="@+id/material_calendar_day"
         android:layout_width="match_parent"
@@ -44,6 +45,17 @@
 
 
     </androidx.recyclerview.widget.RecyclerView>
+
+
+            <ProgressBar
+                android:id="@+id/loadingPanel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                android:layout_gravity="center"
+                android:visibility="visible"/>
+
+
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_new"
             android:layout_width="wrap_content"

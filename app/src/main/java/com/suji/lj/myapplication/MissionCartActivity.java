@@ -8,12 +8,14 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,9 +24,12 @@ import com.google.android.flexbox.AlignItems;
 import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexboxLayoutManager;
 import com.google.android.flexbox.JustifyContent;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -36,11 +41,13 @@ import com.suji.lj.myapplication.Adapters.OpenBanking;
 import com.suji.lj.myapplication.Adapters.RecyclerTransferRespectivelyAdapter;
 import com.suji.lj.myapplication.Items.ContactItem;
 import com.suji.lj.myapplication.Items.DateItem;
+import com.suji.lj.myapplication.Items.ItemForMissionByDay;
 import com.suji.lj.myapplication.Items.ItemForServer;
 import com.suji.lj.myapplication.Items.MissionCartItem;
 import com.suji.lj.myapplication.Items.MissionInfoList;
 import com.suji.lj.myapplication.Items.MissionInfoRoot;
 import com.suji.lj.myapplication.Items.UserAccountItem;
+import com.suji.lj.myapplication.Utils.DateTimeUtils;
 import com.suji.lj.myapplication.Utils.Utils;
 
 import java.io.IOException;
@@ -295,23 +302,29 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
         String user_id = getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
         String mission_id = Utils.getCurrentTime() + "U" + user_id;
 
-        DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
-        registerCheckForServer(mRootRef, user_id, mission_id);
-        registerMissionInfoRoot(mRootRef,user_id,mission_id);
-        registerUserMissionList(mRootRef,user_id,mission_id);
-        registerMissionInfoList(mRootRef,user_id,mission_id);
+        DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference().child("user_data").child(user_id);
+        //registerCheckForServer(mRootRef, user_id, mission_id);
+        //registerMissionInfoRoot(mRootRef,user_id,mission_id);
+        //registerUserMissionList(mRootRef,user_id,mission_id);
+        //registerMissionInfoList(mRootRef,user_id,mission_id);
+        registerMainDisplay(mRootRef,user_id,mission_id);
         //testtest(mRootRef);
 
-
-        mRootRef.child("mission_info_list").addValueEventListener(new ValueEventListener() {
+        mRootRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                Log.d("실시간", dataSnapshot.getValue().toString());
+                if(dataSnapshot.exists())
+                {
+                    Log.d("파베","addvalue  성공");
+                    deleteRealm();
+                }else{
+                    Log.d("파베","addvalue  실패");
+                }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                Log.d("파베","addvalue  실패"+databaseError.toString());
             }
         });
 
@@ -385,7 +398,7 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
                 int year = missionCartItemList.get(i).getCalendarDayList().get(j).getYear();
                 int month = missionCartItemList.get(i).getCalendarDayList().get(j).getMonth();
                 int day = missionCartItemList.get(i).getCalendarDayList().get(j).getDay();
-                String date = Utils.makeDateForServer(year,month,day);
+                String date = DateTimeUtils.makeDateForServer(year,month,day);
                 //Log.d("파베", "날짜" + date);
                 mission_dates.put(date, true);
             }
@@ -414,12 +427,12 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
                 int month = missionCartItemList.get(i).getCalendarDayList().get(j).getMonth();
                 int day = missionCartItemList.get(i).getCalendarDayList().get(j).getDay();
 
-                String date = Utils.makeDateForServer(year,month,day);
+                String date = DateTimeUtils.makeDateForServer(year,month,day);
 
 
                 int hour = missionCartItemList.get(i).getHour();
                 int min = missionCartItemList.get(i).getMin();
-                String time_id = Utils.makeTimeForServer(hour, min);
+                String time_id = DateTimeUtils.makeTimeForServer(hour, min);
 
 
                 ItemForServer itemForServer = new ItemForServer();
@@ -441,6 +454,56 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
 
 
     }
+    private void registerMainDisplay(DatabaseReference databaseReference, String user_id,String mission_id){
+        Map<String, Object> mission_main_list = new HashMap<>();
+        for (int i = 0; i < missionCartItemList.size(); i++) {
+            for (int j = 0; j < missionCartItemList.get(i).getCalendarDayList().size(); j++) {
+
+                ItemForMissionByDay itemForMissionByDay = new ItemForMissionByDay();
+
+                itemForMissionByDay.setTitle(missionCartItemList.get(i).getTitle());
+                itemForMissionByDay.setAddress(missionCartItemList.get(i).getAddress());
+                itemForMissionByDay.setTime(DateTimeUtils.makeTimeForServer(missionCartItemList.get(i).getHour(),missionCartItemList.get(i).getMin()));
+                itemForMissionByDay.setLat(missionCartItemList.get(i).getLat());
+                itemForMissionByDay.setLng(missionCartItemList.get(i).getLng());
+
+
+                int year = missionCartItemList.get(i).getCalendarDayList().get(j).getYear();
+                int month = missionCartItemList.get(i).getCalendarDayList().get(j).getMonth();
+                int day = missionCartItemList.get(i).getCalendarDayList().get(j).getDay();
+
+                String date = DateTimeUtils.makeDateForServer(year,month,day);
+                itemForMissionByDay.setDate(date);
+
+                itemForMissionByDay.setSuccess(false);
+
+
+                int hour = missionCartItemList.get(i).getHour();
+                int min = missionCartItemList.get(i).getMin();
+                String time = DateTimeUtils.makeTimeForServer(hour,min);
+
+                mission_main_list.put(date+time,itemForMissionByDay);
+
+
+
+            }
+        }
+
+        databaseReference.child("mission_display").updateChildren(mission_main_list).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Log.d("파베","mission_display_전송성공");
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d("파베","mission_display_전송실패");
+            }
+        });
+
+
+
+    }
 
 
     @Override
@@ -454,12 +517,13 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
                 startActivityForResult(new Intent(this, ContactActivity.class), 2);
                 break;
             case R.id.register_send:
-                //registerSend();
-                transferOpenBanking();
+                registerSend();
+                //transferOpenBanking();
                 break;
             case R.id.firebase_read:
                 //checkResult();
                 deleteRealm();
+
 
                 break;
 

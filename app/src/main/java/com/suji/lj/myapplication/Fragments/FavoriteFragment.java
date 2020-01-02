@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.paging.PagedList;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -19,6 +20,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,11 +34,15 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.borax12.materialdaterangepicker.date.DatePickerDialog;
+import com.firebase.ui.database.paging.DatabasePagingOptions;
+import com.firebase.ui.database.paging.FirebaseRecyclerPagingAdapter;
+import com.firebase.ui.database.paging.LoadingState;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.prolificinteractive.materialcalendarview.OnMonthChangedListener;
 import com.prolificinteractive.materialcalendarview.format.WeekDayFormatter;
@@ -43,6 +51,7 @@ import com.suji.lj.myapplication.Adapters.RecyclerAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerViewDivider;
 import com.suji.lj.myapplication.Decorators.EventDecorator;
 import com.suji.lj.myapplication.Decorators.SelectorDecorator;
+import com.suji.lj.myapplication.Items.ItemForMissionByDay;
 import com.suji.lj.myapplication.Items.ItemForServer;
 import com.suji.lj.myapplication.Items.MissionInfoList;
 import com.suji.lj.myapplication.Items.RecyclerItem;
@@ -58,6 +67,8 @@ import com.prolificinteractive.materialcalendarview.CalendarMode;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
 import com.prolificinteractive.materialcalendarview.format.TitleFormatter;
+import com.suji.lj.myapplication.Utils.DateTimeUtils;
+import com.suji.lj.myapplication.Utils.Utils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -79,6 +90,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import static android.content.Context.MODE_PRIVATE;
+import static com.firebase.ui.database.paging.LoadingState.LOADED;
 
 public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDateSetListener {
 
@@ -96,6 +108,7 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
     private List<CalendarDay> dates = new ArrayList<>();
     private String response_result;
     private Context mContext;
+    ProgressBar loading_panel;
 
     @Nullable
     @Override
@@ -119,6 +132,7 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
         //volleyConnect(user_id);
         FloatingActionButton fab = view.findViewById(R.id.fab_new);
 
+        loading_panel = view.findViewById(R.id.loadingPanel);
         recyclerView = view.findViewById(R.id.recycler_day);
         recyclerView.setNestedScrollingEnabled(false);
         recyclerView.addItemDecoration(new RecyclerViewDivider(36));
@@ -153,8 +167,9 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
             }
         });
 
-        checkResult();
+        //checkResult();
 
+        checkPaging();
         return view;
     }
 
@@ -230,6 +245,98 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
 
             }
         });
+
+
+    }
+    private void checkPaging(){
+
+        String user_id = mContext.getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
+        Query query = FirebaseDatabase.getInstance()
+                .getReference()
+                .child("user_data").child(user_id).child("mission_display");
+
+        PagedList.Config config = new PagedList.Config.Builder()
+                .setEnablePlaceholders(false)
+                .setPrefetchDistance(2)
+                .setPageSize(2)
+                .build();
+        DatabasePagingOptions<ItemForMissionByDay> options = new DatabasePagingOptions.Builder<ItemForMissionByDay>()
+                .setLifecycleOwner(this)
+                .setQuery(query, config, ItemForMissionByDay.class)
+                .build();
+
+        //MainRecyclerAdapter mainRecyclerAdapter = new MainRecyclerAdapter(getContext(), lstRecyclerItem);
+
+
+        FirebaseRecyclerPagingAdapter<ItemForMissionByDay, ItemViewHolder> adapter =
+                new FirebaseRecyclerPagingAdapter<ItemForMissionByDay, ItemViewHolder>(options) {
+                    @NonNull
+                    @Override
+                    public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                        // Create the ItemViewHolder
+                        // ...
+                        View view;
+                        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+                        view = inflater.inflate(R.layout.main_recycler_view_item, parent, false);
+                        ItemViewHolder viewHolder = new ItemViewHolder(view);
+
+                        return viewHolder;
+                    }
+
+                    @Override
+                    protected void onBindViewHolder(@NonNull ItemViewHolder holder,
+                                                    int position,
+                                                    @NonNull ItemForMissionByDay model) {
+                        // Bind the item to the view holder
+                        // ...
+                        holder.tv_missionTitle.setText(model.getTitle());
+                        holder.tv_address.setText(model.getAddress());
+                        holder.tv_date.setText(DateTimeUtils.makeDateForHuman(model.getDate()));
+                        holder.tv_time.setText(DateTimeUtils.makeTimeForHuman(model.getTime()));
+
+
+                    }
+
+                    @Override
+                    protected void onLoadingStateChanged(@NonNull LoadingState state) {
+                        Log.d("페이징",state.toString());
+                        switch (state) {
+                            case LOADING_INITIAL:
+                                // The initial load has begun
+                                // ...
+                                loading_panel.setVisibility(View.VISIBLE);
+                                break;
+                            case LOADING_MORE:
+                                // The adapter has started to load an additional page
+                                // ...
+                                loading_panel.setVisibility(View.VISIBLE);
+                                break;
+                            case LOADED:
+                                // The previous load (either initial or additional) completed
+                                // ...
+                                loading_panel.setVisibility(View.GONE);
+                                break;
+                            case ERROR:
+                                // The previous load (either initial or additional) failed. Call
+                                // the retry() method in order to retry the load operation.
+                                // ...
+                                retry();
+                                break;
+                            case FINISHED:
+
+                                loading_panel.setVisibility(View.GONE);
+                                break;
+                        }
+                    }
+
+                };
+
+
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setAdapter(adapter);
+
+
 
 
     }
@@ -414,5 +521,36 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
         mContext = context;
 
     }
+    public static class ItemViewHolder extends RecyclerView.ViewHolder {
+        TextView tv_missionTitle;
+        TextView tv_date;
+        TextView tv_time;
+        TextView tv_address;
 
+        LinearLayout view_container;
+
+
+        public ItemViewHolder(View itemView) {
+            super(itemView);
+            view_container = itemView.findViewById(R.id.main_recycler_view_container);
+            tv_missionTitle = itemView.findViewById(R.id.tv_mission_title);
+            tv_date = itemView.findViewById(R.id.date_display);
+            tv_time = itemView.findViewById(R.id.time_display);
+            tv_address = itemView.findViewById(R.id.address_display);
+
+        }
+    }
+    private void setDisplayDateTime(ItemViewHolder holder, MissionInfoList missionInfoList){
+        //String time = Utils.monthDayTime(missionInfoList.getMission_dates().,missionInfoList.getMission_time());
+
+
+
+    }
+
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        loading_panel.setVisibility(View.VISIBLE);
+    }
 }

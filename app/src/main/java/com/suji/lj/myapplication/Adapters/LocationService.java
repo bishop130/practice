@@ -37,6 +37,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.SettingsClient;
 import com.suji.lj.myapplication.Utils.DateTimeFormatter;
+import com.suji.lj.myapplication.Utils.DateTimeUtils;
 import com.suji.lj.myapplication.Utils.PreciseCountdown;
 import com.suji.lj.myapplication.Utils.Utils;
 
@@ -168,7 +169,7 @@ public class LocationService extends Service {
             startLocationUpdates();
             stringBuffer = new StringBuffer();
 
-            updateNotification("다음 목표 : " + alarmItemList.get(0).getTitle() + " - " + Utils.monthDayTime(alarmItemList.get(0).getDate(), alarmItemList.get(0).getTime()), "자동위치 등록이 실행중입니다.");
+            updateNotification("다음 목표 : " + alarmItemList.get(0).getTitle() + " - " + DateTimeUtils.makeDateTimeForHuman(alarmItemList.get(0).getDate(), alarmItemList.get(0).getTime()), "자동위치 등록이 실행중입니다.");
             //foregroundNotification("다음 목표 : " + alarmItemList.get(0).getTitle() + " - " + Utils.monthDayTime(alarmItemList.get(0).getDate(), alarmItemList.get(0).getTime()), "자동위치 등록이 실행중입니다.");
 
 
@@ -184,7 +185,7 @@ public class LocationService extends Service {
                     service_time = alarmItemList.get(i).getTime();
                     service_date = alarmItemList.get(i).getDate();
                     service_title = alarmItemList.get(i).getTitle();
-                    updateNotification("다음 목표 : " + service_title + " - " + Utils.monthDayTime(service_date, service_time), "목표시간 30분 전에 자동위치등록이 시작됩니다.");
+                    updateNotification("다음 목표 : " + service_title + " - " + DateTimeUtils.makeDateTimeForHuman(service_date, service_time), "목표시간 30분 전에 자동위치등록이 시작됩니다.");
                     //foregroundNotification("다음 목표 : " + service_title + " - " + Utils.monthDayTime(service_date, service_time), "목표시간 30분 전에 자동위치등록이 시작됩니다.");
                 }
 
@@ -299,7 +300,7 @@ public class LocationService extends Service {
             if (alarmItemList.size() > 0) {//
 
                 getLatestMission();
-                updateNotification("다음 목표 : " + alarmItemList.get(0).getTitle() + " - " + Utils.monthDayTime(alarmItemList.get(0).getDate(), alarmItemList.get(0).getTime()), "목표시간 30분 전에 자동위치등록이 시작됩니다.");
+                updateNotification("다음 목표 : " + alarmItemList.get(0).getTitle() + " - " + DateTimeUtils.makeDateTimeForHuman(alarmItemList.get(0).getDate(), alarmItemList.get(0).getTime()), "목표시간 30분 전에 자동위치등록이 시작됩니다.");
                 //foregroundNotification("다음 목표 : " + alarmItemList.get(0).getTitle() + " - " + Utils.monthDayTime(alarmItemList.get(0).getDate(), alarmItemList.get(0).getTime()), "목표시간 30분 전에 자동위치등록이 시작됩니다.");
             } else {//진짜 아무것도 없으면
                 updateNotification("다음 목표 : 없음", "새로운 목표를 등록해주세요!");
@@ -383,7 +384,7 @@ public class LocationService extends Service {
         }
         preciseCountdown = null;
 
-        updateNotification("다음 목표 : " + title + " - " + Utils.monthDayTime(date, time), "목표시간 30분 전에 자동위치등록이 시작됩니다.");
+        updateNotification("다음 목표 : " + title + " - " + DateTimeUtils.makeDateTimeForHuman(date, time), "목표시간 30분 전에 자동위치등록이 시작됩니다.");
         //foregroundNotification("다음 목표 : " + title + " - " + Utils.monthDayTime(date, time), "목표시간 30분 전에 자동위치등록이 시작됩니다.");
 
         Date current_date_time = new Date(System.currentTimeMillis());

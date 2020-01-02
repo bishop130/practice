@@ -193,61 +193,7 @@ public class Utils {
     }
 
 
-    public static String monthDayTime(String date, String time) {
 
-        String mission_time;
-        DateTimeFormatter dtf = new DateTimeFormatter();
-
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(dtf.dateParser(date));
-        int month = cal.get(Calendar.MONTH) + 1;
-        int day = cal.get(Calendar.DATE);
-        String minutes;
-        String[] date_array = time.split(":");
-        int hour = Integer.valueOf(date_array[0]);
-        int min = Integer.valueOf(date_array[1]);
-        if (min < 10) {
-            minutes = "0" + String.valueOf(min);
-        } else {
-
-            minutes = String.valueOf(min);
-        }
-
-
-        if (hour == 12) {
-            mission_time = "오후\n" + hour + "시 " + minutes + "분";
-            if (min == 0) {
-                mission_time = "오후\n" + hour + "시 ";
-            }
-
-        } else if (hour == 0) {
-            mission_time = "오전\n 12시 " + minutes + "분";
-            if (min == 0) {
-                mission_time = "오후\n" + hour + "시 ";
-            }
-        } else {
-            mission_time = ((hour >= 12) ? "오후\n" : "오전\n") + hour % 12 + "시 " + minutes + "분";
-            if (min == 0) {
-                mission_time = ((hour >= 12) ? "오후\n" : "오전\n") + hour % 12 + "시 ";
-            }
-        }
-
-
-        if (DateUtils.isToday(dtf.dateParser(date).getTime())) {
-            return "오늘 " + mission_time;
-
-        } else if (isTomorrow(dtf.dateParser(date))) {
-            return "내일 " + mission_time;
-
-        } else {
-            return month + "월 " + day + "일 " + mission_time;
-        }
-
-    }
-
-    public static boolean isTomorrow(Date d) {
-        return DateUtils.isToday(d.getTime() - DateUtils.DAY_IN_MILLIS);
-    }
 
     public static void getKeyHash(Context context){
         try {
@@ -497,53 +443,8 @@ public class Utils {
 
     }
 
-    public static String makeTimeForServer(int gethour, int getmin){
-
-        String hour;
-        String min;
-        String result;
-
-        if(gethour<10){
-            hour = "0"+gethour;
-        }else{
-            hour = gethour+"";
-        }if(getmin<10){
-            min = "0"+getmin;
-        }else{
-            min = getmin+"";
-        }
-
-        result = "T"+hour+min+"00";
 
 
-        return result;
-    }
-
-    public static String makeDateForServer(int year, int month, int day){
-        String Year;
-        String Month;
-        String Day;
-
-        Year = String.valueOf(year);
-
-        if(month<10){
-
-            Month = "0"+month;
-        }else{
-            Month = String.valueOf(month);
-
-        }
-        if(day<10){
-            Day = "0"+day;
-        }else{
-            Day = String.valueOf(day);
-        }
-
-        return Year+Month+Day;
-
-
-
-    }
 
     private static double distance(double lat1, double lon1, double lat2, double lon2, String unit) {
 

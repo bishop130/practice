@@ -88,8 +88,8 @@ public class MainRecyclerAdapter extends RecyclerView.Adapter<MainRecyclerAdapte
         }
     }
     private void setDisplayDateTime(ItemViewHolder holder,final int position){
-        String time = Utils.monthDayTime(recyclerItemList.get(position).getDate(),recyclerItemList.get(position).getMissionTime());
-        holder.tv_date.setText(time);
+        //String time = Utils.makeDateTimeForHuman(recyclerItemList.get(position).getDate(),recyclerItemList.get(position).getMissionTime());
+        //holder.tv_date.setText(time);
         holder.tv_time.setText(recyclerItemList.get(position).getDate_time());
 
 
