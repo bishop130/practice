@@ -25,6 +25,11 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.suji.lj.myapplication.Items.AlarmItem;
 import com.suji.lj.myapplication.MainActivity;
@@ -54,6 +59,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
@@ -119,6 +125,7 @@ public class LocationService extends Service {
             foregroundNotification();
 
             getLatestMission();
+            //queryData();
         } else {
             instantAlarm("위치정보에 대한 접근이 거부되었습니다.", "위치정보에 대한 권한을 허가해주세요.");
 
@@ -154,6 +161,7 @@ public class LocationService extends Service {
 
         return START_STICKY;
     }
+
 
 
 

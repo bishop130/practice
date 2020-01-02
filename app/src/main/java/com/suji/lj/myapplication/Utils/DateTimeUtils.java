@@ -3,8 +3,10 @@ package com.suji.lj.myapplication.Utils;
 import android.text.format.DateUtils;
 import android.util.Log;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 public class DateTimeUtils {
 
@@ -199,6 +201,15 @@ public class DateTimeUtils {
 
 
         return result;
+    }
+    public static String getCurrentTime(){
+        long now = System.currentTimeMillis();
+        Date date = new Date(now);
+        SimpleDateFormat simpleDate = new SimpleDateFormat("yyyyMMddhhmm", Locale.KOREA);
+        String getTime = simpleDate.format(date);
+
+
+        return getTime;
     }
 
 

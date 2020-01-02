@@ -66,7 +66,7 @@ public class DateTimeFormatter {
     }
 
     public Date dateTimeParser(String date_time) {
-        SimpleDateFormat date_time_sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.KOREA);
+        SimpleDateFormat date_time_sdf = new SimpleDateFormat("yyyyMMddHHmm", Locale.KOREA);
         Date result = new Date();
         try {
             result = date_time_sdf.parse(date_time);

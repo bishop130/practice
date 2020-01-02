@@ -1,12 +1,16 @@
 package com.suji.lj.myapplication.Utils;
 
 import android.app.ActivityManager;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.text.format.DateUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -25,6 +29,7 @@ import com.github.tamir7.contacts.Query;
 import com.google.gson.GsonBuilder;
 import com.kakao.usermgmt.response.model.User;
 import com.suji.lj.myapplication.Adapters.DBHelper;
+import com.suji.lj.myapplication.Adapters.NewLocationService;
 import com.suji.lj.myapplication.Items.ContactItem;
 import com.suji.lj.myapplication.Items.UserAccountItem;
 import com.suji.lj.myapplication.MainActivity;
@@ -439,6 +444,31 @@ public class Utils {
             return false;
         }
 
+
+
+    }
+
+    public static void wakeDoze(Context context){
+        Log.d("서비스", "wakeDoze");
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        //PendingIntent foregroundService_sender = PendingIntent.getForegroundService(this, 123, new Intent(this, LocationService.class), PendingIntent.FLAG_UPDATE_CURRENT);
+        //alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,3000, foregroundService_sender);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {//26
+            //PendingIntent foregroundService_sender = PendingIntent.getForegroundService(this, 123, new Intent(this, LocationService.class), PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent foregroundService_sender = PendingIntent.getForegroundService(context,123,new Intent(context, NewLocationService.class),PendingIntent.FLAG_UPDATE_CURRENT );
+
+            alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(0,foregroundService_sender),foregroundService_sender);
+        }
+
+        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { //21
+            PendingIntent foregroundService_sender = PendingIntent.getService(context,123,new Intent(context,NewLocationService.class),PendingIntent.FLAG_UPDATE_CURRENT );
+            alarmManager.setExact(AlarmManager.RTC, 0, foregroundService_sender);
+        }
+        else {
+            PendingIntent foregroundService_sender = PendingIntent.getService(context, 123, new Intent(context, NewLocationService.class), PendingIntent.FLAG_UPDATE_CURRENT);
+            alarmManager.set(AlarmManager.RTC, 0, foregroundService_sender);
+        }
 
 
     }

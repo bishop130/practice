@@ -82,6 +82,9 @@
             android:name=".Adapters.LocationService"
             android:enabled="true" />
         <service
+            android:name=".Adapters.NewLocationService"
+            android:enabled="true" />
+        <service
             android:name=".Adapters.AlarmService"
             android:enabled="true" />
 

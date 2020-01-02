@@ -25,6 +25,7 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import com.suji.lj.myapplication.Adapters.LocationService;
+import com.suji.lj.myapplication.Adapters.NewLocationService;
 import com.suji.lj.myapplication.Utils.Utils;
 
 public class AutoLocationSetting extends AppCompatActivity {
@@ -67,7 +68,7 @@ public class AutoLocationSetting extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
                     if(checkLocationPermission()) {
-                        Intent service = new Intent(AutoLocationSetting.this, LocationService.class);
+                        Intent service = new Intent(AutoLocationSetting.this, NewLocationService.class);
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             ContextCompat.startForegroundService(AutoLocationSetting.this, service);
                         } else {
@@ -85,7 +86,7 @@ public class AutoLocationSetting extends AppCompatActivity {
 
                     // The toggle is enabled
                 } else {
-                    Intent serviceIntent = new Intent(AutoLocationSetting.this, LocationService.class);
+                    Intent serviceIntent = new Intent(AutoLocationSetting.this, NewLocationService.class);
                     stopService(serviceIntent);
                     cancelAlarm();
                     SharedPreferences.Editor editor = getSharedPreferences("settings", MODE_PRIVATE).edit();

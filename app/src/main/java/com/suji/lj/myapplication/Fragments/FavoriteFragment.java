@@ -153,7 +153,7 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
             @Override
             public void onDateSelected(@NonNull MaterialCalendarView materialCalendarView, @NonNull CalendarDay calendarDay, boolean b) {
                 //onSortMission(response_result, calendarDay);
-                Log.d("달력",calendarDay.getMonth()+"");
+                Log.d("달력", calendarDay.getMonth() + "");
             }
         });
 
@@ -170,6 +170,7 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
         //checkResult();
 
         checkPaging();
+        queryData();
         return view;
     }
 
@@ -206,6 +207,35 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
         recyclerView.setAdapter(mainRecyclerAdapter);
 
     }
+
+
+    private void queryData() {
+        String user_id = mContext.getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+        databaseReference.child("user_data").child(user_id).child("mission_display").orderByChild("date").startAt(DateTimeUtils.getCurrentTime()).limitToFirst(1).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot data : dataSnapshot.getChildren()) {
+                    ItemForMissionByDay itemForMissionByDay = data.getValue(ItemForMissionByDay.class);
+                    double lat = itemForMissionByDay.getLat();
+                    double lng = itemForMissionByDay.getLat();
+                    if (dataSnapshot.hasChildren()) {
+                        Log.d("정렬", itemForMissionByDay.getDate()+" "+itemForMissionByDay.getTime());
+                    }
+                }
+
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+
+    }
+
 
     private void checkResult() {
 
@@ -248,7 +278,8 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
 
 
     }
-    private void checkPaging(){
+
+    private void checkPaging() {
 
         String user_id = mContext.getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
         Query query = FirebaseDatabase.getInstance()
@@ -299,7 +330,7 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
 
                     @Override
                     protected void onLoadingStateChanged(@NonNull LoadingState state) {
-                        Log.d("페이징",state.toString());
+                        Log.d("페이징", state.toString());
                         switch (state) {
                             case LOADING_INITIAL:
                                 // The initial load has begun
@@ -320,7 +351,8 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
                                 // The previous load (either initial or additional) failed. Call
                                 // the retry() method in order to retry the load operation.
                                 // ...
-                                retry();
+                                //retry();
+                                loading_panel.setVisibility(View.GONE);
                                 break;
                             case FINISHED:
 
@@ -332,11 +364,8 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
                 };
 
 
-
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
-
-
 
 
     }
@@ -354,7 +383,7 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
                 recyclerItem.setLongitude(missionInfoLists.get(i).getLng());
                 recyclerItem.setMissionTime(missionInfoLists.get(i).getMission_time());
                 //recyclerItem.setDate_array(jsonObject.getString("date_array"));
-                Log.d("파베",date+" "+missionInfoLists.get(i).getMission_time());
+                Log.d("파베", date + " " + missionInfoLists.get(i).getMission_time());
                 recyclerItem.setDate_time(date + " " + missionInfoLists.get(i).getMission_time());
                 //recyclerItem.setContact_json(jsonObject.getString("mission_contacts"));
                 //recyclerItem.setCompleted(jsonObject.getString("completed_dates"));
@@ -521,6 +550,7 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
         mContext = context;
 
     }
+
     public static class ItemViewHolder extends RecyclerView.ViewHolder {
         TextView tv_missionTitle;
         TextView tv_date;
@@ -540,9 +570,9 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
 
         }
     }
-    private void setDisplayDateTime(ItemViewHolder holder, MissionInfoList missionInfoList){
-        //String time = Utils.monthDayTime(missionInfoList.getMission_dates().,missionInfoList.getMission_time());
 
+    private void setDisplayDateTime(ItemViewHolder holder, MissionInfoList missionInfoList) {
+        //String time = Utils.monthDayTime(missionInfoList.getMission_dates().,missionInfoList.getMission_time());
 
 
     }

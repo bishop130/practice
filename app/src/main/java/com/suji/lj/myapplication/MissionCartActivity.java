@@ -302,8 +302,8 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
         String user_id = getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
         String mission_id = Utils.getCurrentTime() + "U" + user_id;
 
-        DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference().child("user_data").child(user_id);
-        //registerCheckForServer(mRootRef, user_id, mission_id);
+        DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
+        registerCheckForServer(mRootRef, user_id, mission_id);
         //registerMissionInfoRoot(mRootRef,user_id,mission_id);
         //registerUserMissionList(mRootRef,user_id,mission_id);
         //registerMissionInfoList(mRootRef,user_id,mission_id);
@@ -445,7 +445,7 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
 
 
                 objectMap.put(time_id, itemForServerArrayList);
-                databaseReference.child("check_for_server").child(date).child(time_id).push().setValue(itemForServer);
+                databaseReference.child("check_for_server").child(date+time_id).push().setValue(itemForServer);
 
             }
 
@@ -489,7 +489,7 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
             }
         }
 
-        databaseReference.child("mission_display").updateChildren(mission_main_list).addOnSuccessListener(new OnSuccessListener<Void>() {
+        databaseReference.child("user_data").child(user_id).child("mission_display").updateChildren(mission_main_list).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 Log.d("파베","mission_display_전송성공");
