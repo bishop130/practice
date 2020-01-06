@@ -306,7 +306,7 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
         registerCheckForServer(mRootRef, user_id, mission_id);
         //registerMissionInfoRoot(mRootRef,user_id,mission_id);
         //registerUserMissionList(mRootRef,user_id,mission_id);
-        //registerMissionInfoList(mRootRef,user_id,mission_id);
+        registerMissionInfoList(mRootRef,user_id,mission_id);
         registerMainDisplay(mRootRef,user_id,mission_id);
         //testtest(mRootRef);
 
@@ -385,14 +385,17 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
 
         for (int i = 0; i < missionCartItemList.size(); i++) {
             MissionInfoList missionInfoList = new MissionInfoList();
-            Map<String, Object> mission_dates = new HashMap<>();
+            Map<String, Boolean> mission_dates = new HashMap<>();
 
             missionInfoList.setMission_title(missionCartItemList.get(i).getTitle());
-            missionInfoList.setMission_time(missionCartItemList.get(i).getHour() + ":" + missionCartItemList.get(i).getMin());
+            missionInfoList.setMission_time(DateTimeUtils.makeTimeForServer(missionCartItemList.get(i).getHour() , missionCartItemList.get(i).getMin()));
             missionInfoList.setAddress(missionCartItemList.get(i).getAddress());
             missionInfoList.setIs_success(false);
             missionInfoList.setLat(missionCartItemList.get(i).getLat());
             missionInfoList.setLng(missionCartItemList.get(i).getLng());
+            missionInfoList.setMin_date(missionCartItemList.get(i).getMin_date());
+            missionInfoList.setMax_date(missionCartItemList.get(i).getMax_date());
+
             //Log.d("파베", "있기는한가" + missionCartItemList.get(i).getCalendarDayList().size());
             for (int j = 0; j < missionCartItemList.get(i).getCalendarDayList().size(); j++) {
                 int year = missionCartItemList.get(i).getCalendarDayList().get(j).getYear();

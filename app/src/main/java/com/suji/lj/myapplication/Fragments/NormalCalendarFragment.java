@@ -19,6 +19,7 @@ import com.prolificinteractive.materialcalendarview.format.TitleFormatter;
 import com.suji.lj.myapplication.Items.DateItem;
 import com.suji.lj.myapplication.MainActivity;
 import com.suji.lj.myapplication.R;
+import com.suji.lj.myapplication.Utils.DateTimeUtils;
 
 import org.threeten.bp.LocalDate;
 
@@ -180,8 +181,8 @@ public class NormalCalendarFragment extends Fragment{
                 maxMonth = month;
                 maxDay = day;
             }
-            minDate = minYear + "-" + minMonth + "-" + minDay;
-            maxDate = maxYear + "-" + maxMonth + "-" + maxDay;
+            minDate = DateTimeUtils.makeDateForServer(minYear,minMonth,minDay);
+            maxDate = DateTimeUtils.makeDateForServer(maxYear,maxMonth,maxDay);
 
 /*
             if(i==calendarDayList.size()) {
@@ -197,7 +198,7 @@ public class NormalCalendarFragment extends Fragment{
             Log.d("파베", dateList.get(j).getYear() + "-" + dateList.get(j).getMonth() + "-" + dateList.get(j).getDay());
         }
 
-        onDateChangedListener.onDateChanged(dateList,minDate,maxDate);
+        onDateChangedListener.onDateChanged(dateList, minDate,maxDate);
         dateList.clear();
 
 

@@ -10,7 +10,7 @@ import java.util.Locale;
 
 public class DateTimeUtils {
 
-
+DateTimeFormatter dateTimeFormatter;
 
     public static String makeDateTimeForHuman(String date, String time) {
 
@@ -104,25 +104,25 @@ public class DateTimeUtils {
 
         if (hour == 12) {
             if (min == 0) {
-                return "오후\n" + hour + "시 ";
+                return "오후 " + hour + "시 ";
             }else{
-                return "오후\n" + hour + "시 " + minutes + "분";
+                return "오후 " + hour + "시 " + minutes + "분";
             }
 
         }
         else if (hour == 0) {
 
             if (min == 0) {
-                return "오후\n" + hour + "시 ";
+                return "오후 " + hour + "시 ";
             }else{
-                return "오전\n 12시 " + minutes + "분";
+                return "오전 12시 " + minutes + "분";
             }
         } else {
 
             if (min == 0) {
-                return ((hour >= 12) ? "오후\n" : "오전\n") + hour % 12 + "시 ";
+                return ((hour >= 12) ? "오후 " : "오전 ") + hour % 12 + "시 ";
             }else{
-                return ((hour >= 12) ? "오후\n" : "오전\n") + hour % 12 + "시 " + minutes + "분";
+                return ((hour >= 12) ? "오후 " : "오전 ") + hour % 12 + "시 " + minutes + "분";
             }
         }
 
@@ -210,6 +210,19 @@ public class DateTimeUtils {
 
 
         return getTime;
+    }
+
+    public static boolean compareIsFuture(String input_date){
+        DateTimeFormatter dateTimeFormatter = new DateTimeFormatter();
+        Date date = dateTimeFormatter.dateTimeParser(input_date);
+        long input = date.getTime();
+        long now = System.currentTimeMillis();
+        if(input>now){
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 
 

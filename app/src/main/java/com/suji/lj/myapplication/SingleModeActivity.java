@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -36,6 +37,8 @@ import com.suji.lj.myapplication.Fragments.NormalCalendarFragment;
 import com.suji.lj.myapplication.Fragments.PeriodCalendarFragment;
 import com.suji.lj.myapplication.Items.DateItem;
 import com.suji.lj.myapplication.Items.MissionCartItem;
+import com.suji.lj.myapplication.Utils.DateTimeUtils;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -161,19 +164,17 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
     }
 
     @Override
-    public void onDateChanged(RealmList<DateItem> dateItemList,String minDate,String maxDate) {
+    public void onDateChanged(RealmList<DateItem> dateItemList,String min_date,String max_date) {
 
         int min_position =0;
 
         if (dateItemList.size() == 0) {
 
         } else {//선택한 날짜가 오늘과 같다면
-            min_date = minDate;
 
             missionCartItem.setCalendarDayList(dateItemList);
-            for(int i =0; i<dateItemList.size(); i++) {
-
-            }
+            missionCartItem.setMin_date(min_date);
+            missionCartItem.setMax_date(max_date);
             checkDateTime();
 
 

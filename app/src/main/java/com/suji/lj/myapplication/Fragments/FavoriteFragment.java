@@ -15,8 +15,10 @@ import androidx.paging.PagedList;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.CountDownTimer;
 import android.text.format.DateFormat;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,10 +36,15 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.borax12.materialdaterangepicker.date.DatePickerDialog;
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.firebase.ui.database.SnapshotParser;
 import com.firebase.ui.database.paging.DatabasePagingOptions;
 import com.firebase.ui.database.paging.FirebaseRecyclerPagingAdapter;
 import com.firebase.ui.database.paging.LoadingState;
+import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -47,6 +54,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.prolificinteractive.materialcalendarview.OnMonthChangedListener;
 import com.prolificinteractive.materialcalendarview.format.WeekDayFormatter;
 import com.suji.lj.myapplication.Adapters.MainRecyclerAdapter;
+import com.suji.lj.myapplication.Adapters.MissionRecyclerAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerViewDivider;
 import com.suji.lj.myapplication.Decorators.EventDecorator;
@@ -67,6 +75,7 @@ import com.prolificinteractive.materialcalendarview.CalendarMode;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
 import com.prolificinteractive.materialcalendarview.format.TitleFormatter;
+import com.suji.lj.myapplication.Utils.DateTimeFormatter;
 import com.suji.lj.myapplication.Utils.DateTimeUtils;
 import com.suji.lj.myapplication.Utils.Utils;
 
@@ -75,7 +84,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.threeten.bp.DayOfWeek;
 import org.threeten.bp.LocalDate;
-import org.threeten.bp.format.DateTimeFormatter;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -88,76 +96,152 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 
 import static android.content.Context.MODE_PRIVATE;
 import static com.firebase.ui.database.paging.LoadingState.LOADED;
 
 public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDateSetListener {
 
-
-    private TextView date_display;
-    private MaterialCalendarView materialCalendarView;
-    DatePickerDialog datePickerDialog;
-    int year, month, day;
-    private Calendar calendar;
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private FragmentActivity myContext;
-    private RequestQueue requestQueue;
     private RecyclerView recyclerView;
     private List<RecyclerItem> lstRecyclerItem = new ArrayList<>();
-    private List<CalendarDay> dates = new ArrayList<>();
-    private String response_result;
     private Context mContext;
-    ProgressBar loading_panel;
+    private ProgressBar loading_panel;
+    private TextView tv_mission_title;
+    private TextView date_display;
+    private TextView time_display;
+    private TextView address_display;
+    //private LinearLayout no_mission_ly;
+    private LinearLayout is_mission_ly;
+    private TextView rest_time_display;
+    CountDownTimer timer;
+    DateTimeFormatter dtf = new DateTimeFormatter();
+    AppBarLayout appBar;
+    LinearLayout address_display_ly;
+    LinearLayout rest_time_display_ly;
+
+    private int expandedTopMargin;
+    private int collapsedTopMargin;
+    private static final float COLLAPSED_TOP_MARGIN_DP = 24f;
+    private static final float MARGIN_SCROLLER_MULTIPLIER = 4f;
+    TabLayout tab_ly;
+    List<MissionInfoList> infoLists = new ArrayList<>();
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         Log.d("홈프레그", "onCreateView");
-        calendar = Calendar.getInstance();
-        requestQueue = Volley.newRequestQueue(mContext);
-        year = calendar.get(Calendar.YEAR);
-        month = calendar.get(Calendar.MONTH);
-        day = calendar.get(Calendar.DAY_OF_MONTH);
-
-
         final View view = inflater.inflate(R.layout.fragment_favorite, container, false);
         SharedPreferences Preferences = mContext.getSharedPreferences("timer_control", MODE_PRIVATE);
         SharedPreferences.Editor editor = Preferences.edit();
         editor.putBoolean("timer_switch", true);
         editor.apply();
 
-        String user_id = mContext.getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
-        //volleyConnect(user_id);
         FloatingActionButton fab = view.findViewById(R.id.fab_new);
+        tv_mission_title = view.findViewById(R.id.tv_mission_title);
+        date_display = view.findViewById(R.id.date_display);
+        time_display = view.findViewById(R.id.time_display);
+        address_display = view.findViewById(R.id.address_display);
+        //no_mission_ly = view.findViewById(R.id.no_mission_layout);
+        is_mission_ly = view.findViewById(R.id.is_mission_layout);
+        rest_time_display = view.findViewById(R.id.rest_time_display);
+        address_display_ly=view.findViewById(R.id.address_display_layout);
+        rest_time_display_ly=view.findViewById(R.id.rest_time_display_layout);
 
         loading_panel = view.findViewById(R.id.loadingPanel);
         recyclerView = view.findViewById(R.id.recycler_day);
         recyclerView.setNestedScrollingEnabled(false);
+        appBar = view.findViewById(R.id.app_bar_layout);
+        tab_ly = view.findViewById(R.id.tab_ly);
+
+
+        expandedTopMargin = ((ViewGroup.MarginLayoutParams) rest_time_display_ly.getLayoutParams()).topMargin;
+        collapsedTopMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, COLLAPSED_TOP_MARGIN_DP, getResources().getDisplayMetrics());
+        tab_ly.addTab(tab_ly.newTab().setText("TAB-3")) ;
+        tab_ly.addTab(tab_ly.newTab().setText("TAB-4")) ;
+
+        tab_ly.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                int pos = tab.getPosition() ;
+                switch (pos) {
+                    case 0 :
+                        queryData();
+
+                        break ;
+                    case 1 :
+                        String user_id = mContext.getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
+
+                        FirebaseDatabase.getInstance().getReference().child("mission_info_list").child(user_id).addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                                infoLists.clear();
+                                for(DataSnapshot data : dataSnapshot.getChildren()){
+                                    MissionInfoList missionInfoList = data.getValue(MissionInfoList.class);
+                                    infoLists.add(missionInfoList);
+
+
+                                   for(TreeMap.Entry<String, Boolean> map: new TreeMap<>(missionInfoList.getMission_dates()).entrySet()){
+
+
+                                   }
+
+
+                                }
+                                setRecyclerViewByMission(infoLists);
+
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
+
+
+
+
+
+
+                        break ;
+                }
+
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
+
+
+        appBar.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+
+                Log.d("오프셋", "오프셋" + verticalOffset + "");
+                Log.d("오프셋", "스크롤렌지" + appBarLayout.getTotalScrollRange() + "");
+
+                //is_mission_ly.setAlpha(1.0f - (Math.abs(verticalOffset / (float) appBarLayout.getTotalScrollRange()))*2);
+                address_display_ly.setAlpha(1.0f - (Math.abs(verticalOffset / (float) appBarLayout.getTotalScrollRange()))*2);
+                rest_time_display_ly.setAlpha(1.0f - (Math.abs(verticalOffset / (float) appBarLayout.getTotalScrollRange()))*2);
+
+
+            }
+        });
+
+
+
         recyclerView.addItemDecoration(new RecyclerViewDivider(36));
 
-
-        materialCalendarView = view.findViewById(R.id.material_calendar_day);
-        materialCalendarView.setTopbarVisible(true);
-
-        materialCalendarView.setOnMonthChangedListener(new OnMonthChangedListener() {
-            @Override
-            public void onMonthChanged(MaterialCalendarView widget, CalendarDay date) {
-
-            }
-        });
-
-
-        materialCalendarView.setOnDateChangedListener(new OnDateSelectedListener() {
-            @Override
-            public void onDateSelected(@NonNull MaterialCalendarView materialCalendarView, @NonNull CalendarDay calendarDay, boolean b) {
-                //onSortMission(response_result, calendarDay);
-                Log.d("달력", calendarDay.getMonth() + "");
-            }
-        });
-
-        setMaterialCalendarView();
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -169,33 +253,21 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
 
         //checkResult();
 
-        checkPaging();
+        //checkPaging();
         queryData();
+
+
         return view;
     }
+    private void setRecyclerViewByMission(List<MissionInfoList> infoLists){
 
 
-    private void setMaterialCalendarView() {
-        materialCalendarView.setBackgroundColor(Color.WHITE);
-        materialCalendarView.state().edit()
-                .setCalendarDisplayMode(CalendarMode.WEEKS)
-                .commit();
-        final LocalDate calendar = LocalDate.now();
-        materialCalendarView.setSelectedDate(calendar);
-        //materialCalendarView.addDecorator(new SelectorDecorator(getActivity()));
+        MissionRecyclerAdapter missionRecyclerAdapter= new MissionRecyclerAdapter(getContext(),infoLists);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setAdapter(missionRecyclerAdapter);
 
-        materialCalendarView.setTitleFormatter(new TitleFormatter() {
-            @Override
-            public CharSequence format(CalendarDay calendarDay) {
-
-                StringBuffer buffer = new StringBuffer();
-                int yearOne = calendarDay.getYear();
-                int monthOne = calendarDay.getMonth();
-                buffer.append(yearOne).append("년  ").append(monthOne).append("월");
-                return buffer;
-            }
-        });
     }
+
 
 
     private void setupRecyclerView(List<RecyclerItem> lstRecyclerItem) {
@@ -212,16 +284,37 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
     private void queryData() {
         String user_id = mContext.getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-        databaseReference.child("user_data").child(user_id).child("mission_display").orderByChild("date").startAt(DateTimeUtils.getCurrentTime()).limitToFirst(1).addValueEventListener(new ValueEventListener() {
+        Log.d("데이트타임",DateTimeUtils.getCurrentTime());
+        databaseReference.child("user_data").child(user_id).child("mission_display").orderByKey().startAt(DateTimeUtils.getCurrentTime()).limitToFirst(1).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot data : dataSnapshot.getChildren()) {
-                    ItemForMissionByDay itemForMissionByDay = data.getValue(ItemForMissionByDay.class);
-                    double lat = itemForMissionByDay.getLat();
-                    double lng = itemForMissionByDay.getLat();
-                    if (dataSnapshot.hasChildren()) {
-                        Log.d("정렬", itemForMissionByDay.getDate()+" "+itemForMissionByDay.getTime());
+                if(dataSnapshot.exists()) {
+                    //no_mission_ly.setVisibility(View.GONE);
+                    is_mission_ly.setVisibility(View.VISIBLE);
+                    for (DataSnapshot data : dataSnapshot.getChildren()) {
+                        ItemForMissionByDay itemForMissionByDay = data.getValue(ItemForMissionByDay.class);
+                        double lat = itemForMissionByDay.getLat();
+                        double lng = itemForMissionByDay.getLat();
+                        String title = itemForMissionByDay.getTitle();
+                        String date = itemForMissionByDay.getDate();
+                        String time = itemForMissionByDay.getTime();
+                        String address = itemForMissionByDay.getAddress();
+                        tv_mission_title.setText(title);
+                        date_display.setText(DateTimeUtils.makeDateForHuman(date));
+                        time_display.setText(DateTimeUtils.makeTimeForHuman(time));
+                        address_display.setText(address);
+                        setTimer(date+time);
+                        checkResult(date + (Integer.valueOf(time) + 1));
+                        if (dataSnapshot.hasChildren()) {
+                            Log.d("정렬", itemForMissionByDay.getDate() + " " + itemForMissionByDay.getTime());
+                        }
                     }
+                }
+                else{
+                   // no_mission_ly.setVisibility(View.VISIBLE);
+                    is_mission_ly.setVisibility(View.GONE);
+
+
                 }
 
 
@@ -229,56 +322,112 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(getContext(),databaseError.toString(),Toast.LENGTH_LONG).show();
 
             }
         });
-
-
     }
 
 
-    private void checkResult() {
+    private void checkResult(String date_time) {
 
+        String dateTime = String.valueOf(Double.valueOf(date_time)+1);
+        Log.d("정렬","이거확인"+date_time);
         String user_id = mContext.getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
-        List<MissionInfoList> missionInfoLists = new ArrayList<>();
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
 
-        databaseReference = databaseReference.child("mission_info_list").child(user_id);
-        databaseReference.addValueEventListener(new ValueEventListener() {
+        Query query = FirebaseDatabase.getInstance().getReference().child("user_data").child(user_id).child("mission_display").orderByChild("date").startAt(date_time);
+
+        FirebaseRecyclerOptions<ItemForMissionByDay> options =
+                new FirebaseRecyclerOptions.Builder<ItemForMissionByDay>()
+                        .setLifecycleOwner(this)
+                        .setQuery(query, new SnapshotParser<ItemForMissionByDay>() {
+                            @NonNull
+                            @Override
+                            public ItemForMissionByDay parseSnapshot(@NonNull DataSnapshot snapshot) {
+
+                                ItemForMissionByDay item =snapshot.getValue(ItemForMissionByDay.class);
+                                return item;
+                            }
+                        })
+                        .build();
+        FirebaseRecyclerAdapter adapter = new FirebaseRecyclerAdapter<ItemForMissionByDay, ItemViewHolder>(options) {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            public ItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+                // Create a new instance of the ViewHolder, in this case we are using a custom
+                // layout called R.layout.message for each item
+                View view;
+                LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+                view = inflater.inflate(R.layout.main_recycler_view_item, parent, false);
+                ItemViewHolder viewHolder = new ItemViewHolder(view);
 
-
-                Log.d("파베", dataSnapshot.getChildrenCount() + "");
-
-                for (DataSnapshot post : dataSnapshot.getChildren()) {
-                    MissionInfoList missionInfoList = post.getValue(MissionInfoList.class);
-
-
-                    missionInfoLists.add(missionInfoList);
-                    Log.d("파베", missionInfoList.getMission_title() + "");
-                    Log.d("파베", missionInfoList.getMission_time());
-                    Log.d("파베", missionInfoList.getLat() + "");
-                    Log.d("파베", missionInfoList.getMission_info_root_id() + "");
-
-                    for (String date : missionInfoList.getMission_dates().keySet()) {
-                        Log.d("파베", date);
-                    }
-                }
-
-                sortMissions(missionInfoLists);
-
+                return viewHolder;
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
+            protected void onBindViewHolder(ItemViewHolder holder, int position, ItemForMissionByDay model) {
+                // Bind the Chat object to the ChatHolder
+                // ...
+                Log.d("정렬",model.getTitle());
+                holder.tv_missionTitle.setText(model.getTitle());
+                holder.tv_address.setText(model.getAddress());
+                holder.tv_date.setText(DateTimeUtils.makeDateForHuman(model.getDate()));
+                holder.tv_time.setText(DateTimeUtils.makeTimeForHuman(model.getTime()));
             }
-        });
+
+
+        };
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        loading_panel.setVisibility(View.GONE);
+        recyclerView.setAdapter(adapter);
 
 
     }
 
+    private void setTimer(String date_time){
+        Date endDate = dtf.dateTimeParser(date_time);
+        Date curDate = new Date(System.currentTimeMillis());
+
+        long diff = endDate.getTime() - curDate.getTime();
+        if (diff >= 0) {
+
+            timer = new CountDownTimer(diff,1000) {
+                @Override
+                public void onTick(long l) {
+                    long days = TimeUnit.MILLISECONDS.toDays(l);
+                    long remainingHoursInMillis = l - TimeUnit.DAYS.toMillis(days);
+                    long hours = TimeUnit.MILLISECONDS.toHours(remainingHoursInMillis);
+                    long remainingMinutesInMillis = remainingHoursInMillis - TimeUnit.HOURS.toMillis(hours);
+                    long minutes = TimeUnit.MILLISECONDS.toMinutes(remainingMinutesInMillis);
+                    long remainingSecondsInMillis = remainingMinutesInMillis - TimeUnit.MINUTES.toMillis(minutes);
+                    long seconds = TimeUnit.MILLISECONDS.toSeconds(remainingSecondsInMillis);
+                    //Log.d("타이머", "position" + position + "   " + holder.getAdapterPosition() + "time:" + l + " " + timer_switch);
+                    if (days == 0) {
+                        String time = "+ " + hours + "시간 " + minutes + "분";
+
+                        rest_time_display.setText("남은시간: "+time);
+
+                        if (l < 2 * 60 * 60 * 1000) { //2시간
+                            //holder.is_status.setImageResource(R.drawable.ready_to_check);
+                        }
+                    } else {
+                        String time = "+ " + days + "일 " + hours + "시간 " + minutes + "분";
+                        rest_time_display.setText("남은시간"+time);
+
+                    }
+                }
+
+                @Override
+                public void onFinish() {
+
+
+                }
+            }.start();
+
+        }
+
+
+    }
+/*
     private void checkPaging() {
 
         String user_id = mContext.getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
@@ -293,7 +442,25 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
                 .build();
         DatabasePagingOptions<ItemForMissionByDay> options = new DatabasePagingOptions.Builder<ItemForMissionByDay>()
                 .setLifecycleOwner(this)
-                .setQuery(query, config, ItemForMissionByDay.class)
+                .setQuery(query, config,    new SnapshotParser<ItemForMissionByDay>() {
+                    @NonNull
+                    @Override
+                    public ItemForMissionByDay parseSnapshot(@NonNull DataSnapshot snapshot) {
+                        for(DataSnapshot data:snapshot.getChildren()){
+
+                            Log.d("파베","스냅샷"+data.toString());
+                        }
+
+                        ItemForMissionByDay item = snapshot.getValue(ItemForMissionByDay.class);
+                        if(DateTimeUtils.compareIsFuture(item.getDate()+item.getTime())){
+
+                            return item;
+                        }
+                        else {
+                            return item;
+                        }
+                    }
+                })
                 .build();
 
         //MainRecyclerAdapter mainRecyclerAdapter = new MainRecyclerAdapter(getContext(), lstRecyclerItem);
@@ -320,10 +487,29 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
                                                     @NonNull ItemForMissionByDay model) {
                         // Bind the item to the view holder
                         // ...
-                        holder.tv_missionTitle.setText(model.getTitle());
-                        holder.tv_address.setText(model.getAddress());
-                        holder.tv_date.setText(DateTimeUtils.makeDateForHuman(model.getDate()));
-                        holder.tv_time.setText(DateTimeUtils.makeTimeForHuman(model.getTime()));
+
+                        if (DateTimeUtils.compareIsFuture(model.getDate() + model.getTime())) {
+
+                            if (position == 0) {
+                                tv_mission_title.setText(model.getTitle());
+                                time_display.setText(model.getTime());
+                                date_display.setText(model.getDate());
+                                address_display.setText(model.getAddress());
+
+                               // notifyItemRemoved(position);
+                                //notifyItemRangeChanged(position,.size());
+
+                            } else {
+                                holder.tv_missionTitle.setText(model.getTitle());
+                                holder.tv_address.setText(model.getAddress());
+                                holder.tv_date.setText(DateTimeUtils.makeDateForHuman(model.getDate()));
+                                holder.tv_time.setText(DateTimeUtils.makeTimeForHuman(model.getTime()));
+                                holder.view_container.setVisibility(View.GONE);
+                                holder.tv_date.setVisibility(View.GONE);
+                                holder.tv_missionTitle.setVisibility(View.GONE);
+                            }
+
+                        }
 
 
                     }
@@ -370,6 +556,8 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
 
     }
 
+ */
+
     private void sortMissions(List<MissionInfoList> missionInfoLists) {
 
 
@@ -412,105 +600,6 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
         Log.d("결과 보기", date);
     }
 
-    private void displayDotinCalendar(String response) {
-
-        try {
-            JSONArray jsonArray = new JSONArray(response);
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject jsonObject = jsonArray.getJSONObject(i);
-
-                String date_array = jsonObject.getString("date_array");
-                List<String> items = Arrays.asList(date_array.split("\\s*,\\s*"));
-                for (int j = 0; j < items.size(); j++) {
-                    Date date = dateParser(items.get(j));
-                    String day = (String) DateFormat.format("d", date); // 20
-                    String monthNumber = (String) DateFormat.format("M", date); // 6
-                    String year = (String) DateFormat.format("yyyy", date); // 2013
-                    CalendarDay eventDay2 = CalendarDay.from(Integer.valueOf(year), Integer.valueOf(monthNumber), Integer.valueOf(day));
-                    dates.add(eventDay2);
-                }
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-
-        materialCalendarView.addDecorator(new EventDecorator(Color.RED, dates));
-
-    }
-
-
-    private void onSortMission(String resultForDate, CalendarDay calendarDay) {
-
-        if (resultForDate != null) {
-            try {
-                lstRecyclerItem.clear();
-                JSONArray jsonArray = new JSONArray(resultForDate);
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject jsonObject = jsonArray.getJSONObject(i);
-
-                    String date_array = jsonObject.getString("date_array");
-                    String completed_dates_array = jsonObject.getString("completed_dates_array");
-                    int last = completed_dates_array.length() - 1;
-                    if (last > 0 && completed_dates_array.charAt(last) == ',') {
-                        completed_dates_array = completed_dates_array.substring(0, last);
-                    }
-
-                    List<String> items = Arrays.asList(date_array.split("\\s*,\\s*"));
-                    List<String> completed_dates_item = Arrays.asList(completed_dates_array.split("\\s*,\\s*"));
-
-                    for (int j = 0; j < items.size(); j++) {
-                        //if (FORMATTER.format(calendarDay.getDate()).equals(items.get(j))) {
-                        RecyclerItem recyclerItem = new RecyclerItem();
-                        for (int k = 0; k < completed_dates_item.size(); k++) {
-                            if (items.get(j).equals(completed_dates_item.get(k))) {
-                                recyclerItem.setSuccess(true);
-                            } else {
-                                recyclerItem.setSuccess(false);
-                            }
-                        }
-                        recyclerItem.setMissionTitle(jsonObject.getString("mission_name"));
-                        recyclerItem.setMissionID(jsonObject.getString("mission_id"));
-                        recyclerItem.setLatitude(jsonObject.getDouble("mission_lat"));
-                        recyclerItem.setLongitude(jsonObject.getDouble("mission_lng"));
-                        recyclerItem.setMissionTime(jsonObject.getString("mission_time"));
-                        recyclerItem.setDate_array(jsonObject.getString("date_array"));
-                        recyclerItem.setDate_time(items.get(j) + " " + jsonObject.getString("mission_time"));
-                        recyclerItem.setContact_json(jsonObject.getString("mission_contacts"));
-                        recyclerItem.setCompleted(jsonObject.getString("completed_dates"));
-                        recyclerItem.setCompleted_dates(jsonObject.getString("completed_dates_array"));
-                        recyclerItem.setTotal_dates(jsonObject.getString("total_dates"));
-                        recyclerItem.setIs_failed(jsonObject.getString("is_failed"));
-                        recyclerItem.setAddress(jsonObject.getString("address"));
-                        recyclerItem.setDate(items.get(j));
-
-                        lstRecyclerItem.add(recyclerItem);
-
-
-                    }
-                    //  }
-                }
-                //Collections.sort(lstRecyclerItem);
-                setupRecyclerView(lstRecyclerItem);
-
-
-            } catch (JSONException e) {
-                Log.d("살펴보자", e + "error");
-            }
-        }
-
-    }
-
-    private Date dateParser(String date) {
-        Date result = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-d", Locale.KOREA);
-        try {
-            result = sdf.parse(date);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
 
 
     @Override
@@ -534,6 +623,7 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
     public void onResume() {
         super.onResume();
         Log.d("홈프레그", "onResume_SearchFragment");
+        loading_panel.setVisibility(View.GONE);
         SharedPreferences sharedPreferences = mContext.getSharedPreferences("timer_control", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean("timer_switch", true);
@@ -546,6 +636,7 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+
         Log.d("홈프레그", "onAttach_SearchFragment");
         mContext = context;
 
@@ -569,12 +660,6 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
             tv_address = itemView.findViewById(R.id.address_display);
 
         }
-    }
-
-    private void setDisplayDateTime(ItemViewHolder holder, MissionInfoList missionInfoList) {
-        //String time = Utils.monthDayTime(missionInfoList.getMission_dates().,missionInfoList.getMission_time());
-
-
     }
 
 

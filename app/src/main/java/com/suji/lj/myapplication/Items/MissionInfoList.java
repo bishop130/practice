@@ -16,10 +16,12 @@ public class MissionInfoList {
     public double lat;
     public double lng;
     public ArrayList<String> arrayList;
-    public Map<String, Object> mission_dates;
+    public Map<String, Boolean> mission_dates;
     public String mission_info_root_id;
+    String min_date;
+    String max_date;
 
-    public MissionInfoList(String mission_title, String mission_time, String address, boolean is_success, double lat, double lng, ArrayList<String> arrayList, Map<String, Object> mission_dates, String mission_info_root_id) {
+    public MissionInfoList(String mission_title, String mission_time, String address, boolean is_success, double lat, double lng, ArrayList<String> arrayList, Map<String, Boolean> mission_dates, String mission_info_root_id,String max_date,String min_date) {
         this.mission_title = mission_title;
         this.mission_time = mission_time;
         this.address = address;
@@ -29,6 +31,24 @@ public class MissionInfoList {
         this.arrayList = arrayList;
         this.mission_dates = mission_dates;
         this.mission_info_root_id = mission_info_root_id;
+        this.min_date = min_date;
+        this.max_date = max_date;
+    }
+
+    public String getMin_date() {
+        return min_date;
+    }
+
+    public void setMin_date(String min_date) {
+        this.min_date = min_date;
+    }
+
+    public String getMax_date() {
+        return max_date;
+    }
+
+    public void setMax_date(String max_date) {
+        this.max_date = max_date;
     }
 
     public String getMission_title() {
@@ -87,11 +107,11 @@ public class MissionInfoList {
         this.arrayList = arrayList;
     }
 
-    public Map<String, Object> getMission_dates() {
+    public Map<String, Boolean> getMission_dates() {
         return mission_dates;
     }
 
-    public void setMission_dates(Map<String, Object> mission_dates) {
+    public void setMission_dates(Map<String, Boolean> mission_dates) {
         this.mission_dates = mission_dates;
     }
 

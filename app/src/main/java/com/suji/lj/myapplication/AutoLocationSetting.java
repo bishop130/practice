@@ -119,7 +119,7 @@ public class AutoLocationSetting extends AppCompatActivity {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
 
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (LocationService.class.getName().equals(service.service.getClassName()))
+            if (NewLocationService.class.getName().equals(service.service.getClassName()))
                 return true;
         }
         return false;

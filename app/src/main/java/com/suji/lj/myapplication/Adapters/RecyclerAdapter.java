@@ -382,7 +382,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
         animator.setInterpolator(Utils.createInterpolator(Utils.LINEAR_INTERPOLATOR));
         return animator;
     }
-/*
+
     private void calculateRestTime(final ItemViewHolder holder, final int position) {
 
         if (mData.get(position).getIs_failed().equals("1")) {
@@ -453,7 +453,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
 
     }
 
- */
+
 
     private static boolean isTomorrow(Date d) {
         return DateUtils.isToday(d.getTime() - DateUtils.DAY_IN_MILLIS);

@@ -63,12 +63,9 @@ public class NewLocationService extends Service {
 
         }
     };
-
-
     int notif_id = 1;
     PreciseCountdown preciseCountdown;
     DateTimeFormatter dtf = new DateTimeFormatter();
-
 
     @Nullable
     @Override
@@ -92,77 +89,7 @@ public class NewLocationService extends Service {
             queryData();
 
 
-            SharedPreferences pref = getSharedPreferences("Location", MODE_PRIVATE);
-            String user_id = getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
-            String date = pref.getString("date", "");
-            String time = pref.getString("time", "");
-            DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
-/*
-            ref.child("check_for_server").child(date + time).orderByChild("user_id").equalTo(user_id).addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-                    Log.d("서비스", dataSnapshot.toString() + "  for_server");
-                    for (DataSnapshot child : dataSnapshot.getChildren()) {
-                        String key = child.getKey();
-                        ItemForServer object = child.getValue(ItemForServer.class);
-                        object.setIs_success(true);
-                        ref.child("check_for_server").child(date + time).child(key).setValue(object);
-                    }
-
-
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });
-
- */
-            ref.child("user_data").child(user_id).child("mission_display").child(date + time).addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                    Log.d("서비스", dataSnapshot.toString() + "  display");
-
-                    ItemForMissionByDay item = dataSnapshot.getValue(ItemForMissionByDay.class);
-                    item.setSuccess(true);
-                    for (DataSnapshot data : dataSnapshot.getChildren()) {
-
-                        Log.d("서비스", data.toString() + "  display");
-                        //ItemForMissionByDay itemForMissionByDay = data.getValue(ItemForMissionByDay.class);
-                        //itemForMissionByDay.setSuccess(true);
-                        //ItemForMissionByDay itemForMissionByDay = new ItemForMissionByDay(data.getValue(ItemForMissionByDay.class));
-
-                        /*
-
-                        ItemForMissionByDay itemForMissionByDay = new ItemForMissionByDay();
-                        itemForMissionByDay.setTitle(data.child("title").getValue(String.class));
-                        itemForMissionByDay.setDate(data.child("date").getValue(String.class));
-                        itemForMissionByDay.setTime(data.child("time").getValue(String.class));
-                        itemForMissionByDay.setAddress(data.child("address").getValue(String.class));
-                        itemForMissionByDay.setSuccess(true);
-                        itemForMissionByDay.setLat(data.child("lat").getValue(Double.class));
-                        itemForMissionByDay.setLng(data.child("lng").getValue(Double.class));
-
-                         */
-                       //
-                    }
-                    ref.child("user_data").child(user_id).child("mission_display").child(date + time).setValue(item);
-
-
-
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });
-
-
-            //LocationUtils.startLocationUpdates(this, locationCallback);
 
 
         } else {
@@ -222,14 +149,18 @@ public class NewLocationService extends Service {
                     editor.putLong("Lng", Double.doubleToRawLongBits(lng));
                     editor.apply();
 
-
+                    Log.d("서비스", "가장가까운 날짜"+date);
                     //foregroundNotification();
                     Date current_date_time = new Date(System.currentTimeMillis());
                     Date mission_date_time = dtf.dateTimeParser(date + time);
                     long diff = mission_date_time.getTime() - current_date_time.getTime();
 
-                    if (true) {
+                    if (diff>0) {
                         LocationUtils.startLocationUpdates(getApplicationContext(), locationCallback);
+
+
+
+
                     } else {
                         updateNotification("다음 목표 : " + title + " - " + DateTimeUtils.makeDateForHuman(date) + " " + DateTimeUtils.makeTimeForHuman(time), "목표시간 30분 전에 자동위치등록이 시작됩니다.");
                         timerAlarm(diff);
@@ -334,6 +265,50 @@ public class NewLocationService extends Service {
             String user_id = getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
             String date = pref.getString("date", "");
             String time = pref.getString("time", "");
+            DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
+
+            ref.child("check_for_server").child(date + time).orderByChild("user_id").equalTo(user_id).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                    Log.d("서비스", dataSnapshot.toString() + "  for_server");
+                    for (DataSnapshot child : dataSnapshot.getChildren()) {
+                        String key = child.getKey();
+                        ItemForServer object = child.getValue(ItemForServer.class);
+                        object.setIs_success(true);
+                        ref.child("check_for_server").child(date + time).child(key).setValue(object);
+                    }
+
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
+
+            ref.child("user_data").child(user_id).child("mission_display").child(date + time).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                    Log.d("서비스", dataSnapshot.toString() + "  display");
+
+                    ItemForMissionByDay item = dataSnapshot.getValue(ItemForMissionByDay.class);
+                    item.setSuccess(true);
+                    ref.child("user_data").child(user_id).child("mission_display").child(date + time).setValue(item);
+
+
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
 
 
         }
