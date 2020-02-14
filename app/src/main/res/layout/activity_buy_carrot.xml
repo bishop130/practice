@@ -19,6 +19,7 @@
             android:layout_height="200dp"
             android:src="@drawable/carrot_circle" />
         <LinearLayout
+            android:id="@+id/fore_test"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:gravity="center"

@@ -7,14 +7,17 @@ import java.util.List;
 
 import io.realm.RealmList;
 import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 
 public class MissionCartItem extends RealmObject {
 
+    String id;
+
     String title;
     String date;
     String address;
-    RealmList<DateItem> calendarDayList = new RealmList<>();
+    RealmList<ItemForDateTime> calendarDayList = new RealmList<>();
     int hour;
     int min;
     boolean no_time_limit;
@@ -27,7 +30,7 @@ public class MissionCartItem extends RealmObject {
 
 
 
-    public MissionCartItem(String title, String date, String address, RealmList<DateItem> calendarDayList, int hour, int min, boolean no_time_limit,double lat,double lng,String min_date,String max_date) {
+    public MissionCartItem(String title, String date, String address, RealmList<ItemForDateTime> calendarDayList, int hour, int min, boolean no_time_limit,double lat,double lng,String min_date,String max_date,String id) {
         this.title = title;
         this.date = date;
         this.address = address;
@@ -39,6 +42,15 @@ public class MissionCartItem extends RealmObject {
         this.lng = lng;
         this.min_date = min_date;
         this.max_date = max_date;
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getMin_date() {
@@ -97,11 +109,11 @@ public class MissionCartItem extends RealmObject {
         this.min = min;
     }
 
-    public RealmList<DateItem> getCalendarDayList() {
+    public RealmList<ItemForDateTime> getCalendarDayList() {
         return calendarDayList;
     }
 
-    public void setCalendarDayList(RealmList<DateItem> calendarDayList) {
+    public void setCalendarDayList(RealmList<ItemForDateTime> calendarDayList) {
         this.calendarDayList = calendarDayList;
     }
 

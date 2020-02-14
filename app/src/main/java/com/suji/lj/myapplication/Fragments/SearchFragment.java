@@ -14,31 +14,40 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
+import com.google.android.material.tabs.TabLayout;
+import com.kakao.friends.AppFriendContext;
+import com.kakao.friends.response.AppFriendsResponse;
+import com.kakao.kakaotalk.callback.TalkResponseCallback;
+import com.kakao.kakaotalk.v2.KakaoTalkService;
+import com.kakao.network.ErrorResult;
 import com.suji.lj.myapplication.Adapters.KakaoFriends;
-import com.suji.lj.myapplication.Adapters.RecyclerForMissionAdapter;
+import com.suji.lj.myapplication.Adapters.RecyclerFriendsListAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerViewDivider;
+import com.suji.lj.myapplication.Items.ItemForFriendsList;
 import com.suji.lj.myapplication.Items.RecyclerItem;
 import com.suji.lj.myapplication.R;
-import com.prolificinteractive.materialcalendarview.CalendarDay;
+import com.suji.lj.myapplication.Utils.DateTimeUtils;
+import com.suji.lj.myapplication.Utils.Utils;
 
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class SearchFragment extends Fragment {
     private RecyclerView recyclerView;
@@ -48,6 +57,22 @@ public class SearchFragment extends Fragment {
     private List<RecyclerItem> lstRecyclerItem = new ArrayList<>();
     private KakaoFriends kakaoFriends = new KakaoFriends();
     private Context mContext;
+    TabLayout tab_ly_friends;
+    List<ItemForFriendsList> itemForFriendsListList = new ArrayList<>();
+    private Callback callback = new Callback() {
+        @Override
+        public void onFailure(Call call, IOException e) {
+
+        }
+
+        @Override
+        public void onResponse(Call call, Response response) throws IOException {
+
+            Log.d("친구목록",response.toString());
+
+        }
+    };
+
 
     @Nullable
     @Override
@@ -55,14 +80,47 @@ public class SearchFragment extends Fragment {
 
 
 
-        requestQueue = Volley.newRequestQueue(mContext);
+
         final View view = inflater.inflate(R.layout.fragment_search, container, false);
         recyclerView = view.findViewById(R.id.recycler_total);
         recyclerView.addItemDecoration(new RecyclerViewDivider(36));
+        tab_ly_friends = view.findViewById(R.id.tab_ly_friends);
+
+        tab_ly_friends.addTab(tab_ly_friends.newTab().setText("친구목록"));
+        tab_ly_friends.addTab(tab_ly_friends.newTab().setText("친구요청"));
+
+        requestFriendsList();
+        requestFriends();
+
+        tab_ly_friends.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                switch (tab.getPosition()){
+                    case 0:
+                        break;
+                    case 1:
+                        break;
+
+                }
+
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
 
         String user_id = mContext.getSharedPreferences("Kakao",Context.MODE_PRIVATE).getString("token","");
-        volleyConnect(user_id);
+        //volleyConnect(user_id);
         kakaoFriends.requestFriends();
+        setupRecyclerView();
 
         return view;
     }
@@ -77,84 +135,21 @@ public class SearchFragment extends Fragment {
         editor.apply();
     }
 
-    private void setupRecyclerView(List<RecyclerItem> lstRecyclerItem) {
+    private void setupRecyclerView() {
+        SharedPreferences sharedPreferences = mContext.getSharedPreferences("kakao_profile",MODE_PRIVATE);
+        String name = sharedPreferences.getString("name","");
+        String profile_image = sharedPreferences.getString("profile_image","");
 
-        RecyclerForMissionAdapter recyclerAdapter = new RecyclerForMissionAdapter(getContext(), lstRecyclerItem);
-        recyclerAdapter.notifyDataSetChanged();
+        ItemForFriendsList item = new ItemForFriendsList();
+        item.setFriends_name(name);
+        item.setFriends_image(profile_image);
+
+        itemForFriendsListList.add(item);
+
+        RecyclerFriendsListAdapter recyclerAdapter = new RecyclerFriendsListAdapter(mContext,itemForFriendsListList);
+        //recyclerAdapter.notifyDataSetChanged();
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(recyclerAdapter);
-
-    }
-
-    private void volleyConnect(final String userId) {
-
-
-        request = new StringRequest(Request.Method.POST, Mission_List_URL, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-
-                Log.d("HomeFragment", "volley connect");
-                CalendarDay calendarDay = CalendarDay.today();
-                onSortMission(response, calendarDay);
-
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(getContext(), "전송실패" + error, Toast.LENGTH_LONG).show();
-            }
-        }) {
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                HashMap<String, String> hashMap = new HashMap<String, String>();
-                hashMap.put("userId", userId);
-                return hashMap;
-            }
-        };
-        requestQueue.add(request);
-    }
-
-    private void onSortMission(String resultForDate, CalendarDay calendarDay) {
-
-        if (resultForDate != null) {
-            try {
-                lstRecyclerItem.clear();
-                JSONArray jsonArray = new JSONArray(resultForDate);
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    RecyclerItem recyclerItem = new RecyclerItem();
-                    String register_date = jsonObject.getString("register_date_time");
-
-                    recyclerItem.setMissionTitle(jsonObject.getString("mission_name"));
-                    recyclerItem.setMissionID(jsonObject.getString("mission_id"));
-                    recyclerItem.setLatitude(jsonObject.getDouble("mission_lat"));
-                    recyclerItem.setLongitude(jsonObject.getDouble("mission_lng"));
-                    recyclerItem.setMissionTime(jsonObject.getString("mission_time"));
-                    recyclerItem.setContact_json(jsonObject.getString("mission_contacts"));
-                    recyclerItem.setCompleted_dates(jsonObject.getString("completed_dates_array"));
-                    recyclerItem.setTotal_dates(jsonObject.getString("total_dates"));
-                    recyclerItem.setCompleted(jsonObject.getString("completed_dates"));
-
-
-                    recyclerItem.setRegister_date(jsonObject.getString("register_date_time"));
-                    recyclerItem.setDate_time(jsonObject.getString("register_date_time"));
-                    recyclerItem.setDate_array(jsonObject.getString("date_array"));
-                    recyclerItem.setAddress(jsonObject.getString("address"));
-                    recyclerItem.setIs_failed(jsonObject.getString("is_failed"));
-
-                    lstRecyclerItem.add(recyclerItem);
-
-
-                }
-                Collections.sort(lstRecyclerItem);
-                setupRecyclerView(lstRecyclerItem);
-
-
-            } catch (JSONException e) {
-                Log.d("살펴보자", e + "error");
-            }
-        }
-
 
     }
     @Override
@@ -172,4 +167,76 @@ public class SearchFragment extends Fragment {
         Log.d("타이머"," "+timer_switch);
 
     }
+
+    private void requestFriendsList() {
+
+        OkHttpClient client = new OkHttpClient();
+        String user_id = mContext.getSharedPreferences("Kakao",Context.MODE_PRIVATE).getString("token","");
+
+        String url="https://testapi.openbanking.or.kr/v2.0/inquiry/real_name";
+
+
+        MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("bank_tran_id", Utils.makeBankTranId());
+        params.put("bank_code_std", "004");
+        params.put("account_num", "29030204202663");
+        params.put("account_holder_info_type", " ");
+        params.put("account_holder_info", "901130");
+        params.put("tran_dtime", DateTimeUtils.getCurrentTime());
+
+
+        JSONObject parameter = new JSONObject(params);
+        RequestBody formBody = RequestBody.create(JSON,parameter.toString());
+
+
+        okhttp3.Request request = new okhttp3.Request.Builder()
+                .header("Authorization","Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJUOTkxNTk2OTIwIiwic2NvcGUiOlsib29iIl0sImlzcyI6Imh0dHBzOi8vd3d3Lm9wZW5iYW5raW5nLm9yLmtyIiwiZXhwIjoxNTg2ODU3NDQ0LCJqdGkiOiI3YzdhMDE3OS1iOGU3LTQxYTEtOTBkZi0xOWVhMzlkOTI0MWQifQ.86REUWV7ImJXWr7FtiayZclAmIW_4WO37s5tujR-UXI")
+                .url(url)
+                .post(formBody)
+                .build();
+
+
+        client.newCall(request).enqueue(callback);
+    }
+
+
+    public void requestFriends() {
+
+        // offset = 0, limit = 100
+        AppFriendContext friendContext = new AppFriendContext(true, 0, 100, "asc");
+
+        KakaoTalkService.getInstance().requestAppFriends(friendContext,
+                new TalkResponseCallback<AppFriendsResponse>() {
+                    @Override
+                    public void onNotKakaoTalkUser() {
+                        Log.d("카카오친구 ", "카카오 유저가 아님");
+                    }
+
+                    @Override
+                    public void onSessionClosed(ErrorResult errorResult) {
+
+                    }
+
+                    @Override
+                    public void onNotSignedUp() {
+
+                    }
+
+                    @Override
+                    public void onFailure(ErrorResult errorResult) {
+                        Log.d("카카오친구 ", errorResult.toString());
+                    }
+
+                    @Override
+                    public void onSuccess(AppFriendsResponse result) {
+                        // 친구 목록
+                        Log.d("친구목록 ", result.getFriends().toString());
+                        result.getFriends().get(0).getUUID();
+                        // context의 beforeUrl과 afterUrl이 업데이트 된 상태.
+                    }
+                });
+    }
+
+
 }

@@ -2,12 +2,18 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal" android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/White">
+    android:background="@color/White"
+    android:id="@+id/ly_mission_container">
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_margin="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="20dp"
         >
 
     <com.google.android.material.checkbox.MaterialCheckBox
@@ -27,6 +33,68 @@
 
 
     </LinearLayout>
+
+
+
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp">
+        <TextView
+            android:layout_marginStart="40dp"
+            android:id="@+id/start_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="start_date"/>
+        <TextView
+            android:layout_marginStart="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="-"/>
+        <TextView
+            android:layout_marginStart="8dp"
+            android:id="@+id/end_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="end_date"/>
+
+
+
+
+
+    </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:layout_marginTop="8dp">
+            <TextView
+                android:layout_marginStart="40dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="time"
+                android:id="@+id/time"/>
+
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/past_warning"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:visibility="gone">
+            <TextView
+                android:layout_marginStart="40dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="* 이미 지난 날짜가 포함되어 있습니다"
+                android:textColor="@color/red"/>
+
+
+        </LinearLayout>
+
+    </LinearLayout>
     <View
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -36,6 +104,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:gravity="center"
+
         android:layout_gravity="center">
         <ImageView
             android:layout_width="wrap_content"
@@ -47,9 +116,5 @@
 
             android:layout_gravity="end|center"/>
 
-
     </LinearLayout>
-
-
-
 </LinearLayout>

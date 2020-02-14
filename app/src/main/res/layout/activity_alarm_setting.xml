@@ -7,50 +7,216 @@
     android:orientation="vertical"
     tools:context=".AlarmSettingActivity">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar_alarm_setting"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/White"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="20dp">
+        android:layout_marginTop="16dp"
+        android:background="@color/White"
+        android:orientation="vertical">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="30dp"
-            android:text="알람 활성화"
-            android:textSize="24sp" />
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:text="5. 벌칙설정"
+            android:textSize="20sp" />
 
         <View
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1" />
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/divider_line" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/ly_add_new_account"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="20dp"
+                android:background="@drawable/shape_add_new_account"
+                android:visibility="gone"
+
+                >
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="28dp"
+                    android:layout_marginBottom="28dp"
+                    android:gravity="center"
+                    android:text="+ 계좌 등록하기"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="18sp" />
 
 
-        <Switch
-            android:id="@+id/switch1"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="right"
-            android:checked="true"
-            android:switchMinWidth="56dp"
-            android:layout_marginRight="20dp"
+            </LinearLayout>
 
-            android:textOff="OFF"
-            android:textOn="ON" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/transfer_recyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <LinearLayout
+                    android:id="@+id/add_contact"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/White">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_margin="20dp"
+                        android:gravity="center"
+                        android:text="+ 연락처 선택"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="16sp" />/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <LinearLayout
+                        android:id="@+id/account_select"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="24dp"
+                        android:orientation="horizontal"
+
+                        android:background="@drawable/shape_rounded_bank">
+
+                        <LinearLayout
+
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:layout_marginBottom="12dp"
+                            android:orientation="horizontal">
+                            <ImageView
+                                android:layout_marginStart="28dp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:src="@drawable/checked_icon"
+                                android:layout_gravity="center"/>
+
+                            <LinearLayout
+
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+
+                                android:orientation="vertical">
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal">
+
+
+
+
+                                <TextView
+                                    android:id="@+id/bank_name"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="12dp"
+                                    android:layout_marginEnd="28dp"
+                                    android:textColor="@color/black"
+                                    android:textSize="18sp"
+                                    android:text="국민은행" />
+                                </LinearLayout>
+
+                                <TextView
+
+                                    android:layout_marginStart="12dp"
+                                    android:id="@+id/account_num"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textSize="18sp"
+                                    android:textColor="@color/black"
+                                    android:text="290302042026" />
+
+
+
+                            </LinearLayout>
+                            <View
+                                android:layout_width="0dp"
+                                android:layout_height="0dp"
+                                android:layout_weight="1"/>
+                            <ImageView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:src="@drawable/right_arrow"
+                                android:layout_marginEnd="12dp"
+                                android:layout_gravity="center"/>
+
+
+
+
+
+
+                        </LinearLayout>
+                    </LinearLayout>
+
+
+                </LinearLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/divider_line" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp"
+                    android:layout_marginBottom="32dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="총 이체금액"
+                        android:layout_marginStart="32dp"
+                        android:textColor="@color/colorPrimary"/>
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="10,000"
+                        android:textSize="60sp"
+                        android:textColor="@color/colorPrimary"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="원"
+                        android:layout_marginStart="8dp"
+                        android:textSize="16sp"
+                        android:layout_marginEnd="32dp"
+                        android:textColor="@color/colorPrimary"/>
+
+
+
+
+                </LinearLayout>
+
+
+            </LinearLayout>
+        </LinearLayout>
+
+
     </LinearLayout>
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/alarm_setting_list"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:choiceMode="multipleChoice" />
 
 
 </LinearLayout>

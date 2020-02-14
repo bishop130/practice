@@ -27,6 +27,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import io.realm.Realm;
+
 public class RecyclerViewContactAdapter extends RecyclerView.Adapter<RecyclerViewContactAdapter.RecyclerViewContactHolder> implements Filterable {
 
     private List<ContactItem> itemList;
@@ -36,13 +38,14 @@ public class RecyclerViewContactAdapter extends RecyclerView.Adapter<RecyclerVie
     private int count = 0;
     private static final int MAX_CONTACTS = 10;
     OnFriendsCountFromContactListener onFriendsCountFromContactListener;
+    Realm realm;
 
 
-
-    public RecyclerViewContactAdapter(Context context, List<ContactItem> itemList, OnFriendsCountFromContactListener onFriendsCountFromContactListener) {
+    public RecyclerViewContactAdapter(Context context, List<ContactItem> itemList, OnFriendsCountFromContactListener onFriendsCountFromContactListener, Realm realm) {
         this.itemList = itemList;
         this.context = context;
         this.exampleListFull = new ArrayList<>(itemList);
+        this.realm = realm;
 
         this.onFriendsCountFromContactListener = onFriendsCountFromContactListener;
     }
@@ -77,21 +80,25 @@ public class RecyclerViewContactAdapter extends RecyclerView.Adapter<RecyclerVie
                 itemList.get(position).setPosition(position);
                 //Log.d("라니스터","position  "+position+"\n"+"isture"+itemList.get(position).isSelected());
 
-                if(itemList.get(position).isSelected()) {
+                if (itemList.get(position).isSelected()) {
 
-                    ContactItem contactItem = new ContactItem();
-                    contactItem.setDisplayName(itemList.get(position).getDisplayName());
-                    contactItem.setPhoneNumbers(itemList.get(position).getPhoneNumbers());
-                    contactItem.setPosition(position);
-                    contactItem.setSelected(true);
+
+                    ContactItem item = new ContactItem();
+                    item.setDisplayName(itemList.get(position).getDisplayName());
+                    item.setAmount(1000);
+                    item.setPosition(position);
+                    item.setSelected(true);
+                    item.setPhoneNumbers(itemList.get(position).getPhoneNumbers());
+
+
                     //onFriendsCountFromContactListener.onFriendsCountFromContact(itemList.size());
 
 
-                    ((ContactActivity) context).selectedList(contactItem);
+                    ((ContactActivity) context).selectedList(item, position);
 
-                   // notifyDataSetChanged();
-                }
-                else{
+                    // notifyDataSetChanged();
+                } else {
+
 
                     //onFriendsCountFromContactListener.onFriendsCountFromContact(itemList.size());
 
@@ -103,99 +110,6 @@ public class RecyclerViewContactAdapter extends RecyclerView.Adapter<RecyclerVie
 
             }
         });
-
-
-        //((ContactActivity) context).refreshThumb(selected_contact);
-/*
-        holder.name.setText(itemList.get(position).getDisplayName());
-        holder.phone_number.setText(itemList.get(position).getPhoneNumbers());
-        holder.first_name.setText(String.valueOf(itemList.get(position).getDisplayName().charAt(0)));
-
-        holder.contact_container.setBackgroundColor(itemList.get(position).isSelected() ? Color.WHITE : Color.WHITE);
-        holder.first_name.setBackgroundResource(itemList.get(position).isSelected() ? R.drawable.checked_contact : R.drawable.contact_circle);
-        holder.first_name.setText(itemList.get(position).isSelected() ? "" : String.valueOf(itemList.get(position).getDisplayName().charAt(0)));
-        //holder.first_name.setVisibility(itemList.get(position).isSelected() ? View.INVISIBLE : View.VISIBLE);
-        //holder.checked_contact.setVisibility(itemList.get(position).isSelected() ? View.GONE : View.VISIBLE);
-        //holder.first_name.setImageResource(R.drawable.account);
-        Log.d("라니스터","onBindViewHolder_recyclerViewContact");
-        holder.contact_container.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (count < MAX_CONTACTS) {
-
-                    //((ContactActivity) context).refreshSelection(position);
-                    itemList.get(position).setSelected(!itemList.get(position).isSelected());
-
-
-                    if (itemList.get(position).isSelected()) {
-                        Log.d("라니스터","포지션 선택"+ position+"   "+itemList.get(position).isSelected());
-                        count = count + 1;
-                        ContactItem contactItem = new ContactItem();
-                        contactItem.setDisplayName(itemList.get(position).getDisplayName());
-                        contactItem.setPhoneNumbers(itemList.get(position).getPhoneNumbers());
-                        contactItem.setPosition(position);
-
-                        selected_contact.add(contactItem);
-                        //contactActivity.recyclerViewConfirmed(selected_contact);
-                        //((ContactActivity) context).recyclerViewConfirmed(selected_contact);
-
-                        ((ContactActivity) context).refreshThumb(selected_contact, itemList);
-                        //notifyDataSetChanged();
-
-                        holder.contact_container.setBackgroundColor(itemList.get(position).isSelected() ? Color.WHITE : Color.WHITE);
-                        holder.first_name.setBackgroundResource(itemList.get(position).isSelected() ? R.drawable.checked_contact : R.drawable.contact_circle);
-                        holder.first_name.setText(itemList.get(position).isSelected() ? "" : String.valueOf(itemList.get(position).getDisplayName().charAt(0)));
-
-
-                        checkcontact();
-
-                    } else {
-                        Log.d("라니스터","포지션 선택해제"+ position+"   "+itemList.get(position).isSelected());
-                        ContactItem contactItem = new ContactItem();
-                        contactItem.setDisplayName(itemList.get(position).getDisplayName());
-                        contactItem.setPhoneNumbers(itemList.get(position).getPhoneNumbers());
-                        contactItem.setPosition(position);
-
-                        count = count - 1;
-                        iterator(position);
-
-                        ((ContactActivity) context).refreshThumb(selected_contact,itemList);
-
-                        holder.contact_container.setBackgroundColor(itemList.get(position).isSelected() ? Color.WHITE : Color.WHITE);
-                        holder.first_name.setBackgroundResource(itemList.get(position).isSelected() ? R.drawable.checked_contact : R.drawable.contact_circle);
-                        holder.first_name.setText(itemList.get(position).isSelected() ? "" : String.valueOf(itemList.get(position).getDisplayName().charAt(0)));
-
-
-                        checkcontact();
-                    }
-                } else {
-                    Toast.makeText(context, "전송 최대 인원은 10명입니다.", Toast.LENGTH_LONG).show();
-                    if(itemList.get(position).isSelected()){
-                        itemList.get(position).setSelected(!itemList.get(position).isSelected());
-                        holder.contact_container.setBackgroundColor(itemList.get(position).isSelected() ? Color.WHITE : Color.WHITE);
-                        holder.first_name.setBackgroundResource(itemList.get(position).isSelected() ? R.drawable.checked_contact : R.drawable.contact_circle);
-                        holder.first_name.setText(itemList.get(position).isSelected() ? "" : String.valueOf(itemList.get(position).getDisplayName().charAt(0)));
-
-                        ContactItem contactItem = new ContactItem();
-                        contactItem.setDisplayName(itemList.get(position).getDisplayName());
-                        contactItem.setPhoneNumbers(itemList.get(position).getPhoneNumbers());
-                        contactItem.setPosition(position);
-                        count = count-1;
-                        iterator(position);
-
-                        checkcontact();
-                    }
-
-                }
-
-
-                Log.d("숫자", count + "");
-                //itemList.get(holder.getAdapterPosition()).setContact_count(itemList.get(holder.getAdapterPosition()).getContact_count() + 1);
-
-
-            }
-        });
-        */
 
 
     }
@@ -314,7 +228,7 @@ public class RecyclerViewContactAdapter extends RecyclerView.Adapter<RecyclerVie
         return selected_contact;
     }
 
-    public interface OnFriendsCountFromContactListener{
+    public interface OnFriendsCountFromContactListener {
         void onFriendsCountFromContact(int num);
 
     }

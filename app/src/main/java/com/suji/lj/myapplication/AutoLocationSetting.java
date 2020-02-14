@@ -24,9 +24,7 @@ import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.Toast;
 
-import com.suji.lj.myapplication.Adapters.LocationService;
 import com.suji.lj.myapplication.Adapters.NewLocationService;
-import com.suji.lj.myapplication.Utils.Utils;
 
 public class AutoLocationSetting extends AppCompatActivity {
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
@@ -102,7 +100,7 @@ public class AutoLocationSetting extends AppCompatActivity {
     }
     private void cancelAlarm(){
         AlarmManager am = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(this,LocationService.class);
+        Intent intent = new Intent(this,NewLocationService.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Log.d("서비스","설정전"+(PendingIntent.getForegroundService(this, 123, intent, PendingIntent.FLAG_NO_CREATE) != null));
             PendingIntent pendingIntent = PendingIntent.getForegroundService(this,123,intent,PendingIntent.FLAG_UPDATE_CURRENT);
@@ -176,7 +174,7 @@ public class AutoLocationSetting extends AppCompatActivity {
                     // permission was granted, yay! Do the
                     // location-related task you need to do.
                     if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                        Intent service = new Intent(AutoLocationSetting.this, LocationService.class);
+                        Intent service = new Intent(AutoLocationSetting.this, NewLocationService.class);
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             ContextCompat.startForegroundService(AutoLocationSetting.this, service);
                         } else {

@@ -34,6 +34,7 @@ public class UserAccountItem {
     String transfer_agree_yn;
     String transfer_agree_dtime;
     String payer_num;
+    String account_state;
 
     public UserAccountItem(){
 
@@ -64,7 +65,13 @@ public class UserAccountItem {
         this.payer_num = payer_num;
     }
 
+    public String getAccount_state() {
+        return account_state;
+    }
 
+    public void setAccount_state(String account_state) {
+        this.account_state = account_state;
+    }
 
     public String getFintech_use_num() {
         return fintech_use_num;

@@ -1,124 +1,85 @@
 package com.suji.lj.myapplication;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 
-import android.app.Notification;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.Signature;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.OvalShape;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.Volley;
 import com.crashlytics.android.Crashlytics;
-import com.google.android.material.tabs.TabLayout;
-import com.suji.lj.myapplication.Adapters.BackPressCloseHandler;
-import com.suji.lj.myapplication.Adapters.DBHelper;
+import com.suji.lj.myapplication.Fragments.LocationFragment;
 import com.suji.lj.myapplication.Fragments.SettingFragment;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import es.dmoral.toasty.Toasty;
 import io.fabric.sdk.android.Fabric;
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
 
-import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
-
-import com.android.volley.RequestQueue;
 
 import com.android.volley.toolbox.StringRequest;
 import com.suji.lj.myapplication.Fragments.FavoriteFragment;
-import com.suji.lj.myapplication.Fragments.HomeFragment;
-import com.suji.lj.myapplication.Fragments.SearchFragment;
-import com.google.android.material.navigation.NavigationView;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.iid.InstanceIdResult;
 import com.kakao.auth.ApiResponseCallback;
 import com.kakao.auth.AuthService;
-import com.kakao.auth.ISessionCallback;
 import com.kakao.auth.Session;
 import com.kakao.auth.network.response.AccessTokenInfoResponse;
 import com.kakao.kakaotalk.callback.TalkResponseCallback;
 import com.kakao.kakaotalk.response.KakaoTalkProfile;
 import com.kakao.kakaotalk.v2.KakaoTalkService;
 import com.kakao.network.ErrorResult;
-import com.kakao.util.exception.KakaoException;
 import com.kakao.util.helper.log.Logger;
-import com.squareup.picasso.Picasso;
-import com.suji.lj.myapplication.Utils.Utils;
-
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
 
-    private static final String refreshDatabaseURL = "http://bishop130.cafe24.com/refreshDB.php";
-    //private SessionCallback mKakaocallback;
+
     Toolbar myToolbar;
-    private static final String URL = "http://bishop130.cafe24.com/user_control.php";
     String[] REQUIRED_PERMISSIONS = {Manifest.permission.ACCESS_FINE_LOCATION, // 카메라
-            Manifest.permission.READ_CONTACTS};
+            Manifest.permission.READ_CONTACTS,Manifest.permission.READ_PHONE_STATE};
     private static final int PERMISSIONS_REQUEST_CODE = 100;
     public static Context mContext;
     private StringRequest request;
-    private static final String tokenURL = "http://bishop130.cafe24.com/update_token.php";
-    private RequestQueue requestQueue;
-    private BackPressCloseHandler backPressCloseHandler;
-    DBHelper dbHelper;
 
 
 
-    @SuppressLint("MissingPermission")
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_main);
-        requestQueue = Volley.newRequestQueue(this);
-        dbHelper = new DBHelper(MainActivity.this, "alarm_manager.db", null, 5);
+        if(Session.getCurrentSession().isClosed()){
+            Log.d("카카오",Session.getCurrentSession().isClosed()+"");
+            Intent intent = new Intent(getApplicationContext(),SampleLoginActivity.class);
+            startActivity(intent);
+        }
+        Log.d("카카오",Session.getCurrentSession().isOpened()+"");
 
+
+        checkPermission();
 
         Toasty.Config.getInstance()
                 .setTextSize(14) // optional
                 .apply(); // required
+
+
 /*
         byte[] sha1 = {
                 0x58, 0x64, 0x4B, (byte)0xF6, (byte)0x86, 0x44, (byte)0xE5, 0x27, (byte)0xF0, (byte)0xBB, (byte)0xEF, 0x12, 0x4C, (byte)0x9A,(byte)0xDA, (byte)0xA3,         (byte)0xB5, (byte)0xB5, (byte)0x84, (byte)0xBB
@@ -128,8 +89,8 @@ public class MainActivity extends AppCompatActivity {
         Log.d("둠피 ","" + Base64.encodeToString(sha1, Base64.NO_WRAP));
 */
 
-        requestAccessTokenInfo();
-        deletePastDB();
+        //requestAccessTokenInfo();
+
 
 
         mContext = this;
@@ -139,16 +100,6 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigationView.setOnNavigationItemSelectedListener(navigationItemSelectedListener);
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new FavoriteFragment()).commit();
 
-
-        backPressCloseHandler = new BackPressCloseHandler(this);
-
-        SharedPreferences.Editor editor = getSharedPreferences("sFile", MODE_PRIVATE).edit();
-        editor.clear();
-        editor.apply();
-
-        SharedPreferences.Editor editor1 = getSharedPreferences("Contact", MODE_PRIVATE).edit();
-        editor1.clear();
-        editor1.apply();
 
 
     }
@@ -164,21 +115,30 @@ public class MainActivity extends AppCompatActivity {
             new BottomNavigationView.OnNavigationItemSelectedListener() {
                 @Override
                 public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                    Fragment selectedFragment = null;
 
                     switch (item.getItemId()) {
                         case R.id.nav_favorite:
-                            selectedFragment = new FavoriteFragment();
+                            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                                    new FavoriteFragment()).commit();
+
                             break;
                         case R.id.nav_search:
-                            selectedFragment = new SearchFragment();
+                            Realm.init(getApplicationContext());
+                            Realm.setDefaultConfiguration(getRealmConfig());
+
+
                             break;
                         case R.id.nav_setting:
-                            selectedFragment = new SettingFragment();
+                            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                                    new SettingFragment()).commit();
+
+                            break;
+                        case R.id.nav_location:
+                            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                                    new LocationFragment()).commit();
+                            break;
 
                     }
-                    getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                            selectedFragment).commit();
                     return true;
                 }
             };
@@ -209,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
                 return true;
                 */
             case R.id.notification_icon:
-                startActivity(new Intent(MainActivity.this, MissionCartActivity.class));
+                startActivity(new Intent(MainActivity.this, SingleModeActivity.class));
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
@@ -218,24 +178,22 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+    }
+
     private void requestAccessTokenInfo() {
         AuthService.getInstance().requestAccessTokenInfo(new ApiResponseCallback<AccessTokenInfoResponse>() {
             @Override
             public void onSessionClosed(ErrorResult errorResult) {
                 //redirectLoginActivity(self);
-                //Toast.makeText(getApplicationContext(), "세션닫힘", Toast.LENGTH_LONG).show();
-                Toasty.error(getApplicationContext(), "세셩닫힘", Toast.LENGTH_LONG, true).show();
-                Intent intent = new Intent(MainActivity.this, SampleLoginActivity.class);
-                startActivity(intent);
-                finish();
-
             }
 
             @Override
             public void onNotSignedUp() {
-                Toast.makeText(getApplicationContext(), "로그인해주세요", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(MainActivity.this, SampleLoginActivity.class);
-                startActivity(intent);
+                // not happened
             }
 
             @Override
@@ -245,52 +203,36 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onSuccess(AccessTokenInfoResponse accessTokenInfoResponse) {
-                final String userId = String.valueOf(accessTokenInfoResponse.getUserId());
-                Log.d("토큰확인", String.valueOf(userId));
-                SharedPreferences sharedPreferences = getSharedPreferences("Kakao", MODE_PRIVATE);
-                SharedPreferences.Editor kakao_token = sharedPreferences.edit();
-                kakao_token.putString("token", userId);
-                kakao_token.apply();
+                String user_id = String.valueOf(accessTokenInfoResponse.getUserId());
+                Log.d("카카오세션" , user_id);
 
-                Utils.refreshDatabase(getApplicationContext(),userId);
-                requestProfile();
+                SharedPreferences sharedPreferences = getSharedPreferences("Kakao", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("token",user_id);
+                editor.apply();
 
-                Toasty.success(getApplicationContext(),"로그인 성공",Toasty.LENGTH_LONG,true).show();
+
+
+
+                String access_token = Session.getCurrentSession().getTokenInfo().getAccessToken();
+                String refresh_token = Session.getCurrentSession().getTokenInfo().getRefreshToken();
+
+
             }
         });
     }
-/*
-    private class SessionCallback implements ISessionCallback {
-        @Override
-        public void onSessionOpened() {
-            Log.d("TAG", "세션 오픈됨");
-
-
-            // 사용자 정보를 가져옴, 회원가입 미가입시 자동가입 시킴
-        }
-
-        @Override
-        public void onSessionOpenFailed(KakaoException exception) {
-            if (exception != null) {
-                Toast.makeText(MainActivity.this, "세션실패" + exception.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.d("TAG", exception.getMessage());
-            }
-        }
-    }
-
- */
-
     private void checkPermission() {
         int locationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         int contactsPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS);
+        int phoneNumPermission = ContextCompat.checkSelfPermission(this,Manifest.permission.READ_PHONE_STATE);
 
-        if (locationPermission == PackageManager.PERMISSION_GRANTED && contactsPermission == PackageManager.PERMISSION_GRANTED) {
+        if ((locationPermission == PackageManager.PERMISSION_GRANTED) && (contactsPermission == PackageManager.PERMISSION_GRANTED) && (phoneNumPermission == PackageManager.PERMISSION_GRANTED) ) {
 
             Toast.makeText(getApplicationContext(), "권한승인", Toast.LENGTH_LONG).show();
 
 
         } else {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[0]) || ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[1])) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[0]) || ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[1])|| ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[2])) {
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setTitle("AlertDialog Title");
@@ -323,11 +265,6 @@ public class MainActivity extends AppCompatActivity {
         Log.d("확인좀9", String.valueOf(sharedPreferences.getBoolean("alarm_setting", true)));
     }
 
-    private void deletePastDB() {
-        //DBHelper dbHelper = new DBHelper(MainActivity.this, "alarm_manager.db", null, 5);
-        String sql = "DELETE FROM alarm_table WHERE strftime('%s', date_time) < strftime('%s', datetime('now','localtime'))"; //현재 이전 정보 삭제
-        dbHelper.update(sql);
-    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -348,7 +285,7 @@ public class MainActivity extends AppCompatActivity {
 
                 Toast.makeText(this, "권한허가", Toast.LENGTH_LONG).show();
             } else {
-                if (ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[0]) || ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[1])) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[0]) || ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[1])|| ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[2])) {
 
                     // 사용자가 거부만 선택한 경우에는 앱을 다시 실행하여 허용을 선택하면 앱을 사용할 수 있습니다.
                     Toast.makeText(this, "퍼미션이 거부되었습니다. 앱을 다시 실행하여 퍼미션을 허용해주세요. ", Toast.LENGTH_LONG).show();
@@ -403,7 +340,10 @@ public class MainActivity extends AppCompatActivity {
             //redirectSignupActivity();
         }
     }
+    private RealmConfiguration getRealmConfig(){
 
+        return new RealmConfiguration.Builder().deleteRealmIfMigrationNeeded().build();
+    }
 
 
 }

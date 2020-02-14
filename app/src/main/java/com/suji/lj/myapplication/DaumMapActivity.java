@@ -307,8 +307,8 @@ public class DaumMapActivity extends AppCompatActivity implements MapView.Curren
     public void onMapViewInitialized(MapView mapView) {
 
 
-        mapReverseGeoCoder = new MapReverseGeoCoder("7ff2c8cb39b23bad249dc2f805898a69", mapView.getMapCenterPoint(), DaumMapActivity.this, DaumMapActivity.this);
-        mapReverseGeoCoder.startFindingAddress();
+        //mapReverseGeoCoder = new MapReverseGeoCoder("7ff2c8cb39b23bad249dc2f805898a69", mapView.getMapCenterPoint(), DaumMapActivity.this, DaumMapActivity.this);
+        //mapReverseGeoCoder.startFindingAddress();
         MapPoint.GeoCoordinate geoCoordinate = mapView.getMapCenterPoint().getMapPointGeoCoord();
         Mission_Latitude = geoCoordinate.latitude; // 위도
         Mission_Longitude = geoCoordinate.longitude; // 경도

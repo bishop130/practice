@@ -1,6 +1,7 @@
 package com.suji.lj.myapplication.Items;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class MissionInfoList {
@@ -10,29 +11,43 @@ public class MissionInfoList {
     }
 
     public String mission_title;
-    public String mission_time;
     public String address;
-    public boolean is_success;
+    public boolean success;
+    public boolean valid;
     public double lat;
     public double lng;
     public ArrayList<String> arrayList;
-    public Map<String, Boolean> mission_dates;
-    public String mission_info_root_id;
+    public List<ContactItemForServer> friends_selected_list;
+    public Map<String, ItemForDateTimeByList> mission_dates;
     String min_date;
     String max_date;
 
-    public MissionInfoList(String mission_title, String mission_time, String address, boolean is_success, double lat, double lng, ArrayList<String> arrayList, Map<String, Boolean> mission_dates, String mission_info_root_id,String max_date,String min_date) {
+    public MissionInfoList(String mission_title, String address, boolean success, double lat, double lng, ArrayList<String> arrayList, Map<String, ItemForDateTimeByList> mission_dates,String max_date,String min_date) {
         this.mission_title = mission_title;
-        this.mission_time = mission_time;
         this.address = address;
-        this.is_success = is_success;
+        this.success = success;
         this.lat = lat;
         this.lng = lng;
         this.arrayList = arrayList;
         this.mission_dates = mission_dates;
-        this.mission_info_root_id = mission_info_root_id;
         this.min_date = min_date;
         this.max_date = max_date;
+    }
+
+    public List<ContactItemForServer> getFriends_selected_list() {
+        return friends_selected_list;
+    }
+
+    public void setFriends_selected_list(List<ContactItemForServer> friends_selected_list) {
+        this.friends_selected_list = friends_selected_list;
+    }
+
+    public boolean isValid() {
+        return valid;
+    }
+
+    public void setValid(boolean valid) {
+        this.valid = valid;
     }
 
     public String getMin_date() {
@@ -59,14 +74,6 @@ public class MissionInfoList {
         this.mission_title = mission_title;
     }
 
-    public String getMission_time() {
-        return mission_time;
-    }
-
-    public void setMission_time(String mission_time) {
-        this.mission_time = mission_time;
-    }
-
     public String getAddress() {
         return address;
     }
@@ -75,12 +82,12 @@ public class MissionInfoList {
         this.address = address;
     }
 
-    public boolean isIs_success() {
-        return is_success;
+    public boolean isSuccess() {
+        return success;
     }
 
-    public void setIs_success(boolean is_success) {
-        this.is_success = is_success;
+    public void setSuccess(boolean success) {
+        this.success = success;
     }
 
     public double getLat() {
@@ -107,20 +114,13 @@ public class MissionInfoList {
         this.arrayList = arrayList;
     }
 
-    public Map<String, Boolean> getMission_dates() {
+    public Map<String, ItemForDateTimeByList> getMission_dates() {
         return mission_dates;
     }
 
-    public void setMission_dates(Map<String, Boolean> mission_dates) {
+    public void setMission_dates(Map<String, ItemForDateTimeByList> mission_dates) {
         this.mission_dates = mission_dates;
     }
 
 
-    public String getMission_info_root_id() {
-        return mission_info_root_id;
-    }
-
-    public void setMission_info_root_id(String mission_info_root_id) {
-        this.mission_info_root_id = mission_info_root_id;
-    }
 }

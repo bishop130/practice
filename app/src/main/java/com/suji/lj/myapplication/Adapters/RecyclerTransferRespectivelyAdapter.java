@@ -1,5 +1,6 @@
 package com.suji.lj.myapplication.Adapters;
 
+import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -17,6 +18,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.suji.lj.myapplication.Items.ContactItem;
 import com.suji.lj.myapplication.R;
+import com.suji.lj.myapplication.SingleModeActivity;
 
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -25,18 +27,19 @@ import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 
-public class RecyclerTransferRespectivelyAdapter extends RecyclerView.Adapter<RecyclerTransferRespectivelyAdapter.ViewHolder>{
+public class RecyclerTransferRespectivelyAdapter extends RecyclerView.Adapter<RecyclerTransferRespectivelyAdapter.ViewHolder> {
 
     Realm realm;
     RealmResults<ContactItem> realmResults;
     DecimalFormat df = new DecimalFormat("#,###.##");
     private DecimalFormat dfnd = new DecimalFormat("#,###");
+    Context context;
     private boolean hasFractionalPart;
 
 
+    public RecyclerTransferRespectivelyAdapter(Context context, RealmResults<ContactItem> realmResults, Realm realm) {
 
-    public RecyclerTransferRespectivelyAdapter(RealmResults<ContactItem> realmResults, Realm realm){
-
+        this.context = context;
         this.realmResults = realmResults;
         this.realm = realm;
 
@@ -45,7 +48,7 @@ public class RecyclerTransferRespectivelyAdapter extends RecyclerView.Adapter<Re
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
-        holder.name.setText("# "+realmResults.get(position).getDisplayName());
+        holder.name.setText("# " + realmResults.get(position).getDisplayName() + "/" + realmResults.get(position).getPosition());
         holder.et.setText(df.format(realmResults.get(position).getAmount()));
 
 
@@ -68,16 +71,31 @@ public class RecyclerTransferRespectivelyAdapter extends RecyclerView.Adapter<Re
             @Override
             public void afterTextChanged(Editable s) {
 
-                if(s.toString().length()==0){
+                if (s.toString().length() == 0) {
+
+                } else {
+
+                    realm.executeTransaction(new Realm.Transaction() {
+                        @Override
+                        public void execute(Realm realm) {
+
+                            Log.d("포지", position+""+s);
+                            ContactItem contactItem = realm.where(ContactItem.class).equalTo("position", realmResults.get(position).getPosition()).findFirst();
+
+                            int amount = Integer.valueOf(s.toString().replaceAll(",", ""));
+                            //realmResults.get(position).setAmount(amount);
+                            contactItem.setAmount(amount);
+                            Log.d("포지",contactItem.getDisplayName()+"/"+contactItem.getAmount());
+                            ((SingleModeActivity) context).amountDisplay();
+
+                        }
+                    });
+
 
                 }
-                else {
-                    ContactItem contactItem = realm.where(ContactItem.class).equalTo("position",realmResults.get(position).getPosition()).findFirst();
-                    int amount = Integer.valueOf(s.toString().replaceAll(",", ""));
-                    realm.beginTransaction();
-                    contactItem.setAmount(amount);
-                    realm.commitTransaction();
-                }
+
+
+
                 /*
                 realmResults.get(position).setAmount(amount);
 
@@ -127,10 +145,8 @@ public class RecyclerTransferRespectivelyAdapter extends RecyclerView.Adapter<Re
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
 
-
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(R.layout.item_recycler_transfer_respectively, parent, false);
-
 
 
         return new RecyclerTransferRespectivelyAdapter.ViewHolder(view);
@@ -149,13 +165,11 @@ public class RecyclerTransferRespectivelyAdapter extends RecyclerView.Adapter<Re
         private TextInputLayout etl;
 
 
-
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
             name = itemView.findViewById(R.id.transfer_respectively_name);
             et = itemView.findViewById(R.id.et_transfer_respectively_amount);
-
 
 
         }

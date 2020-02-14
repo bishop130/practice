@@ -16,7 +16,7 @@ public class BroadCastService extends BroadcastReceiver {
         //NotificationManager 안드로이드 상태바에 메세지를 던지기위한 서비스 불러오고
 
         Log.d("브로드", "들어왔나확인");
-        Intent serviceIntent = new Intent(context, LocationService.class);
+        Intent serviceIntent = new Intent(context, NewLocationService.class);
         context.stopService(serviceIntent);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             ContextCompat.startForegroundService(context, serviceIntent);
@@ -31,7 +31,7 @@ public class BroadCastService extends BroadcastReceiver {
 
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE))
         {
-            if (LocationService.class.getName().equals(service.service.getClassName()))
+            if (NewLocationService.class.getName().equals(service.service.getClassName()))
                 return true;
         }
         return false;

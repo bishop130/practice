@@ -1,7 +1,6 @@
 package com.suji.lj.myapplication.Utils;
 
 import android.text.format.DateFormat;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -14,7 +13,7 @@ public class DateTimeFormatter {
 
 
     }
-    public Date timeFormatter(Date date){
+    public static Date timeFormatter(Date date){
         SimpleDateFormat date_sdf = new SimpleDateFormat("HH:mm:ss", Locale.KOREA);
         String d1 = date_sdf.format(date);
         Date result = new Date();
@@ -28,7 +27,7 @@ public class DateTimeFormatter {
 
     }
 
-    public Date dateFormatter(Date date){
+    public static Date dateFormatter(Date date){
         SimpleDateFormat date_sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.KOREA);
         String d1 = date_sdf.format(date);
         Date result = new Date();
@@ -41,7 +40,7 @@ public class DateTimeFormatter {
 
 
     }
-    public Date timeParser(String time){
+    public static Date timeParser(String time){
         SimpleDateFormat date_sdf = new SimpleDateFormat("HH:mm:ss", Locale.KOREA);
         Date result = new Date();
         try {
@@ -53,8 +52,8 @@ public class DateTimeFormatter {
 
     }
 
-    public Date dateParser(String date) {
-        SimpleDateFormat date_sdf = new SimpleDateFormat("yyyyMMdd", Locale.KOREA);
+    public static Date dateParser(String date,String pattern) {
+        SimpleDateFormat date_sdf = new SimpleDateFormat(pattern, Locale.KOREA);
         Date result = new Date();
         try {
             result = date_sdf.parse(date);
@@ -65,7 +64,7 @@ public class DateTimeFormatter {
         return result;
     }
 
-    public Date dateTimeParser(String date_time) {
+    public static Date dateTimeParser(String date_time) {
         SimpleDateFormat date_time_sdf = new SimpleDateFormat("yyyyMMddHHmm", Locale.KOREA);
         Date result = new Date();
         try {
@@ -77,7 +76,7 @@ public class DateTimeFormatter {
         return result;
     }
 
-    public String dateReadable(Date date){
+    public static String dateReadable(Date date){
         String day = (String) DateFormat.format("d", date); // 20
         String monthNumber = (String) DateFormat.format("M", date); // 6
         String year = (String) DateFormat.format("yyyy", date); // 2013

@@ -3,6 +3,7 @@ package com.suji.lj.myapplication;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -12,6 +13,7 @@ import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -42,6 +44,7 @@ import com.kakao.usermgmt.callback.LogoutResponseCallback;
 import com.kakao.usermgmt.callback.UnLinkResponseCallback;
 import com.kakao.util.helper.log.Logger;
 import com.squareup.picasso.Picasso;
+import com.suji.lj.myapplication.Adapters.NewLocationService;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -58,9 +61,6 @@ import java.util.Map;
 public class SampleSignupActivity extends AppCompatActivity{
 
 
-    RequestQueue requestQueue;
-    StringRequest request;
-
 
 
     @Override
@@ -68,10 +68,15 @@ public class SampleSignupActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample_signup);
 
-        requestQueue = Volley.newRequestQueue(this);
-
         LinearLayout unlink_button = findViewById(R.id.kakao_unlink);
         LinearLayout kakao_logout_button = findViewById(R.id.kakao_logout);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+
+
+        toolbar.setTitle("내 정보 관리");
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
 
 
@@ -92,10 +97,12 @@ public class SampleSignupActivity extends AppCompatActivity{
 
                         SharedPreferences sharedPreferences = getSharedPreferences("Kakao", Context.MODE_PRIVATE);
                         SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.clear();
                         editor.apply();
-                        editor.putString("token","666");
+                        Intent serviceIntent = new Intent(getApplicationContext(), NewLocationService.class);
+                        stopService(serviceIntent);
 
-                        startActivity(new Intent(SampleSignupActivity.this, MainActivity.class));
+                        startActivity(new Intent(SampleSignupActivity.this, SampleLoginActivity.class));
                         finish();
                     }
                 });
@@ -126,10 +133,14 @@ public class SampleSignupActivity extends AppCompatActivity{
                                     @Override
                                     public void onNotSignedUp() {
                                         //redirectSignupActivity();
-                                    }
+                                   }
 
                                     @Override
                                     public void onSuccess(Long userId) {
+
+
+                                        //파이어베이스 예약삭제
+
                                         startActivity(new Intent(SampleSignupActivity.this, SampleLoginActivity.class));
                                         finish();
                                     }
@@ -142,15 +153,19 @@ public class SampleSignupActivity extends AppCompatActivity{
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
-                                Intent intent = new Intent(SampleSignupActivity.this, MainActivity.class);
-                                startActivity(intent);
 
                             }
                         }).show();
 
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                finish();
 
-
-
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }

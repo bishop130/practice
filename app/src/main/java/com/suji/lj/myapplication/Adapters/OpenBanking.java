@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.google.gson.JsonObject;
 import com.suji.lj.myapplication.Items.UserAccountItem;
+import com.suji.lj.myapplication.Utils.DateTimeUtils;
 import com.suji.lj.myapplication.Utils.Utils;
 
 import org.json.JSONArray;
@@ -41,10 +42,9 @@ public class OpenBanking {
     }
 
 
-
     public String requestWebServer() {
 
-        String url="https://testapi.openbanking.or.kr/oauth/2.0/authorize";
+        String url = "https://testapi.openbanking.or.kr/oauth/2.0/authorize";
 
 
         HashMap<String, String> params = new HashMap<>();
@@ -55,19 +55,18 @@ public class OpenBanking {
         params.put("client_info", "whatever");
         params.put("state", "12345678901234567890123456789012");
         params.put("auth_type", "0");
-        params.put("lang","kor");
-        params.put("edit_option","on");
-        params.put("bg_color","#FFFFFF");
-        params.put("text_color","#000000");
-        params.put("btn1_color","#000000");
-        params.put("btn2_color","#000000");
-
+        params.put("lang", "kor");
+        params.put("edit_option", "on");
+        params.put("bg_color", "#FFFFFF");
+        params.put("text_color", "#000000");
+        params.put("btn1_color", "#000000");
+        params.put("btn2_color", "#000000");
 
 
         HttpUrl.Builder httpBuider = HttpUrl.parse(url).newBuilder();
         if (params != null) {
-            for(Map.Entry<String, String> param : params.entrySet()) {
-                httpBuider.addQueryParameter(param.getKey(),param.getValue());
+            for (Map.Entry<String, String> param : params.entrySet()) {
+                httpBuider.addQueryParameter(param.getKey(), param.getValue());
             }
         }
         String LoadUrl = httpBuider.toString();
@@ -79,9 +78,9 @@ public class OpenBanking {
         //client.newCall(request).enqueue(callback);
     }
 
-    public void requestAccessToken(Callback callback, String code){
+    public void requestAccessToken(Callback callback, String code) {
 
-        String url="https://testapi.openbanking.or.kr/oauth/2.0/token";
+        String url = "https://testapi.openbanking.or.kr/oauth/2.0/token";
 
         RequestBody formBody = new FormBody.Builder()
                 .add("code", code)
@@ -100,142 +99,108 @@ public class OpenBanking {
         client.newCall(request).enqueue(callback);
 
     }
-    public void requestUserAccountInfo(Callback callback, String access_token,String user_seq_num){
+
+    public void requestUserAccountInfo(Callback callback, String access_token, String user_seq_num) {
 
         HttpUrl.Builder urlBuilder = HttpUrl.parse("https://testapi.openbanking.or.kr/v2.0/user/me").newBuilder();
         urlBuilder.addQueryParameter("user_seq_no", user_seq_num);
         String url = urlBuilder.build().toString();
 
         Request request = new Request.Builder()
-                .header("Authorization","Bearer "+access_token)
+                .header("Authorization", "Bearer " + access_token)
                 .url(url)
                 .build();
 
-        Log.d("오픈뱅킹","사용자정보요청 get   "+request.toString());
+        Log.d("오픈뱅킹", "사용자정보요청 get   " + request.toString());
 
         client.newCall(request).enqueue(callback);
 
 
     }
 
-    public void requestTransfer(Callback callback, Context context){
+    public void requestTransfer(Callback callback, Context context) {
 
-            int amount = 5300;
-            String user_me_body = context.getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("user_me","");
-            String access_token = context.getSharedPreferences("OpenBanking",MODE_PRIVATE).getString("access_token","");
-            int pos = 0;
-            List<UserAccountItem> userAccountItemList = Utils.UserInfoResponseJsonParse(user_me_body);
+        String user_me_body = context.getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("user_me", "");
+        String access_token = context.getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("access_token", "");
+        String fintech_num = context.getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("fintech_num", "");
+        List<UserAccountItem> userAccountItemList = Utils.UserInfoResponseJsonParse(user_me_body);
+        for(int i =0; i<userAccountItemList.size(); i++){
+            if(userAccountItemList.get(i).getFintech_use_num().equals(fintech_num)){
+                String url = "https://testapi.openbanking.or.kr/v2.0/transfer/withdraw/fin_num";
 
-            String url = "https://testapi.openbanking.or.kr/v2.0/transfer/withdraw/fin_num";
+                MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("bank_tran_id", Utils.makeBankTranId());
+                params.put("cntr_account_type", "N");
+                params.put("cntr_account_num", "85768576");
+                params.put("dps_print_content", "이불안은위험해");
+                params.put("fintech_use_num", fintech_num);
+                params.put("wd_print_content", "오픈");
+                params.put("tran_amt", String.valueOf(1000));
+                params.put("tran_dtime", Utils.getCurrentTime());
+                params.put("req_client_name", userAccountItemList.get(i).getUser_name());
+                params.put("req_client_num", "HONG1234");
+                params.put("transfer_purpose", "TR");
+                params.put("req_client_bank_code", "004");
+                params.put("req_client_account_num", "01030331130");
+                params.put("req_client_fintech_use _num", fintech_num);
+                params.put("sub_frnc_name", "이름");
+                params.put("sub_frnc_num", "12345678");
+                params.put("sub_frnc_business_num", "12345678");
+                params.put("recv_client_name", "이불안");
+                params.put("recv_client_bank_code", "004");
+                params.put("recv_client_account_num", "85768576");
 
-    /*
-            HttpUrl.Builder urlBuilder = HttpUrl.parse("https://testapi.openbanking.or.kr/v2.0/transfer/withdraw/fin_num").newBuilder();
-            urlBuilder.addQueryParameter("bank_tran_id", Utils.makeBankTranId());
-            Log.d("송금",Utils.makeBankTranId());
-            urlBuilder.addQueryParameter("cntr_account_type", "N");
-            urlBuilder.addQueryParameter("cntr_account_num", "29030204202663");
-            urlBuilder.addQueryParameter("dps_print_content", "이불안은위험해");
-            urlBuilder.addQueryParameter("fintech_use_num", userAccountItemList.get(pos).getFintech_use_num());
+                JSONObject parameter = new JSONObject(params);
+                RequestBody formBody = RequestBody.create(JSON, parameter.toString());
 
-            urlBuilder.addQueryParameter("tran_amt", context.getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("transfer_amount",""));
-            Log.d("송금",context.getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("transfer_amount",""));
-            urlBuilder.addQueryParameter("tran_dtime", Utils.getCurrentTime());
-            Log.d("송금",Utils.getCurrentTime());
-            urlBuilder.addQueryParameter("req_client_name", userAccountItemList.get(pos).getUser_name());
-            Log.d("송금",userAccountItemList.get(pos).getUser_name());
-            urlBuilder.addQueryParameter("req_client_num",userAccountItemList.get(pos).getUser_seq_no());
-            Log.d("송금",userAccountItemList.get(pos).getUser_seq_no());
-            urlBuilder.addQueryParameter("transfer_purpose","TR");
-    */
-            MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-            Map<String, String> params = new HashMap<String, String>();
-            params.put("bank_tran_id", Utils.makeBankTranId());
-            params.put("cntr_account_type", "N");
-            params.put("cntr_account_num", "85768576");
-            params.put("dps_print_content", "이불안은위험해");
-            params.put("fintech_use_num", userAccountItemList.get(pos).getFintech_use_num());
-            params.put("wd_print_content","오픈");
-            params.put("tran_amt", String.valueOf(1000));
-            params.put("tran_dtime", Utils.getCurrentTime());
-            params.put("req_client_name", userAccountItemList.get(pos).getUser_name());
-            params.put("req_client_num","HONG1234");
-            params.put("transfer_purpose","TR");
-            params.put("req_client_bank_code","004");
-            params.put("req_client_account_num","01030331130");
-            params.put("req_client_fintech_use _num",userAccountItemList.get(0).getFintech_use_num());
-            params.put("sub_frnc_name","이름");
-            params.put("sub_frnc_num","12345678");
-            params.put("sub_frnc_business_num","12345678");
-            params.put("recv_client_name","이불안");
-            params.put("recv_client_bank_code","004");
-            params.put("recv_client_account_num","85768576");
-
-            JSONObject parameter = new JSONObject(params);
-            RequestBody formBody = RequestBody.create(JSON,parameter.toString());
-
-            Log.d("송금",userAccountItemList.get(pos).getFintech_use_num());
+                Log.d("송금", userAccountItemList.get(i).getFintech_use_num());
 
 
-            Log.d("송금",context.getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("transfer_amount",""));
-            Log.d("송금",Utils.getCurrentTime());
-            Log.d("송금","핀테크"+userAccountItemList.get(pos).getFintech_use_num());
-            Log.d("송금",userAccountItemList.get(pos).getUser_seq_no());
+                Log.d("송금", context.getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("transfer_amount", ""));
+                Log.d("송금", Utils.getCurrentTime());
+                Log.d("송금", "핀테크" + userAccountItemList.get(i).getFintech_use_num());
+                Log.d("송금", userAccountItemList.get(i).getUser_seq_no());
 
-    /*
-            RequestBody formBody = new FormBody.Builder()
-            .add("bank_tran_id", Utils.makeBankTranId())
-            .add("cntr_account_type", "N")
-            .add("cntr_account_num", "29030204202663")
-            .add("dps_print_content", "이불안은 위험해")
-        .add("fintech_use_num", userAccountItemList.get(pos).getFintech_use_num())
-        .add("tran_amt", context.getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("transfer_amount",""))
-        .add("tran_dtime", Utils.getCurrentTime())
-        .add("req_client_name", userAccountItemList.get(pos).getUser_name())
-        .add("req_client_num",userAccountItemList.get(pos).getUser_seq_no())
-        .add("transfer_purpose","TR")
-                .build();
+                Request request = new Request.Builder()
+                        .header("Authorization", "Bearer " + access_token)
+                        .url(url)
+                        .post(formBody)
+                        .build();
 
-
-*/
-        //String url = urlBuilder.build().toString();
+                client.newCall(request).enqueue(callback);
 
 
 
-
-        Request request = new Request.Builder()
-                .header("Authorization","Bearer "+access_token)
-                .url(url)
-                .post(formBody)
-                .build();
-
-        client.newCall(request).enqueue(callback);
+            }
+        }
 
 
 
 
     }
 
-    public void transferDeposit(Callback callback, Context context){
+    public void transferDeposit(Callback callback, Context context) {
 
         String url = "https://openapi.openbanking.or.kr/v2.0/transfer/deposit/acnt_num";
 
-        String user_me_body = context.getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("user_me","");
-        String access_token = context.getSharedPreferences("OpenBanking",MODE_PRIVATE).getString("access_token","");
+        String user_me_body = context.getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("user_me", "");
+        String access_token = context.getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("access_token", "");
         int pos = 0;
         List<UserAccountItem> userAccountItemList = Utils.UserInfoResponseJsonParse(user_me_body);
 
         MediaType JSON = MediaType.parse("application/json; charset=utf-8");
         Map<String, String> params = new HashMap<String, String>();
-        params.put("cntr_account_type","N");
-        params.put("cntr_account_num","85768576");
-        params.put("wd_pass_phrase","");
-        params.put("wd_print_content","오픈");
-        params.put("name_check_option","off");
-        params.put("sub_frnc_name","");
-        params.put("sub_frnc_num","");
-        params.put("sub_frnc_business_num","");
-        params.put("tran_dtime",Utils.getCurrentTime());
-        params.put("req_cnt","1");
+        params.put("cntr_account_type", "N");
+        params.put("cntr_account_num", "85768576");
+        params.put("wd_pass_phrase", "");
+        params.put("wd_print_content", "오픈");
+        params.put("name_check_option", "off");
+        params.put("sub_frnc_name", "");
+        params.put("sub_frnc_num", "");
+        params.put("sub_frnc_business_num", "");
+        params.put("tran_dtime", Utils.getCurrentTime());
+        params.put("req_cnt", "1");
 
 
         JSONObject ob = new JSONObject();
@@ -245,34 +210,32 @@ public class OpenBanking {
             ob.put("bank_tran_id", Utils.makeBankTranId());
             ob.put("bank_code_std", "004");
             ob.put("account_num", "29030204202663");
-            ob.put("account_holder_name","이정");
-            ob.put("print_content","오픈서비스캐시");
-            ob.put("tran_amt","500");
-            ob.put("req_client_name","이정환");
-            ob.put("req_client_bank_code","004");
-            ob.put("req_client_account_num","01030331130");
-            ob.put("req_client_fintech_use_num","");
-            ob.put("req_client_num","HONG1234");
-            ob.put("transfer_purpose","TR");
+            ob.put("account_holder_name", "이정");
+            ob.put("print_content", "오픈서비스캐시");
+            ob.put("tran_amt", "500");
+            ob.put("req_client_name", "이정환");
+            ob.put("req_client_bank_code", "004");
+            ob.put("req_client_account_num", "01030331130");
+            ob.put("req_client_fintech_use_num", "");
+            ob.put("req_client_num", "HONG1234");
+            ob.put("transfer_purpose", "TR");
 
             arr.put(ob);
 
-        }
-        catch (JSONException e){
+        } catch (JSONException e) {
             e.printStackTrace();
         }
 
 
-        params.put("req_list",arr.toString());
+        params.put("req_list", arr.toString());
 
 
         JSONObject parameter = new JSONObject(params);
-        RequestBody formBody = RequestBody.create(JSON,parameter.toString());
-
+        RequestBody formBody = RequestBody.create(JSON, parameter.toString());
 
 
         Request request = new Request.Builder()
-                .header("Authorization","Bearer "+access_token)
+                .header("Authorization", "Bearer " + access_token)
                 .url(url)
                 .post(formBody)
                 .build();
@@ -280,6 +243,164 @@ public class OpenBanking {
         client.newCall(request).enqueue(callback);
 
 
+    }
+
+    public void requestCenterToken(Callback callback) {
+
+
+        String url = "https://testapi.openbanking.or.kr/oauth/2.0/token";
+
+
+        RequestBody formBody = new FormBody.Builder()
+                .add("client_id", "X20kit9iRk7IGfFHbGukTXCxGGPPP6wSLie0OVgu")
+                .add("client_secret", "2YWjBZZJGUg5MjBfbP969sXlixByKp7TE704nYI6")
+                .add("scope", "oob")
+                .add("grant_type", "client_credentials")
+                .build();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .post(formBody)
+                .build();
+
+
+        client.newCall(request).enqueue(callback);
+
+    }
+
+    public void requestRealName(Callback callback) {
+
+
+        String url = "https://testapi.openbanking.or.kr/v2.0/inquiry/real_name";
+
+
+        MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("bank_tran_id", Utils.makeBankTranId());
+        params.put("bank_code_std", "004");
+        params.put("account_num", "29030204202663");
+        params.put("account_holder_info_type", " ");
+        params.put("account_holder_info", "901130");
+        params.put("tran_dtime", DateTimeUtils.getCurrentTime());
+
+
+        JSONObject parameter = new JSONObject(params);
+        RequestBody formBody = RequestBody.create(JSON, parameter.toString());
+
+
+        Request request = new Request.Builder()
+                .header("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJUOTkxNTk2OTIwIiwic2NvcGUiOlsib29iIl0sImlzcyI6Imh0dHBzOi8vd3d3Lm9wZW5iYW5raW5nLm9yLmtyIiwiZXhwIjoxNTg2ODU3NDQ0LCJqdGkiOiI3YzdhMDE3OS1iOGU3LTQxYTEtOTBkZi0xOWVhMzlkOTI0MWQifQ.86REUWV7ImJXWr7FtiayZclAmIW_4WO37s5tujR-UXI")
+                .url(url)
+                .post(formBody)
+                .build();
+
+
+        client.newCall(request).enqueue(callback);
+
+    }
+
+    public void requestAccessTokenFromRefreshToken(Callback callback, String refresh_token) {
+
+
+        String url = "https://testapi.openbanking.or.kr/oauth/2.0/token";
+
+
+        RequestBody formBody = new FormBody.Builder()
+                .add("client_id", "X20kit9iRk7IGfFHbGukTXCxGGPPP6wSLie0OVgu")
+                .add("client_secret", "2YWjBZZJGUg5MjBfbP969sXlixByKp7TE704nYI6")
+                .add("refresh_token", refresh_token)
+                .add("scope", "login inquiry transfer")
+                .add("grant_type", "refresh_token")
+                .build();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .post(formBody)
+                .build();
+
+
+        client.newCall(request).enqueue(callback);
+    }
+
+    public void requestAccountCancel(Callback callback,Context context){
+        String access_token = context.getSharedPreferences("OpenBanking",MODE_PRIVATE).getString("access_token","");
+        String fintech_num = context.getSharedPreferences("OpenBanking",MODE_PRIVATE).getString("fintech_num","");
+
+
+        String url = "https://testapi.openbanking.or.kr/v2.0/account/cancel";
+
+        MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("bank_tran_id", Utils.makeBankTranId());
+        params.put("scope", "inquiry transfer");
+        params.put("fintech_use_num", fintech_num);
+
+
+        JSONObject parameter = new JSONObject(params);
+        RequestBody formBody = RequestBody.create(JSON, parameter.toString());
+
+
+        Request request = new Request.Builder()
+                .header("Authorization", "Bearer "+access_token)
+                .url(url)
+                .post(formBody)
+                .build();
+
+
+        client.newCall(request).enqueue(callback);
+
+
+    }
+
+    public void requestAccountList(Callback callback, Context context){
+        String access_token = context.getSharedPreferences("OpenBanking",MODE_PRIVATE).getString("access_token","");
+        String body = context.getSharedPreferences("OpenBanking",MODE_PRIVATE).getString("user_me","");
+        String user_seq_num = Utils.getValueFromJson(body,"user_seq_no");
+                Log.d("계좌관리",user_seq_num);
+        HttpUrl.Builder urlBuilder = HttpUrl.parse("https://testapi.openbanking.or.kr/v2.0/account/list").newBuilder();
+        urlBuilder.addQueryParameter("user_seq_no", user_seq_num);
+        urlBuilder.addQueryParameter("include_cancel_yn", "N");
+        urlBuilder.addQueryParameter("sort_order", "D");
+        String url = urlBuilder.build().toString();
+
+        Request request = new Request.Builder()
+                .header("Authorization", "Bearer " + access_token)
+                .url(url)
+                .build();
+
+        Log.d("오픈뱅킹", "사용자정보요청 get   " + request.toString());
+
+        client.newCall(request).enqueue(callback);
+
+
+
+    }
+
+    public void requestChangeAccountName(Context context,Callback callback,String fintech_num,String new_account_name){
+
+        //String fintech_num = context.getSharedPreferences("OpenBanking",MODE_PRIVATE).getString("fintech_num","");
+        String access_token = context.getSharedPreferences("OpenBanking",MODE_PRIVATE).getString("access_token","");
+        String url = "https://testapi.openbanking.or.kr/v2.0/account/update_info";
+
+        MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+        Map<String, String> params = new HashMap<String, String>();
+
+        params.put("fintech_use_num", fintech_num);
+        params.put("account_alias",new_account_name );
+
+
+        JSONObject parameter = new JSONObject(params);
+        RequestBody formBody = RequestBody.create(JSON, parameter.toString());
+
+
+        Request request = new Request.Builder()
+                .header("Authorization", "Bearer "+access_token)
+                .url(url)
+                .post(formBody)
+                .build();
+
+
+        client.newCall(request).enqueue(callback);
 
 
     }

@@ -1,6 +1,8 @@
 package com.suji.lj.myapplication.Items;
 
-public class ItemForMissionByDay {
+import io.realm.RealmObject;
+
+public class ItemForMissionByDay extends RealmObject {
 
 
     String title;
@@ -10,9 +12,10 @@ public class ItemForMissionByDay {
     double lat;
     double lng;
     boolean success;
+    String mother_id;
     public ItemForMissionByDay(){}
 
-    public ItemForMissionByDay(String title, String address, String date, String time, double lat, double lng,boolean success) {
+    public ItemForMissionByDay(String title, String address, String date, String time, double lat, double lng,boolean success,String mother_id) {
         this.title = title;
         this.address = address;
         this.date = date;
@@ -20,6 +23,15 @@ public class ItemForMissionByDay {
         this.lat = lat;
         this.lng = lng;
         this.success = success;
+        this.mother_id = mother_id;
+    }
+
+    public String getMother_id() {
+        return mother_id;
+    }
+
+    public void setMother_id(String mother_id) {
+        this.mother_id = mother_id;
     }
 
     public boolean isSuccess() {

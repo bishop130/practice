@@ -17,6 +17,7 @@ import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
 import com.prolificinteractive.materialcalendarview.format.TitleFormatter;
 import com.suji.lj.myapplication.Items.DateItem;
+import com.suji.lj.myapplication.Items.MissionCartItem;
 import com.suji.lj.myapplication.MainActivity;
 import com.suji.lj.myapplication.R;
 import com.suji.lj.myapplication.Utils.DateTimeUtils;
@@ -35,11 +36,19 @@ import io.realm.annotations.RealmClass;
 public class NormalCalendarFragment extends Fragment{
 
     private MaterialCalendarView materialCalendarView;
-    private RadioGroup selection_mode_radio_group;
+
     List<CalendarDay> calendarDayList = new ArrayList<>();
     RealmList<DateItem> dateList = new RealmList<>();
     OnDateChangedListener onDateChangedListener;
     Realm realm;
+
+    public NormalCalendarFragment(RealmList<DateItem> dateList,Realm realm){
+        this.dateList = dateList;
+        this.realm = realm;
+    }
+    public NormalCalendarFragment(){
+
+    }
 
 
     @Override
@@ -48,39 +57,48 @@ public class NormalCalendarFragment extends Fragment{
         View view = inflater.inflate(R.layout.fragment_normal_calendar, container, false);
         // Inflate the layout for this fragment
         materialCalendarView = view.findViewById(R.id.material_calendarView);
-        selection_mode_radio_group = view.findViewById(R.id.normal_calendar_radio_group);
+
+
+        //first
+/*
+        realm = Realm.getDefaultInstance();
+        long count = realm.where(MissionCartItem.class).count();
+        if(count == 0){
+            materialCalendarView.setSelectedDate(CalendarDay.today());
+
+        }else{
+            for(int i=0; i<dateList.size(); i++){
+                int year = dateList.get(i).getYear();
+                int month = dateList.get(i).getMonth();
+                int day = dateList.get(i).getDay();
+                materialCalendarView.setDateSelected(CalendarDay.from(year,month,day),true);
+
+            }
+
+        }
+
+
+ */
+
 
 
         materialCalendarView.state().edit()
                 .setMinimumDate(CalendarDay.today())
                 .commit();
-        materialCalendarView.setSelectedDate(CalendarDay.today());
 
 
 
-        realm = Realm.getDefaultInstance();
-        selection_mode_radio_group.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                switch (checkedId){
-                    case R.id.single_selection:
-                        materialCalendarView.setSelectionMode(MaterialCalendarView.SELECTION_MODE_SINGLE);
-                    case R.id.period_selection:
-                        materialCalendarView.setSelectionMode(MaterialCalendarView.SELECTION_MODE_RANGE);
-                }
-            }
-        });
 
-        calendarDayList = materialCalendarView.getSelectedDates();
-        sortingCalendar(calendarDayList);
+        //calendarDayList = materialCalendarView.getSelectedDates();
+        //sortingCalendar(calendarDayList);
 
         materialCalendarView.setOnDateChangedListener(new OnDateSelectedListener() {
             @Override
             public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
 
                 calendarDayList = widget.getSelectedDates();
-
-               sortingCalendar(calendarDayList);
+                onDateChangedListener.onDateChanged(widget,date,selected);
+               //sortingCalendar(calendarDayList);
 
 
             }
@@ -108,7 +126,8 @@ public class NormalCalendarFragment extends Fragment{
 
     public interface OnDateChangedListener{
 
-        void onDateChanged(RealmList<DateItem> DateItemArrayList,String minDate,String maxDate);
+        //void onDateChanged(RealmList<DateItem> DateItemArrayList,String minDate,String maxDate,MaterialCalendarView calendarView);
+        void onDateChanged(MaterialCalendarView calendarView,CalendarDay date,boolean selected);
     }
 
     @Override
@@ -143,7 +162,7 @@ public class NormalCalendarFragment extends Fragment{
 
         for (int i = 0; i < calendarDayList.size(); i++) {
 
-            DateItem dateItem = realm.createObject(DateItem.class);
+            DateItem dateItem = new DateItem();
 
             int year = calendarDayList.get(i).getYear();
             int month = calendarDayList.get(i).getMonth();
@@ -198,7 +217,7 @@ public class NormalCalendarFragment extends Fragment{
             Log.d("파베", dateList.get(j).getYear() + "-" + dateList.get(j).getMonth() + "-" + dateList.get(j).getDay());
         }
 
-        onDateChangedListener.onDateChanged(dateList, minDate,maxDate);
+        //onDateChangedListener.onDateChanged(dateList, minDate,maxDate,materialCalendarView);
         dateList.clear();
 
 

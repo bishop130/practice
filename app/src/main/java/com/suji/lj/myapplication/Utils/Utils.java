@@ -10,7 +10,10 @@ import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
 import android.os.Build;
+import android.provider.Settings;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -196,6 +199,55 @@ public class Utils {
 
 
     }
+    public static List<UserAccountItem> AccountInfoResponseJsonParse(String body){
+        List<UserAccountItem> userAccountItemList = new ArrayList<>();
+        Log.d("오픈뱅킹","리스트만들기 ");
+
+        try {
+            JSONObject obj = new JSONObject(body);
+            JSONArray jsonArray = obj.getJSONArray("res_list");
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject object = (JSONObject) jsonArray.get(i);
+                UserAccountItem userAccountItem = new UserAccountItem();
+                userAccountItem.setApi_tran_id(obj.getString("api_tran_id"));
+                userAccountItem.setApi_tran_dtm(obj.getString("api_tran_dtm"));
+                userAccountItem.setRsp_code(obj.getString("rsp_code"));
+                userAccountItem.setRsp_message(obj.getString("rsp_message"));
+                userAccountItem.setUser_name(obj.getString("user_name"));
+                userAccountItem.setRes_cnt(obj.getString("res_cnt"));
+////
+
+
+                userAccountItem.setFintech_use_num(object.getString("fintech_use_num"));
+                userAccountItem.setAccount_alias(object.getString("account_alias"));
+                userAccountItem.setBank_code_std(object.getString("bank_code_std"));
+                userAccountItem.setBank_code_sub(object.getString("bank_code_sub"));
+                userAccountItem.setBank_name(object.getString("bank_name"));
+                //userAccountItem.setAccount_num(object.getString("account_num"));
+                userAccountItem.setAccount_num_masked(object.getString("account_num_masked"));
+                userAccountItem.setAccount_holder_name(object.getString("account_holder_name"));
+                userAccountItem.setAccount_type(object.getString("account_type"));
+                userAccountItem.setInquiry_agree_yn(object.getString("inquiry_agree_yn"));
+                userAccountItem.setInquiry_agree_dtime(object.getString("inquiry_agree_dtime"));
+                userAccountItem.setTransfer_agree_yn(object.getString("transfer_agree_yn"));
+                userAccountItem.setTransfer_agree_dtime(object.getString("transfer_agree_dtime"));
+                userAccountItem.setAccount_state(object.getString("account_state"));
+
+                userAccountItemList.add(userAccountItem);
+
+            }
+
+
+
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return userAccountItemList;
+
+
+    }
 
 
 
@@ -215,48 +267,6 @@ public class Utils {
         }
     }
 
-
-    public static void volleyConnection(Context context, HashMap<String,String> hashMap, VolleyResponseListener listener) {
-        RequestQueue requestQueue = Volley.newRequestQueue(context);
-        StringRequest request;
-        String getURL = "http://bishop130.cafe24.com/Mission_List.php";
-
-        request = new StringRequest(Request.Method.POST, getURL, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-
-                Log.d("서비스", "전송성공");
-                listener.onResponse(response);
-
-
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                listener.onError(error.toString());
-
-                Toast.makeText(context, "전송실패" + error, Toast.LENGTH_LONG).show();
-            }
-        }) {
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                //HashMap<String, String> hashMap = new HashMap<String, String>();
-
-               // hashMap.put("token", token);
-               // hashMap.put("user_id", user_id);
-
-                return hashMap;
-            }
-        };
-        requestQueue.add(request);
-
-
-    }
-    public interface VolleyResponseListener {
-        void onError(String message);
-
-        void onResponse(Object response);
-    }
 
 
     public static Map<String, Object> jsonToMap(JSONObject json) throws JSONException {
@@ -456,7 +466,7 @@ public class Utils {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {//26
             //PendingIntent foregroundService_sender = PendingIntent.getForegroundService(this, 123, new Intent(this, LocationService.class), PendingIntent.FLAG_UPDATE_CURRENT);
-            PendingIntent foregroundService_sender = PendingIntent.getForegroundService(context,123,new Intent(context, NewLocationService.class),PendingIntent.FLAG_UPDATE_CURRENT );
+            PendingIntent foregroundService_sender = PendingIntent.getService(context,123,new Intent(context, NewLocationService.class),PendingIntent.FLAG_UPDATE_CURRENT );
 
             alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(0,foregroundService_sender),foregroundService_sender);
         }
@@ -501,6 +511,39 @@ public class Utils {
     private static double rad2deg(double rad) {
         return (rad * 180 / Math.PI);
     }
+
+    public static boolean isNetworkConnected(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
+    }
+
+    public static boolean isLocationEnabled(Context context) {
+        int locationMode = 0;
+        String locationProviders;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+            try {
+                locationMode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
+
+            } catch (Settings.SettingNotFoundException e) {
+                e.printStackTrace();
+                return false;
+            }
+
+            return locationMode != Settings.Secure.LOCATION_MODE_OFF;
+
+        }else{
+            locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+            return !TextUtils.isEmpty(locationProviders);
+        }
+
+
+    }
+    public static boolean isEmpty(Object s) { if (s == null) { return true; } if ((s instanceof String) && (((String)s).trim().length() == 0)) { return true; } if (s instanceof Map) { return ((Map<?, ?>)s).isEmpty(); } if (s instanceof List) { return ((List<?>)s).isEmpty(); } if (s instanceof Object[]) { return (((Object[])s).length == 0); } return false; }
+
+
+
 
 
 }

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/account_num"
+            android:layout_marginStart="32dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="계좌번호"/>
+
+    </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/divider_line"
+        android:layout_marginStart="40dp" />
+
+    <LinearLayout
+        android:id="@+id/change_account_name"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_gravity="center"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="19sp"
+            android:text="계좌명 변경"/>
+
+    </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/divider_line"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"/>
+
+
+    <LinearLayout
+        android:id="@+id/account_cancel"
+        android:layout_width="match_parent"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:layout_height="48dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="19sp"
+            android:textColor="@color/errorColor"
+            android:text="계좌삭제"/>
+
+    </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/divider_line"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:gravity="center">
+        <TextView
+            android:id="@+id/dialog_cancel"
+            android:layout_width="150dp"
+            android:layout_height="match_parent"
+            android:text="취소"
+            android:textSize="21sp"
+            android:layout_gravity="center"
+            android:gravity="center"/>
+
+
+    </LinearLayout>
+
+
+
+
+</LinearLayout>

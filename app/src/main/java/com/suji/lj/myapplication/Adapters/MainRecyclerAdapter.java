@@ -95,35 +95,6 @@ public class MainRecyclerAdapter extends RecyclerView.Adapter<MainRecyclerAdapte
 
     }
 
-    private void setMinMaxDate(final ItemViewHolder holder, final int position) {
-
-        String array = recyclerItemList.get(position).getDate_array();
-
-
-        List<String> date_array = Arrays.asList(array.split("\\s*,\\s*"));
-        int date_count = 0;
-        Date max_date = dtf.dateParser(date_array.get(0));
-        Date min_date = dtf.dateParser(date_array.get(0));
-
-        for (int i = 0; i < date_array.size(); i++) {
-            String date = date_array.get(i);
-            Log.d("date_check", date);
-            date_count++;
-
-            Date date_arr = dtf.dateParser(date);
-            if (date_arr.getTime() >= max_date.getTime()) {
-                max_date = date_arr;
-            }
-            if (date_arr.getTime() <= min_date.getTime()) {
-                min_date = date_arr;
-            }
-        }
-
-        Log.d("date_check_count", String.valueOf(date_count));
-        //holder.range_date.setText(simpleDateFormat.format(min_date) + "~" + simpleDateFormat.format(max_date));
-
-
-    }
 }
 
 

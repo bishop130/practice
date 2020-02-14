@@ -11,6 +11,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="com.android.vending.BILLING" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application
         android:name=".Adapters.GlobalApplication"
@@ -21,7 +22,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".OpenBankingActivity"></activity>
+        <activity android:name=".AccountActivity"></activity>
+        <activity android:name=".DetailSettingActivity" />
+        <activity android:name=".OpenBankingActivity" />
         <activity android:name=".SingleModeActivity" />
         <activity android:name=".BuyCarrotActivity" />
         <activity android:name=".FAQActivity" />
@@ -35,12 +38,8 @@
             android:value="ca-app-pub-3940256099942544/6300978111" />
 
         <activity android:name=".AutoLocationSetting" />
-        <activity android:name=".AlarmSettingActivity" />
-        <activity android:name=".NotificationActivity" />
         <activity android:name=".MissionDetailActivity" />
-        <activity
-            android:name=".MainActivity"
-            android:launchMode="singleTask">
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -51,10 +50,8 @@
         <activity android:name=".SampleSignupActivity" />
         <activity android:name=".ContactActivity" />
         <activity android:name=".DaumMapActivity" />
-        <activity android:name=".RecyclerActivity" />
         <activity android:name=".RecyclerResultActivity" />
-        <activity android:name=".NewMissionActivity" />
-        <activity android:name=".MissionCartActivity"/>
+        <activity android:name=".MissionCartActivity" />
 
         <receiver
             android:name=".Adapters.BroadCastService"
@@ -72,15 +69,18 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+        <receiver android:name=".Adapters.LocationReceiver">
+            <intent-filter>
+                <action android:name="android.location.PROVIDERS_CHANGED" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
 
         <service android:name=".Adapters.MyFirebaseMessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-        <service
-            android:name=".Adapters.LocationService"
-            android:enabled="true" />
         <service
             android:name=".Adapters.NewLocationService"
             android:enabled="true" />

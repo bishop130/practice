@@ -45,8 +45,6 @@ import com.suji.lj.myapplication.Adapters.BroadCastAlarm;
 import com.suji.lj.myapplication.Adapters.DBHelper;
 import com.suji.lj.myapplication.Utils.DateTimeFormatter;
 
-import com.suji.lj.myapplication.Adapters.MainDB;
-
 import com.suji.lj.myapplication.Items.AlarmItem;
 
 import net.daum.android.map.location.MapViewLocationManager;
@@ -105,7 +103,6 @@ public class RecyclerResultActivity extends AppCompatActivity implements MapView
     LinearLayout layout_if_success;
     LinearLayout layout_if_success_not;
     private MapViewLocationManager mapViewLocationManager;
-    MainDB mainDB;
     DBHelper dbHelper;
     List<AlarmItem> alarmItemList = new ArrayList<>();
 
@@ -135,7 +132,6 @@ public class RecyclerResultActivity extends AppCompatActivity implements MapView
 
         requestQueue = Volley.newRequestQueue(this);
         //dbHelper = new DBHelper(this, "alarm_manager.db", null, 5);
-        mainDB = new MainDB(this, "main_manager.db", null, 1);
         dbHelper = new DBHelper(RecyclerResultActivity.this, "alarm_manager.db", null, 5);
         dtf = new DateTimeFormatter();
 
@@ -265,7 +261,6 @@ public class RecyclerResultActivity extends AppCompatActivity implements MapView
         alarmItemList.clear();
 
         String sql = "SELECT * FROM main_table WHERE mission_id = '" + mission_id + "' AND date_time = '" + mission_date_time + "'";
-        alarmItemList = mainDB.setNextAlarm(sql);
         for (int i = 0; i < alarmItemList.size(); i++) {
 
             String result = alarmItemList.get(i).getIs_success();
@@ -398,7 +393,7 @@ public class RecyclerResultActivity extends AppCompatActivity implements MapView
     private void onCheckTimer() {
 
         Date cur_date_time = new Date(System.currentTimeMillis());
-        Date set_mission_date = dtf.dateParser(mission_date);
+        Date set_mission_date = DateTimeFormatter.dateParser(mission_date,"yyyyMMdd");
         Date set_mission_date_time = dtf.dateTimeParser(mission_date_time);
 
         date_time_timer = new CountDownTimer((set_mission_date.getTime() + 86400 * 1000) - cur_date_time.getTime(), 1000) {
@@ -447,7 +442,7 @@ public class RecyclerResultActivity extends AppCompatActivity implements MapView
         final String user_id = sharedPreferences.getString("token", "");
 
 
-        Date set_mission_date = dtf.dateParser(mission_date);
+        Date set_mission_date = DateTimeFormatter.dateParser(mission_date,"yyyyMMdd");
         Date set_mission_time = dtf.timeParser(mission_time);
 
         try {

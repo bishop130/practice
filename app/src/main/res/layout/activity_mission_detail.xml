@@ -16,7 +16,7 @@
         android:background="@color/White"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        app:titleTextColor="@color/colorPrimary"/>
+        app:titleTextColor="@color/colorPrimary" />
 
     <ScrollView
         android:id="@+id/main_scroll_view"
@@ -24,230 +24,278 @@
         android:layout_height="match_parent">
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:id="@+id/test_ly"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-
-            <com.prolificinteractive.materialcalendarview.MaterialCalendarView
-                android:id="@+id/detail_calendar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:mcv_calendarMode="month"
-                app:mcv_tileHeight="34dp"
-                >
-
-            </com.prolificinteractive.materialcalendarview.MaterialCalendarView>
-
             <RelativeLayout
+                android:id="@+id/ly_progress_bar"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_gravity="center"
+                android:background="@color/White"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_date_progress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:text="1/7일"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+
+                    />
+
+                <com.mikhaellopez.circularprogressbar.CircularProgressBar
+                    android:id="@+id/circularProgressBar"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+
+                    android:layout_marginBottom="8dp"
+                    app:cpb_background_progressbar_color="#b6bbd8"
+                    app:cpb_background_progressbar_width="5dp"
+                    app:cpb_progress_direction="to_right"
+                    app:cpb_progressbar_color="#3f51b5"
+                    app:cpb_progressbar_width="10dp"
+                    app:cpb_round_border="false" />
+            </RelativeLayout>
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <RelativeLayout
-                    android:id="@+id/map_layout_detail"
-                    android:layout_width="match_parent"
-                    android:layout_height="300dp"
-                    android:layout_below="@+id/date_range_layout"
-                    android:layout_marginTop="0dp"
-                    android:elevation="4dp">
-
-                    <fragment
-                        android:id="@+id/map_view_detail"
-                        class="com.google.android.gms.maps.MapFragment"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
-
-                    <ImageView
-                        android:id="@+id/transparent_image"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:src="@color/transparent" />
-
-
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/mission_location_detail"
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:layout_alignParentRight="true"
-                        android:layout_marginTop="12dp"
-                        android:layout_marginRight="12dp"
-                        android:clipChildren="false"
-                        android:clipToPadding="false"
-                        android:divider="@android:color/transparent"
-                        android:dividerHeight="0.0px"
-                        android:elevation="8dp"
-                        android:text="현재위치"
-                        app:cardCornerRadius="8dp"
-
-                        >
-
-                        <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:src="@drawable/ic_flag_black_24dp" />
-                    </androidx.cardview.widget.CardView>
-
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/myLocation_detail"
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:layout_below="@id/mission_location_detail"
-                        android:layout_alignParentRight="true"
-                        android:layout_marginTop="12dp"
-                        android:layout_marginRight="12dp"
-                        android:clipChildren="false"
-                        android:clipToPadding="false"
-                        android:divider="@android:color/transparent"
-                        android:dividerHeight="0.0px"
-                        android:elevation="8dp"
-                        android:text="현재위치"
-                        app:cardCornerRadius="8dp"
-
-                        >
-
-                        <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:src="@drawable/ic_my_location_black_24dp" />
-                    </androidx.cardview.widget.CardView>
-
-
-                </RelativeLayout>
 
                 <RelativeLayout
-                    android:id="@+id/date_range_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
 
-                    android:orientation="vertical">
+                    >
 
-                    <View
+                    <RelativeLayout
+                        android:id="@+id/ly_recycler_progress_detail"
                         android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginStart="24dp"
-                        android:layout_marginEnd="24dp"
-                        android:background="@color/divider_line" />
+                        android:layout_height="wrap_content">
 
-                    <LinearLayout
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/recycler_progress_detail"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@color/White" />
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/date_range_layout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/bottom_rounded"
-                        android:orientation="horizontal">
+                        android:layout_below="@+id/ly_recycler_progress_detail"
+                        android:orientation="vertical">
 
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginStart="24dp"
+                            android:layout_marginEnd="24dp"
+                            android:background="@color/divider_line" />
 
                         <LinearLayout
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical">
+                            android:background="@drawable/bottom_rounded"
+                            android:orientation="horizontal">
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="20dp"
-                                android:layout_marginTop="20dp"
-                                android:layout_marginBottom="8dp"
-                                android:text="시작일"
-                                android:textColor="@color/colorPrimary"
-                                android:textSize="14sp" />
 
-                            <TextView
-                                android:id="@+id/mission_date_start"
+                            <LinearLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginStart="20dp"
-                                android:layout_marginBottom="8dp"
-                                android:text="날짜 선택 결과"
-                                android:textSize="18sp" />
-                            <TextView
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="20dp"
+                                    android:layout_marginTop="20dp"
+                                    android:layout_marginBottom="8dp"
+                                    android:text="시작일"
+                                    android:textColor="@color/colorPrimary"
+                                    android:textSize="14sp" />
+
+                                <TextView
+                                    android:id="@+id/mission_date_start"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="20dp"
+                                    android:layout_marginBottom="8dp"
+                                    android:textSize="16sp" />
+
+                                <TextView
+                                    android:id="@+id/mission_time_start"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="20dp"
+                                    android:layout_marginBottom="8dp" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_gravity="center"
+                                android:layout_weight="1"
+                                android:gravity="center"
+
+
+                                >
+
+                                <View
+                                    android:layout_width="1dp"
+                                    android:layout_height="match_parent"
+                                    android:layout_marginTop="20dp"
+                                    android:layout_marginBottom="20dp"
+                                    android:background="@color/divider_line" />
+
+
+                            </LinearLayout>
+
+                            <LinearLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:id="@+id/mission_time_start"
-                                android:layout_marginStart="20dp"
-                                android:layout_marginBottom="8dp"
-                                />
+                                android:layout_gravity="end"
+                                android:gravity="end"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="20dp"
+                                    android:layout_marginTop="20dp"
+                                    android:layout_marginEnd="20dp"
+                                    android:layout_marginBottom="8dp"
+                                    android:text="종료일"
+                                    android:textColor="@color/colorPrimary"
+                                    android:textSize="14sp" />
+
+                                <TextView
+                                    android:id="@+id/mission_date_end"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginEnd="20dp"
+                                    android:layout_marginBottom="8dp"
+                                    android:textSize="16sp" />
+
+                                <TextView
+                                    android:id="@+id/mission_time_end"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginEnd="20dp"
+                                    android:layout_marginBottom="8dp" />
+                            </LinearLayout>
+
+
                         </LinearLayout>
+                    </RelativeLayout>
 
-                        <LinearLayout
-                            android:layout_width="0dp"
+
+                    <RelativeLayout
+                        android:id="@+id/map_layout_detail"
+                        android:layout_width="match_parent"
+                        android:layout_height="300dp"
+                        android:layout_below="@+id/date_range_layout"
+                        android:layout_marginTop="0dp"
+                        android:elevation="4dp">
+
+
+                        <RelativeLayout
+                            android:id="@+id/map_view_detail"
+
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent" />
+
+                        <ImageView
+                            android:id="@+id/transparent_image"
+                            android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:layout_gravity="center"
-                            android:layout_weight="1"
-                            android:gravity="center"
+                            android:src="@color/transparent" />
 
+
+                        <androidx.cardview.widget.CardView
+                            android:id="@+id/btn_mission_location"
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:layout_alignParentRight="true"
+                            android:layout_marginTop="12dp"
+                            android:layout_marginRight="12dp"
+                            android:clipChildren="false"
+                            android:clipToPadding="false"
+                            android:divider="@android:color/transparent"
+                            android:dividerHeight="0.0px"
+                            android:elevation="8dp"
+                            android:text="현재위치"
+                            app:cardCornerRadius="8dp"
 
                             >
 
-                            <View
-                                android:layout_width="1dp"
-                                android:layout_height="match_parent"
-                                android:layout_marginTop="20dp"
-                                android:layout_marginBottom="20dp"
-                                android:background="@color/divider_line" />
-
-
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="end"
-                            android:gravity="end"
-                            android:orientation="vertical">
-
-                            <TextView
+                            <ImageView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginStart="20dp"
-                                android:layout_marginTop="20dp"
-                                android:layout_marginEnd="20dp"
-                                android:layout_marginBottom="8dp"
-                                android:textColor="@color/colorPrimary"
-                                android:text="종료일"
-                                android:textSize="14sp" />
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_flag_black_24dp" />
+                        </androidx.cardview.widget.CardView>
 
-                            <TextView
-                                android:id="@+id/mission_date_end"
+                        <androidx.cardview.widget.CardView
+                            android:id="@+id/btn_current_location"
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:layout_below="@id/btn_mission_location"
+                            android:layout_alignParentRight="true"
+                            android:layout_marginTop="12dp"
+                            android:layout_marginRight="12dp"
+                            android:clipChildren="false"
+                            android:clipToPadding="false"
+                            android:divider="@android:color/transparent"
+                            android:dividerHeight="0.0px"
+                            android:elevation="8dp"
+                            android:text="현재위치"
+                            app:cardCornerRadius="8dp"
+
+                            >
+
+                            <ImageView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginEnd="20dp"
-                                android:layout_marginBottom="8dp"
-                                android:text="날짜 선택 결과"
-                                android:textSize="18sp" />
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:id="@+id/mission_time_end"
-                                android:layout_marginEnd="20dp"
-                                android:layout_marginBottom="8dp"/>
-                        </LinearLayout>
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_my_location_black_24dp" />
+                        </androidx.cardview.widget.CardView>
 
 
+                    </RelativeLayout>
 
-                    </LinearLayout>
+
                 </RelativeLayout>
-
-
-            </RelativeLayout>
+            </LinearLayout>
 
             <LinearLayout
 
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:orientation="vertical"
-                android:padding="12dp">
+                android:layout_marginTop="8dp"
+                android:background="@color/White"
+                android:orientation="vertical">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="28dp"
+                    android:layout_marginEnd="28dp"
                     android:orientation="vertical">
+
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="40dp"
+                        android:layout_marginTop="20dp"
                         android:text="주소"
                         android:textSize="18sp" />
 
@@ -255,7 +303,6 @@
                         android:id="@+id/address_detail"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="40dp"
                         android:layout_marginTop="12dp"
                         android:layout_marginBottom="20dp"
                         android:text=""
@@ -268,28 +315,38 @@
                         android:layout_marginEnd="24dp"
                         android:background="@color/divider_line" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="40dp"
                         android:layout_marginTop="20dp"
-                        android:text="벌칙"
-                        android:textSize="18sp" />
+                        android:layout_marginBottom="8dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="벌칙"
+                            android:textSize="18sp" />
 
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="40dp"
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
 
-                        android:layout_marginTop="12dp"
-                        android:text="*실패시 아래 연락처로 문자알림" />
+                            android:layout_marginStart="20dp"
+
+                            android:text="*실패시 아래 연락처로 송금"
+                            android:textColor="@color/colorPrimary" />
+                    </LinearLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recycler_friends_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
 
                     <TextView
                         android:id="@+id/penalty_name_list"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="40dp"
                         android:layout_marginTop="12dp"
                         android:text=""
                         android:textSize="14sp" />
@@ -309,7 +366,6 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="40dp"
                             android:layout_marginTop="20dp"
                             android:text="벌칙내용"
                             android:textSize="18sp" />
@@ -318,7 +374,6 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="40dp"
                             android:layout_marginTop="12dp"
 
 
@@ -328,7 +383,6 @@
                             android:id="@+id/penalty_content"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="40dp"
                             android:layout_marginTop="12dp"
                             android:text="내용" />
                     </LinearLayout>

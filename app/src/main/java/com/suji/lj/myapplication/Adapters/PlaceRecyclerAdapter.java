@@ -10,6 +10,7 @@ import android.widget.TextView;
 import com.suji.lj.myapplication.DaumMapActivity;
 import com.suji.lj.myapplication.Items.PlaceItem;
 import com.suji.lj.myapplication.R;
+import com.suji.lj.myapplication.SingleModeActivity;
 
 import java.util.List;
 
@@ -46,8 +47,7 @@ public class PlaceRecyclerAdapter extends RecyclerView.Adapter<PlaceRecyclerAdap
         holder.view_container.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                ((DaumMapActivity)DaumMapActivity.mContext).moveSelectedPlace(placeList.get(position).getLatitude(),placeList.get(position).getLongitude());
+                ((SingleModeActivity) context).moveSelectedPlace(placeList.get(position).getLatitude(),placeList.get(position).getLongitude());
 
             }
         });

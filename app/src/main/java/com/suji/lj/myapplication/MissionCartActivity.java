@@ -35,6 +35,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.kakao.auth.Session;
 import com.suji.lj.myapplication.Adapters.FlexBoxAdapter;
 import com.suji.lj.myapplication.Adapters.MissionCartListAdapter;
 import com.suji.lj.myapplication.Adapters.OpenBanking;
@@ -169,6 +170,18 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
 
         }
     };
+    private final Callback request_center_token = new Callback() {
+        @Override
+        public void onFailure(Call call, IOException e) {
+
+        }
+
+        @Override
+        public void onResponse(Call call, Response response) throws IOException {
+            final String body = response.body().string();
+            Log.d("센터콜백",body);
+        }
+    };
 
 
     @Override
@@ -176,8 +189,6 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_check_mission);
 
-
-        add_mission = findViewById(R.id.add_mission);
         add_contact = findViewById(R.id.add_contact);
         //contact_recyclerView = findViewById(R.id.contact_recyclerView);
 
@@ -193,7 +204,6 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
         firebase_read = findViewById(R.id.firebase_read);
         ly_add_new_account = findViewById(R.id.ly_add_new_account);
         transfer_recyclerView = findViewById(R.id.transfer_recyclerView);
-        recyclerView = findViewById(R.id.missions_cart_list);
 
         //numberTextWatcher = new NumberTextWatcher(textInputEditText,textInputLayout,contact_num,transfer_amount,context);
 
@@ -281,7 +291,7 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
 
     private void setTransferRecyclerView(RealmResults<ContactItem> realmResults) {
         transfer_recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        transfer_recycler_adapter = new RecyclerTransferRespectivelyAdapter(realmResults, realm);
+        transfer_recycler_adapter = new RecyclerTransferRespectivelyAdapter(this,realmResults, realm);
 
         transfer_recyclerView.setAdapter(transfer_recycler_adapter);
 
@@ -295,6 +305,12 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
     private void transferOpenBanking(){
         openBanking.requestTransfer(transfer_openbanking,this);
     }
+    private void requestCenterToken(){
+        openBanking.requestCenterToken(request_center_token);
+    }
+    private void requestRealName(){
+        openBanking.requestRealName(request_center_token);
+    }
 
     private void registerSend() {
         //파이어베이스
@@ -304,10 +320,11 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
 
         DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
         registerCheckForServer(mRootRef, user_id, mission_id);
-        //registerMissionInfoRoot(mRootRef,user_id,mission_id);
+        registerMissionInfoRoot(mRootRef,user_id,mission_id);
         //registerUserMissionList(mRootRef,user_id,mission_id);
         registerMissionInfoList(mRootRef,user_id,mission_id);
         registerMainDisplay(mRootRef,user_id,mission_id);
+        registerKakaoToken(mRootRef,user_id);
         //testtest(mRootRef);
 
         mRootRef.addValueEventListener(new ValueEventListener() {
@@ -358,7 +375,7 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
         mission_info_root.put("S" + mission_id, missionInfoRoot);
 
 
-        databaseReference.child("mission_info_root").child(user_id).updateChildren(mission_info_root);
+        databaseReference.child("user_data").child(user_id).child("mission_info_root").updateChildren(mission_info_root);
     }
 
 
@@ -388,9 +405,9 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
             Map<String, Boolean> mission_dates = new HashMap<>();
 
             missionInfoList.setMission_title(missionCartItemList.get(i).getTitle());
-            missionInfoList.setMission_time(DateTimeUtils.makeTimeForServer(missionCartItemList.get(i).getHour() , missionCartItemList.get(i).getMin()));
+            //missionInfoList.setMission_time(DateTimeUtils.makeTimeForServer(missionCartItemList.get(i).getHour() , missionCartItemList.get(i).getMin()));
             missionInfoList.setAddress(missionCartItemList.get(i).getAddress());
-            missionInfoList.setIs_success(false);
+            missionInfoList.setSuccess(false);
             missionInfoList.setLat(missionCartItemList.get(i).getLat());
             missionInfoList.setLng(missionCartItemList.get(i).getLng());
             missionInfoList.setMin_date(missionCartItemList.get(i).getMin_date());
@@ -405,16 +422,16 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
                 //Log.d("파베", "날짜" + date);
                 mission_dates.put(date, true);
             }
-            missionInfoList.setMission_dates(mission_dates);
+            //missionInfoList.setMission_dates(mission_dates);
             //missionInfoList.setArrayList(gogo);
-            missionInfoList.setMission_info_root_id("S" + mission_id);
+            //missionInfoList.setMission_info_root_id("S" + mission_id);
 
             mission_info_list.put("E" + mission_id + "N" + i, missionInfoList);
 
         }
 
 
-        databaseReference.child("mission_info_list").child(user_id).updateChildren(mission_info_list);
+        databaseReference.child("user_data").child(user_id).child("mission_info_list").updateChildren(mission_info_list);
     }
 
     private void registerCheckForServer(DatabaseReference databaseReference, String user_id, String mission_id) {
@@ -469,6 +486,7 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
                 itemForMissionByDay.setTime(DateTimeUtils.makeTimeForServer(missionCartItemList.get(i).getHour(),missionCartItemList.get(i).getMin()));
                 itemForMissionByDay.setLat(missionCartItemList.get(i).getLat());
                 itemForMissionByDay.setLng(missionCartItemList.get(i).getLng());
+                itemForMissionByDay.setMother_id("E" + mission_id + "N" + i);
 
 
                 int year = missionCartItemList.get(i).getCalendarDayList().get(j).getYear();
@@ -479,7 +497,6 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
                 itemForMissionByDay.setDate(date);
 
                 itemForMissionByDay.setSuccess(false);
-
 
                 int hour = missionCartItemList.get(i).getHour();
                 int min = missionCartItemList.get(i).getMin();
@@ -507,15 +524,22 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
 
 
     }
+    private void registerKakaoToken(DatabaseReference databaseReference,String user_id){
+        String access_token = Session.getCurrentSession().getTokenInfo().getAccessToken();
+        String request_token = Session.getCurrentSession().getTokenInfo().getRefreshToken();
+        Map<String,String> objectMap = new HashMap<>();
+        objectMap.put("access_token",access_token);
+        objectMap.put("refresh_token",request_token);
+
+        databaseReference.child("user_data").child(user_id).child("kakao_data").setValue(objectMap);
+
+    }
 
 
     @Override
     public void onClick(View v) {
 
         switch (v.getId()) {
-            case R.id.add_mission:
-                addMission();
-                break;
             case R.id.add_contact:
                 startActivityForResult(new Intent(this, ContactActivity.class), 2);
                 break;
@@ -526,8 +550,8 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
             case R.id.firebase_read:
                 //checkResult();
                 deleteRealm();
-
-
+                //requestCenterToken();
+                //requestRealName();
                 break;
 
         }
@@ -537,9 +561,16 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
     private void deleteRealm() {
         realm.beginTransaction();
         RealmResults<ContactItem> realmResults = realm.where(ContactItem.class).findAll();
+        RealmResults<MissionCartItem> realmlist = realm.where(MissionCartItem.class).findAll();
         realmResults.deleteAllFromRealm();
+        realmlist.deleteAllFromRealm();
 
         realm.commitTransaction();
+        boolean con = realm.where(ContactItem.class).isValid();
+        boolean cart = realm.where(MissionCartItem.class).isValid();
+        long count = realm.where(ContactItem.class).count();
+        Log.d("이즈밸리드","contact_item"+con);
+        Log.d("이즈밸리드","cart_item"+count);
         missionCartListAdapter.notifyDataSetChanged();
 
     }

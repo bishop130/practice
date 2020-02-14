@@ -7,9 +7,9 @@
     android:orientation="vertical"
     tools:context="com.suji.lj.myapplication.SampleSignupActivity">
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/sample_signup_toolbar"
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
+        android:layout_height="wrap_content"
         android:background="@color/White"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
@@ -17,7 +17,6 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="60dp"
         android:background="@drawable/rounded"
         android:orientation="vertical">
 

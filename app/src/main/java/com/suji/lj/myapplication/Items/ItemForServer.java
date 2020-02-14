@@ -6,6 +6,7 @@ public class ItemForServer {
     public boolean is_success;
     public String root_id;
     public String children_id;
+    public String time_stamp;
 
     public ItemForServer() {
 
@@ -48,5 +49,13 @@ public class ItemForServer {
 
     public void setChildren_id(String children_id) {
         this.children_id = children_id;
+    }
+
+    public String getTime_stamp() {
+        return time_stamp;
+    }
+
+    public void setTime_stamp(String time_stamp) {
+        this.time_stamp = time_stamp;
     }
 }

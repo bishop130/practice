@@ -4,6 +4,15 @@
     <color name="colorPrimary2">#3F51B5</color>
     <color name="colorPrimaryDark">#4D73ED</color>
     <color name="colorAccent">#F1862D</color>
+    <color name="colorPrimary200">#FFCC80</color>
+    <color name="colorPrimary300">#FFB74D</color>
+    <color name="colorPrimary400">#FFA726</color>
+    <color name="colorPrimary500">#FF9800</color>
+    <color name="colorPrimary100">#FFE0B2</color>
+    <color name="colorPrimary50">#FFF3E0</color>
+    <color name="colorSub">#6278CD</color>
+
+
 
     <color name="red">#FFC93437</color>
     <color name="blue">#FF375BF1</color>

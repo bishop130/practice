@@ -6,6 +6,10 @@
         android:icon="@drawable/ic_history_black_24dp"
         android:title=""/>
     <item
+        android:id="@+id/nav_location"
+        android:icon="@drawable/ic_add_mission"
+        android:title=""/>
+    <item
         android:id="@+id/nav_search"
         android:icon="@drawable/ic_menu_black_24dp"
         android:title=""/>

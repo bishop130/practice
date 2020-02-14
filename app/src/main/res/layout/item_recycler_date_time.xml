@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="20년 2월 4일 (수)"
+        android:textSize="18sp"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="8dp"
+        android:id="@+id/date"
+        android:textColor="@color/colorPrimary"/>
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="오후 12시 40분"
+        android:textSize="16sp"
+        android:id="@+id/time"
+
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="40dp"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/ly_time_error"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="visible"
+        >
+        <ImageView
+            android:layout_marginStart="32dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_error"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="현재시간기준 30분뒤 부터 설정할 수 있습니다."
+            android:textColor="@color/errorColor"
+            android:layout_gravity="center"/>
+    </LinearLayout>
+
+</LinearLayout>

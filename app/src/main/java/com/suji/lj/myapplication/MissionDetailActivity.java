@@ -1,30 +1,63 @@
 package com.suji.lj.myapplication;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.opengl.GLException;
+import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.mikhaellopez.circularprogressbar.CircularProgressBar;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
+import com.suji.lj.myapplication.Adapters.RecyclerDetailFriendsAdapter;
+import com.suji.lj.myapplication.Adapters.RecyclerMissionProgressAdapter;
+import com.suji.lj.myapplication.Adapters.RecyclerViewContactAdapter;
+import com.suji.lj.myapplication.Items.ContactItemForServer;
+import com.suji.lj.myapplication.Items.ItemForDateTime;
+import com.suji.lj.myapplication.Items.ItemForDateTimeByList;
+import com.suji.lj.myapplication.Items.ItemForFriendsList;
+import com.suji.lj.myapplication.Items.ItemForMissionByDay;
+import com.suji.lj.myapplication.Items.MissionInfoList;
 import com.suji.lj.myapplication.Utils.DateTimeFormatter;
 import com.suji.lj.myapplication.Decorators.EventDecorator;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.CalendarMode;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.format.TitleFormatter;
+import com.suji.lj.myapplication.Utils.DateTimeUtils;
+import com.suji.lj.myapplication.Utils.Utils;
 
 import net.daum.mf.map.api.CameraUpdateFactory;
 import net.daum.mf.map.api.MapCircle;
@@ -39,19 +72,28 @@ import org.threeten.bp.LocalDate;
 import org.threeten.bp.ZoneId;
 
 
+import java.nio.IntBuffer;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
-public class MissionDetailActivity extends AppCompatActivity implements MapView.MapViewEventListener, MapView.CurrentLocationEventListener,OnDateSelectedListener {
+import javax.microedition.khronos.egl.EGL10;
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.egl.EGLContext;
+import javax.microedition.khronos.opengles.GL10;
+
+public class MissionDetailActivity extends AppCompatActivity implements MapView.MapViewEventListener, MapView.CurrentLocationEventListener, View.OnClickListener {
     MapView mapView;
-    MaterialCalendarView materialCalendarView;
-    CardView button_location;
-    CardView button_mission_location;
+    //MaterialCalendarView materialCalendarView;
+    CardView btn_current_location;
+    CardView btn_mission_location;
     private String mission_title;
     private double mission_latitude;
     private double mission_longitude;
@@ -76,6 +118,21 @@ public class MissionDetailActivity extends AppCompatActivity implements MapView.
     TextView penalty_content;
     TextView mission_time_start;
     TextView mission_time_end;
+    List<ContactItemForServer> friendsLists;
+    String min_date;
+    String max_date;
+    public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
+    Bitmap snapshotBitmap;
+    ImageView some_image;
+    LinearLayout test;
+    ViewGroup mapViewContainer;
+    RecyclerView recyclerView;
+    int total_dates;
+    TextView tv_date_progress;
+    CircularProgressBar circularProgressBar;
+    Toolbar toolbar;
+    RecyclerView recyclerView_friends_list;
+
     DateTimeFormatter dtf = new DateTimeFormatter();
     Date initial_date;
 
@@ -87,22 +144,21 @@ public class MissionDetailActivity extends AppCompatActivity implements MapView.
         getIntents();
 
         mapView = new MapView(this);
-        ViewGroup mapViewContainer = findViewById(R.id.map_view_detail);
+        mapViewContainer = findViewById(R.id.map_view_detail);
         mapViewContainer.addView(mapView);
         mapView.setMapViewEventListener(this);
 
 
-        Toolbar toolbar = findViewById(R.id.mission_detail_toolbar);
-        toolbar.setTitle(mission_title);
+        toolbar = findViewById(R.id.mission_detail_toolbar);
+        toolbar.setTitle("");
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         //Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        materialCalendarView = findViewById(R.id.detail_calendar);
         address_result = findViewById(R.id.address_detail);
-        address_result.setText(address);
-        button_location = findViewById(R.id.myLocation_detail);
-        button_mission_location = findViewById(R.id.mission_location_detail);
+
+        btn_current_location = findViewById(R.id.btn_current_location);
+        btn_mission_location = findViewById(R.id.btn_mission_location);
         mainScrollView = findViewById(R.id.main_scroll_view);
         transparentImageView = findViewById(R.id.transparent_image);
         penalty_name_list = findViewById(R.id.penalty_name_list);
@@ -111,33 +167,17 @@ public class MissionDetailActivity extends AppCompatActivity implements MapView.
         penalty_content = findViewById(R.id.penalty_content);
         mission_time_start = findViewById(R.id.mission_time_start);
         mission_time_end = findViewById(R.id.mission_time_end);
+        recyclerView = findViewById(R.id.recycler_progress_detail);
+        tv_date_progress = findViewById(R.id.tv_date_progress);
+        circularProgressBar = findViewById(R.id.circularProgressBar);
+        recyclerView_friends_list = findViewById(R.id.recycler_friends_list);
+        checkLocationPermission();
 
+        //some_image.setImageBitmap(getBitmapFromView(test));
 
-
-
-        materialCalendarView.setOnDateChangedListener(this);
-        setMaterialCalendarView();
-        drawMissionRadius();
-        displayContactList();
-        displayPenaltyContent();
-        setMinMaxDate();
-        button_location.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mapView.isShowingCurrentLocationMarker()) {
-                    if ((current_latitude != 0.0) && (current_longitude != 0.0)) {
-                        mapView.moveCamera(CameraUpdateFactory.newMapPoint(MapPoint.mapPointWithGeoCoord(current_latitude, current_longitude)));
-                    }
-                }
-
-            }
-        });
-        button_mission_location.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mapView.moveCamera(CameraUpdateFactory.newMapPoint(MapPoint.mapPointWithGeoCoord(mission_latitude, mission_longitude)));
-            }
-        });
+        //Log.d("안될듯",viewToBitmap().toString());
+        btn_current_location.setOnClickListener(this);
+        btn_mission_location.setOnClickListener(this);
 
 
         transparentImageView.setOnTouchListener(new View.OnTouchListener() {
@@ -170,11 +210,68 @@ public class MissionDetailActivity extends AppCompatActivity implements MapView.
         });
 
 
+        //query();
+
+
     }
+
+    private void setRecyclerView(List<ItemForDateTimeByList> list) {
+        RecyclerMissionProgressAdapter adapter = new RecyclerMissionProgressAdapter(list);
+        //adapter.notifyDataSetChanged();
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(mLayoutManager);
+        recyclerView.setAdapter(adapter);
+
+
+    }
+
+    private void makeCircularProgressBar(int date, int total_dates) {
+
+
+// Set Progress
+        // circularProgressBar.setProgress(1f);
+// or with animation
+        if (date == 0) {
+            circularProgressBar.setProgressWithAnimation(total_dates * 0.02f, (long) 1000);
+        } else {
+
+            circularProgressBar.setProgressWithAnimation(date, (long) 1000); // =1s
+        }
+
+// Set Progress Max
+        circularProgressBar.setProgressMax(total_dates);
+
+// Set ProgressBar Color
+        circularProgressBar.setProgressBarColor(getResources().getColor(R.color.colorPrimary));
+
+// or with gradient
+        //circularProgressBar.setProgressBarColorStart(Color.GRAY);
+        //circularProgressBar.setProgressBarColorEnd(Color.RED);
+        //circularProgressBar.setProgressBarColorDirection(CircularProgressBar.GradientDirection.TOP_TO_BOTTOM);
+
+// Set background ProgressBar Color
+        circularProgressBar.setBackgroundProgressBarColor(getResources().getColor(R.color.wall_paper2));
+// or with gradient
+        //circularProgressBar.setBackgroundProgressBarColorStart(Color.WHITE);
+        //circularProgressBar.setBackgroundProgressBarColorEnd(Color.RED);
+        //circularProgressBar.setBackgroundProgressBarColorDirection(CircularProgressBar.GradientDirection.TOP_TO_BOTTOM);
+
+// Set Width
+        circularProgressBar.setProgressBarWidth(14f); // in DP
+        circularProgressBar.setBackgroundProgressBarWidth(10f); // in DP
+
+// Other
+        circularProgressBar.setRoundBorder(true);
+        //circularProgressBar.setStartAngle(180f);
+        circularProgressBar.setProgressDirection(CircularProgressBar.ProgressDirection.TO_RIGHT);
+
+
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
-            case android.R.id.home:{ //toolbar의 back키 눌렀을 때 동작
+        switch (item.getItemId()) {
+            case android.R.id.home: { //toolbar의 back키 눌렀을 때 동작
                 finish();
                 return true;
             }
@@ -183,69 +280,112 @@ public class MissionDetailActivity extends AppCompatActivity implements MapView.
     }
 
 
-
-    private void displayPenaltyContent(){
+    private void displayPenaltyContent() {
         String user_name = getSharedPreferences("kakao_profile", MODE_PRIVATE).getString("name", "");
-        String content = user_name+"님이 '"+mission_title+"' 미션에 실패하셨습니다. 테스트중입니다.";
+        String content = user_name + "님이 '" + mission_title + "' 미션에 실패하셨습니다. 테스트중입니다.";
         penalty_content.setText(content);
 
-    }
-
-    private void setMinMaxDate() {
-
-        List<String> date_array = Arrays.asList(mission_date_array.split("\\s*,\\s*"));
-        int date_count = 0;
-        Date max_date = dtf.dateParser(date_array.get(0));
-        Date min_date = dtf.dateParser(date_array.get(0));
-
-        for (int i = 0; i < date_array.size(); i++) {
-            String date = date_array.get(i);
-            Log.d("date_check", date);
-            date_count++;
-
-            Date date_arr = dtf.dateParser(date);
-            if (date_arr.getTime() >= max_date.getTime()) {
-                max_date = date_arr;
-            }
-            if (date_arr.getTime() <= min_date.getTime()) {
-                min_date = date_arr;
-            }
-        }
-        initial_date = min_date;
-
-        Log.d("date_check_count", String.valueOf(date_count));
-        mission_date_start.setText(dtf.dateReadable(min_date));
-        mission_date_end.setText(dtf.dateReadable(max_date));
-        mission_time_start.setText(readableTime(mission_time));
-        mission_time_end.setText(readableTime(mission_time));
-
-        //holder.range_date.setText(sdf_array.format(min_date) + "~" + sdf_array.format(max_date));
-
 
     }
-
 
 
     private void getIntents() {
 
+
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            mission_title = extras.getString("MissionTitle");
-            mission_id = extras.getString("MissionID");
-            mission_latitude = extras.getDouble("Latitude");
-            mission_longitude = extras.getDouble("Longitude");
-            mission_time = extras.getString("mission_time");
-            mission_date_array = extras.getString("mission_date_array");
-            address = extras.getString("address");
-            contact_list = extras.getString("contact_list");
-            completed_dates = extras.getString("completed_dates");
-            is_failed = extras.getString("is_failed");
+            mission_time = extras.getString("time");
+            String mission_id = extras.getString("mission_id");
+            Log.d("아이템바이", mission_id);
+            String user_id = getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
+            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+            if (!Utils.isEmpty(mission_id) && !Utils.isEmpty(user_id))
+                databaseReference.child("user_data").child(user_id).child("mission_info_list").child(mission_id).addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        List<ItemForDateTimeByList> itemForDateTimeByLists = new ArrayList<>();
+                        Log.d("아이템바이", dataSnapshot.exists() + "");
+                        if (dataSnapshot.exists()) {
+
+
+                            MissionInfoList item = dataSnapshot.getValue(MissionInfoList.class);
+
+                            String address = item.getAddress();
+                            mission_latitude = item.getLat();
+                            mission_longitude = item.getLng();
+                            String min_date = item.getMin_date();
+                            String max_date = item.getMax_date();
+                            String mission_title = item.getMission_title();
+                            //total_dates = item.getMission_dates().size();
+                            friendsLists = item.getFriends_selected_list();
+                            for(int i =0; i<friendsLists.size();i++){
+                                Log.d("친구",friendsLists.get(i).getFriend_name());
+                                Log.d("친구",friendsLists.get(i).getPhone_num());
+
+                            }
+
+                            setRecyclerViewFriendsList(friendsLists);
+
+
+                            mission_date_start.setText(DateTimeUtils.makeDateForHuman(min_date));
+                            mission_date_end.setText(DateTimeUtils.makeDateForHuman(max_date));
+                            address_result.setText(address);
+                            toolbar.setTitle(mission_title);
+                            setSupportActionBar(toolbar);
+
+
+                            Map<String, ItemForDateTimeByList> map = item.getMission_dates();
+
+                            for (ItemForDateTimeByList object : map.values()) {
+
+                                Collections.addAll(itemForDateTimeByLists, object);
+                                Collections.sort(itemForDateTimeByLists, new Comparator<ItemForDateTimeByList>() {
+                                    @Override
+                                    public int compare(ItemForDateTimeByList o1, ItemForDateTimeByList o2) {
+                                        return o1.getDate().compareTo(o2.getDate());
+                                    }
+                                });
+                                //Collections.add
+                                //itemForDateTimeByLists.add(object);
+                            }
+
+                            mission_time_start.setText(DateTimeUtils.makeTimeForHuman(itemForDateTimeByLists.get(0).getTime()));
+                            mission_time_end.setText(DateTimeUtils.makeTimeForHuman(itemForDateTimeByLists.get(itemForDateTimeByLists.size() - 1).getTime()));
+
+                            int count = 0;
+                            for (int i = 0; i < itemForDateTimeByLists.size(); i++) {
+                                String date = itemForDateTimeByLists.get(i).getDate();
+                                String time = itemForDateTimeByLists.get(i).getTime();
+                                Log.d("아이템바이", itemForDateTimeByLists.get(i).getDate() + "/" + itemForDateTimeByLists.get(i).getTime());
+                                if (!DateTimeUtils.compareIsFuture(date + time)) {
+                                    count++;
+                                }
+
+
+                            }
+                            tv_date_progress.setText(count + "/" + item.getMission_dates().size() + "일");
+                            makeCircularProgressBar(count, itemForDateTimeByLists.size());
+                            setRecyclerView(itemForDateTimeByLists);
+                            drawMissionRadius(mission_latitude, mission_longitude);
+                            moveSelectedPlace(mission_latitude,mission_longitude);
+
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+
+
         }
     }
 
-    private void drawMissionRadius() {
+    private void drawMissionRadius(double lat, double lng) {
         MapCircle circle2 = new MapCircle(
-                MapPoint.mapPointWithGeoCoord(mission_latitude, mission_longitude), // center
+                MapPoint.mapPointWithGeoCoord(lat, lng), // center
                 100, // radius
                 Color.argb(128, 255, 0, 0), // strokeColor
                 Color.argb(128, 255, 255, 0) // fillColor
@@ -254,116 +394,10 @@ public class MissionDetailActivity extends AppCompatActivity implements MapView.
         mapView.addCircle(circle2);
 
     }
-
-    private void displayContactList() {
-        StringBuilder sb = new StringBuilder();
-        try {
-            JSONArray jsonArray = new JSONArray(contact_list);
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject jsonObject = jsonArray.getJSONObject(i);
-
-                sb.append(jsonObject.getString("name")+" : "+jsonObject.getString("num")+"\n");
-                //sb.append(",");
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        /*
-        String result = sb.toString();
-        int last = result.length() - 1;
-        if (last > 0 && result.charAt(last) == ',') {
-            result = result.substring(0, last);
-        }
-        */
-        penalty_name_list.setText(sb.toString());
-    }
-
-    private void setMaterialCalendarView() {
-        materialCalendarView.setTitleFormatter(new TitleFormatter() {
-            @Override
-            public CharSequence format(CalendarDay calendarDay) {
-
-                StringBuffer buffer = new StringBuffer();
-                int yearOne = calendarDay.getYear();
-                int monthOne = calendarDay.getMonth();
-                buffer.append(yearOne).append("년 ").append(monthOne).append("월");
-                return buffer;
-            }
-        });
-        materialCalendarView.setBackgroundColor(Color.WHITE);
-        materialCalendarView.state().edit()
-                .setCalendarDisplayMode(CalendarMode.MONTHS)
-                .commit();
-        List<String> date_array = Arrays.asList(mission_date_array.split("\\s*,\\s*"));
-        int date_count = 0;
-        Date max_date = dtf.dateParser(date_array.get(0));
-        Date min_date = dtf.dateParser(date_array.get(0));
-
-        for (int i = 0; i < date_array.size(); i++) {
-            String date = date_array.get(i);
-            Log.d("date_check", date);
-            date_count++;
-
-            Date date_arr = dtf.dateParser(date);
-            if (date_arr.getTime() >= max_date.getTime()) {
-                max_date = date_arr;
-            }
-            if (date_arr.getTime() <= min_date.getTime()) {
-                min_date = date_arr;
-            }
-        }
-        initial_date = min_date;
-
-
-        final LocalDate localDate = Instant.ofEpochMilli(initial_date.getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
-
-                //LocalDate.now();
-        materialCalendarView.setSelectedDate(localDate);
-        materialCalendarView.setCurrentDate(localDate);
-        //materialCalendarView.addDecorator(new SelectorDecorator(this));
-
-
-
-
-        try {
-
-            List<String> date_arrays = Arrays.asList(mission_date_array.split("\\s*,\\s*"));
-            for (int i = 0; i < date_arrays.size(); i++) {
-
-                Date date = simpleDateFormat.parse(date_arrays.get(i));
-
-
-                String day = (String) DateFormat.format("d", date); // 20
-                String monthNumber = (String) DateFormat.format("M", date); // 6
-                String year = (String) DateFormat.format("yyyy", date); // 2013
-                CalendarDay eventDay2 = CalendarDay.from(Integer.valueOf(year), Integer.valueOf(monthNumber), Integer.valueOf(day));
-                dates.add(eventDay2);
-            }
-            List<String> completed_array = Arrays.asList(completed_dates.split("\\s*,\\s*"));
-            for (int i = 0; i < completed_array.size(); i++) {
-
-                Date date = simpleDateFormat.parse(completed_array.get(i));
-
-
-                String day = (String) DateFormat.format("d", date); // 20
-                String monthNumber = (String) DateFormat.format("M", date); // 6
-                String year = (String) DateFormat.format("yyyy", date); // 2013
-                CalendarDay eventDay3 = CalendarDay.from(Integer.valueOf(year), Integer.valueOf(monthNumber), Integer.valueOf(day));
-                completed_date_array.add(eventDay3);
-            }
-
-
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        if(is_failed.equals("1")){
-            materialCalendarView.addDecorator(new EventDecorator(Color.RED, dates));
-        }else{
-            materialCalendarView.addDecorator(new EventDecorator(Color.YELLOW, dates));
-        }
-        materialCalendarView.addDecorator(new EventDecorator(Color.BLUE, completed_date_array));
-
+    private void setRecyclerViewFriendsList(List<ContactItemForServer> friendsLists){
+        RecyclerDetailFriendsAdapter adapter = new RecyclerDetailFriendsAdapter(friendsLists);
+        recyclerView_friends_list.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView_friends_list.setAdapter(adapter);
 
 
     }
@@ -443,62 +477,107 @@ public class MissionDetailActivity extends AppCompatActivity implements MapView.
         finish();
     }
 
-    public String readableTime(String time){
-        String mission_time_readable;
-        String minutes;
-        String[] date_array = time.split(":");
-        int hour = Integer.valueOf(date_array[0]);
-        int min = Integer.valueOf(date_array[1]);
-        if (min < 10) {
-            minutes = "0" + String.valueOf(min);
-        } else {
 
-            minutes = String.valueOf(min);
-        }
-
-
-        if (hour == 12) {
-            mission_time_readable = "오후 " + hour + "시 " + minutes + "분";
-            if (min == 0) {
-                mission_time_readable = "오후 " + hour + "시 ";
-            }
-
-        } else if (hour == 0) {
-            mission_time_readable = "오전  12시 " + minutes + "분";
-            if (min == 0) {
-                mission_time_readable = "오후 " + hour + "시 ";
-            }
-        } else {
-            mission_time_readable = ((hour >= 12) ? "오후 " : "오전 ") + hour % 12 + "시 " + minutes + "분";
-            if (min == 0) {
-                mission_time_readable = ((hour >= 12) ? "오후 " : "오전 ") + hour % 12 + "시 ";
-            }
-        }
-        return mission_time_readable;
+    public void moveSelectedPlace(double lat, double lng) {
+        mapView.moveCamera(CameraUpdateFactory.newMapPoint(MapPoint.mapPointWithGeoCoord(lat, lng)));
 
     }
 
+    private void moveCurrentLocation() {
+        if (mapView.isShowingCurrentLocationMarker()) {
+            if ((current_latitude != 0.0) && (current_longitude != 0.0)) {
+                mapView.moveCamera(CameraUpdateFactory.newMapPoint(MapPoint.mapPointWithGeoCoord(current_latitude, current_longitude)));
+            }
+        } else {
+            Toast.makeText(getApplicationContext(), "위치정보를 수신중입니다.", Toast.LENGTH_LONG).show();
+        }
+    }
 
     @Override
-    public void onDateSelected(@NonNull MaterialCalendarView materialCalendarView2, @NonNull CalendarDay calendarDay, boolean b) {
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.btn_current_location:
+                moveCurrentLocation();
+                break;
+            case R.id.btn_mission_location:
+                moveSelectedPlace(mission_latitude, mission_longitude);
+                break;
 
-        ArrayList<CalendarDay> selected_date = new ArrayList<>();
-        selected_date.add(calendarDay);
-        //materialCalendarView.invalidateDecorators();
-        if(is_failed.equals("1")){
-            materialCalendarView.addDecorator(new EventDecorator(Color.RED, dates));
-        }else{
-            materialCalendarView.addDecorator(new EventDecorator(Color.YELLOW, dates));
+
         }
-        materialCalendarView.addDecorator(new EventDecorator(Color.BLUE, completed_date_array));
+    }
+
+    private void checkLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            Log.d("퍼미션", "이미 승인받음");
+
+            mapView.setCurrentLocationEventListener(this);
+            mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving);
+        } else {
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+                new AlertDialog.Builder(this)
+                        .setTitle("Location Permission Needed")
+                        .setMessage("This app needs the Location permission, please accept to use location functionality")
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                //Prompt the user once explanation has been shown
+                                ActivityCompat.requestPermissions(MissionDetailActivity.this,
+                                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                        MY_PERMISSIONS_REQUEST_LOCATION);
+                            }
+                        })
+                        .create()
+                        .show();
 
 
-        Log.d("캘린더","선택");
-        if(b) {
-            Log.d("캘린더","선택");
-            materialCalendarView.addDecorator(new EventDecorator(Color.WHITE, selected_date));
+            } else {
+                // No explanation needed, we can request the permission.
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        MY_PERMISSIONS_REQUEST_LOCATION);
+            }
         }
+    }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted, yay! Do the
+                    // location-related task you need to do.
+                    if (ContextCompat.checkSelfPermission(this,
+                            Manifest.permission.ACCESS_FINE_LOCATION)
+                            == PackageManager.PERMISSION_GRANTED) {
+                        Log.d("퍼미션", "여기는 왜 못들어와");
 
+                        mapView.setCurrentLocationEventListener(this);
+                        mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving);
+
+                    }
+
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                    Toast.makeText(this, "permission denied", Toast.LENGTH_LONG).show();
+                    finish();
+                }
+                break;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
     }
 }

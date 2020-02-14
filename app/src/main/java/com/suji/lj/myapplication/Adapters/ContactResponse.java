@@ -19,18 +19,23 @@ import com.suji.lj.myapplication.R;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.realm.Realm;
+import io.realm.RealmResults;
+
 public class ContactResponse extends RecyclerView.Adapter<ContactResponse.ContactResponseHolder>{
     Context context;
     private ContactResponse.ContactResponseHolder contactResponseHolder;
     RecyclerViewContactAdapter adapter;
     List<ContactItem> itemList;
     OnFriendsCountListener onFriendsCountListener;
+    Realm realm;
 
-    public ContactResponse(Context context, List<ContactItem> itemList,OnFriendsCountListener onFriendsCountListener) {
+    public ContactResponse(Context context, List<ContactItem> itemList, OnFriendsCountListener onFriendsCountListener, Realm realm) {
 
         this.context = context;
         this.itemList=itemList;
         this.onFriendsCountListener = onFriendsCountListener;
+        this.realm = realm;
 
 
     }
@@ -59,18 +64,17 @@ public class ContactResponse extends RecyclerView.Adapter<ContactResponse.Contac
         holder.title.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int pos = itemList.get(position).getPosition();
-                itemList.remove(position);
+
+                ((ContactActivity) context).refreshSelection(position);
 
                 //notifyDataSetChanged();
 
-                notifyItemRemoved(position);
-                notifyItemChanged(position,itemList);
+
                 onFriendsCountListener.onFriendsCount(itemList.size());
 
 
 
-                ((ContactActivity) context).refreshSelection(itemList,pos);
+
 
             }
         });
