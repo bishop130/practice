@@ -1,7 +1,6 @@
 package com.suji.lj.myapplication.Fragments;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -9,7 +8,10 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,15 +20,22 @@ import android.view.ViewGroup;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.kakao.friends.AppFriendContext;
 import com.kakao.friends.response.AppFriendsResponse;
 import com.kakao.kakaotalk.callback.TalkResponseCallback;
 import com.kakao.kakaotalk.v2.KakaoTalkService;
 import com.kakao.network.ErrorResult;
-import com.suji.lj.myapplication.Adapters.KakaoFriends;
+import com.suji.lj.myapplication.Adapters.FriendPagerAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerFriendsListAdapter;
+import com.suji.lj.myapplication.Adapters.RecyclerInvitationAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerViewDivider;
 import com.suji.lj.myapplication.Items.ItemForFriendsList;
+import com.suji.lj.myapplication.Items.ItemForMultiModeRequest;
 import com.suji.lj.myapplication.Items.RecyclerItem;
 import com.suji.lj.myapplication.R;
 import com.suji.lj.myapplication.Utils.DateTimeUtils;
@@ -47,18 +56,15 @@ import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-import static android.content.Context.MODE_PRIVATE;
-
 public class SearchFragment extends Fragment {
-    private RecyclerView recyclerView;
     private RequestQueue requestQueue;
     private Request request;
     private static final String Mission_List_URL = "http://bishop130.cafe24.com/Mission_List.php";
     private List<RecyclerItem> lstRecyclerItem = new ArrayList<>();
-    private KakaoFriends kakaoFriends = new KakaoFriends();
     private Context mContext;
     TabLayout tab_ly_friends;
-    List<ItemForFriendsList> itemForFriendsListList = new ArrayList<>();
+    ViewPager view_pager;
+
     private Callback callback = new Callback() {
         @Override
         public void onFailure(Call call, IOException e) {
@@ -68,7 +74,7 @@ public class SearchFragment extends Fragment {
         @Override
         public void onResponse(Call call, Response response) throws IOException {
 
-            Log.d("친구목록",response.toString());
+            Log.d("친구목록아닌거같으",response.toString());
 
         }
     };
@@ -82,12 +88,20 @@ public class SearchFragment extends Fragment {
 
 
         final View view = inflater.inflate(R.layout.fragment_search, container, false);
-        recyclerView = view.findViewById(R.id.recycler_total);
-        recyclerView.addItemDecoration(new RecyclerViewDivider(36));
         tab_ly_friends = view.findViewById(R.id.tab_ly_friends);
 
+
+        tab_ly_friends.addTab(tab_ly_friends.newTab().setText("약속초대"));
         tab_ly_friends.addTab(tab_ly_friends.newTab().setText("친구목록"));
-        tab_ly_friends.addTab(tab_ly_friends.newTab().setText("친구요청"));
+        //tab_ly_friends.addTab(tab_ly_friends.newTab().setText("친구요청"));
+
+        view_pager = view.findViewById(R.id.view_pager);
+
+        FriendPagerAdapter adapter = new FriendPagerAdapter
+                (getChildFragmentManager(), tab_ly_friends.getTabCount());
+        view_pager.setAdapter(adapter);
+        view_pager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tab_ly_friends));
+
 
         requestFriendsList();
         requestFriends();
@@ -97,9 +111,13 @@ public class SearchFragment extends Fragment {
             public void onTabSelected(TabLayout.Tab tab) {
                 switch (tab.getPosition()){
                     case 0:
+                        view_pager.setCurrentItem(tab.getPosition());
+
                         break;
                     case 1:
+                        view_pager.setCurrentItem(tab.getPosition());
                         break;
+
 
                 }
 
@@ -117,54 +135,21 @@ public class SearchFragment extends Fragment {
             }
         });
 
-        String user_id = mContext.getSharedPreferences("Kakao",Context.MODE_PRIVATE).getString("token","");
-        //volleyConnect(user_id);
-        kakaoFriends.requestFriends();
-        setupRecyclerView();
-
         return view;
     }
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         mContext = context;
-
-        SharedPreferences sharedPreferences = mContext.getSharedPreferences("timer_control",Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean("timer_switch",true);
-        editor.apply();
     }
 
-    private void setupRecyclerView() {
-        SharedPreferences sharedPreferences = mContext.getSharedPreferences("kakao_profile",MODE_PRIVATE);
-        String name = sharedPreferences.getString("name","");
-        String profile_image = sharedPreferences.getString("profile_image","");
 
-        ItemForFriendsList item = new ItemForFriendsList();
-        item.setFriends_name(name);
-        item.setFriends_image(profile_image);
 
-        itemForFriendsListList.add(item);
-
-        RecyclerFriendsListAdapter recyclerAdapter = new RecyclerFriendsListAdapter(mContext,itemForFriendsListList);
-        //recyclerAdapter.notifyDataSetChanged();
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(recyclerAdapter);
-
-    }
     @Override
     public void onPause(){
         super.onPause();
         Log.d("타이머","onPause_SearchFragment");
-        SharedPreferences sharedPreferences = mContext.getSharedPreferences("timer_control",Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean("timer_switch",false);
-        editor.apply();
 
-        boolean timer_switch = mContext.getSharedPreferences("timer_control",Context.MODE_PRIVATE).getBoolean("timer_switch",true);
-
-
-        Log.d("타이머"," "+timer_switch);
 
     }
 
@@ -215,12 +200,12 @@ public class SearchFragment extends Fragment {
 
                     @Override
                     public void onSessionClosed(ErrorResult errorResult) {
-
+                        Log.d("카카오친구 ", errorResult.toString());
                     }
 
                     @Override
                     public void onNotSignedUp() {
-
+                        Log.d("카카오친구 ", "onNotSinedup");
                     }
 
                     @Override
@@ -232,7 +217,18 @@ public class SearchFragment extends Fragment {
                     public void onSuccess(AppFriendsResponse result) {
                         // 친구 목록
                         Log.d("친구목록 ", result.getFriends().toString());
-                        result.getFriends().get(0).getUUID();
+                        List<ItemForFriendsList> itemForFriendsListList = new ArrayList<>();
+                        for(int i=0;i<result.getFriends().size();i++){
+                            ItemForFriendsList item = new ItemForFriendsList();
+                            item.setFriends_name(result.getFriends().get(i).getProfileNickname());
+                            item.setFriends_image(result.getFriends().get(i).getProfileThumbnailImage());
+                            item.setId(result.getFriends().get(i).getId());
+                            item.setUuid(result.getFriends().get(i).getUUID());
+                            item.setFavorite(result.getFriends().get(i).isFavorite().getBoolean());
+                            itemForFriendsListList.add(item);
+
+                        }
+                        //setupRecyclerView(itemForFriendsListList);
                         // context의 beforeUrl과 afterUrl이 업데이트 된 상태.
                     }
                 });

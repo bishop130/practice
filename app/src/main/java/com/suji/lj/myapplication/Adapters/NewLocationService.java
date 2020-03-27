@@ -25,6 +25,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
@@ -71,6 +72,7 @@ public class NewLocationService extends Service {
     int notif_id = 1;
     PreciseCountdown preciseCountdown;
     boolean isTimerRunning = false;
+    FusedLocationProviderClient mFusedLocationClient;
 
 
     @Nullable
@@ -87,10 +89,7 @@ public class NewLocationService extends Service {
 
         //Realm realm = Realm.getDefaultInstance();
         if (!Utils.isServiceRunningInForeground(this, NewLocationService.class)) {
-
-            startForeground(notif_id, getMyActivityNotification("처음", "처음"));
-
-
+            startForeground(notif_id, getMyActivityNotification("자동위치등록을 실행합니다", "처음"));
         }
     }
 
@@ -130,66 +129,77 @@ public class NewLocationService extends Service {
 
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
         if (!Utils.isEmpty(user_id)) {
-            databaseReference.child("user_data").child(user_id).child("mission_display").orderByKey().startAt(date_time).limitToFirst(1).addValueEventListener(new ValueEventListener() {
+            databaseReference.child("user_data").child(user_id).child("mission_display").orderByKey().startAt(date_time).limitToFirst(1).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if (dataSnapshot.exists()) {
                         for (DataSnapshot data : dataSnapshot.getChildren()) {
+                            //Log.d("서비스",data.getChildrenCount()+"count");
+                            //Log.d("서비스",dataSnapshot.getChildrenCount()+"datacount");
+
                             ItemForMissionByDay itemForMissionByDay = data.getValue(ItemForMissionByDay.class);
-                            if (itemForMissionByDay != null) {
 
+                            double lat = itemForMissionByDay.getLat();
+                            double lng = itemForMissionByDay.getLng();
+                            String title = itemForMissionByDay.getTitle();
+                            String date = itemForMissionByDay.getDate();
+                            String time = itemForMissionByDay.getTime();
+                            boolean is_success = itemForMissionByDay.isSuccess();
+                            Log.d("서비스", title);
 
-                                double lat = itemForMissionByDay.getLat();
-                                double lng = itemForMissionByDay.getLng();
-                                String title = itemForMissionByDay.getTitle();
-                                String date = itemForMissionByDay.getDate();
-                                String time = itemForMissionByDay.getTime();
-                                boolean is_success = itemForMissionByDay.isSuccess();
-                                if (is_success) {
-                                    queryData(date + (Integer.valueOf(time) + 1));//현재 미션을 완료했다면 다음 미션으로 쿼
+                            if (is_success) {
+                                Log.d("서비스", "성공");
+                                String sample = date + (Integer.valueOf(time) + 1);
+                                Log.d("서비스", "샘플" + sample);
+                                queryData(sample);//현재 미션을 완료했다면 다음 미션으로 쿼
 
-                                } else {
-                                    editor.putString("date", date);
-                                    editor.putString("time", time);
-                                    editor.putLong("Lat", Double.doubleToRawLongBits(lat));
-                                    editor.putLong("Lng", Double.doubleToRawLongBits(lng));
-                                    editor.apply();
+                                break;
 
-                                    Log.d("서비스", "가장가까운 날짜" + date);
-                                    //foregroundNotification();
-                                    Date current_date_time = new Date(System.currentTimeMillis());
-                                    Date mission_date_time = DateTimeFormatter.dateTimeParser(date + time);
-                                    long diff = mission_date_time.getTime() - current_date_time.getTime();
-                                    Log.d("서비스", "diff  " + diff);
-                                    Log.d("서비스", "title  " + title);
-                                    Log.d("서비스", "currenttime  " + current_date_time.getTime());
-                                    Log.d("서비스", "missiontime  " + mission_date_time.getTime());
+                            } else {
+                                editor.putString("date", date);
+                                editor.putString("time", time);
+                                editor.putLong("Lat", Double.doubleToRawLongBits(lat));
+                                editor.putLong("Lng", Double.doubleToRawLongBits(lng));
+                                editor.apply();
+
+                                // Log.d("서비스", "가장가까운 날짜" + date);
+                                //foregroundNotification();
+                                Date current_date_time = new Date(System.currentTimeMillis());
+                                Date mission_date_time = DateTimeFormatter.dateTimeParser(date + time);
+                                long diff = mission_date_time.getTime() - current_date_time.getTime();
+                                //Log.d("서비스", "diff  " + diff);
+                                //Log.d("서비스", "title  " + title);
+                                //Log.d("서비스", "currenttime  " + current_date_time.getTime());
+                                //Log.d("서비스", "missiontime  " + mission_date_time.getTime());
 //1,800,000  ,  3,173,130
 
-                                    if (diff - 1000 * 60 * 30 < 0) {
+                                if (diff - 1000 * 60 * 30 < 0) {
 
-                                        //1,800,000
-                                        Log.d("서비스", "30분안에 들어옴" + date);
-                                        LocationUtils.startLocationUpdates(getApplicationContext(), locationCallback);
-                                        updateNotification("자동위치등록이 실행중입니다.", "목표 : " + title + " - " + DateTimeUtils.makeDateForHumanNoYear(date) + " " + DateTimeUtils.makeTimeForHuman(time));
+                                    //1,800,000
+                                    Log.d("서비스", "30분안에 들어옴" + date);
+                                    LocationUtils.startLocationUpdates(getApplicationContext(), locationCallback);
+                                    updateNotification("자동위치등록이 실행중입니다.", "목표 : " + title + " - " + DateTimeUtils.makeDateForHumanNoYear(date) + " " + DateTimeUtils.makeTimeForHuman(time));
+                                    break;
 
-                                    } else {
-                                        //1,837,158
-                                        Log.d("서비스", "30분밖에 나감" + date);
+                                } else {
+                                    //1,837,158
+                                    Log.d("서비스", "30분밖에 나감" + date);
 
-                                        updateNotification("다음 목표 : " + title + " - " + DateTimeUtils.makeDateForHumanNoYear(date) + " " + DateTimeUtils.makeTimeForHuman(time), "목표시간 30분 전에 자동위치등록이 시작됩니다.");
-                                        timerAlarm(diff);
-
-
-                                    }
+                                    updateNotification("다음 목표 : " + title + " - " + DateTimeUtils.makeDateForHumanNoYear(date) + " " + DateTimeUtils.makeTimeForHuman(time), "목표시간 30분 전에 자동위치등록이 시작됩니다.");
+                                    timerAlarm(diff);
+                                    break;
 
 
                                 }
+
+
                             }
+
                         }
+                    } else {
+                        updateNotification("다음 약속이 없습니다.", "약속을 등록해주세요");
+
                     }
-
-
                 }
 
                 @Override
@@ -208,7 +218,7 @@ public class NewLocationService extends Service {
         // this notification
 
         PendingIntent contentIntent = PendingIntent.getActivity(this,
-                0, new Intent(this, MainActivity.class), 0);
+                0, new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
 
 
         Notification.Builder builder;
@@ -248,10 +258,6 @@ public class NewLocationService extends Service {
             preciseCountdown.cancel();
         } else {
 
-            //updateNotification("다음 목표 : " + title + " - " + DateTimeUtils.makeDateTimeForHuman(date, time), "목표시간 30분 전에 자동위치등록이 시작됩니다.");
-            //foregroundNotification("다음 목표 : " + title + " - " + Utils.monthDayTime(date, time), "목표시간 30분 전에 자동위치등록이 시작됩니다.");
-            //countDownTimer.cancel();
-
             preciseCountdown = new PreciseCountdown(diff - 1000 * 60 * 30, 1000) {//30분전에 알람 diff - 1000 * 60 * 3
                 @Override
                 public void onTick(long timeLeft) {
@@ -277,7 +283,7 @@ public class NewLocationService extends Service {
         SharedPreferences preferences = getSharedPreferences("Location", MODE_PRIVATE);
         double lat = Double.longBitsToDouble(preferences.getLong("Lat", 0));
         double lng = Double.longBitsToDouble(preferences.getLong("Lng", 0));
-        Log.d("서비스", " 위도경도" + lat + "    " + lng);
+        //Log.d("데이트", " 위도경도" + lat + "    " + lng);
         if ((location.getLatitude() - lat) * (location.getLatitude() - lat) + (location.getLongitude() - lng) * (location.getLongitude() - lng) < 0.0007 * 0.0007) {
 
             Log.d("서비스", "  gps 위치확인");
@@ -286,12 +292,11 @@ public class NewLocationService extends Service {
             String time = preferences.getString("time", "");
             DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
 
-            ref.child("check_for_server").child(date + time).orderByChild("user_id").equalTo(user_id).addValueEventListener(new ValueEventListener() {
+            ref.child("check_for_server").child(date + time).orderByChild("user_id").equalTo(user_id).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
 
-                    String mission_id;
                     String time_stamp = DateTimeUtils.getCurrentTime();
                     Log.d("서비스", dataSnapshot.getChildrenCount() + "  how_many");
                     for (DataSnapshot child : dataSnapshot.getChildren()) {
@@ -300,19 +305,22 @@ public class NewLocationService extends Service {
                         if (!Utils.isEmpty(object)) {
                             object.setIs_success(true);
                             object.setTime_stamp(time_stamp);
+                            String mission_id = object.getChildren_id();
+                            Log.d("서비스","몇번이야");
 
                             if (!Utils.isEmpty(key))
                                 ref.child("check_for_server").child(date + time).child(key).setValue(object).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
                                         if (!Utils.isEmpty(user_id))
-                                            ref.child("user_data").child(user_id).child("mission_display").child(date + time).addValueEventListener(new ValueEventListener() {
+                                            ref.child("user_data").child(user_id).child("mission_display").child(date + time).addListenerForSingleValueEvent(new ValueEventListener() {
                                                 @Override
                                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                                                     ItemForMissionByDay item = dataSnapshot.getValue(ItemForMissionByDay.class);
                                                     if (item != null) {
                                                         item.setSuccess(true);
+                                                        item.getMother_id();
                                                     }
 
                                                     ref.child("user_data").child(user_id).child("mission_display").child(date + time).setValue(item).addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -320,8 +328,33 @@ public class NewLocationService extends Service {
                                                         public void onSuccess(Void aVoid) {
                                                             getSharedPreferences("Location", MODE_PRIVATE).edit().remove("date").remove("time").apply();
                                                             Log.d("서비스", "위치등록성공");
-                                                            stopLocationUpdates();
-                                                            queryData(date + time);
+                                                            ref.child("user_data").child(user_id).child("mission_info_list").child(mission_id).child("mission_dates").child(date).addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                @Override
+                                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                    ItemForDateTimeByList item = dataSnapshot.getValue(ItemForDateTimeByList.class);
+                                                                    Log.d("서비스", dataSnapshot.exists() + "");
+                                                                    if (!Utils.isEmpty(item)) {
+                                                                        item.setSuccess(true);
+                                                                        item.setTime_stamp(time_stamp);
+                                                                    }
+                                                                    ref.child("user_data").child(user_id).child("mission_info_list").child(mission_id).child("mission_dates").child(date).setValue(item).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                        @Override
+                                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                                            Log.d("서비스", "성공인가 = " + item.getDate());
+                                                                            stopLocationUpdates();
+                                                                            queryData(date + time);
+                                                                        }
+                                                                    });
+
+
+                                                                }
+
+                                                                @Override
+                                                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                }
+                                                            });
+
                                                         }
                                                     });
 
@@ -333,31 +366,13 @@ public class NewLocationService extends Service {
 
                                                 }
                                             });
+                                        //Log.d("서비스", mission_id + " , " + date);
 
-                                        ref.child("user_data").child(user_id).child("mission_info_list").child(date).child("mission_dates").addValueEventListener(new ValueEventListener() {
-                                            @Override
-                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                                    ItemForDateTimeByList item = snapshot.getValue(ItemForDateTimeByList.class);
-                                                    if (!Utils.isEmpty(item)) {
-                                                        item.setSuccess(true);
-                                                        item.setTime_stamp(time_stamp);
-                                                    }
-                                                    ref.child("user_data").child(user_id).child("mission_info_list").child(date).child("mission_dates").setValue(item);
 
-                                                }
-
-                                            }
-
-                                            @Override
-                                            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                            }
-                                        });
                                     }
                                 });
 
-                            Log.d("서비스", dataSnapshot.toString() + "  for_display");
+                            //Log.d("서비스", dataSnapshot.toString() + "  for_display");
 
 
                         }
@@ -384,6 +399,7 @@ public class NewLocationService extends Service {
 
     private void stopLocationUpdates() {
         getFusedLocationProviderClient(this).removeLocationUpdates(locationCallback);
+
 
         Log.d("서비스4", "stopUpdate");
     }

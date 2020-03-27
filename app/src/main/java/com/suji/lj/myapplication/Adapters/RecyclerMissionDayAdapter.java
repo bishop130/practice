@@ -15,6 +15,7 @@ import com.suji.lj.myapplication.Items.ItemForMissionByDay;
 import com.suji.lj.myapplication.MissionDetailActivity;
 import com.suji.lj.myapplication.R;
 import com.suji.lj.myapplication.Utils.DateTimeUtils;
+import com.suji.lj.myapplication.Utils.OnSingleClickListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,14 +50,15 @@ public class RecyclerMissionDayAdapter extends RecyclerView.Adapter<RecyclerMiss
         holder.tv_address.setText(list.get(position).getAddress());
         holder.tv_date.setText(DateTimeUtils.makeDateForHuman(list.get(position).getDate()));
         holder.tv_time.setText(DateTimeUtils.makeTimeForHuman(list.get(position).getTime()));
-        holder.view_container.setOnClickListener(new View.OnClickListener() {
+        holder.view_container.setOnClickListener(new OnSingleClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onSingleClick(View v) {
                 Intent intent = new Intent(context, MissionDetailActivity.class);
                 intent.putExtra("mission_id", list.get(position).getMother_id());
                 context.startActivity(intent);
             }
         });
+
     }
 
     @Override

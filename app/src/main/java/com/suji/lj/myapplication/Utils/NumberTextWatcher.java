@@ -10,7 +10,6 @@ import android.widget.TextView;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.suji.lj.myapplication.StepperForm.MakeAccountStep;
 
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -29,7 +28,6 @@ public class NumberTextWatcher implements TextWatcher {
     private TextView tv_amount;
 
     private boolean isErrorEnable = false;
-    private MakeAccountStep makeAccountStep = new MakeAccountStep("계좌확인");
 
 
     public NumberTextWatcher(TextInputEditText et,TextInputLayout etl,int friends_num, TextView tv_amount,Context context)
@@ -122,10 +120,6 @@ public class NumberTextWatcher implements TextWatcher {
 
             }
         }
-
-
-
-        makeAccountStep.markAsCompletedOrUncompleted(true);
 
 
         if (s.toString().contains(String.valueOf(df.getDecimalFormatSymbols().getDecimalSeparator())))

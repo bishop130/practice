@@ -144,6 +144,7 @@ public class MissionDetailActivity extends AppCompatActivity implements MapView.
         getIntents();
 
         mapView = new MapView(this);
+
         mapViewContainer = findViewById(R.id.map_view_detail);
         mapViewContainer.addView(mapView);
         mapView.setMapViewEventListener(this);
@@ -216,7 +217,7 @@ public class MissionDetailActivity extends AppCompatActivity implements MapView.
     }
 
     private void setRecyclerView(List<ItemForDateTimeByList> list) {
-        RecyclerMissionProgressAdapter adapter = new RecyclerMissionProgressAdapter(list);
+        RecyclerMissionProgressAdapter adapter = new RecyclerMissionProgressAdapter(this, list);
         //adapter.notifyDataSetChanged();
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(mLayoutManager);
@@ -318,17 +319,17 @@ public class MissionDetailActivity extends AppCompatActivity implements MapView.
                             String mission_title = item.getMission_title();
                             //total_dates = item.getMission_dates().size();
                             friendsLists = item.getFriends_selected_list();
-                            for(int i =0; i<friendsLists.size();i++){
-                                Log.d("친구",friendsLists.get(i).getFriend_name());
-                                Log.d("친구",friendsLists.get(i).getPhone_num());
+                            for (int i = 0; i < friendsLists.size(); i++) {
+                                Log.d("친구", friendsLists.get(i).getFriend_name());
+                                Log.d("친구", friendsLists.get(i).getPhone_num());
 
                             }
 
                             setRecyclerViewFriendsList(friendsLists);
 
 
-                            mission_date_start.setText(DateTimeUtils.makeDateForHuman(min_date));
-                            mission_date_end.setText(DateTimeUtils.makeDateForHuman(max_date));
+                            mission_date_start.setText(DateTimeUtils.makeDateSimple(min_date));
+                            mission_date_end.setText(DateTimeUtils.makeDateSimple(max_date));
                             address_result.setText(address);
                             toolbar.setTitle(mission_title);
                             setSupportActionBar(toolbar);
@@ -349,8 +350,8 @@ public class MissionDetailActivity extends AppCompatActivity implements MapView.
                                 //itemForDateTimeByLists.add(object);
                             }
 
-                            mission_time_start.setText(DateTimeUtils.makeTimeForHuman(itemForDateTimeByLists.get(0).getTime()));
-                            mission_time_end.setText(DateTimeUtils.makeTimeForHuman(itemForDateTimeByLists.get(itemForDateTimeByLists.size() - 1).getTime()));
+                            mission_time_start.setText(DateTimeUtils.makeTimeSimple(itemForDateTimeByLists.get(0).getTime()));
+                            mission_time_end.setText(DateTimeUtils.makeTimeSimple(itemForDateTimeByLists.get(itemForDateTimeByLists.size() - 1).getTime()));
 
                             int count = 0;
                             for (int i = 0; i < itemForDateTimeByLists.size(); i++) {
@@ -367,7 +368,7 @@ public class MissionDetailActivity extends AppCompatActivity implements MapView.
                             makeCircularProgressBar(count, itemForDateTimeByLists.size());
                             setRecyclerView(itemForDateTimeByLists);
                             drawMissionRadius(mission_latitude, mission_longitude);
-                            moveSelectedPlace(mission_latitude,mission_longitude);
+                            moveSelectedPlace(mission_latitude, mission_longitude);
 
                         }
 
@@ -394,7 +395,8 @@ public class MissionDetailActivity extends AppCompatActivity implements MapView.
         mapView.addCircle(circle2);
 
     }
-    private void setRecyclerViewFriendsList(List<ContactItemForServer> friendsLists){
+
+    private void setRecyclerViewFriendsList(List<ContactItemForServer> friendsLists) {
         RecyclerDetailFriendsAdapter adapter = new RecyclerDetailFriendsAdapter(friendsLists);
         recyclerView_friends_list.setLayoutManager(new LinearLayoutManager(this));
         recyclerView_friends_list.setAdapter(adapter);

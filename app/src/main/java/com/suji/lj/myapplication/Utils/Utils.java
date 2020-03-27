@@ -59,25 +59,26 @@ import java.util.StringTokenizer;
 
 public class Utils {
 
-    public Utils(){
+    public Utils() {
 
     }
-    public static String getParamValFromUrlString(String url, String paramKey){
+
+    public static String getParamValFromUrlString(String url, String paramKey) {
 
         Log.d("## url", url);
         String[] urlParamPair = url.split("\\?");
-        if(urlParamPair.length < 2){
+        if (urlParamPair.length < 2) {
             Log.d("##", "파라미터가 존재하지 않는 URL 입니다.");
             return "";
         }
         String queryString = urlParamPair[1];
         Log.d("## queryString", queryString);
         StringTokenizer st = new StringTokenizer(queryString, "&");
-        while(st.hasMoreTokens()){
+        while (st.hasMoreTokens()) {
             String pair = st.nextToken();
             Log.d("## pair", pair);
             String[] pairArr = pair.split("=");
-            if(paramKey.equals(pairArr[0])){
+            if (paramKey.equals(pairArr[0])) {
                 return pairArr[1]; // 찾았을 경우
             }
         }
@@ -85,7 +86,7 @@ public class Utils {
     }
 
 
-    public ArrayList<ContactItem> getContacts(){
+    public ArrayList<ContactItem> getContacts() {
         ArrayList<ContactItem> listItem = new ArrayList<>();
         Query q = Contacts.getQuery();
         q.include(Contact.Field.ContactId, Contact.Field.DisplayName, Contact.Field.PhoneNumber);
@@ -93,7 +94,7 @@ public class Utils {
 
         try {
             String con = new GsonBuilder().setPrettyPrinting().create().toJson(result);
-            Log.d("연락처",con);
+            Log.d("연락처", con);
             JSONArray jsonArr = new JSONArray(con);
             for (int i = 0; i < jsonArr.length(); i++) {
 
@@ -130,14 +131,20 @@ public class Utils {
     public static String getCurrentTime() {
         return new SimpleDateFormat("yyyyMMddHHmmss", Locale.KOREA).format(new Date());
     }
-    public static String makeBankTranId(){
 
-        return getServiceCode()+"U"+ new SimpleDateFormat("HHmmssSSS",Locale.KOREA).format(new Date());
+    public static String getCustomTime() {
+        Date date = new Date(System.currentTimeMillis() + 1000 * 60 * 30);
+        return new SimpleDateFormat("yyyyMMddHHmmss", Locale.KOREA).format(date);
+    }
+
+    public static String makeBankTranId() {
+
+        return getServiceCode() + "U" + new SimpleDateFormat("HHmmssSSS", Locale.KOREA).format(new Date());
 
 
     }
 
-    public static String getServiceCode(){
+    public static String getServiceCode() {
 
 
         String service_code;
@@ -145,12 +152,11 @@ public class Utils {
         return service_code;
 
 
-
     }
 
-    public static List<UserAccountItem> UserInfoResponseJsonParse(String body){
+    public static List<UserAccountItem> UserInfoResponseJsonParse(String body) {
         List<UserAccountItem> userAccountItemList = new ArrayList<>();
-        Log.d("오픈뱅킹","리스트만들기 ");
+        Log.d("오픈뱅킹", "리스트만들기 ");
 
         try {
             JSONObject obj = new JSONObject(body);
@@ -189,9 +195,6 @@ public class Utils {
             }
 
 
-
-
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -199,9 +202,10 @@ public class Utils {
 
 
     }
-    public static List<UserAccountItem> AccountInfoResponseJsonParse(String body){
+
+    public static List<UserAccountItem> AccountInfoResponseJsonParse(String body) {
         List<UserAccountItem> userAccountItemList = new ArrayList<>();
-        Log.d("오픈뱅킹","리스트만들기 ");
+        Log.d("오픈뱅킹", "리스트만들기 ");
 
         try {
             JSONObject obj = new JSONObject(body);
@@ -238,9 +242,6 @@ public class Utils {
             }
 
 
-
-
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -250,9 +251,7 @@ public class Utils {
     }
 
 
-
-
-    public static void getKeyHash(Context context){
+    public static void getKeyHash(Context context) {
         try {
             PackageInfo info = context.getPackageManager().getPackageInfo("com.suji.lj.myapplication", PackageManager.GET_SIGNATURES);
             for (Signature signature : info.signatures) {
@@ -268,11 +267,10 @@ public class Utils {
     }
 
 
-
     public static Map<String, Object> jsonToMap(JSONObject json) throws JSONException {
         Map<String, Object> retMap = new HashMap<String, Object>();
 
-        if(json != JSONObject.NULL) {
+        if (json != JSONObject.NULL) {
             retMap = toMap(json);
         }
         return retMap;
@@ -282,15 +280,13 @@ public class Utils {
         Map<String, Object> map = new HashMap<String, Object>();
 
         Iterator<String> keysItr = object.keys();
-        while(keysItr.hasNext()) {
+        while (keysItr.hasNext()) {
             String key = keysItr.next();
             Object value = object.get(key);
 
-            if(value instanceof JSONArray) {
+            if (value instanceof JSONArray) {
                 value = toList((JSONArray) value);
-            }
-
-            else if(value instanceof JSONObject) {
+            } else if (value instanceof JSONObject) {
                 value = toMap((JSONObject) value);
             }
             map.put(key, value);
@@ -300,13 +296,11 @@ public class Utils {
 
     public static List<Object> toList(JSONArray array) throws JSONException {
         List<Object> list = new ArrayList<Object>();
-        for(int i = 0; i < array.length(); i++) {
+        for (int i = 0; i < array.length(); i++) {
             Object value = array.get(i);
-            if(value instanceof JSONArray) {
+            if (value instanceof JSONArray) {
                 value = toList((JSONArray) value);
-            }
-
-            else if(value instanceof JSONObject) {
+            } else if (value instanceof JSONObject) {
                 value = toMap((JSONObject) value);
             }
             list.add(value);
@@ -387,8 +381,7 @@ public class Utils {
         return new SimpleDateFormat("HHmmssSSS", Locale.KOREA).format(new Date());
     }
 
-    public static String getBase64String(Bitmap bitmap)
-    {
+    public static String getBase64String(Bitmap bitmap) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
@@ -398,67 +391,66 @@ public class Utils {
         return Base64.encodeToString(imageBytes, Base64.NO_WRAP);
     }
 
-    public static Bitmap getBitmapFromString(String bitmap_string){
+    public static Bitmap getBitmapFromString(String bitmap_string) {
 
         byte[] decodedByteArray = Base64.decode(bitmap_string, Base64.NO_WRAP);
         return BitmapFactory.decodeByteArray(decodedByteArray, 0, decodedByteArray.length);
     }
 
-    public static boolean compareNowAndInput(int sel_hour, int sel_min){
+    public static boolean compareNowAndInput(int sel_hour, int sel_min) {
 
-        DateFormat dateFormat = new SimpleDateFormat("HH:mm",Locale.KOREA);
+        DateFormat dateFormat = new SimpleDateFormat("HH:mm", Locale.KOREA);
 
         int now_hour = Calendar.getInstance().get(Calendar.HOUR);
         int now_min = Calendar.getInstance().get(Calendar.MINUTE);
-        long min=0;
+        long min = 0;
 
         try {
 
-            Date date_now = dateFormat.parse(now_hour+":"+now_min);
-            Date date_input = dateFormat.parse(sel_hour+":"+sel_min); //String을 포맷에 맞게 변경
+            Date date_now = dateFormat.parse(now_hour + ":" + now_min);
+            Date date_input = dateFormat.parse(sel_hour + ":" + sel_min); //String을 포맷에 맞게 변경
             long duration = date_input.getTime() - date_now.getTime(); // 입력시간-현재시간
-            min = duration/60000;
-            Log.d("싱글",min+"duration");
+            min = duration / 60000;
+            Log.d("싱글", min + "duration");
 
 
         } catch (ParseException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        if (min>=30) { // 30분이상 지났을때
+        if (min >= 30) { // 30분이상 지났을때
 
             return true;
-        }else{
+        } else {
             return false;
         }
 
 
     }
 
-    public static boolean checkIsToday(int sel_year, int sel_month, int sel_day){
+    public static boolean checkIsToday(int sel_year, int sel_month, int sel_day) {
 
         Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH)+1;
+        int month = calendar.get(Calendar.MONTH) + 1;
         int day = calendar.get(Calendar.DATE);
-        Log.d("싱글",year+"year");
-        Log.d("싱글",month+"month");
-        Log.d("싱글",day+"day");
-        Log.d("싱글",sel_year+"sel_year");
-        Log.d("싱글",sel_month+"ser_month");
-        Log.d("싱글",sel_day+"sel_day");
+        Log.d("싱글", year + "year");
+        Log.d("싱글", month + "month");
+        Log.d("싱글", day + "day");
+        Log.d("싱글", sel_year + "sel_year");
+        Log.d("싱글", sel_month + "ser_month");
+        Log.d("싱글", sel_day + "sel_day");
 
-        if((year==sel_year)&&(month==sel_month)&&(day==sel_day)){
+        if ((year == sel_year) && (month == sel_month) && (day == sel_day)) {
             return true;
-        }else{
+        } else {
             return false;
         }
 
 
-
     }
 
-    public static void wakeDoze(Context context){
+    public static void wakeDoze(Context context) {
         Log.d("서비스", "wakeDoze");
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         //PendingIntent foregroundService_sender = PendingIntent.getForegroundService(this, 123, new Intent(this, LocationService.class), PendingIntent.FLAG_UPDATE_CURRENT);
@@ -466,24 +458,19 @@ public class Utils {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {//26
             //PendingIntent foregroundService_sender = PendingIntent.getForegroundService(this, 123, new Intent(this, LocationService.class), PendingIntent.FLAG_UPDATE_CURRENT);
-            PendingIntent foregroundService_sender = PendingIntent.getService(context,123,new Intent(context, NewLocationService.class),PendingIntent.FLAG_UPDATE_CURRENT );
+            PendingIntent foregroundService_sender = PendingIntent.getService(context, 123, new Intent(context, NewLocationService.class), PendingIntent.FLAG_UPDATE_CURRENT);
 
-            alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(0,foregroundService_sender),foregroundService_sender);
-        }
-
-        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { //21
-            PendingIntent foregroundService_sender = PendingIntent.getService(context,123,new Intent(context,NewLocationService.class),PendingIntent.FLAG_UPDATE_CURRENT );
+            alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(0, foregroundService_sender), foregroundService_sender);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { //21
+            PendingIntent foregroundService_sender = PendingIntent.getService(context, 123, new Intent(context, NewLocationService.class), PendingIntent.FLAG_UPDATE_CURRENT);
             alarmManager.setExact(AlarmManager.RTC, 0, foregroundService_sender);
-        }
-        else {
+        } else {
             PendingIntent foregroundService_sender = PendingIntent.getService(context, 123, new Intent(context, NewLocationService.class), PendingIntent.FLAG_UPDATE_CURRENT);
             alarmManager.set(AlarmManager.RTC, 0, foregroundService_sender);
         }
 
 
     }
-
-
 
 
     private static double distance(double lat1, double lon1, double lat2, double lon2, String unit) {
@@ -497,12 +484,13 @@ public class Utils {
 
         if (unit == "kilometer") {
             dist = dist * 1.609344;
-        } else if(unit == "meter"){
+        } else if (unit == "meter") {
             dist = dist * 1609.344;
         }
 
         return (dist);
     }
+
     private static double deg2rad(double deg) {
         return (deg * Math.PI / 180.0);
     }
@@ -522,7 +510,7 @@ public class Utils {
         int locationMode = 0;
         String locationProviders;
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             try {
                 locationMode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
 
@@ -533,17 +521,32 @@ public class Utils {
 
             return locationMode != Settings.Secure.LOCATION_MODE_OFF;
 
-        }else{
+        } else {
             locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
             return !TextUtils.isEmpty(locationProviders);
         }
 
 
     }
-    public static boolean isEmpty(Object s) { if (s == null) { return true; } if ((s instanceof String) && (((String)s).trim().length() == 0)) { return true; } if (s instanceof Map) { return ((Map<?, ?>)s).isEmpty(); } if (s instanceof List) { return ((List<?>)s).isEmpty(); } if (s instanceof Object[]) { return (((Object[])s).length == 0); } return false; }
 
-
-
+    public static boolean isEmpty(Object s) {
+        if (s == null) {
+            return true;
+        }
+        if ((s instanceof String) && (((String) s).trim().length() == 0)) {
+            return true;
+        }
+        if (s instanceof Map) {
+            return ((Map<?, ?>) s).isEmpty();
+        }
+        if (s instanceof List) {
+            return ((List<?>) s).isEmpty();
+        }
+        if (s instanceof Object[]) {
+            return (((Object[]) s).length == 0);
+        }
+        return false;
+    }
 
 
 }

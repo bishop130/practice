@@ -9,9 +9,9 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="com.android.vending.BILLING" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
     <application
         android:name=".Adapters.GlobalApplication"
@@ -22,7 +22,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".AccountActivity"></activity>
+        <activity android:name=".InvitationInfoActivity"></activity>
+        <activity android:name=".MultiModeDetailActivity" />
+        <activity android:name=".FriendsActivity" />
+        <activity android:name=".MultiModeActivity" />
+        <activity android:name=".AccountActivity" />
         <activity android:name=".DetailSettingActivity" />
         <activity android:name=".OpenBankingActivity" />
         <activity android:name=".SingleModeActivity" />
@@ -39,7 +43,9 @@
 
         <activity android:name=".AutoLocationSetting" />
         <activity android:name=".MissionDetailActivity" />
-        <activity android:name=".MainActivity">
+        <activity
+            android:name=".MainActivity"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -47,7 +53,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".SampleLoginActivity" />
-        <activity android:name=".SampleSignupActivity" />
         <activity android:name=".ContactActivity" />
         <activity android:name=".DaumMapActivity" />
         <activity android:name=".RecyclerResultActivity" />
@@ -72,11 +77,14 @@
         <receiver android:name=".Adapters.LocationReceiver">
             <intent-filter>
                 <action android:name="android.location.PROVIDERS_CHANGED" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
 
-        <service android:name=".Adapters.MyFirebaseMessagingService">
+        <service
+            android:name=".Adapters.MyFirebaseMessagingService"
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>

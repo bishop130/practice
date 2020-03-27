@@ -4,23 +4,17 @@
     android:layout_height="match_parent"
     android:background="@color/wall_paper2"
     android:orientation="vertical">
+
     <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_ly_friends"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/tab_ly_friends"/>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_total"
+        android:layout_height="wrap_content" />
+
+
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/view_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:splitMotionEvents="false"
-        android:clipToPadding="false"
-        android:paddingBottom="80dp"
-        android:scrollbars="vertical"
-        >
+        android:background="@color/White"/>
 
-    </androidx.recyclerview.widget.RecyclerView>
-    </LinearLayout>
 </LinearLayout>

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -32,7 +33,7 @@ public class RecyclerPastMissionAdapter extends RecyclerView.Adapter<RecyclerPas
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View view = inflater.inflate(R.layout.main_recycler_view_item, parent, false);
+        View view = inflater.inflate(R.layout.item_recycler_past, parent, false);
 
 
 
@@ -46,10 +47,14 @@ public class RecyclerPastMissionAdapter extends RecyclerView.Adapter<RecyclerPas
         holder.tv_date.setText(DateTimeUtils.makeDateForHuman(list.get(position).getDate()));
         holder.tv_time.setText(DateTimeUtils.makeTimeForHuman(list.get(position).getTime()));
         if(list.get(position).isSuccess()){
-
-
+            holder.ly_is_success.setBackgroundColor(context.getResources().getColor(R.color.colorSuccess));
+            holder.tv_missionTitle.setTextColor(context.getResources().getColor(R.color.colorSuccess));
+            holder.ic_is_success.setImageDrawable(context.getDrawable(R.drawable.ic_success));
 
         }else{
+            holder.ly_is_success.setBackgroundColor(context.getResources().getColor(R.color.colorError));
+            holder.tv_missionTitle.setTextColor(context.getResources().getColor(R.color.colorError));
+            holder.ic_is_success.setImageDrawable(context.getDrawable(R.drawable.ic_fail));
 
         }
         holder.view_container.setOnClickListener(new View.OnClickListener() {
@@ -75,6 +80,8 @@ public class RecyclerPastMissionAdapter extends RecyclerView.Adapter<RecyclerPas
         TextView tv_date;
         TextView tv_time;
         TextView tv_address;
+        LinearLayout ly_is_success;
+        ImageView ic_is_success;
 
         LinearLayout view_container;
 
@@ -88,6 +95,9 @@ public class RecyclerPastMissionAdapter extends RecyclerView.Adapter<RecyclerPas
             tv_date = itemView.findViewById(R.id.date_display);
             tv_time = itemView.findViewById(R.id.time_display);
             tv_address = itemView.findViewById(R.id.address_display);
+            ly_is_success = itemView.findViewById(R.id.ly_is_success);
+            ic_is_success = itemView.findViewById(R.id.ic_is_success);
+
 
 
 

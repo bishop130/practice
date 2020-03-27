@@ -3,6 +3,9 @@
     android:id="@+id/main_recycler_view_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="false"
+    android:focusableInTouchMode="false"
     android:background="@color/White"
     android:orientation="horizontal">
 
@@ -31,7 +34,7 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="4dp"
             android:layout_marginStart="30dp">
             <ImageView
                 android:layout_width="wrap_content"
@@ -49,7 +52,7 @@
                 android:id="@+id/time_display"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
+                android:layout_marginStart="8dp"
                 android:text="time"
                 android:textSize="14sp" />
 

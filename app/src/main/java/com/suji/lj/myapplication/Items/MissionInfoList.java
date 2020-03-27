@@ -21,6 +21,7 @@ public class MissionInfoList {
     public Map<String, ItemForDateTimeByList> mission_dates;
     String min_date;
     String max_date;
+    String mission_id;
 
     public MissionInfoList(String mission_title, String address, boolean success, double lat, double lng, ArrayList<String> arrayList, Map<String, ItemForDateTimeByList> mission_dates,String max_date,String min_date) {
         this.mission_title = mission_title;
@@ -32,6 +33,14 @@ public class MissionInfoList {
         this.mission_dates = mission_dates;
         this.min_date = min_date;
         this.max_date = max_date;
+    }
+
+    public String getMission_id() {
+        return mission_id;
+    }
+
+    public void setMission_id(String mission_id) {
+        this.mission_id = mission_id;
     }
 
     public List<ContactItemForServer> getFriends_selected_list() {

@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -15,6 +16,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.suji.lj.myapplication.Adapters.AccountDialog;
@@ -39,6 +42,7 @@ public class AccountActivity extends AppCompatActivity {
     RecyclerAccountManagementAdapter adapter;
     OpenBanking openBanking = OpenBanking.getInstance();
     List<UserAccountItem> list = new ArrayList<>();
+    LinearLayout ly_add_new_account;
 
     private Callback callback = new Callback() {
         @Override
@@ -50,16 +54,16 @@ public class AccountActivity extends AppCompatActivity {
         public void onResponse(Call call, Response response) throws IOException {
             String body = response.body().string();
 
-            Log.d("계좌관리",body);
+            Log.d("계좌관리", body);
             //Log.d("계좌관리",);
 
             String rsp_code = Utils.getValueFromJson(body, "rsp_code");
             if (rsp_code.equals("A0000")) {
 
                 list = Utils.AccountInfoResponseJsonParse(body);
-                for(int i =0; i<list.size(); i++){
+                for (int i = 0; i < list.size(); i++) {
 
-                    Log.d("계좌관리",list.get(i).getAccount_num_masked());
+                    Log.d("계좌관리", list.get(i).getAccount_num_masked());
                 }
 
 
@@ -79,13 +83,21 @@ public class AccountActivity extends AppCompatActivity {
     };
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_account);
         recyclerView = findViewById(R.id.recycler_account);
+        ly_add_new_account = findViewById(R.id.ly_add_new_account);
         initiateTab();
+
+        ly_add_new_account.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), OpenBankingActivity.class);
+                startActivity(intent);
+            }
+        });
 
 
         openBanking.requestAccountList(callback, this);
@@ -101,10 +113,9 @@ public class AccountActivity extends AppCompatActivity {
 
 
     }
+
     private void initiateTab() {
-
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.account_toolbar);
+        Toolbar toolbar = findViewById(R.id.account_toolbar);
         toolbar.setTitle("계좌관리");
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -112,7 +123,7 @@ public class AccountActivity extends AppCompatActivity {
 
     }
 
-    public void accountManagement(String bank_name,String account_num) {
+    public void accountManagement(String bank_name, String account_num) {
 
         AccountManagementDialog accountDialog = new AccountManagementDialog(this);
 /*
@@ -140,8 +151,6 @@ public class AccountActivity extends AppCompatActivity {
         accountDialog.show();
 
 
-
-
         //openBanking.requestAccountCancel(account_cancel_callback, this);
 
 
@@ -155,14 +164,13 @@ public class AccountActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case android.R.id.home:
                 finish();
                 break;
 
         }
         return super.onOptionsItemSelected(item);
-
 
 
     }

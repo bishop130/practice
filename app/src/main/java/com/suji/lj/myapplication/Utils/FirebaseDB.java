@@ -1,5 +1,6 @@
 package com.suji.lj.myapplication.Utils;
 
+import android.content.ClipData;
 import android.content.Context;
 import android.util.Log;
 
@@ -13,8 +14,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.kakao.auth.Session;
 import com.suji.lj.myapplication.Items.ContactItem;
 import com.suji.lj.myapplication.Items.ContactItemForServer;
+import com.suji.lj.myapplication.Items.ItemForDateTime;
 import com.suji.lj.myapplication.Items.ItemForDateTimeByList;
+import com.suji.lj.myapplication.Items.ItemForFriendResponseForRequest;
+import com.suji.lj.myapplication.Items.ItemForFriends;
 import com.suji.lj.myapplication.Items.ItemForMissionByDay;
+import com.suji.lj.myapplication.Items.ItemForMultiModeRequest;
 import com.suji.lj.myapplication.Items.ItemForServer;
 import com.suji.lj.myapplication.Items.MissionCartItem;
 import com.suji.lj.myapplication.Items.MissionInfoList;
@@ -49,7 +54,7 @@ public class FirebaseDB {
 
         Map<String, Object> mission_children = new HashMap<>();
 
-            mission_children.put("E" + mission_id, true);
+        mission_children.put("E" + mission_id, true);
 
 
         MissionInfoRoot missionInfoRoot = new MissionInfoRoot();
@@ -64,14 +69,14 @@ public class FirebaseDB {
         databaseReference.child("user_data").child(user_id).child("mission_info_root").updateChildren(mission_info_root);
     }
 
-    public static void registerMissionInfoList(DatabaseReference databaseReference, String user_id, String mission_id,Realm realm) {
+    public static void registerMissionInfoList(DatabaseReference databaseReference, String user_id, String mission_id, Realm realm) {
 
         Map<String, Object> mission_info_list = new HashMap<>();
 
         MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
         RealmResults<ContactItem> realmResults = realm.where(ContactItem.class).findAll();
         List<ContactItemForServer> list = new ArrayList<>();
-        for(int i=0;i<realmResults.size(); i++){
+        for (int i = 0; i < realmResults.size(); i++) {
             ContactItemForServer object = new ContactItemForServer();
 
             String phone_num = realmResults.get(i).getPhoneNumbers().replaceAll("[^0-9]", "");
@@ -81,139 +86,133 @@ public class FirebaseDB {
             list.add(object);
         }
 
-            MissionInfoList missionInfoList = new MissionInfoList();
-            Map<String, ItemForDateTimeByList> mission_dates = new HashMap<>();
+        MissionInfoList missionInfoList = new MissionInfoList();
+        Map<String, ItemForDateTimeByList> mission_dates = new HashMap<>();
 
-            missionInfoList.setFriends_selected_list(list);
-            missionInfoList.setMission_title(item.getTitle());
-            missionInfoList.setAddress(item.getAddress());
-            missionInfoList.setSuccess(false);
-            missionInfoList.setValid(true);
-            missionInfoList.setLat(item.getLat());
-            missionInfoList.setLng(item.getLng());
-            String min_date = item.getCalendarDayList().get(0).getDate();//이론상 최소날짜
-            String max_date = item.getCalendarDayList().get(item.getCalendarDayList().size()-1).getDate();//이론상 최대날짜
-            missionInfoList.setMin_date(min_date);
-            missionInfoList.setMax_date(max_date);
+        missionInfoList.setFriends_selected_list(list);
+        missionInfoList.setMission_title(item.getTitle());
+        missionInfoList.setAddress(item.getAddress());
+        missionInfoList.setSuccess(false);
+        missionInfoList.setValid(true);
+        missionInfoList.setLat(item.getLat());
+        missionInfoList.setLng(item.getLng());
+        missionInfoList.setMission_id("E" + mission_id);
+        String min_date = item.getCalendarDayList().get(0).getDate();//이론상 최소날짜
+        String max_date = item.getCalendarDayList().get(item.getCalendarDayList().size() - 1).getDate();//이론상 최대날짜
+        missionInfoList.setMin_date(min_date);
+        missionInfoList.setMax_date(max_date);
 
-            //Log.d("파베", "있기는한가" + missionCartItemList.get(i).getCalendarDayList().size());
-            for (int j = 0; j < item.getCalendarDayList().size(); j++) {
-                int year = item.getCalendarDayList().get(j).getYear();
-                int month = item.getCalendarDayList().get(j).getMonth();
-                int day = item.getCalendarDayList().get(j).getDay();
-                int hour = item.getCalendarDayList().get(j).getHour();
-                int min = item.getCalendarDayList().get(j).getMin();
-                String date = DateTimeUtils.makeDateForServer(year,month,day);
-                String time = DateTimeUtils.makeTimeForServer(hour,min);
-                //Log.d("파베", "날짜" + date);
-                ItemForDateTimeByList object = new ItemForDateTimeByList();
-                object.setDate(date);
-                object.setTime(time);
-                object.setTime_stamp("");
-                object.setSuccess(false);
-                mission_dates.put(date, object);
-            }
-            missionInfoList.setMission_dates(mission_dates);
+        //Log.d("파베", "있기는한가" + missionCartItemList.get(i).getCalendarDayList().size());
+        for (int j = 0; j < item.getCalendarDayList().size(); j++) {
+            int year = item.getCalendarDayList().get(j).getYear();
+            int month = item.getCalendarDayList().get(j).getMonth();
+            int day = item.getCalendarDayList().get(j).getDay();
+            int hour = item.getCalendarDayList().get(j).getHour();
+            int min = item.getCalendarDayList().get(j).getMin();
+            String date = DateTimeUtils.makeDateForServer(year, month, day);
+            String time = DateTimeUtils.makeTimeForServer(hour, min);
+            //Log.d("파베", "날짜" + date);
+            ItemForDateTimeByList object = new ItemForDateTimeByList();
+            object.setDate(date);
+            object.setTime(time);
+            object.setTime_stamp("");
+            object.setSuccess(false);
+            mission_dates.put(date, object);
+        }
+        missionInfoList.setMission_dates(mission_dates);
 
-            mission_info_list.put("E" + mission_id, missionInfoList);
-
-
+        mission_info_list.put("E" + mission_id, missionInfoList);
 
 
         databaseReference.child("user_data").child(user_id).child("mission_info_list").updateChildren(mission_info_list).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                Log.d("깃발",task.isComplete()+"iscomplete");
-                Log.d("깃발",task.isSuccessful()+"issuccessful");
+                Log.d("깃발", task.isComplete() + "iscomplete");
+                Log.d("깃발", task.isSuccessful() + "issuccessful");
 
 
             }
         });
     }
 
-    public static void registerCheckForServer(DatabaseReference databaseReference, String user_id, String mission_id,MissionCartItem item) {
+    public static void registerCheckForServer(DatabaseReference databaseReference, String user_id, String mission_id, MissionCartItem item) {
 
 
-
-            for (int j = 0; j < item.getCalendarDayList().size(); j++) {
-                Map<String, Object> objectMap = new HashMap<>();
-                ArrayList<ItemForServer> itemForServerArrayList = new ArrayList<>();
-
-
-                int year = item.getCalendarDayList().get(j).getYear();
-                int month = item.getCalendarDayList().get(j).getMonth();
-                int day = item.getCalendarDayList().get(j).getDay();
-
-                String date = DateTimeUtils.makeDateForServer(year,month,day);
+        for (int j = 0; j < item.getCalendarDayList().size(); j++) {
+            Map<String, Object> objectMap = new HashMap<>();
+            ArrayList<ItemForServer> itemForServerArrayList = new ArrayList<>();
 
 
-                int hour = item.getCalendarDayList().get(j).getHour();
-                int min = item.getCalendarDayList().get(j).getMin();
-                String time_id = DateTimeUtils.makeTimeForServer(hour, min);
+            int year = item.getCalendarDayList().get(j).getYear();
+            int month = item.getCalendarDayList().get(j).getMonth();
+            int day = item.getCalendarDayList().get(j).getDay();
+
+            String date = DateTimeUtils.makeDateForServer(year, month, day);
 
 
-                ItemForServer itemForServer = new ItemForServer();
-
-                itemForServer.setUser_id(user_id);
-                itemForServer.setIs_success(false);
-                itemForServer.setRoot_id("S" + mission_id);
-                itemForServer.setChildren_id("E" + mission_id);
-                itemForServerArrayList.add(itemForServer);
+            int hour = item.getCalendarDayList().get(j).getHour();
+            int min = item.getCalendarDayList().get(j).getMin();
+            String time_id = DateTimeUtils.makeTimeForServer(hour, min);
 
 
-                objectMap.put(time_id, itemForServerArrayList);
-                databaseReference.child("check_for_server").child(date+time_id).push().setValue(itemForServer);
+            ItemForServer itemForServer = new ItemForServer();
 
-            }
+            itemForServer.setUser_id(user_id);
+            itemForServer.setIs_success(false);
+            itemForServer.setRoot_id("S" + mission_id);
+            itemForServer.setChildren_id("E" + mission_id);
+            itemForServerArrayList.add(itemForServer);
 
 
+            objectMap.put(time_id, itemForServerArrayList);
+            databaseReference.child("check_for_server").child(date + time_id).push().setValue(itemForServer);
 
+        }
 
 
     }
-    public static void registerMainDisplay(Context context, DatabaseReference databaseReference, String user_id, String mission_id, MissionCartItem item){
+
+    public static void registerMainDisplay(Context context, DatabaseReference databaseReference, String user_id, String mission_id, MissionCartItem item) {
         Map<String, Object> mission_main_list = new HashMap<>();
 
 
-            for (int j = 0; j < item.getCalendarDayList().size(); j++) {
+        for (int j = 0; j < item.getCalendarDayList().size(); j++) {
 
-                ItemForMissionByDay itemForMissionByDay = new ItemForMissionByDay();
+            ItemForMissionByDay itemForMissionByDay = new ItemForMissionByDay();
 
-                itemForMissionByDay.setTitle(item.getTitle());
-                itemForMissionByDay.setAddress(item.getAddress());
-                itemForMissionByDay.setTime(DateTimeUtils.makeTimeForServer(item.getCalendarDayList().get(j).getHour(),item.getCalendarDayList().get(j).getMin()));
-                itemForMissionByDay.setLat(item.getLat());
-                itemForMissionByDay.setLng(item.getLng());
-                itemForMissionByDay.setMother_id("E" + mission_id);
-
-
-                int year = item.getCalendarDayList().get(j).getYear();
-                int month = item.getCalendarDayList().get(j).getMonth();
-                int day = item.getCalendarDayList().get(j).getDay();
-
-                String date = DateTimeUtils.makeDateForServer(year,month,day);
-                itemForMissionByDay.setDate(date);
-
-                itemForMissionByDay.setSuccess(false);
+            itemForMissionByDay.setTitle(item.getTitle());
+            itemForMissionByDay.setAddress(item.getAddress());
+            itemForMissionByDay.setTime(DateTimeUtils.makeTimeForServer(item.getCalendarDayList().get(j).getHour(), item.getCalendarDayList().get(j).getMin()));
+            itemForMissionByDay.setLat(item.getLat());
+            itemForMissionByDay.setLng(item.getLng());
+            itemForMissionByDay.setMother_id("E" + mission_id);
 
 
+            int year = item.getCalendarDayList().get(j).getYear();
+            int month = item.getCalendarDayList().get(j).getMonth();
+            int day = item.getCalendarDayList().get(j).getDay();
 
-                int hour = item.getCalendarDayList().get(j).getHour();
-                int min = item.getCalendarDayList().get(j).getMin();
-                String time = DateTimeUtils.makeTimeForServer(hour,min);
+            String date = DateTimeUtils.makeDateForServer(year, month, day);
+            itemForMissionByDay.setDate(date);
 
-                mission_main_list.put(date+time,itemForMissionByDay);
-
+            itemForMissionByDay.setSuccess(false);
 
 
-            }
+            int hour = item.getCalendarDayList().get(j).getHour();
+            int min = item.getCalendarDayList().get(j).getMin();
+            String time = DateTimeUtils.makeTimeForServer(hour, min);
+
+            mission_main_list.put(date + time, itemForMissionByDay);
+
+
+        }
 
 
         databaseReference.child("user_data").child(user_id).child("mission_display").updateChildren(mission_main_list).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                if(task.isSuccessful()){
-                    Log.d("파베전송",task.isSuccessful()+"");
+                if (task.isSuccessful()) {
+                    Log.d("파베전송", task.isSuccessful() + "");
 
                 }
             }
@@ -221,14 +220,83 @@ public class FirebaseDB {
 
 
     }
-    public static void registerKakaoToken(DatabaseReference databaseReference,String user_id){
+
+    public static void registerKakaoToken(DatabaseReference databaseReference, String user_id) {
         String access_token = Session.getCurrentSession().getTokenInfo().getAccessToken();
         String request_token = Session.getCurrentSession().getTokenInfo().getRefreshToken();
-        Map<String,String> objectMap = new HashMap<>();
-        objectMap.put("access_token",access_token);
-        objectMap.put("refresh_token",request_token);
+        Map<String, String> objectMap = new HashMap<>();
+        objectMap.put("access_token", access_token);
+        objectMap.put("refresh_token", request_token);
 
         databaseReference.child("user_data").child(user_id).child("kakao_data").setValue(objectMap);
 
+    }
+
+    public static void registerInvitationForFriend(DatabaseReference databaseReference, String user_id, Realm realm, MissionCartItem missionCartItem) {
+        RealmResults<ItemForFriends> realmResults = realm.where(ItemForFriends.class).findAll();
+
+        List<ItemForFriends> itemForFriendsList= new ArrayList<>();
+        itemForFriendsList = realm.copyFromRealm(realmResults);
+
+        ItemForMultiModeRequest item = new ItemForMultiModeRequest();
+        item.setLat(missionCartItem.getLat());
+        item.setLng(missionCartItem.getLng());
+        item.setAddress(missionCartItem.getAddress());
+        item.setManager_id(user_id);
+        item.setManager_name("123");
+        item.setTitle(missionCartItem.getTitle());
+        item.setFail_penalty(3000);
+        item.setLate_penalty(1000);
+        List<ItemForFriendResponseForRequest> requestList = new ArrayList<>();
+        for(int j=0; j<realmResults.size(); j++){
+
+            ItemForFriendResponseForRequest item1 = new ItemForFriendResponseForRequest();
+            item1.setFriend_id(String.valueOf(realmResults.get(j).getId()));
+            item1.setFriend_name(realmResults.get(j).getName());
+            item1.setFriend_uuid(realmResults.get(j).getUuid());
+            requestList.add(item1);
+        }
+        item.setFriendRequestList(requestList);
+        List<ItemForDateTime> list = new ArrayList<>();
+        for (int j = 0; j < item.getCalendarDayList().size(); j++) {
+
+            ItemForDateTime dateTime = new ItemForDateTime();
+
+
+            int year = item.getCalendarDayList().get(j).getYear();
+            int month = item.getCalendarDayList().get(j).getMonth();
+            int day = item.getCalendarDayList().get(j).getDay();
+
+            String date = DateTimeUtils.makeDateForServer(year, month, day);
+
+
+            int hour = item.getCalendarDayList().get(j).getHour();
+            int min = item.getCalendarDayList().get(j).getMin();
+            String time = DateTimeUtils.makeTimeForServer(hour, min);
+
+            dateTime.setDate(date);
+            dateTime.setTime(time);
+            list.add(dateTime);
+
+
+        }
+
+        item.setCalendarDayList(list);
+
+        for (int i = 0; i < realmResults.size(); i++) {
+
+            if (realmResults.get(i).isSelected()) {
+                String friend_id = String.valueOf(realmResults.get(i).getId());
+
+
+                databaseReference.child("user_data").child(friend_id).child("invitation").push().setValue(item);
+
+            }
+
+
+        }
+
+        //테스트용으로 나에게도 보내기
+        databaseReference.child("user_data").child(user_id).child("invitation").push().setValue(item);
     }
 }

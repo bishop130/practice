@@ -1,5 +1,6 @@
 package com.suji.lj.myapplication;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
@@ -12,7 +13,16 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.suji.lj.myapplication.Adapters.OpenBanking;
+import com.suji.lj.myapplication.Items.ItemForCommonOpenBanking;
+import com.suji.lj.myapplication.Items.ItemForOpenBanking;
 import com.suji.lj.myapplication.Utils.Utils;
 
 import java.io.IOException;
@@ -108,13 +118,40 @@ public class OpenBankingActivity extends AppCompatActivity {
         open_banking_token.putString("refresh_token",refresh_token);
         open_banking_token.putString("user_seq_num",user_seq_num);
         open_banking_token.putString("expires_in",expires_in);
-        open_banking_token.apply();
-        open_banking_token.commit();
+
 
         SharedPreferences sharedPreferences1 = getSharedPreferences("OpenBanking",MODE_PRIVATE);
+        String user_id=getSharedPreferences("Kakao",MODE_PRIVATE).getString("token","");
         Log.d("오픈뱅킹","sharedpreference"+sharedPreferences1.getString("access_token",""));
+        ItemForOpenBanking item = new ItemForOpenBanking();
+        item.setToken(access_token);
+        item.setRefresh_token(refresh_token);
 
-        finish();
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+        databaseReference.child("common").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                ItemForCommonOpenBanking item = dataSnapshot.getValue(ItemForCommonOpenBanking.class);
+                String center_id = item.getCenter_id();
+                open_banking_token.putString("center_id",center_id);
+            }
+
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        databaseReference.child("user_data").child(user_id).setValue(item).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                open_banking_token.apply();
+                finish();
+            }
+        });
+
+
 
 
 

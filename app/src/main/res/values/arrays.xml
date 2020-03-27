@@ -16,6 +16,12 @@
         <item>토</item>
         <item>일</item>
     </string-array>
+    <string-array name="mission_mode">
+        <item>혼자하기</item>
+        <item>친구와 같이하기</item>
+        <item>친구에게 제안하기</item>
+    </string-array>
+
 
     <string-array name="custom_months">
         <item>1</item>

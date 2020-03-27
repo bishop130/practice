@@ -188,6 +188,24 @@ public class DateTimeUtils {
         return DateUtils.isToday(d.getTime() - DateUtils.DAY_IN_MILLIS);
     }
 
+    public static String makeDateSimple(String date) {
+        String year = date.substring(2, 4);
+        String month = date.substring(4, 6);
+        String day = date.substring(6);
+
+        return year + "." + month + "." + day + " (" + makeDayOfWeek(date) + ")";
+
+    }
+
+    public static String makeTimeSimple(String time) {
+        String hour = time.substring(0, 2);
+        String min = time.substring(2);
+
+        return hour + ":" + min;
+
+
+    }
+
 
     public static String makeDateForServer(int year, int month, int day) {
         String Year;

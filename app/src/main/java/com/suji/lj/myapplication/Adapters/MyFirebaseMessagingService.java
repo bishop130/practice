@@ -8,20 +8,28 @@ import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
+
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import android.util.Log;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.suji.lj.myapplication.MainActivity;
 import com.suji.lj.myapplication.R;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static android.content.ContentValues.TAG;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
+
     @Override
-    public void onNewToken(String token) {
+    public void onNewToken(@NonNull String token) {
         Log.d("뉴토큰",token);
         sendRegistrationToServer(token);
 
@@ -92,6 +100,15 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     }
     private void sendRegistrationToServer(String token) {
+
+        String user_id = getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+        Map<String,String> objectMap = new HashMap<>();
+        objectMap.put("token",token);
+        if(user_id!=null)
+        databaseReference.child("user_data").child(user_id).child("fcm_data").setValue(objectMap);
+
+
         // TODO: Implement this method to send token to your app server.
     }
 

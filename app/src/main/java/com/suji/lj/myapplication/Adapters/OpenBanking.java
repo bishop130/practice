@@ -354,9 +354,8 @@ public class OpenBanking {
 
     public void requestAccountList(Callback callback, Context context){
         String access_token = context.getSharedPreferences("OpenBanking",MODE_PRIVATE).getString("access_token","");
-        String body = context.getSharedPreferences("OpenBanking",MODE_PRIVATE).getString("user_me","");
-        String user_seq_num = Utils.getValueFromJson(body,"user_seq_no");
-                Log.d("계좌관리",user_seq_num);
+        String user_seq_num = context.getSharedPreferences("OpenBanking",MODE_PRIVATE).getString("user_seq_num","");
+
         HttpUrl.Builder urlBuilder = HttpUrl.parse("https://testapi.openbanking.or.kr/v2.0/account/list").newBuilder();
         urlBuilder.addQueryParameter("user_seq_no", user_seq_num);
         urlBuilder.addQueryParameter("include_cancel_yn", "N");
@@ -401,6 +400,38 @@ public class OpenBanking {
 
 
         client.newCall(request).enqueue(callback);
+
+
+    }
+
+
+
+    public void requestAccountClose(Context context,Callback callback){
+        String url = "https://testapi.openbanking.or.kr/v2.0/user/close";
+        String access_token = context.getSharedPreferences("OpenBanking",MODE_PRIVATE).getString("access_token","");
+        String user_seq_num = context.getSharedPreferences("OpenBanking",MODE_PRIVATE).getString("user_seq_num","");
+        String client_use_code = context.getSharedPreferences("OpenBanking",MODE_PRIVATE).getString("center_id","");
+        Log.d("라스트",user_seq_num);
+        Log.d("라스트",client_use_code);
+        MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("client_use_code", client_use_code);
+        params.put("user_seq_num", user_seq_num);
+
+
+        JSONObject parameter = new JSONObject(params);
+        RequestBody formBody = RequestBody.create(JSON, parameter.toString());
+
+
+        Request request = new Request.Builder()
+                .header("Authorization", "Bearer "+access_token)
+                .url(url)
+                .post(formBody)
+                .build();
+
+
+        client.newCall(request).enqueue(callback);
+
 
 
     }

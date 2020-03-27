@@ -4,15 +4,18 @@ package com.suji.lj.myapplication.Fragments;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.os.CountDownTimer;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -36,27 +39,20 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.leinardi.android.speeddial.SpeedDialActionItem;
+import com.leinardi.android.speeddial.SpeedDialView;
 
-import com.kakao.kakaotalk.callback.TalkResponseCallback;
-import com.kakao.kakaotalk.v2.KakaoTalkService;
-import com.kakao.message.template.ButtonObject;
-import com.kakao.message.template.ContentObject;
-import com.kakao.message.template.FeedTemplate;
-import com.kakao.message.template.LinkObject;
-import com.kakao.message.template.SocialObject;
-import com.suji.lj.myapplication.Adapters.MainRecyclerAdapter;
-import com.suji.lj.myapplication.Adapters.MissionRecyclerAdapter;
-import com.suji.lj.myapplication.Adapters.RecyclerMissionDayAdapter;
-import com.suji.lj.myapplication.Adapters.RecyclerPastMissionAdapter;
-import com.suji.lj.myapplication.Adapters.RecyclerViewDivider;
 import com.suji.lj.myapplication.Items.ItemForMissionByDay;
 import com.suji.lj.myapplication.Items.MissionInfoList;
 import com.suji.lj.myapplication.Items.RecyclerItem;
 import com.suji.lj.myapplication.MissionDetailActivity;
+import com.suji.lj.myapplication.MultiModeActivity;
 import com.suji.lj.myapplication.R;
 import com.kakao.network.ErrorResult;
+import com.suji.lj.myapplication.SingleModeActivity;
 import com.suji.lj.myapplication.Utils.DateTimeFormatter;
 import com.suji.lj.myapplication.Utils.DateTimeUtils;
+import com.suji.lj.myapplication.Utils.OnSingleClickListener;
 import com.suji.lj.myapplication.Utils.Utils;
 
 import java.util.ArrayList;
@@ -67,12 +63,12 @@ import java.util.concurrent.TimeUnit;
 
 import static android.content.Context.MODE_PRIVATE;
 
-public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDateSetListener, View.OnClickListener, TabLayout.OnTabSelectedListener {
+public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDateSetListener, TabLayout.OnTabSelectedListener {
 
-    private RecyclerView recyclerView;
+    //private RecyclerView recyclerView;
     private List<RecyclerItem> lstRecyclerItem = new ArrayList<>();
     private Context mContext;
-    private ProgressBar loading_panel;
+    //private ProgressBar loading_panel;
     private TextView tv_mission_title;
     private TextView date_display;
     private TextView time_display;
@@ -92,12 +88,12 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
     private static final float MARGIN_SCROLLER_MULTIPLIER = 4f;
     boolean data_loaded = false;
     TabLayout tab_ly;
-    List<MissionInfoList> infoLists = new ArrayList<>();
     String mother_id;
-    String date;
-    String time;
     String user_id;
-    FirebaseRecyclerPagingAdapter<ItemForMissionByDay, ItemViewHolder> adapter;
+    //SwipeRefreshLayout ly_swipe_refresh;
+    Fragment fa, fb, fc;
+    FragmentTransaction ft;
+    String key_for_day;
 
     @Nullable
     @Override
@@ -107,7 +103,6 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
         final View view = inflater.inflate(R.layout.fragment_favorite, container, false);
         user_id = mContext.getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
 
-        FloatingActionButton fab = view.findViewById(R.id.fab_new);
         tv_mission_title = view.findViewById(R.id.tv_mission_title);
         date_display = view.findViewById(R.id.date_display);
         time_display = view.findViewById(R.id.time_display);
@@ -117,10 +112,11 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
         rest_time_display = view.findViewById(R.id.rest_time_display);
         address_display_ly = view.findViewById(R.id.address_display_layout);
         rest_time_display_ly = view.findViewById(R.id.rest_time_display_layout);
+        //ly_swipe_refresh = view.findViewById(R.id.ly_swipe_refresh);
 
-        loading_panel = view.findViewById(R.id.loadingPanel);
-        recyclerView = view.findViewById(R.id.recycler_day);
-        recyclerView.setNestedScrollingEnabled(false);
+        //loading_panel = view.findViewById(R.id.loadingPanel);
+        //recyclerView = view.findViewById(R.id.recycler_day);
+        //recyclerView.setNestedScrollingEnabled(false);
         appBar = view.findViewById(R.id.app_bar_layout);
         tab_ly = view.findViewById(R.id.tab_ly);
 
@@ -131,10 +127,16 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
         tab_ly.addTab(tab_ly.newTab().setText("지난약속"));
         tab_ly.addTab(tab_ly.newTab().setText("전체약속"));
 
+        ft = getChildFragmentManager().beginTransaction();
         tab_ly.addOnTabSelectedListener(this);
-        ly_latest_mission.setOnClickListener(this);
-
-
+        ly_latest_mission.setOnClickListener(new OnSingleClickListener() {
+            @Override
+            public void onSingleClick(View v) {
+                Intent intent = new Intent(mContext, MissionDetailActivity.class);
+                intent.putExtra("mission_id", mother_id);
+                mContext.startActivity(intent);
+            }
+        });
         appBar.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
             @Override
             public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
@@ -150,10 +152,47 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
             }
         });
 
+        SpeedDialView speedDialView = view.findViewById(R.id.fab_new);
 
-        recyclerView.addItemDecoration(new RecyclerViewDivider(36));
 
-        fab.setOnClickListener(new View.OnClickListener() {
+        speedDialView.addActionItem(new SpeedDialActionItem.Builder(R.id.fab_no_label, AppCompatResources.getDrawable(mContext, R.drawable.ic_fail))
+                .setFabBackgroundColor(mContext.getResources().getColor(R.color.White))
+                .setLabel("약속정하기")
+                .setFabImageTintColor(mContext.getResources().getColor(R.color.blue))
+                .create());
+        speedDialView.addActionItem(new SpeedDialActionItem.Builder(R.id.fab_custom_color, AppCompatResources.getDrawable(mContext, R.drawable.ic_success))
+                .setFabBackgroundColor(mContext.getResources().getColor(R.color.White))
+                .setLabel("친구랑 같이")
+                .setFabImageTintColor(mContext.getResources().getColor(R.color.blue))
+                .create());
+        speedDialView.setMainFabClosedBackgroundColor(getResources().getColor(R.color.colorPrimary));
+        speedDialView.setMainFabOpenedBackgroundColor(getResources().getColor(R.color.colorPrimary));
+        speedDialView.setMainFabOpenedIconColor(getResources().getColor(R.color.White));
+        speedDialView.setMainFabClosedIconColor(getResources().getColor(R.color.White));
+        speedDialView.setOnActionSelectedListener(new SpeedDialView.OnActionSelectedListener() {
+            @Override
+            public boolean onActionSelected(SpeedDialActionItem actionItem) {
+                switch (actionItem.getId()) {
+                    case R.id.fab_no_label:
+                        Toast.makeText(mContext, "노레이블", Toast.LENGTH_LONG).show();
+                        startActivity(new Intent(mContext, SingleModeActivity.class));
+                        speedDialView.close();
+                        return false;
+                    case R.id.fab_custom_color:
+                        startActivity(new Intent(mContext, MultiModeActivity.class));
+                        Toast.makeText(mContext, "친구랑같이", Toast.LENGTH_LONG).show();
+                        return false;
+                    default:
+                        return false;
+
+                }
+            }
+        });
+
+
+        //recyclerView.addItemDecoration(new RecyclerViewDivider(36));
+/*
+        fabs.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
@@ -205,25 +244,15 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
                 }, params);
             }
         });
+
+ */
         String key = DateTimeUtils.getCurrentTime();
         queryData(key);
-
 
         return view;
     }
 
-    private void setRecyclerViewByMission(List<String> keyList, List<MissionInfoList> infoLists) {
-        MissionRecyclerAdapter missionRecyclerAdapter = new MissionRecyclerAdapter(getContext(), keyList, infoLists);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(missionRecyclerAdapter);
-    }
-
     private void queryData(String key) {
-
-        //String user_id = mContext.getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
-        SharedPreferences preferences = mContext.getSharedPreferences("FirebaseKey", MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-
         Log.d("카카오세션", user_id + "  favorite");
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
         Log.d("데이트타임", DateTimeUtils.getCurrentTime());
@@ -231,20 +260,22 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
             databaseReference.child("user_data").child(user_id).child("mission_display").orderByKey().limitToFirst(2).startAt(key).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.exists()) {
-                        no_mission_ly.setVisibility(View.GONE);
-                        ly_latest_mission.setVisibility(View.VISIBLE);
+                    no_mission_ly.setVisibility(View.GONE);
+                    ly_latest_mission.setVisibility(View.VISIBLE);
 
-                        List<ItemForMissionByDay> list = new ArrayList<>();
-                        for (DataSnapshot data : dataSnapshot.getChildren()) {
-                            ItemForMissionByDay itemForMissionByDay = data.getValue(ItemForMissionByDay.class);
-                            list.add(itemForMissionByDay);
-                        }
-
-                        if(list.get(0).isSuccess()){
-                            String key = list.get(1).getDate()+list.get(1).getTime();
-                            queryData(key);
-                        }else{
+                    List<ItemForMissionByDay> list = new ArrayList<>();
+                    Log.d("수정", list.size() + "사이즈");
+                    for (DataSnapshot data : dataSnapshot.getChildren()) {
+                        ItemForMissionByDay itemForMissionByDay = data.getValue(ItemForMissionByDay.class);
+                        list.add(itemForMissionByDay);
+                    }
+                    if (list.size() == 1) {
+                        if (list.get(0).isSuccess()) {
+                            //String key = list.get(1).getDate() + list.get(1).getTime();
+                            //queryData(key);
+                            Log.d("수정", "사이즈 1 성공이라면");
+                        } else {
+                            Log.d("수정", "사이즈 1 실패라면");
                             String title = list.get(0).getTitle();
                             String date = list.get(0).getDate();
                             String time = list.get(0).getTime();
@@ -258,15 +289,46 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
                             setTimer(date + time);
                             data_loaded = true;
                             ly_latest_mission.setClickable(true);
-                            String key = list.get(1).getDate()+list.get(1).getTime();
-                            editor.putString("key",key);
-                            editor.apply();
-                            checkResult(key);
+
+                            //replaceFragment(new MissionByDayFragment(key_for_day));
+                            //checkResult(key);
+
+
+                        }
+
+                    }
+                    if (list.size() > 1) {
+
+                        if (list.get(0).isSuccess()) {
+                            String key = list.get(1).getDate() + list.get(1).getTime();
+                            queryData(key);
+                        } else {
+                            String title = list.get(0).getTitle();
+                            String date = list.get(0).getDate();
+                            String time = list.get(0).getTime();
+                            String address = list.get(0).getAddress();
+                            mother_id = list.get(0).getMother_id();
+
+                            tv_mission_title.setText(title);
+                            date_display.setText(DateTimeUtils.makeDateForHumanIfToday(date));
+                            time_display.setText(DateTimeUtils.makeTimeForHuman(time));
+                            address_display.setText(address);
+                            setTimer(date + time);
+                            data_loaded = true;
+                            ly_latest_mission.setClickable(true);
+                            if (list.size() != 1) {
+                                key_for_day = list.get(1).getDate() + list.get(1).getTime();
+                                if (!isAdded()) return;
+                                replaceFragment(new MissionByDayFragment(key_for_day));
+                                //checkResult(key);
+
+                            }
 
                         }
 
                     } else {
-                        loading_panel.setVisibility(View.GONE);
+                        Log.d("수정", "사이즈 0 없음");
+                        //loading_panel.setVisibility(View.GONE);
                         no_mission_ly.setVisibility(View.VISIBLE);
                         ly_latest_mission.setVisibility(View.GONE);
 
@@ -284,123 +346,21 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
             });
     }
 
-
-    private void checkResult(String date_time) {
-
-        Log.d("정렬", "이거확인" + date_time);
-        //String user_id = mContext.getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
-        if (!Utils.isEmpty(user_id)) {
-            Query query = FirebaseDatabase.getInstance().getReference().child("user_data").child(user_id).child("mission_display").orderByKey().startAt(date_time);
-
-            FirebaseRecyclerOptions<ItemForMissionByDay> options = new FirebaseRecyclerOptions.Builder<ItemForMissionByDay>()
-                    .setLifecycleOwner(this)
-                    .setQuery(query, ItemForMissionByDay.class)
-                    .build();
-            FirebaseRecyclerAdapter adapter = new FirebaseRecyclerAdapter<ItemForMissionByDay, ItemViewHolder>(options) {
-                @NonNull
-                @Override
-                public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                    // Create a new instance of the ViewHolder, in this case we are using a custom
-                    // layout called R.layout.message for each item
-                    View view;
-                    LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-                    view = inflater.inflate(R.layout.main_recycler_view_item, parent, false);
-                    return new ItemViewHolder(view);
-                }
-
-
-                @Override
-                protected void onBindViewHolder(ItemViewHolder holder, int position, ItemForMissionByDay model) {
-                    // Bind the Chat object to the ChatHolder
-                    // ...
-                    Log.d("정렬", model.getTitle());
-                    holder.tv_missionTitle.setText(model.getTitle());
-                    holder.tv_address.setText(model.getAddress());
-                    holder.tv_date.setText(DateTimeUtils.makeDateForHuman(model.getDate()));
-                    holder.tv_time.setText(DateTimeUtils.makeTimeForHuman(model.getTime()));
-                    holder.view_container.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Intent intent = new Intent(mContext, MissionDetailActivity.class);
-                            intent.putExtra("mission_id", model.getMother_id());
-                            startActivity(intent);
-                        }
-                    });
-
-                }
-
-
-            };
-            recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-            recyclerView.setAdapter(adapter);
-            recyclerView.setVisibility(View.VISIBLE);
-            loading_panel.setVisibility(View.GONE);
-        }
-
-
-    }
-
-    private void queryPastData(){
-
-       // String user_id = mContext.getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
-        SharedPreferences preferences = mContext.getSharedPreferences("FirebaseKey", MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-        String key = Utils.getCurrentTime();
-
-        Log.d("카카오세션", user_id + "  favorite");
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-        Log.d("데이트타임", DateTimeUtils.getCurrentTime());
-        if (!Utils.isEmpty(user_id))
-            databaseReference.child("user_data").child(user_id).child("mission_display").orderByKey().endAt(key).addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.exists()) {
-                        no_mission_ly.setVisibility(View.GONE);
-                        ly_latest_mission.setVisibility(View.VISIBLE);
-                        List<ItemForMissionByDay> list = new ArrayList<>();
-                        for (DataSnapshot data : dataSnapshot.getChildren()) {
-                            ItemForMissionByDay itemForMissionByDay = data.getValue(ItemForMissionByDay.class);
-                            list.add(itemForMissionByDay);
-                        }
-                        Collections.reverse(list);
-
-                        RecyclerPastMissionAdapter adapter = new RecyclerPastMissionAdapter(mContext,list);
-                        recyclerView.setLayoutManager(new LinearLayoutManager(mContext));
-                        recyclerView.setAdapter(adapter);
-
-
-
-
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });
-
-
-
-
-    }
-
     private void setTimer(String date_time) {
         Date endDate = DateTimeFormatter.dateTimeParser(date_time);
         Date curDate = new Date(System.currentTimeMillis());
 
         long diff = endDate.getTime() - curDate.getTime();
-        if(isTimerRunning){
+        if (isTimerRunning) {
             timer.cancel();
         }
-
 
         if (diff >= 0) {
 
             timer = new CountDownTimer(diff, 1000) {
                 @Override
                 public void onTick(long l) {
-                    Log.d("타이머","isrunning");
+                    Log.d("타이머", "isrunning");
                     isTimerRunning = true;
                     long days = TimeUnit.MILLISECONDS.toDays(l);
                     long remainingHoursInMillis = l - TimeUnit.DAYS.toMillis(days);
@@ -411,13 +371,16 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
                     long seconds = TimeUnit.MILLISECONDS.toSeconds(remainingSecondsInMillis);
                     //Log.d("타이머", "position" + position + "   " + holder.getAdapterPosition() + "time:" + l + " " + timer_switch);
                     if (days == 0) {
-                        String time = "+ " + hours + "시간 " + minutes + "분";
+                        if (l < 10 * 60 * 1000) { //10분
+                            String time2 = "+ " + minutes + "분 " + seconds + "초";
+                            rest_time_display.setText("남은시간: " + time2);
+                        } else {
+                            String time = "+ " + hours + "시간 " + minutes + "분";
 
-                        rest_time_display.setText("남은시간: " + time);
-
-                        if (l < 2 * 60 * 60 * 1000) { //2시간
-                            //holder.is_status.setImageResource(R.drawable.ready_to_check);
+                            rest_time_display.setText("남은시간: " + time);
                         }
+
+
                     } else {
                         String time = "+ " + days + "일 " + hours + "시간 " + minutes + "분";
                         rest_time_display.setText("남은시간: " + time);
@@ -427,6 +390,7 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
 
                 @Override
                 public void onFinish() {
+                    queryData(Utils.getCurrentTime());
                     isTimerRunning = false;
 
 
@@ -472,33 +436,24 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
 
     }
 
-    public static class ItemViewHolder extends RecyclerView.ViewHolder {
-        TextView tv_missionTitle;
-        TextView tv_date;
-        TextView tv_time;
-        TextView tv_address;
-
-        LinearLayout view_container;
-
-
-        public ItemViewHolder(View itemView) {
-            super(itemView);
-            view_container = itemView.findViewById(R.id.main_recycler_view_container);
-            tv_missionTitle = itemView.findViewById(R.id.tv_mission_title);
-            tv_date = itemView.findViewById(R.id.date_display);
-            tv_time = itemView.findViewById(R.id.time_display);
-            tv_address = itemView.findViewById(R.id.address_display);
-
-        }
-    }
-
 
     @Override
     public void onStart() {
         super.onStart();
-        if (isTimerRunning) {
-            timer.cancel();
-        }
+
+        fa = null;
+        fb = null;
+        fc = null;
+        Log.d("홈프레그", "TabPosition" + tab_ly.getSelectedTabPosition());
+        //tabFragment(tab_ly.getSelectedTabPosition());
+
+
+        //addFragment(new MissionByDayFragment());
+
+
+        //getChildFragmentManager().beginTransaction().remove(getChildFragmentManager().findFragmentById(R.id.fragment_container)).commit();
+        //getChildFragmentManager().beginTransaction().remove(new MissionByMissionFragment()).commit();
+
         Log.d("홈프레그", "onStart");
         //adapter.startListening();
 
@@ -508,60 +463,21 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
     @Override
     public void onStop() {
         super.onStop();
-        if (isTimerRunning) {
-            timer.cancel();
-        }
+
         Log.d("홈프레그", "onStop");
         //adapter.stopListening();
-    }
-
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.ly_latest_mission:
-                Intent intent = new Intent(mContext, MissionDetailActivity.class);
-                intent.putExtra("mission_id", mother_id);
-                mContext.startActivity(intent);
-
-                //loadMissionDetail();
-                break;
-
-
-        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mContext = null;
         Log.d("홈프레그", "onDetach");
     }
 
     @Override
     public void onTabSelected(TabLayout.Tab tab) {
         int pos = tab.getPosition();
-        switch (pos) {
-            case 0:
-                loading_panel.setVisibility(View.VISIBLE);
-                recyclerView.setVisibility(View.GONE);
-                String key = mContext.getSharedPreferences("FirebaseKey", MODE_PRIVATE).getString("key", "");
-                queryData(key);
-
-                break;
-            case 1:
-                loading_panel.setVisibility(View.VISIBLE);
-                recyclerView.setVisibility(View.GONE);
-                queryPastData();
-
-                break;
-            case 2:
-                loading_panel.setVisibility(View.VISIBLE);
-                recyclerView.setVisibility(View.GONE);
-                queryMissionData();
-
-                break;
-        }
+        tabFragment(pos);
 
     }
 
@@ -573,55 +489,103 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
     @Override
     public void onTabReselected(TabLayout.Tab tab) {
         int pos = tab.getPosition();
+        tabFragment(pos);
+    }
+
+    private void addFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getChildFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.add(R.id.fragment_container, fragment).commit();
+    }
+
+    private void hideFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getChildFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.hide(fragment).commit();
+    }
+
+    private void showFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getChildFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.show(fragment).commit();
+    }
+
+    private void replaceFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getChildFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_container, fragment).commitAllowingStateLoss();
+    }
+
+    private void tabFragment(int pos) {
         switch (pos) {
             case 0:
-                loading_panel.setVisibility(View.VISIBLE);
-                recyclerView.setVisibility(View.GONE);
-                String key = mContext.getSharedPreferences("FirebaseKey", MODE_PRIVATE).getString("key", "");
-                queryData(key);
+                if (fa == null) {
+                        fa = new MissionByDayFragment(key_for_day);
+                        addFragment(fa);
+
+                    Log.d("홈프레그", "fa is null");
+                }
+
+                if (fa != null) {
+                    showFragment(fa);
+                    Log.d("홈프레그", "fa is showing");
+                }
+                if (fb != null) {
+                    hideFragment(fb);
+                    Log.d("홈프레그", "fb is hiding");
+                }
+                if (fc != null) {
+                    hideFragment(fc);
+                    Log.d("홈프레그", "fc is hiding");
+                }
 
                 break;
             case 1:
-                loading_panel.setVisibility(View.VISIBLE);
-                recyclerView.setVisibility(View.GONE);
-                queryPastData();
+
+                if (fb == null) {
+                    fb = new MissionByPastFragment();
+                    addFragment(fb);
+                    Log.d("홈프레그", "fb is null");
+                }
+
+                if (fa != null) {
+                    hideFragment(fa);
+                    Log.d("홈프레그", "fa is hiding");
+                }
+                if (fb != null) {
+                    showFragment(fb);
+                    Log.d("홈프레그", "fb is showing");
+                }
+                if (fc != null) {
+                    hideFragment(fc);
+                    Log.d("홈프레그", "fc is hiding");
+                }
 
                 break;
             case 2:
-                loading_panel.setVisibility(View.VISIBLE);
-                recyclerView.setVisibility(View.GONE);
-                queryMissionData();
+                if (fc == null) {
+                    fc = new MissionByMissionFragment();
+
+                    addFragment(fc);
+                    Log.d("홈프레그", "fc is null");
+                }
+
+                if (fa != null) {
+                    hideFragment(fa);
+                    Log.d("홈프레그", "fa is hiding");
+                }
+                if (fb != null) {
+                    hideFragment(fb);
+                    Log.d("홈프레그", "fb is hiding");
+                }
+                if (fc != null) {
+                    showFragment(fc);
+                    Log.d("홈프레그", "fc is showing");
+                }
+
 
                 break;
         }
-    }
-
-    private void queryMissionData() {
-
-        //String user_id = mContext.getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
-        if (!Utils.isEmpty(user_id))
-            FirebaseDatabase.getInstance().getReference().child("user_data").child(user_id).child("mission_info_list").addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    infoLists.clear();
-                    List<String> keyList = new ArrayList<>();
-                    for (DataSnapshot data : dataSnapshot.getChildren()) {
-                        MissionInfoList missionInfoList = data.getValue(MissionInfoList.class);
-                        infoLists.add(missionInfoList);
-                        Log.d("아이템바이", data.getKey());
-                        keyList.add(data.getKey());
-                    }
-                    setRecyclerViewByMission(keyList, infoLists);
-                    recyclerView.setVisibility(View.VISIBLE);
-                    loading_panel.setVisibility(View.GONE);
-
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });
 
     }
 }
