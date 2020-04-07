@@ -5,12 +5,14 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.squareup.picasso.Picasso;
 import com.suji.lj.myapplication.InvitationInfoActivity;
 import com.suji.lj.myapplication.Items.ItemForMultiModeRequest;
 import com.suji.lj.myapplication.MultiModeActivity;
@@ -24,11 +26,11 @@ public class RecyclerInvitationAdapter extends RecyclerView.Adapter<RecyclerInvi
 
     List<ItemForMultiModeRequest> list;
     Context context;
-
     public RecyclerInvitationAdapter(Context context, List<ItemForMultiModeRequest> list){
 
         this.list = list;
         this.context = context;
+
     }
 
 
@@ -46,13 +48,21 @@ public class RecyclerInvitationAdapter extends RecyclerView.Adapter<RecyclerInvi
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int i) {
 
-        holder.address.setText(list.get(i).getAddress());
-        holder.title.setText(list.get(i).getTitle());
-        holder.manager_name.setText(list.get(i).getManager_name());
-        holder.container.setOnClickListener(new View.OnClickListener() {
+
+        String title = list.get(i).getTitle();
+        String manager_name = list.get(i).getManager_name();
+        int friends_num = list.get(i).getFriendRequestList().size();
+        if(list.get(i).getManager_thumbnail()!=null) {
+            Picasso.with(context).load(list.get(i).getManager_thumbnail()).fit().into(holder.thumbnail);
+        }
+        holder.text.setText(manager_name+"님이 "+title+"미션에 초대하셨습니다.");
+        holder.ly_multi_request.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                context.startActivity(new Intent(context, InvitationInfoActivity.class));
+                Intent intent = new Intent(context, InvitationInfoActivity.class);
+                intent.putExtra("key",list.get(i).getMission_key());
+                context.startActivity(intent);
+
             }
         });
 
@@ -65,11 +75,10 @@ public class RecyclerInvitationAdapter extends RecyclerView.Adapter<RecyclerInvi
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        TextView title;
-        TextView manager_name;
-        TextView address;
+        TextView text;
 
-        LinearLayout container;
+        ImageView thumbnail;
+        LinearLayout ly_multi_request;
 
 
 
@@ -77,10 +86,9 @@ public class RecyclerInvitationAdapter extends RecyclerView.Adapter<RecyclerInvi
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            container = itemView.findViewById(R.id.container);
-            title = itemView.findViewById(R.id.title);
-            manager_name = itemView.findViewById(R.id.manager_name);
-            address = itemView.findViewById(R.id.address);
+            ly_multi_request = itemView.findViewById(R.id.ly_multi_request);
+            text = itemView.findViewById(R.id.text);
+            thumbnail = itemView.findViewById(R.id.thumbnail);
 
 
 

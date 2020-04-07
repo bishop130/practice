@@ -25,6 +25,32 @@ public class Account {
 
 
     }
+    public static String getUserName(Context context){
+
+        String user_id = context.getSharedPreferences("Kakao", MODE_PRIVATE).getString("user_name", "");
+        if(user_id!=null){
+            return user_id;
+        }else{
+            context.startActivity(new Intent(context, SampleLoginActivity.class));
+            return "null";
+
+        }
+
+
+    }
+    public static String getUserThumbnail(Context context){
+
+        String thumbnail = context.getSharedPreferences("Kakao", MODE_PRIVATE).getString("thumbnail", "");
+        if(thumbnail!=null){
+            return thumbnail;
+        }else{
+            context.startActivity(new Intent(context, SampleLoginActivity.class));
+            return "null";
+
+        }
+
+
+    }
 
 
 

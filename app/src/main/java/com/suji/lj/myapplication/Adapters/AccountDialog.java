@@ -22,6 +22,8 @@ import com.suji.lj.myapplication.R;
 
 import java.util.List;
 
+import static android.content.Context.MODE_PRIVATE;
+
 public class AccountDialog extends Dialog {
     private View.OnClickListener mPositiveListener;
     private View.OnClickListener mNegativeListener;
@@ -47,6 +49,7 @@ public class AccountDialog extends Dialog {
 
 
 
+        String fintech_num = context.getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("fintech_num", "");
 
         //셋팅
 
@@ -57,7 +60,7 @@ public class AccountDialog extends Dialog {
         if (userAccountItemList.size() > 0) {
             user_name.setText(userAccountItemList.get(0).getUser_name());
         }
-        setRecyclerView();
+        setRecyclerView(fintech_num);
     }
 /*
     @Nullable
@@ -87,10 +90,10 @@ public class AccountDialog extends Dialog {
  */
 
 
-    private void setRecyclerView() {
+    private void setRecyclerView(String fintech_num) {
         Log.d("계좌", userAccountItemList.size() + "");
 
-        RecyclerAccountAdapter recyclerAccountAdapter = new RecyclerAccountAdapter(context,userAccountItemList);
+        RecyclerAccountAdapter recyclerAccountAdapter = new RecyclerAccountAdapter(context,userAccountItemList,fintech_num);
         recyclerView_account.setLayoutManager(new LinearLayoutManager(context));
         recyclerView_account.setAdapter(recyclerAccountAdapter);
 

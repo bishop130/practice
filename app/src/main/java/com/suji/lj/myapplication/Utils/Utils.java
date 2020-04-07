@@ -1,5 +1,8 @@
 package com.suji.lj.myapplication.Utils;
 
+import android.animation.AnimatorSet;
+import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -17,7 +20,14 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Base64;
 import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.Toast;
+
+import androidx.core.widget.NestedScrollView;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -548,5 +558,65 @@ public class Utils {
         return false;
     }
 
+
+    public static void fixMapScroll(ImageView imageView, NestedScrollView scrollView){
+
+        imageView.setOnTouchListener(new View.OnTouchListener() {
+
+            @SuppressLint("ClickableViewAccessibility")
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                int action = event.getAction();
+                switch (action) {
+                    case MotionEvent.ACTION_DOWN:
+                        // Disallow ScrollView to intercept touch events.
+                        scrollView.requestDisallowInterceptTouchEvent(true);
+                        // Disable touch on transparent view
+                        return false;
+
+                    case MotionEvent.ACTION_UP:
+                        // Allow ScrollView to intercept touch events.
+                        scrollView.requestDisallowInterceptTouchEvent(false);
+                        return true;
+
+                    case MotionEvent.ACTION_MOVE:
+                        scrollView.requestDisallowInterceptTouchEvent(true);
+                        return false;
+
+                    default:
+                        return true;
+                }
+            }
+
+        });
+
+
+
+    }
+
+    public static void slideView(View view,
+                                 int currentHeight,
+                                 int newHeight) {
+
+        ValueAnimator slideAnimator = ValueAnimator
+                .ofInt(currentHeight, newHeight)
+                .setDuration(3000);
+
+        /* We use an update listener which listens to each tick
+         * and manually updates the height of the view  */
+
+        slideAnimator.addUpdateListener(animation1 -> {
+            Integer value = (Integer) animation1.getAnimatedValue();
+            view.getLayoutParams().height = value.intValue();
+            view.requestLayout();
+        });
+
+        /*  We use an animationSet to play the animation  */
+
+        AnimatorSet animationSet = new AnimatorSet();
+        animationSet.setInterpolator(new AccelerateDecelerateInterpolator());
+        animationSet.play(slideAnimator);
+        animationSet.start();
+    }
 
 }

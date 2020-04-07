@@ -232,11 +232,11 @@ public class FirebaseDB {
 
     }
 
-    public static void registerInvitationForFriend(DatabaseReference databaseReference, String user_id, Realm realm, MissionCartItem missionCartItem) {
+    public static void registerInvitationForFriend(DatabaseReference databaseReference, Context context, Realm realm, MissionCartItem missionCartItem) {
         RealmResults<ItemForFriends> realmResults = realm.where(ItemForFriends.class).findAll();
-
-        List<ItemForFriends> itemForFriendsList= new ArrayList<>();
-        itemForFriendsList = realm.copyFromRealm(realmResults);
+        String user_name = Account.getUserName(context);
+        String user_id = Account.getUserId(context);
+        String user_thumbnail = Account.getUserThumbnail(context);
 
         ItemForMultiModeRequest item = new ItemForMultiModeRequest();
         item.setLat(missionCartItem.getLat());
@@ -245,6 +245,7 @@ public class FirebaseDB {
         item.setManager_id(user_id);
         item.setManager_name("123");
         item.setTitle(missionCartItem.getTitle());
+        item.setManager_thumbnail(user_thumbnail);
         item.setFail_penalty(3000);
         item.setLate_penalty(1000);
         List<ItemForFriendResponseForRequest> requestList = new ArrayList<>();
@@ -254,30 +255,43 @@ public class FirebaseDB {
             item1.setFriend_id(String.valueOf(realmResults.get(j).getId()));
             item1.setFriend_name(realmResults.get(j).getName());
             item1.setFriend_uuid(realmResults.get(j).getUuid());
+            item1.setThumbnail(realmResults.get(j).getImage());
             requestList.add(item1);
         }
         item.setFriendRequestList(requestList);
+
+
         List<ItemForDateTime> list = new ArrayList<>();
-        for (int j = 0; j < item.getCalendarDayList().size(); j++) {
+        for (int i = 0; i < missionCartItem.getCalendarDayList().size(); i++) {
 
             ItemForDateTime dateTime = new ItemForDateTime();
 
 
-            int year = item.getCalendarDayList().get(j).getYear();
-            int month = item.getCalendarDayList().get(j).getMonth();
-            int day = item.getCalendarDayList().get(j).getDay();
+            int year = missionCartItem.getCalendarDayList().get(i).getYear();
+            int month = missionCartItem.getCalendarDayList().get(i).getMonth();
+            int day = missionCartItem.getCalendarDayList().get(i).getDay();
 
             String date = DateTimeUtils.makeDateForServer(year, month, day);
 
 
-            int hour = item.getCalendarDayList().get(j).getHour();
-            int min = item.getCalendarDayList().get(j).getMin();
+            int hour = missionCartItem.getCalendarDayList().get(i).getHour();
+            int min = missionCartItem.getCalendarDayList().get(i).getMin();
             String time = DateTimeUtils.makeTimeForServer(hour, min);
+            boolean select=missionCartItem.getCalendarDayList().get(i).isSelect();
+            int position = missionCartItem.getCalendarDayList().get(i).getPosition();
 
+            Log.d("날짜확인",date+"  "+time+"  ");
+
+            dateTime.setYear(year);
+            dateTime.setMonth(month);
+            dateTime.setDay(day);
+            dateTime.setHour(hour);
+            dateTime.setMin(min);
             dateTime.setDate(date);
             dateTime.setTime(time);
+            dateTime.setPosition(position);
+            dateTime.setSelect(select);
             list.add(dateTime);
-
 
         }
 

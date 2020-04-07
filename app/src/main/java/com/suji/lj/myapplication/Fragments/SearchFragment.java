@@ -85,15 +85,12 @@ public class SearchFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
 
-
-
         final View view = inflater.inflate(R.layout.fragment_search, container, false);
         tab_ly_friends = view.findViewById(R.id.tab_ly_friends);
 
 
         tab_ly_friends.addTab(tab_ly_friends.newTab().setText("약속초대"));
         tab_ly_friends.addTab(tab_ly_friends.newTab().setText("친구목록"));
-        //tab_ly_friends.addTab(tab_ly_friends.newTab().setText("친구요청"));
 
         view_pager = view.findViewById(R.id.view_pager);
 
@@ -104,7 +101,6 @@ public class SearchFragment extends Fragment {
 
 
         requestFriendsList();
-        requestFriends();
 
         tab_ly_friends.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -186,7 +182,7 @@ public class SearchFragment extends Fragment {
     }
 
 
-    public void requestFriends() {
+    public void requestFriends(String is_friend_id) {
 
         // offset = 0, limit = 100
         AppFriendContext friendContext = new AppFriendContext(true, 0, 100, "asc");
@@ -217,7 +213,7 @@ public class SearchFragment extends Fragment {
                     public void onSuccess(AppFriendsResponse result) {
                         // 친구 목록
                         Log.d("친구목록 ", result.getFriends().toString());
-                        List<ItemForFriendsList> itemForFriendsListList = new ArrayList<>();
+                        List<ItemForFriendsList> list = new ArrayList<>();
                         for(int i=0;i<result.getFriends().size();i++){
                             ItemForFriendsList item = new ItemForFriendsList();
                             item.setFriends_name(result.getFriends().get(i).getProfileNickname());
@@ -225,9 +221,21 @@ public class SearchFragment extends Fragment {
                             item.setId(result.getFriends().get(i).getId());
                             item.setUuid(result.getFriends().get(i).getUUID());
                             item.setFavorite(result.getFriends().get(i).isFavorite().getBoolean());
-                            itemForFriendsListList.add(item);
+                            list.add(item);
 
                         }
+
+                        for(int i =0; i<list.size(); i++){
+                            String friend_id = String.valueOf(list.get(i).getId());
+
+                            if(is_friend_id.equals(friend_id)){
+
+
+                            }
+
+
+                        }
+
                         //setupRecyclerView(itemForFriendsListList);
                         // context의 beforeUrl과 afterUrl이 업데이트 된 상태.
                     }

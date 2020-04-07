@@ -296,6 +296,16 @@ public class DateTimeUtils {
         return getTime;
     }
 
+    public static String getToday(){
+        long now = System.currentTimeMillis();
+        Date date = new Date(now);
+        SimpleDateFormat simpleDate = new SimpleDateFormat("yyyyMMdd", Locale.KOREA);
+
+
+        return simpleDate.format(date);
+
+    }
+
     public static boolean compareIsFuture(String input_date_time) {
         DateTimeFormatter dateTimeFormatter = new DateTimeFormatter();
         Date date = dateTimeFormatter.dateTimeParser(input_date_time);

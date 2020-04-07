@@ -7,6 +7,10 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.widget.NestedScrollView;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -44,6 +48,7 @@ import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
 import com.suji.lj.myapplication.Adapters.RecyclerDetailFriendsAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerMissionProgressAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerViewContactAdapter;
+import com.suji.lj.myapplication.Fragments.MapFragment;
 import com.suji.lj.myapplication.Items.ContactItemForServer;
 import com.suji.lj.myapplication.Items.ItemForDateTime;
 import com.suji.lj.myapplication.Items.ItemForDateTimeByList;
@@ -89,28 +94,14 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.opengles.GL10;
 
-public class MissionDetailActivity extends AppCompatActivity implements MapView.MapViewEventListener, MapView.CurrentLocationEventListener, View.OnClickListener {
-    MapView mapView;
+public class MissionDetailActivity extends AppCompatActivity implements  View.OnClickListener {
+
     //MaterialCalendarView materialCalendarView;
-    CardView btn_current_location;
-    CardView btn_mission_location;
+
     private String mission_title;
     private double mission_latitude;
     private double mission_longitude;
-    private String mission_id;
-    private String mission_time;
-    private String address;
-    private String contact_list;
-    private String mission_date_array;
-    private String completed_dates;
-    private double current_latitude;
-    private double current_longitude;
-    private String is_failed;
-    ScrollView mainScrollView;
-    ImageView transparentImageView;
-    ArrayList<CalendarDay> dates = new ArrayList<>();
-    ArrayList<CalendarDay> completed_date_array = new ArrayList<>();
-    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-M-d", Locale.KOREA);
+    NestedScrollView mainScrollView;
     TextView address_result;
     TextView penalty_name_list;
     TextView mission_date_start;
@@ -119,6 +110,7 @@ public class MissionDetailActivity extends AppCompatActivity implements MapView.
     TextView mission_time_start;
     TextView mission_time_end;
     List<ContactItemForServer> friendsLists;
+    String mission_time;
     String min_date;
     String max_date;
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
@@ -143,25 +135,19 @@ public class MissionDetailActivity extends AppCompatActivity implements MapView.
         setContentView(R.layout.activity_mission_detail);
         getIntents();
 
-        mapView = new MapView(this);
-
-        mapViewContainer = findViewById(R.id.map_view_detail);
-        mapViewContainer.addView(mapView);
-        mapView.setMapViewEventListener(this);
-
-
         toolbar = findViewById(R.id.mission_detail_toolbar);
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if(getSupportActionBar()!=null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
         //Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         address_result = findViewById(R.id.address_detail);
 
-        btn_current_location = findViewById(R.id.btn_current_location);
-        btn_mission_location = findViewById(R.id.btn_mission_location);
+
         mainScrollView = findViewById(R.id.main_scroll_view);
-        transparentImageView = findViewById(R.id.transparent_image);
+
         penalty_name_list = findViewById(R.id.penalty_name_list);
         mission_date_start = findViewById(R.id.mission_date_start);
         mission_date_end = findViewById(R.id.mission_date_end);
@@ -172,43 +158,12 @@ public class MissionDetailActivity extends AppCompatActivity implements MapView.
         tv_date_progress = findViewById(R.id.tv_date_progress);
         circularProgressBar = findViewById(R.id.circularProgressBar);
         recyclerView_friends_list = findViewById(R.id.recycler_friends_list);
-        checkLocationPermission();
 
         //some_image.setImageBitmap(getBitmapFromView(test));
 
         //Log.d("안될듯",viewToBitmap().toString());
-        btn_current_location.setOnClickListener(this);
-        btn_mission_location.setOnClickListener(this);
 
 
-        transparentImageView.setOnTouchListener(new View.OnTouchListener() {
-
-            @SuppressLint("ClickableViewAccessibility")
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                int action = event.getAction();
-                switch (action) {
-                    case MotionEvent.ACTION_DOWN:
-                        // Disallow ScrollView to intercept touch events.
-                        mainScrollView.requestDisallowInterceptTouchEvent(true);
-                        // Disable touch on transparent view
-                        return false;
-
-                    case MotionEvent.ACTION_UP:
-                        // Allow ScrollView to intercept touch events.
-                        mainScrollView.requestDisallowInterceptTouchEvent(false);
-                        return true;
-
-                    case MotionEvent.ACTION_MOVE:
-                        mainScrollView.requestDisallowInterceptTouchEvent(true);
-                        return false;
-
-                    default:
-                        return true;
-                }
-            }
-
-        });
 
 
         //query();
@@ -367,10 +322,9 @@ public class MissionDetailActivity extends AppCompatActivity implements MapView.
                             tv_date_progress.setText(count + "/" + item.getMission_dates().size() + "일");
                             makeCircularProgressBar(count, itemForDateTimeByLists.size());
                             setRecyclerView(itemForDateTimeByLists);
-                            drawMissionRadius(mission_latitude, mission_longitude);
-                            moveSelectedPlace(mission_latitude, mission_longitude);
 
                         }
+                        addMapFragment(new MapFragment(mainScrollView,mission_latitude,mission_longitude));
 
                     }
 
@@ -384,17 +338,6 @@ public class MissionDetailActivity extends AppCompatActivity implements MapView.
         }
     }
 
-    private void drawMissionRadius(double lat, double lng) {
-        MapCircle circle2 = new MapCircle(
-                MapPoint.mapPointWithGeoCoord(lat, lng), // center
-                100, // radius
-                Color.argb(128, 255, 0, 0), // strokeColor
-                Color.argb(128, 255, 255, 0) // fillColor
-        );
-        circle2.setTag(5678);
-        mapView.addCircle(circle2);
-
-    }
 
     private void setRecyclerViewFriendsList(List<ContactItemForServer> friendsLists) {
         RecyclerDetailFriendsAdapter adapter = new RecyclerDetailFriendsAdapter(friendsLists);
@@ -405,181 +348,24 @@ public class MissionDetailActivity extends AppCompatActivity implements MapView.
     }
 
     @Override
-    public void onCurrentLocationUpdate(MapView mapView, MapPoint mapPoint, float v) {
-        MapPoint.GeoCoordinate mapPointGeo = mapPoint.getMapPointGeoCoord();
-        current_latitude = mapPointGeo.latitude;
-        current_longitude = mapPointGeo.longitude;
-
-    }
-
-    @Override
-    public void onCurrentLocationDeviceHeadingUpdate(MapView mapView, float v) {
-
-    }
-
-    @Override
-    public void onCurrentLocationUpdateFailed(MapView mapView) {
-
-    }
-
-    @Override
-    public void onCurrentLocationUpdateCancelled(MapView mapView) {
-
-    }
-
-    @Override
-    public void onMapViewInitialized(MapView mapView) {
-        mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(mission_latitude, mission_longitude), 2, true);
-
-    }
-
-    @Override
-    public void onMapViewCenterPointMoved(MapView mapView, MapPoint mapPoint) {
-
-    }
-
-    @Override
-    public void onMapViewZoomLevelChanged(MapView mapView, int i) {
-
-    }
-
-    @Override
-    public void onMapViewSingleTapped(MapView mapView, MapPoint mapPoint) {
-
-    }
-
-    @Override
-    public void onMapViewDoubleTapped(MapView mapView, MapPoint mapPoint) {
-
-    }
-
-    @Override
-    public void onMapViewLongPressed(MapView mapView, MapPoint mapPoint) {
-
-    }
-
-    @Override
-    public void onMapViewDragStarted(MapView mapView, MapPoint mapPoint) {
-
-    }
-
-    @Override
-    public void onMapViewDragEnded(MapView mapView, MapPoint mapPoint) {
-
-    }
-
-    @Override
-    public void onMapViewMoveFinished(MapView mapView, MapPoint mapPoint) {
-
-    }
-
-    @Override
     public void onBackPressed() {
         super.onBackPressed();
         finish();
     }
 
 
-    public void moveSelectedPlace(double lat, double lng) {
-        mapView.moveCamera(CameraUpdateFactory.newMapPoint(MapPoint.mapPointWithGeoCoord(lat, lng)));
-
-    }
-
-    private void moveCurrentLocation() {
-        if (mapView.isShowingCurrentLocationMarker()) {
-            if ((current_latitude != 0.0) && (current_longitude != 0.0)) {
-                mapView.moveCamera(CameraUpdateFactory.newMapPoint(MapPoint.mapPointWithGeoCoord(current_latitude, current_longitude)));
-            }
-        } else {
-            Toast.makeText(getApplicationContext(), "위치정보를 수신중입니다.", Toast.LENGTH_LONG).show();
-        }
-    }
-
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.btn_current_location:
-                moveCurrentLocation();
-                break;
-            case R.id.btn_mission_location:
-                moveSelectedPlace(mission_latitude, mission_longitude);
-                break;
 
 
         }
     }
 
-    private void checkLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            Log.d("퍼미션", "이미 승인받음");
 
-            mapView.setCurrentLocationEventListener(this);
-            mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving);
-        } else {
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION)) {
-
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-                new AlertDialog.Builder(this)
-                        .setTitle("Location Permission Needed")
-                        .setMessage("This app needs the Location permission, please accept to use location functionality")
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                //Prompt the user once explanation has been shown
-                                ActivityCompat.requestPermissions(MissionDetailActivity.this,
-                                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                        MY_PERMISSIONS_REQUEST_LOCATION);
-                            }
-                        })
-                        .create()
-                        .show();
-
-
-            } else {
-                // No explanation needed, we can request the permission.
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        MY_PERMISSIONS_REQUEST_LOCATION);
-            }
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_LOCATION: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission was granted, yay! Do the
-                    // location-related task you need to do.
-                    if (ContextCompat.checkSelfPermission(this,
-                            Manifest.permission.ACCESS_FINE_LOCATION)
-                            == PackageManager.PERMISSION_GRANTED) {
-                        Log.d("퍼미션", "여기는 왜 못들어와");
-
-                        mapView.setCurrentLocationEventListener(this);
-                        mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving);
-
-                    }
-
-                } else {
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                    Toast.makeText(this, "permission denied", Toast.LENGTH_LONG).show();
-                    finish();
-                }
-                break;
-            }
-
-            // other 'case' lines to check for other
-            // permissions this app might request
-        }
+    private void addMapFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.add(R.id.map_layout, fragment).commit();
     }
 }

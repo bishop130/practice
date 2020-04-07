@@ -22,7 +22,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".InvitationInfoActivity"></activity>
+        <activity android:name=".Main2Activity"></activity>
+        <activity android:name=".InvitationInfoActivity" />
         <activity android:name=".MultiModeDetailActivity" />
         <activity android:name=".FriendsActivity" />
         <activity android:name=".MultiModeActivity" />

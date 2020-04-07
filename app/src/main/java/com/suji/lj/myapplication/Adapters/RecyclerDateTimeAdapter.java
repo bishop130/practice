@@ -31,17 +31,19 @@ public class RecyclerDateTimeAdapter extends RecyclerView.Adapter<RecyclerDateTi
     List<ItemForDateTime> calendarDayList;
     Realm realm;
     Context context;
+    OnTimeSetListener listener;
 
 
 
 
 
-    public RecyclerDateTimeAdapter(Context context, List<ItemForDateTime> calendarDayList,Realm realm) {
+    public RecyclerDateTimeAdapter(Context context, List<ItemForDateTime> calendarDayList,Realm realm, OnTimeSetListener listener) {
 
 
         this.context = context;
         this.calendarDayList = calendarDayList;
         this.realm = realm;
+        this.listener = listener;
 
     }
 
@@ -98,7 +100,8 @@ public class RecyclerDateTimeAdapter extends RecyclerView.Adapter<RecyclerDateTi
                         @Override
                         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                             holder.time.setText(DateTimeUtils.makeTimeForHumanInt(hourOfDay,minute));
-                            ((SingleModeActivity)context).timeSet(hourOfDay,minute,position);
+                            listener.onTimeSet(hourOfDay,minute,position);
+                            //((SingleModeActivity)context).timeSet(hourOfDay,minute,position);
                             boolean is30min = DateTimeUtils.compareIsFuture30min(year+""+month+""+day+time);
                             if(is30min){
                                 holder.ly_time_error.setVisibility(View.GONE);
@@ -139,5 +142,10 @@ public class RecyclerDateTimeAdapter extends RecyclerView.Adapter<RecyclerDateTi
 
 
         }
+    }
+
+    public interface OnTimeSetListener{
+        void onTimeSet(int hour, int min, int position);
+
     }
 }

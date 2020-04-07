@@ -5,8 +5,7 @@
     android:layout_height="match_parent">
 
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+    <LinearLayout xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -14,11 +13,12 @@
         android:orientation="vertical"
         android:scrollbars="vertical"
         tools:context=".SingleModeActivity">
+
         <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/toolbar"
-            android:background="@color/White"/>
+            android:background="@color/White" />
 
         <LinearLayout
             android:id="@+id/title"
@@ -33,7 +33,9 @@
                 android:layout_gravity="left"
                 android:layout_margin="12dp"
                 android:text="1.제목"
-                android:textSize="20sp" />
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
 
             <View
                 android:layout_width="match_parent"
@@ -76,258 +78,24 @@
                     android:layout_gravity="center"
                     android:layout_margin="12dp"
                     android:text="2.장소"
-                    android:textSize="20sp" />
+                    android:textColor="@color/black"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
 
             </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/divider_line" />
 
-            <LinearLayout
+            <FrameLayout
+                android:id="@+id/map_fragment"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="400dp"
                 android:layout_gravity="center"
+                android:background="@color/wall_paper2"
                 android:orientation="vertical">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
 
-                    <androidx.appcompat.widget.SearchView
-                        android:id="@+id/daum_map_search"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:backgroundTint="@color/White"
-                        android:focusable="false"
-                        android:queryHint="This is a hint"
-                        app:iconifiedByDefault="false"
+            </FrameLayout>
 
-                        >
-
-
-                    </androidx.appcompat.widget.SearchView>
-
-                </LinearLayout>
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-
-                    <RelativeLayout
-                        android:id="@+id/map_layout"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:elevation="4dp"
-                        android:orientation="vertical">
-
-
-                        <RelativeLayout
-                            android:id="@+id/map_capture_layout"
-                            android:layout_width="match_parent"
-                            android:layout_height="350dp">
-
-                            <fragment
-                                android:id="@+id/map_view"
-                                class="com.google.android.gms.maps.MapFragment"
-                                android:layout_width="match_parent"
-                                android:layout_height="350dp" />
-
-                            <ImageView
-                                android:id="@+id/transparent_image"
-                                android:layout_width="match_parent"
-                                android:layout_height="350dp"
-                                android:src="@color/transparent" />
-
-                            <LinearLayout
-                                android:layout_width="40dp"
-                                android:layout_height="1dp"
-                                android:layout_centerHorizontal="true"
-                                android:layout_centerVertical="true"
-                                android:background="#653F51B5">
-
-
-                            </LinearLayout>
-
-                            <LinearLayout
-                                android:layout_width="1dp"
-                                android:layout_height="40dp"
-                                android:layout_centerHorizontal="true"
-                                android:layout_centerVertical="true"
-                                android:background="#653F51B5">
-
-                            </LinearLayout>
-
-                        </RelativeLayout>
-
-
-                        <androidx.cardview.widget.CardView
-                            android:id="@+id/radius"
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:layout_alignParentRight="true"
-                            android:layout_marginTop="12dp"
-                            android:layout_marginRight="12dp"
-                            android:clipChildren="false"
-                            android:clipToPadding="false"
-                            android:divider="@android:color/transparent"
-                            android:dividerHeight="0.0px"
-                            android:elevation="8dp"
-                            android:text="현재위치"
-                            app:cardCornerRadius="8dp"
-
-                            >
-
-                            <TextView
-                                android:id="@+id/daum_map_location_loading"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:text="@string/question_mark"
-                                android:textColor="@color/colorPrimary"
-                                android:textSize="24sp"
-                                android:textStyle="bold"
-                                android:visibility="visible" />
-
-                            <ImageView
-                                android:id="@+id/daum_map_location_loaded"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:src="@drawable/ic_my_location_black_24dp"
-                                android:visibility="gone" />
-                        </androidx.cardview.widget.CardView>
-
-                        <androidx.cardview.widget.CardView
-                            android:id="@+id/zoom"
-                            android:layout_width="36dp"
-                            android:layout_height="wrap_content"
-                            android:layout_below="@+id/radius"
-                            android:layout_alignParentRight="true"
-                            android:layout_marginTop="20dp"
-                            android:layout_marginRight="12dp"
-                            android:clipChildren="false"
-                            android:clipToPadding="false"
-                            android:divider="@android:color/transparent"
-                            android:dividerHeight="0.0px"
-                            android:elevation="8dp"
-                            android:text="현재위치"
-                            app:cardCornerRadius="8dp"
-
-
-                            >
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:orientation="vertical">
-
-                                <LinearLayout
-                                    android:id="@+id/zoom_in"
-                                    android:layout_width="36dp"
-                                    android:layout_height="36dp"
-
-                                    android:layout_gravity="center"
-                                    android:gravity="center"
-
-
-                                    >
-
-                                    <ImageView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:layout_gravity="center"
-                                        android:src="@drawable/ic_add" />
-                                </LinearLayout>
-
-                                <View
-                                    android:layout_width="match_parent"
-                                    android:layout_height="1dp"
-                                    android:layout_marginStart="4dp"
-                                    android:layout_marginEnd="4dp"
-                                    android:background="@color/divider_line" />
-
-                                <LinearLayout
-                                    android:id="@+id/zoom_out"
-                                    android:layout_width="36dp"
-                                    android:layout_height="36dp"
-                                    android:layout_below="@+id/zoom_in"
-                                    android:layout_gravity="center"
-                                    android:gravity="center"
-
-                                    >
-
-                                    <ImageView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:layout_gravity="center"
-
-                                        android:src="@drawable/ic_zoom_out" />
-                                </LinearLayout>
-                            </LinearLayout>
-                        </androidx.cardview.widget.CardView>
-
-                        <androidx.cardview.widget.CardView
-                            android:layout_width="match_parent"
-                            android:layout_height="40dp"
-                            android:layout_below="@id/zoom"
-                            android:layout_alignParentRight="true"
-                            android:layout_marginStart="160dp"
-                            android:layout_marginTop="154dp"
-                            android:layout_marginEnd="12dp"
-                            android:clipChildren="false"
-                            android:clipToPadding="false"
-                            android:divider="@android:color/transparent"
-                            android:dividerHeight="0.0px"
-                            android:elevation="8dp"
-                            android:text="현재위치"
-                            app:cardCornerRadius="8dp">
-
-                            <androidx.appcompat.widget.AppCompatSeekBar
-                                android:id="@+id/circle_seekBar"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:layout_marginStart="8dp"
-                                android:layout_marginEnd="8dp"
-
-
-                                />
-
-                        </androidx.cardview.widget.CardView>
-
-
-                    </RelativeLayout>
-
-
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
-
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/place_recycler"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:clipToPadding="false"
-                        android:orientation="vertical"
-                        android:scrollbars="vertical"
-                        android:splitMotionEvents="false"
-                        android:tooltipText="장소 검색"
-
-                        />
-
-                </RelativeLayout>
-
-
-
-            </LinearLayout>
 
         </LinearLayout>
 
@@ -352,7 +120,9 @@
                     android:layout_margin="12dp"
                     android:gravity="center"
                     android:text="3.날짜 및 시간 선택"
-                    android:textSize="20sp" />
+                    android:textColor="@color/black"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
 
                 <View
                     android:layout_width="0dp"
@@ -377,98 +147,11 @@
                 android:layout_height="1dp"
                 android:background="@color/divider_line" />
 
-
-            <com.prolificinteractive.materialcalendarview.MaterialCalendarView
-                android:id="@+id/material_calendarView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:layout_marginStart="20dp"
-                android:layout_marginEnd="20dp"
-                app:mcv_selectionColor="@color/colorPrimary"
-                app:mcv_selectionMode="multiple"
-                app:mcv_showOtherDates="all" />
-
-            <LinearLayout
-                android:id="@+id/ly_date_error"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:visibility="gone">
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginStart="32dp"
-                    android:src="@drawable/ic_error" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="날짜를 선택해주세요"
-                    android:textColor="@color/errorColor" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/colorPrimary"
-                    android:layout_gravity="center"
-                    android:layout_marginStart="12dp"
-                    android:textSize="16sp"
-                    android:text="시간제한 설정" />
-
-                <Switch
-                    android:id="@+id/no_time_switch"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="right"
-                    android:layout_marginRight="20dp"
-                    android:checked="true"
-                    android:switchMinWidth="56dp"
-
-                    android:textOff="OFF"
-                    android:textOn="ON" />
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_weight="1" />
-
-                <TextView
-                    android:id="@+id/common_time"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:textColor="@color/colorPrimary"
-                    android:padding="12dp"
-                    android:text="전체시간설정"
-                    android:textSize="16sp" />
-            </LinearLayout>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recycler_date_time"
+            <FrameLayout
+                android:id="@+id/calendar_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/divider_line" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-
-
-            </LinearLayout>
 
         </LinearLayout>
 
@@ -488,11 +171,13 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="32dp"
+                    android:layout_marginStart="12dp"
                     android:layout_marginTop="12dp"
                     android:layout_marginBottom="12dp"
                     android:text="5. 벌칙설정"
-                    android:textSize="20sp" />
+                    android:textColor="@color/black"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
 
                 <View
                     android:layout_width="0dp"
@@ -521,347 +206,251 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
+
                 <LinearLayout
-                    android:id="@+id/ly_add_new_account"
+                    android:id="@+id/account_select"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="20dp"
-                    android:background="@drawable/shape_add_new_account"
-                    android:visibility="gone"
-
-                    >
+                    android:layout_marginStart="40dp"
+                    android:layout_marginEnd="40dp"
+                    android:layout_marginTop="12dp"
+                    android:orientation="vertical">
 
                     <TextView
-                        android:layout_width="match_parent"
+                        android:id="@+id/bank_name"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="28dp"
-                        android:layout_marginBottom="28dp"
-                        android:gravity="center"
-                        android:text="+ 계좌 등록하기"
-                        android:textColor="@color/colorPrimary"
+                        android:text="KB국민은행"
+                        android:textColor="@color/black"
                         android:textSize="18sp" />
 
 
-                </LinearLayout>
-
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
-
-
-                    <LinearLayout
-                        android:id="@+id/account_select"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="24dp"
-                        android:background="@drawable/shape_rounded_bank"
-
-                        android:orientation="horizontal">
-
-                        <LinearLayout
-
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="12dp"
-                            android:layout_marginBottom="12dp"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:layout_marginStart="28dp"
-                                android:src="@drawable/checked_icon" />
-
-                            <LinearLayout
-
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-
-                                android:orientation="vertical">
-
-                                <LinearLayout
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:orientation="horizontal">
-
-
-                                    <TextView
-                                        android:id="@+id/bank_name"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:layout_marginStart="12dp"
-                                        android:layout_marginEnd="28dp"
-                                        android:textColor="@color/black"
-                                        android:textSize="18sp" />
-                                </LinearLayout>
-
-                                <TextView
-
-                                    android:id="@+id/account_num"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginStart="12dp"
-                                    android:textColor="@color/black"
-                                    android:textSize="16sp" />
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginStart="12dp"
-                                    android:textColor="@color/black"
-                                    android:id="@+id/account_name"
-                                    android:textSize="16sp"/>
-
-
-                            </LinearLayout>
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="0dp"
-                                android:layout_weight="1" />
-
-                            <ImageView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:layout_marginEnd="12dp"
-                                android:src="@drawable/right_arrow" />
-
-
-                        </LinearLayout>
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/ly_contact_error"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginStart="40dp"
-                        android:visibility="gone">
-                        <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:src="@drawable/ic_error"/>
-                        <TextView
-                            android:layout_marginStart="4dp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:text="연락처를 선택해주세요"
-                            android:textColor="@color/errorColor"/>
-                    </LinearLayout>
-                    <androidx.appcompat.widget.AppCompatSpinner
-                        android:layout_width="200dp"
-                        android:layout_height="40dp"
-                        android:id="@+id/mission_mode"/>
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/fragment_container"/>
-
-
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="80dp"
-                        android:layout_marginBottom="32dp">
+                        android:layout_height="wrap_content">
 
                         <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="32dp"
-                            android:text="총 이체금액"
-                            android:textColor="@color/colorPrimary" />
-
-                        <View
+                            android:id="@+id/account_num"
                             android:layout_width="0dp"
-                            android:layout_height="0dp"
-                            android:layout_weight="1" />
-
-                        <TextView
-                            android:id="@+id/total_amount"
-                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0"
-                            android:textColor="@color/colorPrimary"
-                            android:textSize="60sp" />
+                            android:layout_weight="10"
+                            android:text="29030204202663"
+                            android:textColor="@color/black"
+                            android:textSize="18sp" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
+                        <ImageView
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:layout_marginEnd="32dp"
-                            android:text="원"
-                            android:textColor="@color/colorPrimary"
-                            android:textSize="16sp" />
-
-
+                            android:layout_gravity="center"
+                            android:layout_weight="1"
+                            android:src="@drawable/arrow_down" />
                     </LinearLayout>
 
-
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/black" />
                 </LinearLayout>
-            </LinearLayout>
-
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:layout_marginTop="20dp"
-            android:background="@color/White"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="12dp"
-                android:text="약관동의"
-                android:textSize="21sp" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/divider_line" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="20dp"
-                android:orientation="vertical">
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="3dp">
-
-                    <androidx.appcompat.widget.AppCompatCheckBox
-                        android:id="@+id/agree_terms_use"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:layout_centerVertical="true"
-                        android:text="이용약관동의"
-                        android:textSize="16sp"
-
-                        >
-
-
-                    </androidx.appcompat.widget.AppCompatCheckBox>
-
-
-                    <Button
-                        android:id="@+id/agree_terms_use_detail"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentRight="true"
-                        android:layout_centerVertical="true"
-                        android:background="@drawable/shape_rounded_bank"
-                        android:gravity="center"
-                        android:text="약관보기"
-                        android:textSize="16sp" />
-
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="20dp"
-                    android:padding="3dp">
-
-                    <androidx.appcompat.widget.AppCompatCheckBox
-                        android:id="@+id/agree_terms_private"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:layout_centerVertical="true"
-                        android:text="개인정보취급약관 동의"
-                        android:textSize="16sp">
-
-
-                    </androidx.appcompat.widget.AppCompatCheckBox>
-
-
-                    <Button
-                        android:id="@+id/agree_terms_private_detail"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentRight="true"
-                        android:layout_centerVertical="true"
-                        android:background="@drawable/shape_rounded_bank"
-                        android:gravity="center"
-                        android:text="약관보기"
-                        android:textSize="16sp" />
-
-                </RelativeLayout>
 
                 <LinearLayout
+                    android:id="@+id/ly_contact_error"
                     android:layout_width="match_parent"
-                    android:layout_height="2dp"
-                    android:layout_marginTop="10dp"
-                    android:background="@color/divider_line">
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="40dp"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
 
-
-                </LinearLayout>
-
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="10dp"
-                    android:padding="3dp">
-
-                    <androidx.appcompat.widget.AppCompatCheckBox
-                        android:id="@+id/agree_terms_all"
+                    <ImageView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:layout_centerVertical="true"
-                        android:text="모두 동의"
-                        android:textSize="16sp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_error" />
 
-                        >
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginStart="4dp"
+                        android:text="연락처를 선택해주세요"
+                        android:textColor="@color/errorColor" />
+                </LinearLayout>
 
+                <androidx.appcompat.widget.AppCompatSpinner
+                    android:id="@+id/mission_mode"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="40dp"
 
-                    </androidx.appcompat.widget.AppCompatCheckBox>
+                    android:layout_marginEnd="40dp" />
 
+                <FrameLayout
+                    android:id="@+id/fragment_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
 
-                </RelativeLayout>
-
-            </LinearLayout>
-
-
-        </LinearLayout>
-
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom">
-
-            <TextView
-                android:id="@+id/mission_basic_send"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:background="@color/colorPrimary"
-                android:gravity="center"
-                android:padding="12dp"
-                android:text="다음"
-                android:textColor="@color/White"
-                android:textSize="18sp" />
 
 
         </LinearLayout>
 
 
     </LinearLayout>
-</androidx.core.widget.NestedScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_marginTop="20dp"
+        android:background="@color/White"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:text="약관동의"
+            android:textColor="@color/black"
+            android:textSize="21sp"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/divider_line" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="3dp">
+
+                <androidx.appcompat.widget.AppCompatCheckBox
+                    android:id="@+id/agree_terms_use"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:text="이용약관동의"
+                    android:textSize="16sp"
+
+                    >
+
+
+                </androidx.appcompat.widget.AppCompatCheckBox>
+
+
+                <Button
+                    android:id="@+id/agree_terms_use_detail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:background="@drawable/shape_rounded_bank"
+                    android:gravity="center"
+                    android:text="약관보기"
+                    android:textSize="16sp" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="20dp"
+                android:padding="3dp">
+
+                <androidx.appcompat.widget.AppCompatCheckBox
+                    android:id="@+id/agree_terms_private"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:text="개인정보취급약관 동의"
+                    android:textSize="16sp">
+
+
+                </androidx.appcompat.widget.AppCompatCheckBox>
+
+
+                <Button
+                    android:id="@+id/agree_terms_private_detail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:background="@drawable/shape_rounded_bank"
+                    android:gravity="center"
+                    android:text="약관보기"
+                    android:textSize="16sp" />
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:layout_marginTop="10dp"
+                android:background="@color/divider_line">
+
+
+            </LinearLayout>
+
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="10dp"
+                android:padding="3dp">
+
+                <androidx.appcompat.widget.AppCompatCheckBox
+                    android:id="@+id/agree_terms_all"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:text="모두 동의"
+                    android:textSize="16sp"
+
+                    >
+
+
+                </androidx.appcompat.widget.AppCompatCheckBox>
+
+
+            </RelativeLayout>
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom">
+
+        <TextView
+            android:id="@+id/mission_basic_send"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@color/colorPrimary"
+            android:gravity="center"
+            android:padding="12dp"
+            android:text="확인"
+            android:textColor="@color/White"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+
+    </LinearLayout>
+
+
+</LinearLayout></androidx.core.widget.NestedScrollView>

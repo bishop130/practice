@@ -97,10 +97,8 @@ public class ContactResponse extends RecyclerView.Adapter<ContactResponse.Contac
 
         public ContactResponseHolder(@NonNull View itemView){
             super(itemView);
-            name = itemView.findViewById(R.id.test_name);
             phone_number = itemView.findViewById(R.id.contact_num);
             first_name = itemView.findViewById(R.id.first_name);
-            selected_container = itemView.findViewById(R.id.selected_container);
             title = itemView.findViewById(R.id.tvTitle);
         }
 

@@ -7,6 +7,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -179,6 +180,7 @@ public class MultiModeFragment extends Fragment implements RecyclerFriendsAdapte
         layoutManager.setJustifyContent(JustifyContent.CENTER);
         layoutManager.setAlignItems(AlignItems.CENTER);
         confirmed_recycler.setLayoutManager(layoutManager);
+        //confirmed_recycler.setItemAnimator(new DefaultItemAnimator());
         selectedAdapter = new RecyclerFriendsSelectedAdapter(getActivity(), itemList, realm, this);
         confirmed_recycler.setAdapter(selectedAdapter);
     }
@@ -192,6 +194,7 @@ public class MultiModeFragment extends Fragment implements RecyclerFriendsAdapte
                 itemForFriends.setId(item.getId());
                 itemForFriends.setUuid(item.getUuid());
                 itemForFriends.setName(item.getName());
+                itemForFriends.setImage(item.getImage());
                 itemForFriends.setSelected(item.isSelected());
                 itemForFriends.setPosition(item.getPosition());
                 Log.d("친구선택",item.getId()+"  아이디");

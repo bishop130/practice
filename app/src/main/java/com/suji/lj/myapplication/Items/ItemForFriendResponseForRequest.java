@@ -5,10 +5,18 @@ public class ItemForFriendResponseForRequest {
     String friend_uuid;
     String friend_name;
     String friend_fintech_num;
+    String thumbnail;
 
     public ItemForFriendResponseForRequest(){}
 
 
+    public String getThumbnail() {
+        return thumbnail;
+    }
+
+    public void setThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
+    }
 
     public String getFriend_id() {
         return friend_id;

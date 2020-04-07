@@ -18,7 +18,7 @@
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         app:titleTextColor="@color/colorPrimary" />
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:id="@+id/main_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -198,8 +198,8 @@
                     </RelativeLayout>
 
 
-                    <RelativeLayout
-                        android:id="@+id/map_layout_detail"
+                    <FrameLayout
+                        android:id="@+id/map_layout"
                         android:layout_width="match_parent"
                         android:layout_height="300dp"
                         android:layout_below="@+id/date_range_layout"
@@ -207,70 +207,9 @@
                         android:elevation="4dp">
 
 
-                        <RelativeLayout
-                            android:id="@+id/map_view_detail"
-
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent" />
-
-                        <ImageView
-                            android:id="@+id/transparent_image"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:src="@color/transparent" />
 
 
-                        <androidx.cardview.widget.CardView
-                            android:id="@+id/btn_mission_location"
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:layout_alignParentRight="true"
-                            android:layout_marginTop="12dp"
-                            android:layout_marginRight="12dp"
-                            android:clipChildren="false"
-                            android:clipToPadding="false"
-                            android:divider="@android:color/transparent"
-                            android:dividerHeight="0.0px"
-                            android:elevation="8dp"
-                            android:text="현재위치"
-                            app:cardCornerRadius="8dp"
-
-                            >
-
-                            <ImageView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:src="@drawable/ic_flag_black_24dp" />
-                        </androidx.cardview.widget.CardView>
-
-                        <androidx.cardview.widget.CardView
-                            android:id="@+id/btn_current_location"
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:layout_below="@id/btn_mission_location"
-                            android:layout_alignParentRight="true"
-                            android:layout_marginTop="12dp"
-                            android:layout_marginRight="12dp"
-                            android:clipChildren="false"
-                            android:clipToPadding="false"
-                            android:divider="@android:color/transparent"
-                            android:dividerHeight="0.0px"
-                            android:elevation="8dp"
-                            android:text="현재위치"
-                            app:cardCornerRadius="8dp"
-
-                            >
-
-                            <ImageView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:src="@drawable/ic_my_location_black_24dp" />
-                        </androidx.cardview.widget.CardView>
-
-
-                    </RelativeLayout>
+                    </FrameLayout>
 
 
                 </RelativeLayout>
@@ -297,6 +236,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="20dp"
                         android:text="주소"
+                        android:textStyle="bold"
+                        android:textColor="@color/black"
                         android:textSize="18sp" />
 
                     <TextView
@@ -325,6 +266,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="벌칙"
+                            android:textStyle="bold"
+                            android:textColor="@color/black"
                             android:textSize="18sp" />
 
 
@@ -400,5 +343,5 @@
             </LinearLayout>
 
         </LinearLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 </LinearLayout>

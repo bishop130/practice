@@ -17,6 +17,8 @@ public class ItemForMultiModeRequest {
     String title;
     List<ItemForDateTime> calendarDayList = new ArrayList<>();
     List<ItemForFriendResponseForRequest> friendRequestList = new ArrayList<>();
+    String manager_thumbnail;
+
 
 
     public String getMission_key() {
@@ -115,8 +117,11 @@ public class ItemForMultiModeRequest {
         this.friendRequestList = friendRequestList;
     }
 
+    public String getManager_thumbnail() {
+        return manager_thumbnail;
+    }
 
-
-
-
+    public void setManager_thumbnail(String manager_thumbnail) {
+        this.manager_thumbnail = manager_thumbnail;
+    }
 }

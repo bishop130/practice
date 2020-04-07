@@ -1,11 +1,22 @@
 package com.suji.lj.myapplication.Fragments;
 
+
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
-import android.net.Uri;
+import android.content.DialogInterface;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SearchView;
+import androidx.cardview.widget.CardView;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,15 +29,19 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.suji.lj.myapplication.Adapters.PlaceRecyclerAdapter;
 import com.suji.lj.myapplication.DaumMapActivity;
+import com.suji.lj.myapplication.Items.ItemForMultiModeRequest;
 import com.suji.lj.myapplication.Items.PlaceItem;
 import com.suji.lj.myapplication.R;
 
+import net.daum.mf.map.api.CameraUpdateFactory;
+import net.daum.mf.map.api.MapCircle;
 import net.daum.mf.map.api.MapPOIItem;
 import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapReverseGeoCoder;
@@ -49,38 +64,96 @@ import retrofit2.http.Header;
 import retrofit2.http.Query;
 
 
-public class MapFragment extends Fragment implements MapView.CurrentLocationEventListener, MapReverseGeoCoder.ReverseGeoCodingResultListener, MapView.MapViewEventListener {
+public class MapFragment extends Fragment implements MapView.CurrentLocationEventListener, MapReverseGeoCoder.ReverseGeoCodingResultListener, MapView.MapViewEventListener, View.OnClickListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 
-    public MapFragment() {
+    NestedScrollView scrollView;
+    double lat;
+    double lng;
+
+    public MapFragment(NestedScrollView scrollView,double lat, double lng) {
+        this.scrollView = scrollView;
+        this.lat = lat;
+        this.lng = lng;
         // Required empty public constructor
     }
 
-    SearchView searchView;
+
     MapView mapView;
-    RecyclerView recyclerView;
+
     PlaceRecyclerAdapter placeRecyclerAdapter;
     ImageView imageView;
     ScrollView mainScrollView;
+    TextView location_loading;
+    ImageView location_loaded;
+    public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
+    //Context context;
 
+    Activity activity;
     RelativeLayout map_layout;
+    CardView current_location;
+    CardView mission_location;
+
+    double current_lat;
+    double current_lng;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+
         View view = inflater.inflate(R.layout.fragment_map, container, false);
-        mapView = new MapView(getContext());
+        mapView = new MapView(activity);
         ViewGroup mapViewContainer = view.findViewById(R.id.map_view);
         map_layout = view.findViewById(R.id.map_layout);
-        searchView = view.findViewById(R.id.daum_map_search);
-        recyclerView = view.findViewById(R.id.place_recycler);
-        imageView = view.findViewById(R.id.transparent_image);
 
-        recyclerView.setNestedScrollingEnabled(false);
+        imageView = view.findViewById(R.id.transparent_image);
+        location_loading = view.findViewById(R.id.location_loading);
+        location_loaded = view.findViewById(R.id.location_loaded);
+        current_location = view.findViewById(R.id.current_location);
+        mission_location = view.findViewById(R.id.mission_location);
+
+        current_location.setOnClickListener(this);
+        mission_location.setOnClickListener(this);
+
         mapViewContainer.addView(mapView);
-        onAddressSearch();
+
+
+
+        checkLocationPermission();
+        drawMissionRadius();
+        moveSelectedPlace();
+
+
+        imageView.setOnTouchListener(new View.OnTouchListener() {
+
+            @SuppressLint("ClickableViewAccessibility")
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                int action = event.getAction();
+                switch (action) {
+                    case MotionEvent.ACTION_DOWN:
+                        // Disallow ScrollView to intercept touch events.
+                        scrollView.requestDisallowInterceptTouchEvent(true);
+                        // Disable touch on transparent view
+                        return false;
+
+                    case MotionEvent.ACTION_UP:
+                        // Allow ScrollView to intercept touch events.
+                        scrollView.requestDisallowInterceptTouchEvent(false);
+                        return true;
+
+                    case MotionEvent.ACTION_MOVE:
+                        scrollView.requestDisallowInterceptTouchEvent(true);
+                        return false;
+
+                    default:
+                        return true;
+                }
+            }
+
+        });
 
         return view;
     }
@@ -101,6 +174,13 @@ public class MapFragment extends Fragment implements MapView.CurrentLocationEven
     @Override
     public void onCurrentLocationUpdate(MapView mapView, MapPoint mapPoint, float v) {
 
+        MapPoint.GeoCoordinate mapPointGeo = mapPoint.getMapPointGeoCoord();
+        // Log.i(TAG, String.format("MapView onCurrentLocationUpdate (%f,%f) accuracy (%f)", mapPointGeo.latitude, mapPointGeo.longitude, v));
+        current_lat = mapPointGeo.latitude;
+        current_lng = mapPointGeo.longitude;
+        location_loading.setVisibility(View.GONE);
+        location_loaded.setVisibility(View.VISIBLE);
+
     }
 
     @Override
@@ -120,6 +200,7 @@ public class MapFragment extends Fragment implements MapView.CurrentLocationEven
 
     @Override
     public void onMapViewInitialized(MapView mapView) {
+       // mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(item.getLat(), item.getLng()), 2, true);
 
     }
 
@@ -163,128 +244,124 @@ public class MapFragment extends Fragment implements MapView.CurrentLocationEven
 
     }
 
-    private void onAddressSearch() {
+
+    private void checkLocationPermission() {
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            Log.d("퍼미션", "이미 승인받음");
+
+            mapView.setCurrentLocationEventListener(this);
+            mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving);
+        } else {
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+                new AlertDialog.Builder(activity)
+                        .setTitle("Location Permission Needed")
+                        .setMessage("This app needs the Location permission, please accept to use location functionality")
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                //Prompt the user once explanation has been shown
+                                ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                        MY_PERMISSIONS_REQUEST_LOCATION);
+                            }
+                        })
+                        .create()
+                        .show();
 
 
-        //SearchView searchView = (SearchView) toolbar.getMenu().findItem(R.id.action_search).getActionView();
-        searchView.setQueryHint("장소,주소 검색..");
-
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(final String query) {
-                mapView.removeAllPOIItems();
-                loadAddress(query);
-                final float scale = getContext().getResources().getDisplayMetrics().density;
-                int pixels = (int) (300 * scale + 0.5f);
-                //map_layout.getLayoutParams().height = pixels;
-                searchView.clearFocus();
-
-
-                return true;
+            } else {
+                // No explanation needed, we can request the permission.
+                ActivityCompat.requestPermissions(activity,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        MY_PERMISSIONS_REQUEST_LOCATION);
             }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-
-
-                return true;
-            }
-        });
-
+        }
     }
 
-    private void loadAddress(String query) {
-        final Retrofit retrofit2 = new Retrofit.Builder().
-                addConverterFactory(GsonConverterFactory.create()).
-                baseUrl(KeywordSearch.base).
-                build();
-        KeywordSearch keywordSearch = retrofit2.create(KeywordSearch.class);
-        Call<JsonObject> call = keywordSearch.keywordSearch(KeywordSearch.key, query);
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted, yay! Do the
+                    // location-related task you need to do.
+                    if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                        Log.d("퍼미션", "여기는 왜 못들어와");
 
-        call.enqueue(new Callback<JsonObject>() {
-            @Override
-            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                String con = new GsonBuilder().setPrettyPrinting().create().toJson(response.body());
-                List<PlaceItem> placeList = new ArrayList<>();
-                try {
+                        mapView.setCurrentLocationEventListener(this);
+                        mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving);
 
-                    JSONObject obj = new JSONObject(con);
-                    String check_string = obj.getJSONObject("meta").getString("total_count");
-                    if (Integer.valueOf(check_string) == 0) {
-                        PlaceItem placeItem = new PlaceItem();
-                        placeItem.setPlaceName(query + "(와)과 일치하는 검색결과가 없습니다");
-                        placeList.add(placeItem);
-                    } else {
-                        JSONArray jsonArray = obj.getJSONArray("documents");
-                        for (int i = 0; i < jsonArray.length(); i++) {
-                            PlaceItem placeItem = new PlaceItem();
-                            JSONObject object = (JSONObject) jsonArray.get(i);
-                            if ((object.getString("road_address_name") == null)) {
-                                placeItem.setRoadAddress(object.getString("address_name"));
-                                placeItem.setOldAddress(" ");
-
-                            } else {
-                                placeItem.setRoadAddress(object.getString("road_address_name"));
-                                placeItem.setOldAddress(object.getString("address_name"));
-                            }
-                            placeItem.setPlaceName(object.getString("place_name"));
-                            placeItem.setLatitude(object.getDouble("y"));
-                            placeItem.setLongitude(object.getDouble("x"));
-                            MapPOIItem customMarker = new MapPOIItem();
-                            customMarker.setItemName(object.getString("place_name"));
-                            customMarker.setTag(1);
-                            customMarker.setMapPoint(MapPoint.mapPointWithGeoCoord(object.getDouble("y"), object.getDouble("x")));
-                            customMarker.setMarkerType(MapPOIItem.MarkerType.BluePin); // 마커타입을 커스텀 마커로 지정.
-                            customMarker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin);
-
-
-                            mapView.addPOIItem(customMarker);
-                            Log.d("장소", object.getString("place_name"));
-
-
-                            placeList.add(placeItem);
-
-                            //  String address = ((JSONObject) tempObj.get("address")).get("address_name").toString();
-
-
-                        }
                     }
 
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                    Toast.makeText(activity, "permission denied", Toast.LENGTH_LONG).show();
                 }
-
-                setupRecyclerView(placeList);
-
-
-
+                break;
             }
 
-            @Override
-            public void onFailure(Call<JsonObject> call, Throwable t) {
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
+    }
 
-                Toast.makeText(getContext(), "주소를 불러올 수 없습니다.", Toast.LENGTH_LONG).show();
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if (context instanceof Activity) {
+            this.activity = (Activity) context;
+        }
+    }
 
-            }
-        });
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.mission_location:
+                moveSelectedPlace();
+
+
+                break;
+            case R.id.current_location:
+                moveCurrentLocation();
+                break;
+
+
+        }
+    }
+
+    private void moveSelectedPlace() {
+        if ((lat != 0.0) && (lng != 0.0)) {
+            mapView.moveCamera(CameraUpdateFactory.newMapPoint(MapPoint.mapPointWithGeoCoord(lat, lng)));
+        }
 
     }
 
-    private void setupRecyclerView(List<PlaceItem> placeList) {
-
-        placeRecyclerAdapter = new PlaceRecyclerAdapter(placeList, getActivity());
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        recyclerView.setAdapter(placeRecyclerAdapter);
-
+    private void moveCurrentLocation() {
+        if (mapView.isShowingCurrentLocationMarker()) {
+            if ((current_lat != 0.0) && (current_lng != 0.0)) {
+                mapView.moveCamera(CameraUpdateFactory.newMapPoint(MapPoint.mapPointWithGeoCoord(current_lat, current_lng)));
+            }
+        } else {
+            Toast.makeText(activity, "위치정보를 수신중입니다.", Toast.LENGTH_LONG).show();
+        }
     }
+    private void drawMissionRadius() {
+        MapCircle circle2 = new MapCircle(
+                MapPoint.mapPointWithGeoCoord(lat, lng), // center
+                100, // radius
+                Color.argb(128, 255, 0, 0), // strokeColor
+                Color.argb(128, 255, 255, 0) // fillColor
+        );
+        circle2.setTag(5678);
+        mapView.addCircle(circle2);
 
-    public interface KeywordSearch {
-        String base = "https://dapi.kakao.com/";
-        String key = "KakaoAK 7ff2c8cb39b23bad249dc2f805898a69";
-
-
-        @GET("v2/local/search/keyword.json?")
-        Call<JsonObject> keywordSearch(@Header("Authorization") String key, @Query("query") String query);
     }
 
 }

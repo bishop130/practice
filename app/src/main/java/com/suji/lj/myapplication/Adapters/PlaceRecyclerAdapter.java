@@ -21,10 +21,12 @@ public class PlaceRecyclerAdapter extends RecyclerView.Adapter<PlaceRecyclerAdap
 
     private List<PlaceItem> placeList;
     private Context context;
+    OnMoveSelectedPlaceListener listener;
 
-    public PlaceRecyclerAdapter(List<PlaceItem> placeList, Context context) {
+    public PlaceRecyclerAdapter(List<PlaceItem> placeList, Context context,OnMoveSelectedPlaceListener listener) {
         this.placeList = placeList;
         this.context = context;
+        this.listener = listener;
     }
 
     @NonNull
@@ -47,7 +49,8 @@ public class PlaceRecyclerAdapter extends RecyclerView.Adapter<PlaceRecyclerAdap
         holder.view_container.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((SingleModeActivity) context).moveSelectedPlace(placeList.get(position).getLatitude(),placeList.get(position).getLongitude());
+               // ((SingleModeActivity) context).moveSelectedPlace(placeList.get(position).getLatitude(),placeList.get(position).getLongitude());
+                listener.onMoveSelectedPlace(placeList.get(position).getLatitude(),placeList.get(position).getLongitude());
 
             }
         });
@@ -73,6 +76,11 @@ public class PlaceRecyclerAdapter extends RecyclerView.Adapter<PlaceRecyclerAdap
             road_address= (TextView) itemView.findViewById(R.id.road_address);
             old_address = (TextView)itemView.findViewById(R.id.old_address);
         }
+    }
+
+    public interface OnMoveSelectedPlaceListener {
+        void onMoveSelectedPlace(double lat,double lng);
+
     }
 
 }

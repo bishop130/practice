@@ -29,12 +29,14 @@ import android.graphics.Color;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -47,6 +49,7 @@ import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Switch;
@@ -54,9 +57,8 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
+
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.database.DatabaseReference;
@@ -71,12 +73,13 @@ import com.suji.lj.myapplication.Adapters.AccountDialog;
 import com.suji.lj.myapplication.Adapters.NewLocationService;
 import com.suji.lj.myapplication.Adapters.OpenBanking;
 import com.suji.lj.myapplication.Adapters.PlaceRecyclerAdapter;
+import com.suji.lj.myapplication.Adapters.RecyclerAccountAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerDateTimeAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerTransferRespectivelyAdapter;
+import com.suji.lj.myapplication.Fragments.CalendarSelectFragment;
 import com.suji.lj.myapplication.Fragments.EventModeFragment;
-import com.suji.lj.myapplication.Fragments.MissionByDayFragment;
-import com.suji.lj.myapplication.Fragments.MissionByMissionFragment;
-import com.suji.lj.myapplication.Fragments.MissionByPastFragment;
+import com.suji.lj.myapplication.Fragments.MapMissionFragment;
+
 import com.suji.lj.myapplication.Fragments.MultiModeFragment;
 import com.suji.lj.myapplication.Fragments.SingleModeFragment;
 import com.suji.lj.myapplication.Items.ContactItem;
@@ -85,21 +88,14 @@ import com.suji.lj.myapplication.Items.ItemForFriends;
 import com.suji.lj.myapplication.Items.MissionCartItem;
 import com.suji.lj.myapplication.Items.PlaceItem;
 import com.suji.lj.myapplication.Items.UserAccountItem;
+import com.suji.lj.myapplication.Utils.DateTimeFormatter;
 import com.suji.lj.myapplication.Utils.DateTimeUtils;
 import com.suji.lj.myapplication.Utils.FirebaseDB;
 import com.suji.lj.myapplication.Utils.Utils;
 
 
-import net.daum.mf.map.api.CameraUpdateFactory;
-import net.daum.mf.map.api.MapCircle;
-import net.daum.mf.map.api.MapPOIItem;
-import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapReverseGeoCoder;
-import net.daum.mf.map.api.MapView;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -118,16 +114,12 @@ import io.realm.Realm;
 import io.realm.RealmList;
 import io.realm.RealmResults;
 import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Query;
 
 public class SingleModeActivity extends AppCompatActivity implements TextWatcher,
-        View.OnClickListener, MapView.CurrentLocationEventListener, MapReverseGeoCoder.ReverseGeoCodingResultListener, MapView.MapViewEventListener, CompoundButton.OnCheckedChangeListener {
+        View.OnClickListener, CompoundButton.OnCheckedChangeListener {
     private final okhttp3.Callback user_account_info_callback = new okhttp3.Callback() {
         @Override
         public void onFailure(okhttp3.Call call, IOException e) {
@@ -246,70 +238,50 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
     TextInputLayout textInputLayout;
     TextInputEditText textInputEditText;
     Intent intent;
-    //MissionCartItem item = new MissionCartItem();
-    Calendar calendar = Calendar.getInstance();
 
-    Switch no_time_switch;
-    TextView no_time_limit_tv;
-    TextView wrong_time_tv;
-    List<CalendarDay> calendarDayList = new ArrayList<>();
+
+
     RecyclerView transfer_recyclerView;
     RecyclerTransferRespectivelyAdapter transfer_recycler_adapter;
-    RecyclerDateTimeAdapter recyclerDateTimeAdapter;
-    LinearLayout ly_date_error;
+
+
     LinearLayout ly_contact_error;
 
 
-    RecyclerView date_time_recyclerView;
     RealmList<ItemForDateTime> stringList = new RealmList<>();
-    MaterialCalendarView materialCalendarView;
-    FrameLayout frameLayout;
+
+
     NestedScrollView scrollView;
-    ImageView imageView;
     PlaceRecyclerAdapter placeRecyclerAdapter;
     RecyclerView recyclerView;
     SearchView searchView;
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
     List<UserAccountItem> userAccountItemList = new ArrayList<>();
     OpenBanking openBanking = OpenBanking.getInstance();
-    MapReverseGeoCoder mapReverseGeoCoder;
 
 
-    int selected_year = calendar.get(Calendar.YEAR);
-    int selected_month = calendar.get(Calendar.MONTH) + 1;
-    int selected_day = calendar.get(Calendar.DATE);
-    int hour;
-    int min;
-    String min_date = selected_year + "-" + selected_month + "-" + selected_day;
-
-    boolean is_today = true;
-    TextView common_time;
-    ImageView reset;
     Realm realm;
-    MapView mapView;
-    TextView location_loading;
-    ImageView location_loaded;
-    CardView radius_button;
-    LinearLayout zoom_in;
-    LinearLayout zoom_out;
+
     LinearLayout account_select;
-    private double current_latitude;
-    private double current_longitude;
     TextView detail_setting;
     TextView bank_name_tv;
     TextView account_num_tv;
-    SeekBar circle_seekBar;
-    TextView account_holder_name;
     AppCompatCheckBox checkBox_term_use, checkBox_term_private, checkBox_term_all;
     boolean TERMS_AGREE_1 = false; // No Check = 0, Check = 1
     boolean TERMS_AGREE_2 = false; // No Check = 0, Check = 1
-    int radius = 100;
+
     AccountDialog accountDialog;
     Toolbar toolbar;
-    Calendar cal;
+
     Fragment fa, fb, fc;
     int mission_mode = 0;
+    Runnable runnable;
+    Handler mHandler;
+    BottomSheetDialog bottomSheetDialog;
+    private RecyclerView recyclerView_account;
+    TextView user_name;
 
+    LinearLayout title;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -321,19 +293,13 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
         next_btn = findViewById(R.id.mission_basic_send);
         textInputEditText = findViewById(R.id.mission_basic_editText);
         textInputLayout = findViewById(R.id.mission_basic_inputLayout);
-        no_time_switch = findViewById(R.id.no_time_switch);
+
         transfer_recyclerView = findViewById(R.id.transfer_recyclerView);
-        date_time_recyclerView = findViewById(R.id.recycler_date_time);
-        materialCalendarView = findViewById(R.id.material_calendarView);
-        common_time = findViewById(R.id.common_time);
-        reset = findViewById(R.id.reset);
-        frameLayout = findViewById(R.id.fragment_container);
+
+
         scrollView = findViewById(R.id.main_scroll_view);
-        imageView = findViewById(R.id.transparent_image);
         recyclerView = findViewById(R.id.place_recycler);
-        location_loading = findViewById(R.id.daum_map_location_loading);
-        location_loaded = findViewById(R.id.daum_map_location_loaded);
-        radius_button = findViewById(R.id.radius);
+
         searchView = findViewById(R.id.daum_map_search);
         detail_setting = findViewById(R.id.detail_setting);
         bank_name_tv = findViewById(R.id.bank_name);
@@ -342,196 +308,39 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
         checkBox_term_private = findViewById(R.id.agree_terms_private);
         checkBox_term_all = findViewById(R.id.agree_terms_all);
         total_amount = findViewById(R.id.total_amount);
-        ly_date_error = findViewById(R.id.ly_date_error);
-        zoom_in = findViewById(R.id.zoom_in);
-        zoom_out = findViewById(R.id.zoom_out);
-        circle_seekBar = findViewById(R.id.circle_seekBar);
+
         account_select = findViewById(R.id.account_select);
-        account_holder_name = findViewById(R.id.account_name);
+
         toolbar = findViewById(R.id.toolbar);
         ly_contact_error = findViewById(R.id.ly_contact_error);
+
         Spinner spinner = findViewById(R.id.mission_mode);
+
+        title = findViewById(R.id.title);
+
 
 
         Realm.init(this);
 
         realm = Realm.getDefaultInstance();
-        initiate();
-
-        cal = Calendar.getInstance();
-        mapView = new MapView(this);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-
-                    ViewGroup mapViewContainer = findViewById(R.id.map_view);
-                    mapViewContainer.addView(mapView);
-
-                } catch (Exception ignored) {
-
-                }
-            }
-        }).start();
 
         textInputEditText.addTextChangedListener(this);
         next_btn.setOnClickListener(this);
-        common_time.setOnClickListener(this);
-        reset.setOnClickListener(this);
-        mapView.setMapViewEventListener(this);
-        radius_button.setOnClickListener(this);
         checkBox_term_use.setOnCheckedChangeListener(this);
         checkBox_term_private.setOnCheckedChangeListener(this);
         checkBox_term_all.setOnCheckedChangeListener(this);
-        zoom_in.setOnClickListener(this);
-        zoom_out.setOnClickListener(this);
         account_select.setOnClickListener(this);
 
 
         next_btn.setEnabled(false);
         next_btn.setClickable(false);
-        circle_seekBar.setProgress(75);
-        circle_seekBar.setMax(175);
-        circle_seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                radius = seekBar.getProgress() + 25;
-                realm.where(MissionCartItem.class).findFirst();
 
-                drawCircle(mapView.getMapCenterPoint().getMapPointGeoCoord().latitude, mapView.getMapCenterPoint().getMapPointGeoCoord().longitude, radius);
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                radius = seekBar.getProgress() + 25;
-                realm.where(MissionCartItem.class).findFirst();
-
-                drawCircle(mapView.getMapCenterPoint().getMapPointGeoCoord().latitude, mapView.getMapCenterPoint().getMapPointGeoCoord().longitude, radius);
-
-            }
-        });
-
-        imageView.setOnTouchListener(new View.OnTouchListener() {
-
-            @SuppressLint("ClickableViewAccessibility")
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                int action = event.getAction();
-                switch (action) {
-                    case MotionEvent.ACTION_DOWN:
-                        // Disallow ScrollView to intercept touch events.
-                        scrollView.requestDisallowInterceptTouchEvent(true);
-                        // Disable touch on transparent view
-                        return false;
-
-                    case MotionEvent.ACTION_UP:
-                        // Allow ScrollView to intercept touch events.
-                        scrollView.requestDisallowInterceptTouchEvent(false);
-                        return true;
-
-                    case MotionEvent.ACTION_MOVE:
-                        scrollView.requestDisallowInterceptTouchEvent(true);
-                        return false;
-
-                    default:
-                        return true;
-                }
-            }
-
-        });
+        //Utils.fixMapScroll(imageView,scrollView);
 
         toolbar.setTitle("새 약속 정하");
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-
-
-        materialCalendarView.state().edit()
-                .setMinimumDate(CalendarDay.today())
-                .commit();
-
-
-        materialCalendarView.setTitleFormatter(new TitleFormatter() {
-            @Override
-            public CharSequence format(CalendarDay calendarDay) {
-
-                StringBuffer buffer = new StringBuffer();
-                int yearOne = calendarDay.getYear();
-                int monthOne = calendarDay.getMonth();
-                buffer.append(yearOne).append("년  ").append(monthOne).append("월");
-                return buffer;
-            }
-        });
-
-        materialCalendarView.setOnDateChangedListener(new OnDateSelectedListener() {
-            @Override
-            public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
-                int year = date.getYear();
-                int month = date.getMonth();
-                int day = date.getDay();
-
-                if (selected) {
-
-                    realm.executeTransaction(new Realm.Transaction() {
-                        @Override
-                        public void execute(Realm realm) {
-                            MissionCartItem cart = realm.where(MissionCartItem.class).findFirst();
-                            //ItemForDateTime item = realm.createObject(ItemForDateTime.class);
-
-                            ItemForDateTime item = new ItemForDateTime();
-                            item.setDate(DateTimeUtils.makeDateForServer(year, month, day));
-                            item.setTime(DateTimeUtils.getCurrentHourMin());
-                            item.setYear(year);
-                            item.setMonth(month);
-                            item.setDay(day);
-                            item.setHour(cal.get(Calendar.HOUR_OF_DAY));
-                            item.setMin(cal.get(Calendar.MINUTE));
-
-                            stringList.add(item);
-
-                            Log.d("날짜", stringList.size() + "");
-                            Collections.sort(stringList, new Comparator<ItemForDateTime>() {
-                                @Override
-                                public int compare(ItemForDateTime o1, ItemForDateTime o2) {
-                                    return o1.getDate().compareTo(o2.getDate());
-                                }
-                            });
-
-                            recyclerDateTimeAdapter.notifyDataSetChanged();
-                        }
-                    });
-
-                } else {
-                    for (int i = 0; i < stringList.size(); i++) {
-
-                        if (stringList.get(i).getDate().equals(DateTimeUtils.makeDateForServer(year, month, day))) {
-
-                            Log.d("솔약국", i + "remove");
-                            final int position = i;
-                            realm.executeTransaction(new Realm.Transaction() {
-                                @Override
-                                public void execute(Realm realm) {
-                                    stringList.remove(position);
-                                }
-                            });
-                            recyclerDateTimeAdapter.notifyItemRemoved(i);
-                            recyclerDateTimeAdapter.notifyDataSetChanged();
-                        }
-                    }
-                }
-                if (materialCalendarView.getSelectedDates().size() == 0) {
-                    ly_date_error.setVisibility(View.VISIBLE);
-                } else {
-                    ly_date_error.setVisibility(View.GONE);
-                }
-
-            }
-        });
 
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
@@ -592,19 +401,26 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
             }
         });
 
-
-        checkLocationPermission();
-        onAddressSearch();
         openBankingSetting();
 
 
-        realmInit();
+        mHandler = new Handler();
+        runnable = new Runnable() {
+            @Override
+            public void run() {
+                initiate();
+                addMapFragment(new MapMissionFragment(scrollView));
+
+                addCalendarFragment(new CalendarSelectFragment(stringList, realm));
+            }
+        };
+        mHandler.post(runnable);
+
 
         //setDateTimeRecyclerView(stringList);
         //stringList.clear();
-
-
     }
+
 
     private void initiate() {
         long count = realm.where(MissionCartItem.class).count();
@@ -626,11 +442,9 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
                         int day = realmList.get(i).getDay();
                         Log.d("번들 날", year + " " + month + " " + day);
 
-                        materialCalendarView.setDateSelected(CalendarDay.from(year, month, day), true);
-
 
                     }
-                    setDateTimeRecyclerView(stringList);
+                    //setDateTimeRecyclerView(realmList);
                 }
             });
             Log.d("날짜", realm.where(MissionCartItem.class).count() + "카운트out");
@@ -638,43 +452,17 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
         } else {
             MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
             Log.d("날짜", item.getCalendarDayList().size() + "이니시");
-            RealmList<ItemForDateTime> realmList = item.getCalendarDayList();
+            stringList = item.getCalendarDayList();
             Log.d("날짜", stringList.size() + "string카운트");
-            stringList.clear();
             Log.d("날짜", stringList.size() + "string카운트");
-            stringList = realmList;
-            for (int i = 0; i < realmList.size(); i++) {
 
-                int year = realmList.get(i).getYear();
-                int month = realmList.get(i).getMonth();
-                int day = realmList.get(i).getDay();
-                Log.d("번들 날", year + " " + month + " " + day);
-
-                materialCalendarView.setDateSelected(CalendarDay.from(year, month, day), true);
-
-
-            }
-            setDateTimeRecyclerView(stringList);
+            //setDateTimeRecyclerView(stringList);
             textInputEditText.setText(item.getTitle());
 
 
             //recyclerDateTimeAdapter.notifyDataSetChanged();
 
         }
-
-    }
-
-    public void timeSet(int hour, int min, int position) {
-        realm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                stringList.get(position).setTime(DateTimeUtils.makeTimeForServer(hour, min));
-                stringList.get(position).setHour(hour);
-                stringList.get(position).setMin(min);
-                recyclerDateTimeAdapter.notifyDataSetChanged();
-
-            }
-        });
 
     }
 
@@ -704,49 +492,8 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
 
     }
 
-    private void commonTime() {
-        Log.d("다이소", "여기맞아?");
-
-        TimePickerDialog timePickerDialog = new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
-            @Override
-            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                realm.executeTransaction(new Realm.Transaction() {
-                    @Override
-                    public void execute(Realm realm) {
-
-                        for (int i = 0; i < stringList.size(); i++) {
-                            stringList.get(i).setHour(hourOfDay);
-                            stringList.get(i).setMin(minute);
-
-                            stringList.get(i).setTime(DateTimeUtils.makeTimeForServer(hourOfDay, minute));
-                        }
-                        recyclerDateTimeAdapter.notifyDataSetChanged();
-                    }
-                });
-
-
-            }
-        }, cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), false);
-        timePickerDialog.show();
-
-
-    }
-
-    private void resetSelection() {
-        materialCalendarView.clearSelection();
-        stringList.clear();
-        recyclerDateTimeAdapter.notifyDataSetChanged();
-
-
-    }
-
     private void accountDialog() {
-/*
-        FragmentManager fm = getSupportFragmentManager();
-        AccountDialog dialogFragment = new AccountDialog(this,positiveListener,negativeListener,userAccountItemList);
-        dialogFragment.show(fm, "fragment_dialog_test");
 
- */
 
         accountDialog = new AccountDialog(this, userAccountItemList);
 
@@ -758,17 +505,44 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
-        lp.width = (int) (metrics.widthPixels * 0.8f);
-        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+        lp.width = (int) (metrics.widthPixels*0.9f);
+        lp.height = (int) (metrics.heightPixels*0.7f);
+        //lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
         lp.gravity = Gravity.CENTER;
         lp.flags = WindowManager.LayoutParams.FLAG_DIM_BEHIND;
         lp.dimAmount = 0.8f;
 
 
         accountDialog.getWindow().setAttributes(lp);
-        accountDialog.getWindow().setBackgroundDrawable(getResources().getDrawable(R.drawable.rounded));
+        //accountDialog.getWindow().setBackgroundDrawable(getResources().getDrawable(R.drawable.rounded));
 
         accountDialog.show();
+
+
+    }
+    private void createBottomSheetDialog() {
+
+            View view = LayoutInflater.from(this).inflate(R.layout.fragment_account_dialog, null);
+
+            recyclerView_account = view.findViewById(R.id.recycler_account);
+            user_name = view.findViewById(R.id.user_name);
+            String fintech_num = getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("fintech_num", "");
+
+            user_name.setText(userAccountItemList.get(0).getUser_name());
+            setRecyclerView(fintech_num);
+
+
+            bottomSheetDialog = new BottomSheetDialog(this);
+            bottomSheetDialog.setContentView(view);
+            bottomSheetDialog.show();
+
+    }
+    private void setRecyclerView(String fintech_num) {
+        Log.d("계좌", userAccountItemList.size() + "");
+
+        RecyclerAccountAdapter recyclerAccountAdapter = new RecyclerAccountAdapter(this,userAccountItemList,fintech_num);
+        recyclerView_account.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView_account.setAdapter(recyclerAccountAdapter);
 
 
     }
@@ -783,14 +557,14 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
 
                 bank_name_tv.setText(bank_name);
                 account_num_tv.setText(account_num);
-                account_holder_name.setText(account_holder);
+
 
                 getSharedPreferences("OpenBanking", MODE_PRIVATE).edit().putString("fintech_num", fintech_num).apply();
 
             }
         }
 
-        accountDialog.dismiss();
+        bottomSheetDialog.dismiss();
 
 
     }
@@ -807,15 +581,6 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
 
     }
 
-    private void setDateTimeRecyclerView(List<ItemForDateTime> stringList) {
-
-
-        //Log.d("담쟁이2","넘어가"+stringList.size());
-        date_time_recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerDateTimeAdapter = new RecyclerDateTimeAdapter(this, stringList, realm);
-        date_time_recyclerView.setAdapter(recyclerDateTimeAdapter);
-
-    }
 
     @Override
     public void onClick(View v) {
@@ -825,44 +590,14 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
                 dataCheck();
                 //dataSave();
                 break;
-            case R.id.common_time:
-                commonTime();
-                break;
-            case R.id.reset:
-                materialCalendarView.clearSelection();
-                realm.executeTransaction(new Realm.Transaction() {
-                    @Override
-                    public void execute(Realm realm) {
-                        stringList.deleteAllFromRealm();
-                        recyclerDateTimeAdapter.notifyDataSetChanged();
-                        ly_date_error.setVisibility(View.VISIBLE);
-                    }
-                });
-                break;
-            case R.id.radius:
 
-                if (mapView.isShowingCurrentLocationMarker()) {
-                    //double lat = mapView.getMapCenterPoint().getMapPointGeoCoord().latitude;
-                    //double lng = mapView.getMapCenterPoint().getMapPointGeoCoord().longitude;
-                    mapView.moveCamera(CameraUpdateFactory.newMapPoint(MapPoint.mapPointWithGeoCoord(current_latitude, current_longitude)));
-
-
-                } else {
-                    Toast.makeText(getApplicationContext(), "위치정보를 수신중입니다.", Toast.LENGTH_LONG).show();
-                }
-                break;
             case R.id.detail_setting:
                 startActivity(new Intent(SingleModeActivity.this, DetailSettingActivity.class));
                 break;
-            case R.id.zoom_in:
-                mapView.zoomIn(true);
 
-                break;
-            case R.id.zoom_out:
-                mapView.zoomOut(true);
-                break;
             case R.id.account_select:
-                accountDialog();
+                //accountDialog();
+                createBottomSheetDialog();
 
 
         }
@@ -880,71 +615,16 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
             } else {
                 ly_contact_error.setVisibility(View.VISIBLE);
             }
+            refreshFragment(new SingleModeFragment());
             //setTransferRecyclerView(realmResults2);
-            amountDisplay();
 
         }
 
     }
 
-    private void realmInit() {
 
 
-        loadData();
 
-    }
-
-    public void amountDisplay() {
-        RealmResults<ContactItem> realmResults2 = realm.where(ContactItem.class).findAll();
-        int amount = 0;
-        for (int i = 0; i < realmResults2.size(); i++) {
-            amount = amount + realmResults2.get(i).getAmount();
-        }
-        DecimalFormat decimalFormat = new DecimalFormat("###,###");
-        Log.d("옵티마", decimalFormat.format(amount));
-        total_amount.setText(decimalFormat.format(amount));
-
-    }
-
-    private void loadData() {
-        RealmResults<ContactItem> realmResults2 = realm.where(ContactItem.class).findAll();
-        if (realmResults2.size() > 0) {
-            ly_contact_error.setVisibility(View.GONE);
-        }
-
-        //setTransferRecyclerView(realmResults2);
-        amountDisplay();
-
-
-        int count = 0;
-
-        if (count == 0) {
-            hour = calendar.get(Calendar.HOUR_OF_DAY);
-            min = calendar.get(Calendar.MINUTE);
-
-
-        } else {
-            MissionCartItem cartItem = realm.where(MissionCartItem.class).findFirst();
-            Log.d("미션아이디", "찾기 " + cartItem.getHour());
-            Log.d("미션아이디", "찾기 " + cartItem.getMin());
-            Log.d("미션아이디", "찾기 " + cartItem.getAddress());
-            Log.d("미션아이디", "찾기 " + cartItem.getTitle());
-            Log.d("미션아이디", "찾기 " + cartItem.getMax_date());
-            Log.d("미션아이디", "찾기 " + cartItem.getMin_date());
-            Log.d("미션아이디", "찾기 리스" + cartItem.getCalendarDayList().size());
-
-
-            recyclerDateTimeAdapter.notifyDataSetChanged();
-            hour = cartItem.getHour();
-            min = cartItem.getMin();
-            min_date = cartItem.getMin_date();
-            Log.d("미션아이디", " min " + min);
-            textInputEditText.setText(cartItem.getTitle());
-
-        }
-
-
-    }
 
     private void dataCheck() {
         MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
@@ -963,8 +643,8 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
         RealmResults<ItemForFriends> itemForFriends = realm.where(ItemForFriends.class).findAll();
 
 
-        mapReverseGeoCoder = new MapReverseGeoCoder("7ff2c8cb39b23bad249dc2f805898a69", mapView.getMapCenterPoint(), this, this);
-        mapReverseGeoCoder.startFindingAddress();
+        //mapReverseGeoCoder = new MapReverseGeoCoder("7ff2c8cb39b23bad249dc2f805898a69", mapView.getMapCenterPoint(), this, this);
+        //mapReverseGeoCoder.startFindingAddress();
         if (TextUtils.isEmpty(item.getTitle())) {
             isValid = false;
             Toast.makeText(getApplicationContext(), "제목을 입력해주세요", Toast.LENGTH_LONG).show();
@@ -1078,7 +758,7 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
         }
         if (mission_mode == 1) {
 
-            FirebaseDB.registerInvitationForFriend(mRootRef, user_id, realm, item);
+            FirebaseDB.registerInvitationForFriend(mRootRef, this, realm, item);
 
 
         }
@@ -1119,41 +799,11 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
 
     }
 
-    private void checkDateTime() {
-        long diff = 0;
-        long now = System.currentTimeMillis();
-        DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.KOREA);
-        String input_time = min_date + " " + hour + ":" + min;
-        Log.d("싱글", input_time + "  inputdate");
-        try {
-            Date input_date = sdf.parse(input_time);
-            diff = (input_date.getTime() - now) / 60000;
-            Log.d("싱글", now + "\n" + input_date.getTime() + "\n" + diff);
-        } catch (ParseException e) {
-            e.getErrorOffset();
-        }
-
-        if (diff >= 30) {
-
-            wrong_time_tv.setVisibility(View.GONE);
-        } else {
-
-            if (!no_time_switch.isChecked()) {
-
-                wrong_time_tv.setVisibility(View.GONE);
-            } else {
-
-                wrong_time_tv.setVisibility(View.VISIBLE);
-            }
-
-        }
-
-
-    }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mHandler.removeCallbacks(runnable);
         realm.close();
 
         Log.d("목장", "onDestroy");
@@ -1171,24 +821,6 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
     @Override
     public void onBackPressed() {
         Log.d("번들", "onBackPressed");
-/*
-        realm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-
-                //RealmResults<ItemForDateTime> realmResults = realm.where(ItemForDateTime.class).findAll();
-                //realmResults.deleteAllFromRealm();
-                if (stringList.size() != 0) {
-                    Log.d("번들", "저장" + stringList.size());
-                    //realm.where(MissionCartItem.class).findAll().deleteAllFromRealm();
-                    MissionCartItem items = realm.createObject(MissionCartItem.class);
-                    items.setCalendarDayList(stringList);
-                    items.setMin_date(DateTimeUtils.getCurrentTime());
-                }
-            }
-        });
-
- */
 
         realm.close();
 
@@ -1197,119 +829,6 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
 
     }
 
-    private void onAddressSearch() {
-
-
-        //SearchView searchView = (SearchView) toolbar.getMenu().findItem(R.id.action_search).getActionView();
-        searchView.setQueryHint("장소,주소 검색..");
-
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(final String query) {
-                mapView.removeAllPOIItems();
-                loadAddress(query);
-                final float scale = getResources().getDisplayMetrics().density;
-                int pixels = (int) (300 * scale + 0.5f);
-                //map_layout.getLayoutParams().height = pixels;
-                searchView.clearFocus();
-
-
-                return true;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-
-
-                return true;
-            }
-        });
-
-    }
-
-    private void loadAddress(String query) {
-        final Retrofit retrofit2 = new Retrofit.Builder().
-                addConverterFactory(GsonConverterFactory.create()).
-                baseUrl(KeywordSearch.base).
-                build();
-        KeywordSearch keywordSearch = retrofit2.create(KeywordSearch.class);
-        Call<JsonObject> call = keywordSearch.keywordSearch(KeywordSearch.key, query);
-
-        call.enqueue(new Callback<JsonObject>() {
-            @Override
-            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                String con = new GsonBuilder().setPrettyPrinting().create().toJson(response.body());
-                List<PlaceItem> placeList = new ArrayList<>();
-                try {
-
-                    JSONObject obj = new JSONObject(con);
-                    String check_string = obj.getJSONObject("meta").getString("total_count");
-                    if (Integer.valueOf(check_string) == 0) {
-                        PlaceItem placeItem = new PlaceItem();
-                        placeItem.setPlaceName(query + "(와)과 일치하는 검색결과가 없습니다");
-                        placeList.add(placeItem);
-                    } else {
-                        JSONArray jsonArray = obj.getJSONArray("documents");
-                        for (int i = 0; i < jsonArray.length(); i++) {
-                            PlaceItem placeItem = new PlaceItem();
-                            JSONObject object = (JSONObject) jsonArray.get(i);
-                            if ((object.getString("road_address_name") == null)) {
-                                placeItem.setRoadAddress(object.getString("address_name"));
-                                placeItem.setOldAddress(" ");
-
-                            } else {
-                                placeItem.setRoadAddress(object.getString("road_address_name"));
-                                placeItem.setOldAddress(object.getString("address_name"));
-                            }
-                            placeItem.setPlaceName(object.getString("place_name"));
-                            placeItem.setLatitude(object.getDouble("y"));
-                            placeItem.setLongitude(object.getDouble("x"));
-                            MapPOIItem customMarker = new MapPOIItem();
-                            customMarker.setItemName(object.getString("place_name"));
-                            customMarker.setTag(1);
-                            customMarker.setMapPoint(MapPoint.mapPointWithGeoCoord(object.getDouble("y"), object.getDouble("x")));
-                            customMarker.setMarkerType(MapPOIItem.MarkerType.BluePin); // 마커타입을 커스텀 마커로 지정.
-                            customMarker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin);
-
-
-                            mapView.addPOIItem(customMarker);
-                            Log.d("장소", object.getString("place_name"));
-
-
-                            placeList.add(placeItem);
-
-                            //  String address = ((JSONObject) tempObj.get("address")).get("address_name").toString();
-
-
-                        }
-                    }
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-                setupRecyclerView(placeList);
-
-
-            }
-
-            @Override
-            public void onFailure(Call<JsonObject> call, Throwable t) {
-
-                Toast.makeText(getApplicationContext(), "주소를 불러올 수 없습니다.", Toast.LENGTH_LONG).show();
-
-            }
-        });
-
-    }
-
-    private void setupRecyclerView(List<PlaceItem> placeList) {
-
-        placeRecyclerAdapter = new PlaceRecyclerAdapter(placeList, this);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(placeRecyclerAdapter);
-
-    }
 
     public interface KeywordSearch {
         String base = "https://dapi.kakao.com/";
@@ -1320,214 +839,6 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
         Call<JsonObject> keywordSearch(@Header("Authorization") String key, @Query("query") String query);
     }
 
-
-    @Override
-    public void onReverseGeoCoderFoundAddress(MapReverseGeoCoder mapReverseGeoCoder, String s) {
-        realm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
-                item.setAddress(s);
-            }
-        });
-
-
-    }
-
-    @Override
-    public void onReverseGeoCoderFailedToFindAddress(MapReverseGeoCoder mapReverseGeoCoder) {
-
-    }
-
-    @Override
-    public void onCurrentLocationUpdate(MapView mapView, MapPoint mapPoint, float v) {
-        MapPoint.GeoCoordinate mapPointGeo = mapPoint.getMapPointGeoCoord();
-        current_latitude = mapPointGeo.latitude;
-        current_longitude = mapPointGeo.longitude;
-
-
-        location_loading.setVisibility(View.GONE);
-        location_loaded.setVisibility(View.VISIBLE);
-
-    }
-
-    @Override
-    public void onCurrentLocationDeviceHeadingUpdate(MapView mapView, float v) {
-
-    }
-
-    @Override
-    public void onCurrentLocationUpdateFailed(MapView mapView) {
-
-    }
-
-    @Override
-    public void onCurrentLocationUpdateCancelled(MapView mapView) {
-
-    }
-
-    @Override
-    public void onMapViewInitialized(MapView mapView) {
-
-
-        MapPoint.GeoCoordinate geoCoordinate = mapView.getMapCenterPoint().getMapPointGeoCoord();
-
-        MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
-        if (item.getLat() == 0.0) {
-            Log.d("위치", "초기화됨");
-            SharedPreferences preferences = getSharedPreferences("location_setting", MODE_PRIVATE);
-            double lat = Double.longBitsToDouble(preferences.getLong("lat", 0));
-            double lng = Double.longBitsToDouble(preferences.getLong("lng", 0));
-            Log.d("위치", lat + "");
-            Log.d("위치", lng + "");
-            mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(lat, lng), true);
-            drawCircle(geoCoordinate.latitude, geoCoordinate.longitude, radius);
-        } else {
-            Log.d("위치", "초기화안됨" + item.getLat());
-            mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(item.getLat(), item.getLng()), true);
-            drawCircle(geoCoordinate.latitude, geoCoordinate.longitude, radius);
-        }
-
-
-    }
-
-
-    @Override
-    public void onMapViewCenterPointMoved(MapView mapView, MapPoint mapPoint) {
-
-    }
-
-    @Override
-    public void onMapViewZoomLevelChanged(MapView mapView, int i) {
-
-    }
-
-    @Override
-    public void onMapViewSingleTapped(MapView mapView, MapPoint mapPoint) {
-
-    }
-
-    @Override
-    public void onMapViewDoubleTapped(MapView mapView, MapPoint mapPoint) {
-
-    }
-
-    @Override
-    public void onMapViewLongPressed(MapView mapView, MapPoint mapPoint) {
-
-    }
-
-    @Override
-    public void onMapViewDragStarted(MapView mapView, MapPoint mapPoint) {
-
-    }
-
-    @Override
-    public void onMapViewDragEnded(MapView mapView, MapPoint mapPoint) {
-
-    }
-
-    @Override
-    public void onMapViewMoveFinished(MapView mapView, MapPoint mapPoint) {
-        MapPoint.GeoCoordinate geoCoordinate = mapView.getMapCenterPoint().getMapPointGeoCoord();
-        drawCircle(geoCoordinate.latitude, geoCoordinate.longitude, radius);
-        realm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
-                item.setLat(geoCoordinate.latitude);
-                item.setLng(geoCoordinate.longitude);
-            }
-        });
-
-    }
-
-    private void drawCircle(double lat, double lng, int radius) {
-        mapView.removeAllCircles();
-        MapCircle circle = new MapCircle(
-                MapPoint.mapPointWithGeoCoord(lat, lng), // center
-                radius, // radius
-                Color.argb(128, 255, 0, 0), // strokeColor
-                Color.argb(128, 255, 255, 0) // fillColor
-        );
-        circle.setTag(5678);//태그는 왜달지
-        mapView.addCircle(circle);
-
-
-    }
-
-    public void moveSelectedPlace(double lat, double lng) {
-        mapView.moveCamera(CameraUpdateFactory.newMapPoint(MapPoint.mapPointWithGeoCoord(lat, lng)));
-
-    }
-
-
-    private void checkLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            Log.d("퍼미션", "이미 승인받음");
-
-            mapView.setCurrentLocationEventListener(this);
-            mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving);
-        } else {
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-                new AlertDialog.Builder(this)
-                        .setTitle("Location Permission Needed")
-                        .setMessage("This app needs the Location permission, please accept to use location functionality")
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                //Prompt the user once explanation has been shown
-                                ActivityCompat.requestPermissions(SingleModeActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST_LOCATION);
-                            }
-                        })
-                        .create()
-                        .show();
-
-
-            } else {
-                // No explanation needed, we can request the permission.
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        MY_PERMISSIONS_REQUEST_LOCATION);
-            }
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_LOCATION: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission was granted, yay! Do the
-                    // location-related task you need to do.
-                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                        Log.d("퍼미션", "여기는 왜 못들어와");
-
-                        mapView.setCurrentLocationEventListener(this);
-                        mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving);
-
-                    }
-
-                } else {
-
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                    Toast.makeText(this, "permission denied", Toast.LENGTH_LONG).show();
-                    finish();
-                }
-                break;
-            }
-
-            // other 'case' lines to check for other
-            // permissions this app might request
-        }
-    }
 
     private void openBankingSetting() {
         SharedPreferences sharedPreferences = getSharedPreferences("OpenBanking", MODE_PRIVATE);
@@ -1562,7 +873,6 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
 
                 bank_name_tv.setText(bank_name);
                 account_num_tv.setText(account_num);
-                account_holder_name.setText(account_holder);
             }
         }
 
@@ -1656,6 +966,18 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
         fragmentTransaction.add(R.id.fragment_container, fragment).commit();
     }
 
+    private void addMapFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.add(R.id.map_fragment, fragment).commit();
+    }
+
+    private void addCalendarFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.add(R.id.calendar_container, fragment).commit();
+    }
+
     private void hideFragment(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -1666,6 +988,13 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.show(fragment).commit();
+    }
+    private void refreshFragment(Fragment fragment){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.detach(fragment).attach(fragment).commit();
+
+
     }
 
 }

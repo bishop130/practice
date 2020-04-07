@@ -102,6 +102,7 @@ public class DaumMapActivity extends AppCompatActivity implements MapView.Curren
     Bitmap bm;
     LinearLayout map_capture_layout;
     LinearLayout daum_map_loot_view;
+
     String address;
 
     @Override
@@ -220,8 +221,8 @@ public class DaumMapActivity extends AppCompatActivity implements MapView.Curren
 
     private void setupRecyclerView(List<PlaceItem> placeList) {
 
-        recyclerAdapter = new PlaceRecyclerAdapter(placeList, this);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        //recyclerAdapter = new PlaceRecyclerAdapter(placeList, this);
+        //recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(recyclerAdapter);
 
     }

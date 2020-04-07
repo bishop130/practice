@@ -2,6 +2,8 @@ package com.suji.lj.myapplication.Adapters;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.OvalShape;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -73,6 +75,8 @@ public class RecyclerFriendsAdapter extends RecyclerView.Adapter<RecyclerFriends
         holder.contact_container.setBackgroundColor(itemList.get(position).isSelected() ? Color.WHITE : Color.WHITE);
         holder.select_box.setImageDrawable(itemList.get(position).isSelected() ? context.getDrawable(R.drawable.checked_icon) : context.getDrawable(R.drawable.ring));
 
+        holder.checked_contact.setBackground(new ShapeDrawable(new OvalShape()));
+        holder.checked_contact.setClipToOutline(true);
 
 
         if(!itemList.get(position).getImage().isEmpty()){

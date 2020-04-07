@@ -195,8 +195,6 @@ public class MissionCartActivity extends AppCompatActivity implements View.OnCli
         bank_name_tv = findViewById(R.id.bank_name);
         account_num_tv = findViewById(R.id.account_num);
         //nick_name = view.findViewById(R.id.nick_name);
-        friends_num = findViewById(R.id.friends_num);
-        transfer_amount = findViewById(R.id.transfer_amount);
         register_send = findViewById(R.id.register_send);
 
         //etl = findViewById(R.id.text_input_layout);

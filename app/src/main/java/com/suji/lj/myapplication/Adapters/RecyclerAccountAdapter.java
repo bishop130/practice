@@ -22,10 +22,12 @@ public class RecyclerAccountAdapter extends RecyclerView.Adapter<RecyclerAccount
     List<UserAccountItem> userAccountItemList;
     private  View.OnClickListener positiveListener;
 
+    String fintech_num;
     Context context;
-    public RecyclerAccountAdapter(Context context, List<UserAccountItem>userAccountItemList){
+    public RecyclerAccountAdapter(Context context, List<UserAccountItem>userAccountItemList,String fintech_num){
         this.userAccountItemList = userAccountItemList;
         this.context = context;
+        this.fintech_num = fintech_num;
 
 
 
@@ -47,6 +49,9 @@ public class RecyclerAccountAdapter extends RecyclerView.Adapter<RecyclerAccount
     @Override
     public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
 
+        if(userAccountItemList.get(position).getFintech_use_num().equals(fintech_num)){
+            holder.selected_account.setVisibility(View.VISIBLE);
+        }
         Log.d("계좌",userAccountItemList.get(position).getAccount_num_masked());
         holder.bank_name.setText(userAccountItemList.get(position).getBank_name());
         holder.account_num.setText(userAccountItemList.get(position).getAccount_num_masked());
@@ -69,6 +74,7 @@ public class RecyclerAccountAdapter extends RecyclerView.Adapter<RecyclerAccount
 
         TextView bank_name,account_num;
         LinearLayout ly_account;
+        TextView selected_account;
 
 
 
@@ -78,6 +84,7 @@ public class RecyclerAccountAdapter extends RecyclerView.Adapter<RecyclerAccount
             ly_account = itemView.findViewById(R.id.ly_account);
             bank_name = itemView.findViewById(R.id.bank_name);
             account_num = itemView.findViewById(R.id.account_num);
+            selected_account = itemView.findViewById(R.id.selected_account);
 
 
         }

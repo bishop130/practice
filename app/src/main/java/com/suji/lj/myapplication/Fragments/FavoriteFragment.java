@@ -45,6 +45,7 @@ import com.leinardi.android.speeddial.SpeedDialView;
 import com.suji.lj.myapplication.Items.ItemForMissionByDay;
 import com.suji.lj.myapplication.Items.MissionInfoList;
 import com.suji.lj.myapplication.Items.RecyclerItem;
+import com.suji.lj.myapplication.Main2Activity;
 import com.suji.lj.myapplication.MissionDetailActivity;
 import com.suji.lj.myapplication.MultiModeActivity;
 import com.suji.lj.myapplication.R;
@@ -179,7 +180,7 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
                         speedDialView.close();
                         return false;
                     case R.id.fab_custom_color:
-                        startActivity(new Intent(mContext, MultiModeActivity.class));
+                        startActivity(new Intent(mContext, Main2Activity.class));
                         Toast.makeText(mContext, "친구랑같이", Toast.LENGTH_LONG).show();
                         return false;
                     default:
