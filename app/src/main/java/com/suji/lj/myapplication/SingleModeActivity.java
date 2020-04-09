@@ -240,7 +240,6 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
     Intent intent;
 
 
-
     RecyclerView transfer_recyclerView;
     RecyclerTransferRespectivelyAdapter transfer_recycler_adapter;
 
@@ -319,7 +318,6 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
         title = findViewById(R.id.title);
 
 
-
         Realm.init(this);
 
         realm = Realm.getDefaultInstance();
@@ -368,7 +366,7 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
                         break;
                     case 1:
                         if (fb == null) {
-                            fb = new MultiModeFragment();
+                            fb = new MultiModeFragment(SingleModeActivity.this);
                             addFragment(fb);
                         }
 
@@ -505,8 +503,8 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
-        lp.width = (int) (metrics.widthPixels*0.9f);
-        lp.height = (int) (metrics.heightPixels*0.7f);
+        lp.width = (int) (metrics.widthPixels * 0.9f);
+        lp.height = (int) (metrics.heightPixels * 0.7f);
         //lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
         lp.gravity = Gravity.CENTER;
         lp.flags = WindowManager.LayoutParams.FLAG_DIM_BEHIND;
@@ -520,27 +518,29 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
 
 
     }
+
     private void createBottomSheetDialog() {
 
-            View view = LayoutInflater.from(this).inflate(R.layout.fragment_account_dialog, null);
+        View view = LayoutInflater.from(this).inflate(R.layout.fragment_account_dialog, null);
 
-            recyclerView_account = view.findViewById(R.id.recycler_account);
-            user_name = view.findViewById(R.id.user_name);
-            String fintech_num = getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("fintech_num", "");
+        recyclerView_account = view.findViewById(R.id.recycler_account);
+        user_name = view.findViewById(R.id.user_name);
+        String fintech_num = getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("fintech_num", "");
 
-            user_name.setText(userAccountItemList.get(0).getUser_name());
-            setRecyclerView(fintech_num);
+        user_name.setText(userAccountItemList.get(0).getUser_name());
+        setRecyclerView(fintech_num);
 
 
-            bottomSheetDialog = new BottomSheetDialog(this);
-            bottomSheetDialog.setContentView(view);
-            bottomSheetDialog.show();
+        bottomSheetDialog = new BottomSheetDialog(this);
+        bottomSheetDialog.setContentView(view);
+        bottomSheetDialog.show();
 
     }
+
     private void setRecyclerView(String fintech_num) {
         Log.d("계좌", userAccountItemList.size() + "");
 
-        RecyclerAccountAdapter recyclerAccountAdapter = new RecyclerAccountAdapter(this,userAccountItemList,fintech_num);
+        RecyclerAccountAdapter recyclerAccountAdapter = new RecyclerAccountAdapter(this, userAccountItemList, fintech_num);
         recyclerView_account.setLayoutManager(new LinearLayoutManager(this));
         recyclerView_account.setAdapter(recyclerAccountAdapter);
 
@@ -615,15 +615,12 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
             } else {
                 ly_contact_error.setVisibility(View.VISIBLE);
             }
-            refreshFragment(new SingleModeFragment());
+            //refreshFragment(new SingleModeFragment());
             //setTransferRecyclerView(realmResults2);
 
         }
 
     }
-
-
-
 
 
     private void dataCheck() {
@@ -989,7 +986,8 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.show(fragment).commit();
     }
-    private void refreshFragment(Fragment fragment){
+
+    private void refreshFragment(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.detach(fragment).attach(fragment).commit();

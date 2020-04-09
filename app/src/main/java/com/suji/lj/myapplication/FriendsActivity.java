@@ -21,13 +21,9 @@ import com.kakao.friends.response.AppFriendsResponse;
 import com.kakao.kakaotalk.callback.TalkResponseCallback;
 import com.kakao.kakaotalk.v2.KakaoTalkService;
 import com.kakao.network.ErrorResult;
-import com.suji.lj.myapplication.Adapters.ContactResponse;
 import com.suji.lj.myapplication.Adapters.RecyclerFriendsAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerFriendsSelectedAdapter;
-import com.suji.lj.myapplication.Adapters.RecyclerViewContactAdapter;
-import com.suji.lj.myapplication.Items.ContactItem;
 import com.suji.lj.myapplication.Items.ItemForFriends;
-import com.suji.lj.myapplication.Items.ItemForFriendsList;
 import com.suji.lj.myapplication.Utils.Utils;
 
 import java.util.ArrayList;
@@ -36,7 +32,7 @@ import java.util.List;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
-public class FriendsActivity extends AppCompatActivity implements RecyclerFriendsSelectedAdapter.OnFriendsCountListener, RecyclerFriendsAdapter.OnFriendsCountFromContactListener{
+public class FriendsActivity extends AppCompatActivity implements RecyclerFriendsSelectedAdapter.OnFriendsCountListener{
     RecyclerFriendsAdapter adapter;
     RecyclerFriendsSelectedAdapter selectedAdapter;
     List<ItemForFriends> listItem;
@@ -103,9 +99,9 @@ public class FriendsActivity extends AppCompatActivity implements RecyclerFriend
     }
     public void recyclerViewConfirmed(List<ItemForFriends> itemList) {
 /*
-        contactResponse = new ContactResponse(this,itemList);
+        recyclerContactFriendSelectAdapter = new RecyclerContactFriendSelectAdapter(this,itemList);
         confirmed_recycler.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false));
-        confirmed_recycler.setAdapter(contactResponse);
+        confirmed_recycler.setAdapter(recyclerContactFriendSelectAdapter);
 
  */
         FlexboxLayoutManager layoutManager = new FlexboxLayoutManager(this);
@@ -131,8 +127,8 @@ public class FriendsActivity extends AppCompatActivity implements RecyclerFriend
         selectedAdapter.notifyItemRangeChanged(position, selected_item.size());
 
         //listItem.remove(position);
-        //contactResponse.notifyItemRemoved(position);
-        //contactResponse.notifyDataSetChanged();
+        //recyclerContactFriendSelectAdapter.notifyItemRemoved(position);
+        //recyclerContactFriendSelectAdapter.notifyDataSetChanged();
         adapter.notifyDataSetChanged();
         RealmResults<ItemForFriends> list = realm.where(ItemForFriends.class).findAll();
         for (int i = 0; i < list.size(); i++) {
@@ -184,7 +180,7 @@ public class FriendsActivity extends AppCompatActivity implements RecyclerFriend
 
 
         Log.d("라니스터", "test호출");
-        //contactResponse.notifyDataSetChanged();
+        //recyclerContactFriendSelectAdapter.notifyDataSetChanged();
 
         //adapter.notifyItemRemoved(position);
         adapter.notifyDataSetChanged();
@@ -267,12 +263,6 @@ public class FriendsActivity extends AppCompatActivity implements RecyclerFriend
 
 
     }
-
-    @Override
-    public void onFriendsCountFromContact(int num) {
-        confirm_button.setText("(" + num + ") 선택완료");
-    }
-
 
     private void contactSorting() {
 

@@ -59,6 +59,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -96,7 +97,7 @@ public class Utils {
     }
 
 
-    public ArrayList<ContactItem> getContacts() {
+    public static ArrayList<ContactItem> getContacts() {
         ArrayList<ContactItem> listItem = new ArrayList<>();
         Query q = Contacts.getQuery();
         q.include(Contact.Field.ContactId, Contact.Field.DisplayName, Contact.Field.PhoneNumber);
@@ -559,7 +560,7 @@ public class Utils {
     }
 
 
-    public static void fixMapScroll(ImageView imageView, NestedScrollView scrollView){
+    public static void fixMapScroll(ImageView imageView, NestedScrollView scrollView) {
 
         imageView.setOnTouchListener(new View.OnTouchListener() {
 
@@ -591,7 +592,6 @@ public class Utils {
         });
 
 
-
     }
 
     public static void slideView(View view,
@@ -619,4 +619,85 @@ public class Utils {
         animationSet.start();
     }
 
+    public static List<Integer> makeBalancePortion(int person_num) {
+        List<Integer> list = new ArrayList<>();
+        double result;
+
+        for (int i = 0; i < person_num; i++) {
+            result = 1.0 / person_num;
+            list.add((int) (result * 100));
+        }
+        Log.d("에디트", "리스트포션 내용");
+        return list;
+    }
+
+    public static List<Integer> makeRankPriorityPortion(int person_num) {
+        List<Integer> list_child = new ArrayList<>();
+        List<Double> list_mother = new ArrayList<>();
+        List<Integer> list_portion = new ArrayList<>();
+
+        double sum;
+        double num1 = 0.0;
+        double num2 = 1.0;
+        double total = 0.0;
+        double result;
+        int total_portion = 0;
+
+        for (int i = 0; i < person_num; i++) {
+
+            sum = num1 + num2; // 두 값을 더한 후
+            num1 = num2;
+            num2 = sum; //
+            list_mother.add(sum);
+            total = total + sum;
+
+        }
+
+
+        for (int i = 0; i < person_num; i++) {
+            result = list_mother.get(i) / total;
+            Log.d("더블", (int) result + "");
+            list_portion.add((int) (result * 100));
+
+        }
+        Collections.reverse(list_portion);
+        for (int i = 0; i < person_num; i++) {
+
+            total_portion += list_portion.get(i);
+
+        }
+        if (!(total_portion == 100)) {
+
+            for (int i = 0; i < person_num; i++) {
+
+                list_portion.set(i, list_portion.get(i) + 1);
+                if (is100(list_portion)) {
+                    break;
+                }
+
+
+            }
+        }
+
+        return list_portion;
+
+
+    }
+
+    public static boolean is100(List<Integer> list) {
+
+        int total_portion = 0;
+        for (int i = 0; i < list.size(); i++) {
+
+            total_portion += list.get(i);
+
+        }
+        if (total_portion == 100) {
+            return true;
+        } else {
+            return false;
+
+        }
+
+    }
 }

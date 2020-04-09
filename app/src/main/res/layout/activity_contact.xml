@@ -34,24 +34,23 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:id="@+id/recycler_view_confirmed"/>
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_ly"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    </com.google.android.material.tabs.TabLayout>
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/wall_paper2"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
 
-        <androidx.appcompat.widget.SearchView
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:id="@+id/contact_search"
-            />
+    </FrameLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_view_contact"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scrollbars="vertical"
-            android:layout_below="@+id/contact_search"
-            android:splitMotionEvents="false"
-            android:clipToPadding="false"
-            android:paddingBottom="80dp"
-            />
+
 
 
 

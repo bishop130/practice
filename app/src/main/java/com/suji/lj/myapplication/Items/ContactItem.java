@@ -14,6 +14,10 @@ public class ContactItem extends RealmObject implements Parcelable {
     private boolean isSelected;
     private int position;
     private int amount;
+    private boolean friend_selected;
+    private int friend_position;
+    private int contact_or_friend;
+
 
     public ContactItem() {
 
@@ -33,6 +37,9 @@ public class ContactItem extends RealmObject implements Parcelable {
         dest.writeByte((byte) (this.isSelected ? 1 : 0));
         dest.writeInt(this.position);
         dest.writeInt(this.amount);
+        dest.writeByte((byte) (this.friend_selected ? 1 : 0));
+        dest.writeInt(this.friend_position);
+        dest.writeInt(this.contact_or_friend);
 
 
     }
@@ -58,6 +65,12 @@ public class ContactItem extends RealmObject implements Parcelable {
         this.isSelected = in.readByte() != 0;
         this.position = in.readInt();
         this.amount = in.readInt();
+        this.friend_selected = in.readByte() !=0;
+        this.friend_position = in.readInt();
+        this.contact_or_friend = in.readInt();
+
+
+
     }
 
 
@@ -99,6 +112,30 @@ public class ContactItem extends RealmObject implements Parcelable {
 
     public void setAmount(int amount) {
         this.amount = amount;
+    }
+
+    public boolean isFriend_selected() {
+        return friend_selected;
+    }
+
+    public void setFriend_selected(boolean friend_selected) {
+        this.friend_selected = friend_selected;
+    }
+
+    public int getFriend_position() {
+        return friend_position;
+    }
+
+    public void setFriend_position(int friend_position) {
+        this.friend_position = friend_position;
+    }
+
+    public int getContact_or_friend() {
+        return contact_or_friend;
+    }
+
+    public void setContact_or_friend(int contact_or_friend) {
+        this.contact_or_friend = contact_or_friend;
     }
 
     @SuppressWarnings("rawtypes")

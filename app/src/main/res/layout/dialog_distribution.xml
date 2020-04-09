@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/White">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="분배비율설정"
+        android:layout_marginBottom="8dp"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="12dp"
+        android:textStyle="bold"
+        />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/wall_paper2"
+        android:layout_marginBottom="20dp"/>
+
+    <LinearLayout
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+
+        <TextView
+            android:id="@+id/equal_distribution"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="균등분배"
+            android:textColor="@color/White"
+            android:layout_marginStart="20dp"
+            android:background="@drawable/rounded_rectangle"
+            android:padding="8dp"
+            android:textSize="14sp"/>
+        <TextView
+            android:id="@+id/rank_distribution"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="순위가중분배"
+            android:textColor="@color/White"
+            android:layout_marginStart="20dp"
+            android:padding="8dp"
+            android:background="@drawable/rounded_rectangle"
+            android:textSize="14sp"/>
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="순위"
+            android:textColor="@color/black"
+            android:gravity="center"
+            android:layout_weight="5"/>
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:gravity="center"
+            android:text="분배비율"
+            android:layout_weight="4"/>
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"/>
+
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/recycler_distribution"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"/>
+        <TextView
+            android:id="@+id/total_portion"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="0%"
+            android:textColor="@color/black"
+            android:textSize="24sp"
+            android:layout_weight="4"
+            android:gravity="center"
+            android:layout_gravity="end"/>
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"/>
+    </LinearLayout>
+    <TextView
+        android:id="@+id/confirm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="확인"
+        android:textSize="18sp"
+        android:textColor="@color/black"
+        android:layout_marginTop="12dp"
+        android:layout_gravity="end"
+        android:layout_marginEnd="24dp"
+        android:padding="12dp"/>
+
+
+
+
+</LinearLayout>

@@ -48,8 +48,14 @@ public class RecyclerTransferRespectivelyAdapter extends RecyclerView.Adapter<Re
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
+        if(realmResults.get(position).getContact_or_friend()==1) {
 
+            holder.name.setTextColor(context.getResources().getColor(R.color.colorPrimary));
             holder.name.setText("# " + realmResults.get(position).getDisplayName());
+        }else{
+            holder.name.setText("# " + realmResults.get(position).getDisplayName());
+
+        }
 
 
     }

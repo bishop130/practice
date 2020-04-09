@@ -37,17 +37,16 @@ public class RecyclerViewContactAdapter extends RecyclerView.Adapter<RecyclerVie
     private Context context;
     private int count = 0;
     private static final int MAX_CONTACTS = 10;
-    OnFriendsCountFromContactListener onFriendsCountFromContactListener;
+
     Realm realm;
 
 
-    public RecyclerViewContactAdapter(Context context, List<ContactItem> itemList, OnFriendsCountFromContactListener onFriendsCountFromContactListener, Realm realm) {
+    public RecyclerViewContactAdapter(Context context, List<ContactItem> itemList, Realm realm) {
         this.itemList = itemList;
         this.context = context;
         this.exampleListFull = new ArrayList<>(itemList);
         this.realm = realm;
 
-        this.onFriendsCountFromContactListener = onFriendsCountFromContactListener;
     }
 
     @NonNull
@@ -88,22 +87,24 @@ public class RecyclerViewContactAdapter extends RecyclerView.Adapter<RecyclerVie
                     item.setAmount(1000);
                     item.setPosition(position);
                     item.setSelected(true);
+                    item.setContact_or_friend(0);
                     item.setPhoneNumbers(itemList.get(position).getPhoneNumbers());
 
 
                     //onFriendsCountFromContactListener.onFriendsCountFromContact(itemList.size());
 
 
-                    ((ContactActivity) context).selectedList(item, position);
+                    ((ContactActivity) context).addFromContactToSelect(item, position);
 
-                    // notifyDataSetChanged();
+                    notifyDataSetChanged();
                 } else {
 
 
                     //onFriendsCountFromContactListener.onFriendsCountFromContact(itemList.size());
 
-                    ((ContactActivity) context).testDelete(position);
-                    //notifyDataSetChanged();
+                    ((ContactActivity) context).removeFromContactToSelect(position);
+                    //ondataChangeListener.onDataChange(position);
+                    notifyDataSetChanged();
 
                 }
 
@@ -219,19 +220,5 @@ public class RecyclerViewContactAdapter extends RecyclerView.Adapter<RecyclerVie
         }
 
     }
-
-    public List<ContactItem> getStudentist() {
-        return itemList;
-    }
-
-    public List<ContactItem> getSelected_contact() {
-        return selected_contact;
-    }
-
-    public interface OnFriendsCountFromContactListener {
-        void onFriendsCountFromContact(int num);
-
-    }
-
 
 }

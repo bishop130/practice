@@ -11,10 +11,19 @@ public class ItemForFriends extends RealmObject {
     boolean favorite;
     boolean selected;
     int position;
+    double portion;
 
     public ItemForFriends(){
 
 
+    }
+
+    public double getPortion() {
+        return portion;
+    }
+
+    public void setPortion(double portion) {
+        this.portion = portion;
     }
 
     public String getName() {

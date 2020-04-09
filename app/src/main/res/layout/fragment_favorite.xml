@@ -177,12 +177,13 @@
     </com.google.android.material.appbar.AppBarLayout>
 
 
-    <com.leinardi.android.speeddial.SpeedDialView
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_new"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        app:sdMainFabClosedSrc="@drawable/ic_add" />
+
+        android:background="@color/colorPrimary" />
 
     <FrameLayout
         android:id="@+id/fragment_container"

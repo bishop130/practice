@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -221,32 +222,19 @@ public class RecyclerFriendsAdapter extends RecyclerView.Adapter<RecyclerFriends
     public static class RecyclerViewContactHolder extends RecyclerView.ViewHolder {
 
         TextView name;
-        RelativeLayout contact_container;
+        LinearLayout contact_container;
         ImageView checked_contact;
         ImageView select_box;
 
         public RecyclerViewContactHolder(@NonNull View itemView) {
             super(itemView);
-            contact_container = itemView.findViewById(R.id.contact_container);
-            name = itemView.findViewById(R.id.contact_name);
-            checked_contact = itemView.findViewById(R.id.checked_contact);
+            contact_container = itemView.findViewById(R.id.ly_friend);
+            name = itemView.findViewById(R.id.friend_name);
+            checked_contact = itemView.findViewById(R.id.thumbnail);
             select_box = itemView.findViewById(R.id.friend_select_box);
 
 
         }
-
-    }
-
-    public List<ItemForFriends> getStudentist() {
-        return itemList;
-    }
-
-    public List<ItemForFriends> getSelected_contact() {
-        return selected_contact;
-    }
-
-    public interface OnFriendsCountFromContactListener {
-        void onFriendsCountFromContact(int num);
 
     }
 

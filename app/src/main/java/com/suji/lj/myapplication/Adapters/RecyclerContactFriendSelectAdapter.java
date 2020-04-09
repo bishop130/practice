@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -16,26 +15,26 @@ import com.suji.lj.myapplication.ContactActivity;
 import com.suji.lj.myapplication.Items.ContactItem;
 import com.suji.lj.myapplication.R;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import io.realm.Realm;
-import io.realm.RealmResults;
 
-public class ContactResponse extends RecyclerView.Adapter<ContactResponse.ContactResponseHolder>{
+public class RecyclerContactFriendSelectAdapter extends RecyclerView.Adapter<RecyclerContactFriendSelectAdapter.ContactResponseHolder>{
     Context context;
-    private ContactResponse.ContactResponseHolder contactResponseHolder;
+    private RecyclerContactFriendSelectAdapter.ContactResponseHolder contactResponseHolder;
     RecyclerViewContactAdapter adapter;
     List<ContactItem> itemList;
     OnFriendsCountListener onFriendsCountListener;
+    OnRemoveSelectedListener onRemoveSelectedListener;
     Realm realm;
 
-    public ContactResponse(Context context, List<ContactItem> itemList, OnFriendsCountListener onFriendsCountListener, Realm realm) {
+    public RecyclerContactFriendSelectAdapter(Context context, List<ContactItem> itemList, OnFriendsCountListener onFriendsCountListener, Realm realm, OnRemoveSelectedListener onRemoveSelectedListener) {
 
         this.context = context;
         this.itemList=itemList;
         this.onFriendsCountListener = onFriendsCountListener;
         this.realm = realm;
+        this.onRemoveSelectedListener = onRemoveSelectedListener;
 
 
     }
@@ -47,7 +46,7 @@ public class ContactResponse extends RecyclerView.Adapter<ContactResponse.Contac
         View view;
         LayoutInflater inflater = LayoutInflater.from(context);
         view = inflater.inflate(R.layout.item_flexbox, parent, false);
-        contactResponseHolder = new ContactResponse.ContactResponseHolder(view);
+        contactResponseHolder = new RecyclerContactFriendSelectAdapter.ContactResponseHolder(view);
 
         return contactResponseHolder;
     }
@@ -56,6 +55,10 @@ public class ContactResponse extends RecyclerView.Adapter<ContactResponse.Contac
     public void onBindViewHolder(@NonNull ContactResponseHolder holder, int position) {
         //List<ContactItem> ctList = ((RecyclerViewContactAdapter) adapter).getSelected_contact();
 
+        if(itemList.get(position).getContact_or_friend()==1){
+            holder.title.setTextColor(context.getResources().getColor(R.color.colorPrimary));
+
+        }
         holder.title.setText("#"+itemList.get(position).getDisplayName());
         //holder.phone_number.setText(itemList.get(position).getPhoneNumbers());
         //holder.first_name.setText(String.valueOf(itemList.get(position).getDisplayName().charAt(0)));
@@ -64,13 +67,24 @@ public class ContactResponse extends RecyclerView.Adapter<ContactResponse.Contac
         holder.title.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(itemList.get(position).getContact_or_friend()==0) {
+                    int p = itemList.get(position).getPosition();
+                    onRemoveSelectedListener.onRemoveSelected(p);
+                    ((ContactActivity) context).removeFromSelectToContact(position);
 
-                ((ContactActivity) context).refreshSelection(position);
-
-                //notifyDataSetChanged();
+                    //notifyDataSetChanged();
 
 
-                onFriendsCountListener.onFriendsCount(itemList.size());
+                    onFriendsCountListener.onFriendsCount(itemList.size());
+                }else{
+
+                    int p = itemList.get(position).getPosition();
+
+                    ((ContactActivity) context).removeFromSelectToFriend(position);
+                    onFriendsCountListener.onFriendsCount(itemList.size());
+
+                }
+
 
 
 
@@ -106,6 +120,11 @@ public class ContactResponse extends RecyclerView.Adapter<ContactResponse.Contac
     public interface OnFriendsCountListener{
         void onFriendsCount(int num);
 
+
+    }
+
+    public interface OnRemoveSelectedListener{
+        void onRemoveSelected(int position);
 
     }
 

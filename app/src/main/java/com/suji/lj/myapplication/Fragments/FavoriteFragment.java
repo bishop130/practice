@@ -153,42 +153,14 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
             }
         });
 
-        SpeedDialView speedDialView = view.findViewById(R.id.fab_new);
-
-
-        speedDialView.addActionItem(new SpeedDialActionItem.Builder(R.id.fab_no_label, AppCompatResources.getDrawable(mContext, R.drawable.ic_fail))
-                .setFabBackgroundColor(mContext.getResources().getColor(R.color.White))
-                .setLabel("약속정하기")
-                .setFabImageTintColor(mContext.getResources().getColor(R.color.blue))
-                .create());
-        speedDialView.addActionItem(new SpeedDialActionItem.Builder(R.id.fab_custom_color, AppCompatResources.getDrawable(mContext, R.drawable.ic_success))
-                .setFabBackgroundColor(mContext.getResources().getColor(R.color.White))
-                .setLabel("친구랑 같이")
-                .setFabImageTintColor(mContext.getResources().getColor(R.color.blue))
-                .create());
-        speedDialView.setMainFabClosedBackgroundColor(getResources().getColor(R.color.colorPrimary));
-        speedDialView.setMainFabOpenedBackgroundColor(getResources().getColor(R.color.colorPrimary));
-        speedDialView.setMainFabOpenedIconColor(getResources().getColor(R.color.White));
-        speedDialView.setMainFabClosedIconColor(getResources().getColor(R.color.White));
-        speedDialView.setOnActionSelectedListener(new SpeedDialView.OnActionSelectedListener() {
+        FloatingActionButton fab = view.findViewById(R.id.fab_new);
+        fab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onActionSelected(SpeedDialActionItem actionItem) {
-                switch (actionItem.getId()) {
-                    case R.id.fab_no_label:
-                        Toast.makeText(mContext, "노레이블", Toast.LENGTH_LONG).show();
-                        startActivity(new Intent(mContext, SingleModeActivity.class));
-                        speedDialView.close();
-                        return false;
-                    case R.id.fab_custom_color:
-                        startActivity(new Intent(mContext, Main2Activity.class));
-                        Toast.makeText(mContext, "친구랑같이", Toast.LENGTH_LONG).show();
-                        return false;
-                    default:
-                        return false;
-
-                }
+            public void onClick(View v) {
+                startActivity(new Intent(mContext, SingleModeActivity.class));
             }
         });
+
 
 
         //recyclerView.addItemDecoration(new RecyclerViewDivider(36));

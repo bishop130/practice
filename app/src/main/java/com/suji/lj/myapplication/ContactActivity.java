@@ -3,7 +3,6 @@ package com.suji.lj.myapplication;
 import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,123 +12,92 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.flexbox.AlignItems;
 import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexboxLayoutManager;
 import com.google.android.flexbox.JustifyContent;
 import com.google.android.material.tabs.TabLayout;
-import com.suji.lj.myapplication.Adapters.ContactResponse;
-import com.suji.lj.myapplication.Adapters.FlexBoxAdapter;
-import com.suji.lj.myapplication.Adapters.RecyclerViewContactAdapter;
+import com.suji.lj.myapplication.Adapters.RecyclerContactFriendSelectAdapter;
+import com.suji.lj.myapplication.Fragments.ContactSearchFragment;
+import com.suji.lj.myapplication.Fragments.FriendSearchFragment;
 import com.suji.lj.myapplication.Items.ContactItem;
-import com.suji.lj.myapplication.Items.ContactItemForServer;
 import com.github.tamir7.contacts.Contacts;
-import com.google.gson.Gson;
-import com.suji.lj.myapplication.Items.ContactItemStatus;
-import com.suji.lj.myapplication.Items.MissionCartItem;
+import com.suji.lj.myapplication.Items.ItemForFriends;
 import com.suji.lj.myapplication.Utils.Utils;
 
 import java.util.ArrayList;
 
 import java.util.List;
-import java.util.TreeSet;
 
 import io.realm.Realm;
-import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 
-public class ContactActivity extends AppCompatActivity implements View.OnClickListener, ContactResponse.OnFriendsCountListener, RecyclerViewContactAdapter.OnFriendsCountFromContactListener {
+public class ContactActivity extends AppCompatActivity implements View.OnClickListener, RecyclerContactFriendSelectAdapter.OnFriendsCountListener, TabLayout.OnTabSelectedListener, RecyclerContactFriendSelectAdapter.OnRemoveSelectedListener {
 
 
-    RecyclerViewContactAdapter adapter;
-    ContactResponse contactResponse;
-    List<ContactItem> listItem;
-    List<ContactItem> selected_item = new ArrayList<>();
+    RecyclerContactFriendSelectAdapter recyclerContactFriendSelectAdapter;
+    OnUnCheckFromSelectToContactListener onUnCheckFromSelectToContactListener;
+    OnUnCheckFromSelectToFriendListener onUnCheckFromSelectToFriendListener;
+
+
     RealmResults<ContactItem> tempList;
     RealmResults<ContactItem> tempList2;
     Utils utils = new Utils();
-    RecyclerView recyclerView;
+
     RecyclerView confirmed_recycler;
     TextView confirm_button;
+
+    List<ContactItem> selected_item = new ArrayList<>();
     Realm realm;
+    TabLayout tab_ly;
     RealmResults<ContactItem> realmResults;
+    Fragment fa, fb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contact);
 
-        Contacts.initialize(this);
+
         //Realm.init(this);
         realm = Realm.getDefaultInstance();
 
 
-        recyclerView = findViewById(R.id.recycler_view_contact);
         confirmed_recycler = findViewById(R.id.recycler_view_confirmed);
-        SearchView searchView = findViewById(R.id.contact_search);
+
         confirm_button = findViewById(R.id.contact_confirmed);
+        tab_ly = findViewById(R.id.tab_ly);
+        tab_ly.addTab(tab_ly.newTab().setText("연락처"));
+        tab_ly.addTab(tab_ly.newTab().setText("친구"));
 
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                adapter.getFilter().filter(newText);
-                return true;
-            }
-        });
 
 
         confirm_button.setOnClickListener(this);
-        //tempList2 = realm.where(ContactItem.class).equalTo("isSelected", true).findAll();
+        tab_ly.addOnTabSelectedListener(this);
 
 
-        listItem = utils.getContacts();
-        realmResults = realm.where(ContactItem.class).findAll();
+        checkContactPermission();
 
-        selected_item = realm.copyFromRealm(realmResults);
-        for (int j = 0; j < realmResults.size(); j++) {
 
-            Log.d("삼시", listItem.get(realmResults.get(j).getPosition()).getPosition() + "전체");
-            Log.d("삼시", realmResults.get(j).getPosition() + "선택");
-            listItem.get(realmResults.get(j).getPosition()).setSelected(true);
-            listItem.get(realmResults.get(j).getPosition()).setAmount(realmResults.get(j).getAmount());
-            listItem.get(realmResults.get(j).getPosition()).setPosition(realmResults.get(j).getPosition());
 
-        }
-
-        setupRecyclerView(listItem);
-        recyclerViewConfirmed(selected_item);
 
 
     }
 
-    private void setupRecyclerView(List<ContactItem> itemList) {
-
-        adapter = new RecyclerViewContactAdapter(this, itemList, this, realm);
-        //adapter.notifyDataSetChanged();
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(adapter);
-
-
-    }
 
     public void recyclerViewConfirmed(List<ContactItem> itemList) {
 /*
-        contactResponse = new ContactResponse(this,itemList);
+        recyclerContactFriendSelectAdapter = new RecyclerContactFriendSelectAdapter(this,itemList);
         confirmed_recycler.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false));
-        confirmed_recycler.setAdapter(contactResponse);
+        confirmed_recycler.setAdapter(recyclerContactFriendSelectAdapter);
 
  */
         FlexboxLayoutManager layoutManager = new FlexboxLayoutManager(this);
@@ -137,8 +105,8 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
         layoutManager.setJustifyContent(JustifyContent.CENTER);
         layoutManager.setAlignItems(AlignItems.CENTER);
         confirmed_recycler.setLayoutManager(layoutManager);
-        contactResponse = new ContactResponse(this, itemList, this, realm);
-        confirmed_recycler.setAdapter(contactResponse);
+        recyclerContactFriendSelectAdapter = new RecyclerContactFriendSelectAdapter(this, itemList, this, realm, this);
+        confirmed_recycler.setAdapter(recyclerContactFriendSelectAdapter);
     }
 
 
@@ -151,18 +119,20 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
 
     @Override
     protected void onResume() {
-        checkContactPermission();
+
         super.onResume();
     }
 
     public static final int MY_PERMISSIONS_REQUEST_CONTACT = 100;
 
     private void checkContactPermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS)
-                == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
             Log.d("퍼미션", "이미 승인받음");
             Contacts.initialize(this);
             initiateTab();
+            recyclerViewConfirmed(selected_item);
+            fa = new ContactSearchFragment(this,realm, onUnCheckFromSelectToContactListener);
+            addFragment(fa);
 
 
         } else {
@@ -204,15 +174,16 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST_CONTACT: {
                 // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // permission was granted, yay! Do the
                     // location-related task you need to do.
-                    if (ContextCompat.checkSelfPermission(this,
-                            Manifest.permission.READ_CONTACTS)
-                            == PackageManager.PERMISSION_GRANTED) {
+                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
                         Log.d("퍼미션", "여기는 왜 못들어와");
                         Contacts.initialize(this);
+                        initiateTab();
+                        recyclerViewConfirmed(selected_item);
+                        fa = new ContactSearchFragment(this,realm, onUnCheckFromSelectToContactListener);
+                        addFragment(fa);
 
                     }
 
@@ -240,26 +211,34 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
+        realmResults = realm.where(ContactItem.class).findAll();
+
+        selected_item = realm.copyFromRealm(realmResults);
+
+
+
     }
 
-    public void refreshSelection(int position) {
+    public void removeFromSelectToContact(int position) {
         //Log.d("라니스터","포지션 activity"+ position+"   "+listItem.get(position).isSelected());
 
-
+        onUnCheckFromSelectToContactListener.onUnCheckFromSelectToContact(selected_item.get(position).getPosition());
         //RealmResults<ContactItem> realmResults = realm.where(ContactItem.class).findAll();
-        listItem.get(selected_item.get(position).getPosition()).setSelected(false);
+        //listItem.get(selected_item.get(position).getPosition()).setSelected(false);
         selected_item.remove(position);
         confirm_button.setText("(" + selected_item.size() + ") 선택완료");
 
 
         //RealmResults<ContactItem> realmResults = realm.where(ContactItem.class).findAll();
-        contactResponse.notifyItemRemoved(position);
-        contactResponse.notifyItemRangeChanged(position, selected_item.size());
+        recyclerContactFriendSelectAdapter.notifyItemRemoved(position);
+        recyclerContactFriendSelectAdapter.notifyItemRangeChanged(position, selected_item.size());
 
         //listItem.remove(position);
-        //contactResponse.notifyItemRemoved(position);
-        //contactResponse.notifyDataSetChanged();
-        adapter.notifyDataSetChanged();
+        //recyclerContactFriendSelectAdapter.notifyItemRemoved(position);
+        //recyclerContactFriendSelectAdapter.notifyDataSetChanged();
+        //adapter.notifyDataSetChanged();
+
+
         RealmResults<ContactItem> list = realm.where(ContactItem.class).findAll();
         for (int i = 0; i < list.size(); i++) {
             Log.d("리브", list.get(i).getDisplayName() + "/ " + list.get(i).getAmount() + "/ " + list.get(i).getPosition() + "/ " + i);
@@ -271,60 +250,73 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
 
     }
 
-    public void selectedList(ContactItem item, int position) {
+    public void removeFromSelectToFriend(int position) {
+        onUnCheckFromSelectToFriendListener.onUnCheckFromSelectToFriend(selected_item.get(position).getPosition());
+        selected_item.remove(position);
+        confirm_button.setText("(" + selected_item.size() + ") 선택완료");
+
+        recyclerContactFriendSelectAdapter.notifyItemRemoved(position);
+        recyclerContactFriendSelectAdapter.notifyItemRangeChanged(position, selected_item.size());
+
+
+    }
+
+    public void addFromContactToSelect(ContactItem item, int position) {
         selected_item.add(item);
-
-
-        Log.d("라니스터", "test호출");
-
-        contactResponse.notifyItemChanged(position);
-        adapter.notifyDataSetChanged();
+        recyclerContactFriendSelectAdapter.notifyItemChanged(position);
         confirm_button.setText("(" + selected_item.size() + ") 선택완료");
-
-        RealmResults<ContactItem> list = realm.where(ContactItem.class).findAll();
-        for (int i = 0; i < list.size(); i++) {
-            Log.d("리브", list.get(i).getDisplayName() + "/ " + list.get(i).getAmount() + "/ " + list.get(i).getPosition() + "/ " + i);
-
-        }
-
 
     }
 
-    public void testDelete(int position) {
-        /*
+    public void removeFromContactToSelect(int position) {
         for (int i = 0; i < selected_item.size(); i++) {
-            ContactItem ct = selected_item.get(i);
-            if (ct.getPosition() == position) {
-                int idx = i;
-                selected_item.remove(idx);
+            if (selected_item.get(i).getContact_or_friend() == 0) {
+                if (position == selected_item.get(i).getPosition()) {
+                    Log.d("리브", selected_item.get(i).getDisplayName() + "/ " + selected_item.get(i).getAmount() + "/ " + selected_item.get(i).getPosition() + "/ " + i);
+                    selected_item.remove(i);
+                    recyclerContactFriendSelectAdapter.notifyItemRemoved(i);
+                    recyclerContactFriendSelectAdapter.notifyItemRangeChanged(i, selected_item.size());
+                }
             }
         }
 
-         */
-
-        //RealmResults<ContactItem> item = realm.where(ContactItem.class).findAll();
-        //ContactItem item = realm.where(ContactItem.class).equalTo("position",position).findFirst();
-        //item.deleteFromRealm();
-        for (int i = 0; i < selected_item.size(); i++) {
-            if (position == selected_item.get(i).getPosition()) {
-                Log.d("리브", selected_item.get(i).getDisplayName() + "/ " + selected_item.get(i).getAmount() + "/ " + selected_item.get(i).getPosition() + "/ " + i);
-                selected_item.remove(i);
-                contactResponse.notifyItemRemoved(i);
-                contactResponse.notifyItemRangeChanged(i, selected_item.size());
-
-            }
-        }
-
-
-        Log.d("라니스터", "test호출");
-        //contactResponse.notifyDataSetChanged();
-
-        //adapter.notifyItemRemoved(position);
-        adapter.notifyDataSetChanged();
         confirm_button.setText("(" + selected_item.size() + ") 선택완료");
 
 
     }
+
+    public void addFromFriendToSelect(ItemForFriends item) {
+        ContactItem contactItem = new ContactItem();
+        contactItem.setDisplayName(item.getName());
+        contactItem.setContact_or_friend(1);
+        contactItem.setFriend_selected(true);
+        contactItem.setFriend_position(item.getPosition());
+
+
+        selected_item.add(contactItem);
+        recyclerContactFriendSelectAdapter.notifyDataSetChanged();
+
+
+    }
+
+    public void removeFromFriendToSelect(int position) {
+        for (int i = 0; i < selected_item.size(); i++) {
+            if (selected_item.get(i).getContact_or_friend() == 1) {
+                if (position == selected_item.get(i).getPosition()) {
+                    Log.d("리브", selected_item.get(i).getDisplayName() + "/ " + selected_item.get(i).getAmount() + "/ " + selected_item.get(i).getPosition() + "/ " + i);
+                    selected_item.remove(i);
+                    recyclerContactFriendSelectAdapter.notifyItemRemoved(i);
+                    recyclerContactFriendSelectAdapter.notifyItemRangeChanged(i, selected_item.size());
+
+                }
+            }
+        }
+
+        confirm_button.setText("(" + selected_item.size() + ") 선택완료");
+
+
+    }
+
 
     private void contactSorting() {
 
@@ -340,6 +332,9 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
                     item.setPhoneNumbers(selected_item.get(i).getPhoneNumbers());
                     item.setDisplayName(selected_item.get(i).getDisplayName());
                     item.setSelected(selected_item.get(i).isSelected());
+                    item.setContact_or_friend(selected_item.get(i).getContact_or_friend());
+                    item.setFriend_position(selected_item.get(i).getFriend_position());
+                    item.setFriend_selected(selected_item.get(i).isFriend_selected());
                     Log.d("리브", selected_item.get(i).getAmount() + "/" + selected_item.get(i).getDisplayName() + "/" + selected_item.get(i).getPosition());
                 }
                 selected_item.clear();
@@ -348,8 +343,7 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
             }
         });
 
-        Intent intent = new Intent();
-        setResult(2, intent);
+        setResult(2, getIntent());
         Log.d("미션카트", realmResults.size() + "");
         finish();
     }
@@ -360,11 +354,6 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
         confirm_button.setText("(" + num + ") 선택완료");
 
 
-    }
-
-    @Override
-    public void onFriendsCountFromContact(int num) {
-        confirm_button.setText("(" + num + ") 선택완료");
     }
 
     @Override
@@ -382,5 +371,109 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
     protected void onDestroy() {
         super.onDestroy();
         realm.close();
+    }
+
+    @Override
+    public void onTabSelected(TabLayout.Tab tab) {
+        int p = tab.getPosition();
+        tabFragment(p);
+
+
+    }
+
+    @Override
+    public void onTabUnselected(TabLayout.Tab tab) {
+
+    }
+
+    @Override
+    public void onTabReselected(TabLayout.Tab tab) {
+
+    }
+
+    private void addFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.add(R.id.fragment_container, fragment).commit();
+    }
+
+    @Override
+    public void onRemoveSelected(int position) {
+        //onRemoveSelectedListener.onRemoveSelected(position);
+
+    }
+
+    public interface OnUnCheckFromSelectToContactListener {
+        void onUnCheckFromSelectToContact(int position);
+
+
+    }
+
+    public void setOnUnCheckFromSelectToContactListener(OnUnCheckFromSelectToContactListener onUnCheckFromSelectToContactListener) {
+        this.onUnCheckFromSelectToContactListener = onUnCheckFromSelectToContactListener;
+    }
+
+    private void tabFragment(int pos) {
+        switch (pos) {
+            case 0:
+                if (fa == null) {
+                    fa = new ContactSearchFragment(this,realm, onUnCheckFromSelectToContactListener);
+                    addFragment(fa);
+
+                    Log.d("홈프레그", "fa is null");
+                }
+
+                if (fa != null) {
+                    showFragment(fa);
+                    Log.d("홈프레그", "fa is showing");
+                }
+                if (fb != null) {
+                    hideFragment(fb);
+                    Log.d("홈프레그", "fb is hiding");
+                }
+
+                break;
+            case 1:
+
+                if (fb == null) {
+                    fb = new FriendSearchFragment(this, realm, onUnCheckFromSelectToFriendListener);
+                    addFragment(fb);
+                    Log.d("홈프레그", "fb is null");
+                }
+
+                if (fa != null) {
+                    hideFragment(fa);
+                    Log.d("홈프레그", "fa is hiding");
+                }
+                if (fb != null) {
+                    showFragment(fb);
+                    Log.d("홈프레그", "fb is showing");
+                }
+
+
+                break;
+
+        }
+
+    }
+
+    private void hideFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.hide(fragment).commit();
+    }
+
+    private void showFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.show(fragment).commit();
+    }
+
+    public interface OnUnCheckFromSelectToFriendListener {
+        void onUnCheckFromSelectToFriend(int position);
+    }
+
+    public void setOnUnCheckFromSelectToFriendListener(OnUnCheckFromSelectToFriendListener onUnCheckFromSelectToFriendListener) {
+        this.onUnCheckFromSelectToFriendListener = onUnCheckFromSelectToFriendListener;
     }
 }

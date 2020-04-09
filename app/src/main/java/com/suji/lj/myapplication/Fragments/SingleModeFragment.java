@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -56,11 +57,11 @@ public class SingleModeFragment extends Fragment {
     Context context;
     private boolean hasFractionalPart;
     RealmResults<ContactItem> realmResults2;
+    int amount = 0;
 
     public SingleModeFragment() {
         // Required empty public constructor
     }
-
 
 
     @Override
@@ -73,15 +74,16 @@ public class SingleModeFragment extends Fragment {
         single_contact = view.findViewById(R.id.single_contact);
         total_amount = view.findViewById(R.id.total_amount);
         if_fail = view.findViewById(R.id.if_fail);
-        if_late = view.findViewById(R.id.if_late);
         realm = Realm.getDefaultInstance();
         ly_add_contact.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivityForResult(new Intent(getContext(), ContactActivity.class), 2);
+                Intent intent = new Intent(getContext(), ContactActivity.class);
+                intent.putExtra("amount", amount);
+                startActivityForResult(intent, 2);
             }
         });
-
+        amountDisplay();
 
 
         if_fail.addTextChangedListener(new TextWatcher() {
@@ -131,14 +133,20 @@ public class SingleModeFragment extends Fragment {
                     // do nothing?
                 }
                 if_fail.addTextChangedListener(this);
+                if (s.toString().equals("")) {
+                    amount = 0;
+                    amountDisplay();
+                }else {
+                    amount = Integer.valueOf(s.toString().replaceAll(",", ""));
 
-                amountDisplay(Integer.valueOf(s.toString().replaceAll(",","")));
+                    amountDisplay();
+                }
 
 
             }
         });
-
-
+        realmResults2 = realm.where(ContactItem.class).findAll();
+        setTransferRecyclerView(realmResults2);
 
 
         return view;
@@ -147,9 +155,8 @@ public class SingleModeFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        Log.d("싱글","onstart");
-        realmResults2 = realm.where(ContactItem.class).findAll();
-        setTransferRecyclerView(realmResults2);
+        Log.d("싱글", "onstart");
+
     }
 
     private void setTransferRecyclerView(RealmResults<ContactItem> realmResults) {
@@ -164,13 +171,26 @@ public class SingleModeFragment extends Fragment {
         single_contact.setAdapter(adapter);
 
     }
-    public void amountDisplay(int amount) {
+
+    private void amountDisplay() {
         RealmResults<ContactItem> realmResults2 = realm.where(ContactItem.class).findAll();
-        int total = realmResults2.size()*amount;
+        int total = realmResults2.size() * amount;
         DecimalFormat decimalFormat = new DecimalFormat("###,###");
         Log.d("옵티마", decimalFormat.format(total));
         total_amount.setText(decimalFormat.format(total));
 
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == 2) {
+            Log.d("리절트", "들어가자");
+            realmResults2 = realm.where(ContactItem.class).findAll();
+            setTransferRecyclerView(realmResults2);
+            amountDisplay();
+        }
+
+
+    }
 }
