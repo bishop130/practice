@@ -76,7 +76,14 @@ public class RecyclerWaitingFriendAdapter extends RecyclerView.Adapter<RecyclerW
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
 
-                            databaseReference.child("user_data").child(user_id).child("friend_accept_waiting").child(friend_id).removeValue();
+                            databaseReference.child("user_data").child(user_id).child("friend_accept_waiting").child(friend_id).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+
+                                    //databaseReference.child("user_data").child(user_id).child("friends_list").
+
+                                }
+                            });
                         }
                     });
                 }

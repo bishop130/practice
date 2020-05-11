@@ -8,6 +8,7 @@ import android.text.style.StyleSpan;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.DayViewDecorator;
 import com.prolificinteractive.materialcalendarview.DayViewFacade;
+import com.prolificinteractive.materialcalendarview.spans.DotSpan;
 
 import org.threeten.bp.LocalDate;
 
@@ -35,13 +36,15 @@ public class OneDayDecorator implements DayViewDecorator {
     @Override
     public void decorate(DayViewFacade view) {
 
-        view.addSpan(new StyleSpan(Typeface.BOLD));
-        view.addSpan(new RelativeSizeSpan(1.4f));
-        view.addSpan(new ForegroundColorSpan(today_color));
+        view.addSpan(new DotSpan(10,today_color));
+
+        //view.addSpan(new StyleSpan(Typeface.BOLD));
+        //view.addSpan(new RelativeSizeSpan(1.4f));
+        //view.addSpan(new ForegroundColorSpan(today_color));
     }
 
 
-    public void setDate(LocalDate date) {
-        this.date = CalendarDay.from(date);
+    public void setDate(CalendarDay date) {
+        this.date = date;
     }
 }

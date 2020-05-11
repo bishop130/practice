@@ -2,7 +2,6 @@ package com.suji.lj.myapplication;
 
 import android.Manifest;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,18 +18,23 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.flexbox.AlignItems;
 import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexboxLayoutManager;
 import com.google.android.flexbox.JustifyContent;
 import com.google.android.material.tabs.TabLayout;
+import com.suji.lj.myapplication.Adapters.ContactPagerAdapter;
+import com.suji.lj.myapplication.Adapters.FriendPagerAdapter;
+import com.suji.lj.myapplication.Adapters.GlobalApplication;
 import com.suji.lj.myapplication.Adapters.RecyclerContactFriendSelectAdapter;
 import com.suji.lj.myapplication.Fragments.ContactSearchFragment;
 import com.suji.lj.myapplication.Fragments.FriendSearchFragment;
 import com.suji.lj.myapplication.Items.ContactItem;
 import com.github.tamir7.contacts.Contacts;
 import com.suji.lj.myapplication.Items.ItemForFriends;
+import com.suji.lj.myapplication.Items.MissionCartItem;
 import com.suji.lj.myapplication.Utils.Utils;
 
 import java.util.ArrayList;
@@ -40,7 +44,7 @@ import java.util.List;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
-public class ContactActivity extends AppCompatActivity implements View.OnClickListener, RecyclerContactFriendSelectAdapter.OnFriendsCountListener, TabLayout.OnTabSelectedListener, RecyclerContactFriendSelectAdapter.OnRemoveSelectedListener {
+public class ContactActivity extends AppCompatActivity implements View.OnClickListener, RecyclerContactFriendSelectAdapter.OnFriendsCountListener,  RecyclerContactFriendSelectAdapter.OnRemoveSelectedListener {
 
 
     RecyclerContactFriendSelectAdapter recyclerContactFriendSelectAdapter;
@@ -60,6 +64,7 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
     TabLayout tab_ly;
     RealmResults<ContactItem> realmResults;
     Fragment fa, fb;
+    ViewPager view_pager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +77,7 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
 
 
         confirmed_recycler = findViewById(R.id.recycler_view_confirmed);
+        view_pager = findViewById(R.id.fragment_pager);
 
         confirm_button = findViewById(R.id.contact_confirmed);
         tab_ly = findViewById(R.id.tab_ly);
@@ -79,15 +85,13 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
         tab_ly.addTab(tab_ly.newTab().setText("친구"));
 
 
-
         confirm_button.setOnClickListener(this);
-        tab_ly.addOnTabSelectedListener(this);
+       // tab_ly.addOnTabSelectedListener(this);
+
+
 
 
         checkContactPermission();
-
-
-
 
 
     }
@@ -131,8 +135,8 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
             Contacts.initialize(this);
             initiateTab();
             recyclerViewConfirmed(selected_item);
-            fa = new ContactSearchFragment(this,realm, onUnCheckFromSelectToContactListener);
-            addFragment(fa);
+            //fa = new ContactSearchFragment(this, realm, onUnCheckFromSelectToContactListener);
+            //addFragment(fa);
 
 
         } else {
@@ -169,8 +173,7 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST_CONTACT: {
                 // If request is cancelled, the result arrays are empty.
@@ -182,8 +185,8 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
                         Contacts.initialize(this);
                         initiateTab();
                         recyclerViewConfirmed(selected_item);
-                        fa = new ContactSearchFragment(this,realm, onUnCheckFromSelectToContactListener);
-                        addFragment(fa);
+                        //fa = new ContactSearchFragment(this, realm, onUnCheckFromSelectToContactListener);
+                        //addFragment(fa);
 
                     }
 
@@ -194,7 +197,6 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
                     Toast.makeText(this, "permission denied", Toast.LENGTH_LONG).show();
                     finish();
                 }
-                return;
             }
 
             // other 'case' lines to check for other
@@ -214,7 +216,41 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
         realmResults = realm.where(ContactItem.class).findAll();
 
         selected_item = realm.copyFromRealm(realmResults);
+        confirm_button.setText("(" + selected_item.size() + ") 선택완료");
 
+        ContactPagerAdapter adapter = new ContactPagerAdapter
+                (getSupportFragmentManager(), tab_ly.getTabCount(), this, realm, onUnCheckFromSelectToContactListener, onUnCheckFromSelectToFriendListener);
+        view_pager.setAdapter(adapter);
+        view_pager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tab_ly));
+
+        tab_ly.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                switch (tab.getPosition()) {
+                    case 0:
+                        view_pager.setCurrentItem(tab.getPosition());
+
+                        break;
+                    case 1:
+                        view_pager.setCurrentItem(tab.getPosition());
+                        break;
+
+
+                }
+
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
 
 
     }
@@ -233,20 +269,6 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
         recyclerContactFriendSelectAdapter.notifyItemRemoved(position);
         recyclerContactFriendSelectAdapter.notifyItemRangeChanged(position, selected_item.size());
 
-        //listItem.remove(position);
-        //recyclerContactFriendSelectAdapter.notifyItemRemoved(position);
-        //recyclerContactFriendSelectAdapter.notifyDataSetChanged();
-        //adapter.notifyDataSetChanged();
-
-
-        RealmResults<ContactItem> list = realm.where(ContactItem.class).findAll();
-        for (int i = 0; i < list.size(); i++) {
-            Log.d("리브", list.get(i).getDisplayName() + "/ " + list.get(i).getAmount() + "/ " + list.get(i).getPosition() + "/ " + i);
-
-        }
-
-        //setupRecyclerView(listItem);
-
 
     }
 
@@ -262,8 +284,10 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     public void addFromContactToSelect(ContactItem item, int position) {
+
+
         selected_item.add(item);
-        recyclerContactFriendSelectAdapter.notifyItemChanged(position);
+        recyclerContactFriendSelectAdapter.notifyItemInserted(selected_item.size());
         confirm_button.setText("(" + selected_item.size() + ") 선택완료");
 
     }
@@ -285,16 +309,22 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
 
     }
 
-    public void addFromFriendToSelect(ItemForFriends item) {
-        ContactItem contactItem = new ContactItem();
-        contactItem.setDisplayName(item.getName());
-        contactItem.setContact_or_friend(1);
-        contactItem.setFriend_selected(true);
-        contactItem.setFriend_position(item.getPosition());
+    public void addFromFriendToSelect(ItemForFriends item, int position) {
+        if (selected_item.size() > 10) {
+            Toast.makeText(getApplicationContext(), "최대10명까지 선택가능합니다.", Toast.LENGTH_LONG).show();
+        } else {
+            ContactItem contactItem = new ContactItem();
+            contactItem.setDisplayName(item.getName());
+            contactItem.setContact_or_friend(1);
+            contactItem.setFriend_selected(true);
+            contactItem.setFriend_position(item.getPosition());
 
 
-        selected_item.add(contactItem);
-        recyclerContactFriendSelectAdapter.notifyDataSetChanged();
+            selected_item.add(contactItem);
+            recyclerContactFriendSelectAdapter.notifyItemInserted(selected_item.size());
+            //recyclerContactFriendSelectAdapter.notifyDataSetChanged();
+            confirm_button.setText("(" + selected_item.size() + ") 선택완료");
+        }
 
 
     }
@@ -319,33 +349,39 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
 
 
     private void contactSorting() {
+        Log.d("몇명", selected_item.size() + "");
+        if (selected_item.size() < 21) {
 
-        realm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                realmResults.deleteAllFromRealm();
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    realmResults.deleteAllFromRealm();
 
-                for (int i = 0; i < selected_item.size(); i++) {
-                    ContactItem item = realm.createObject(ContactItem.class);
-                    item.setAmount(selected_item.get(i).getAmount());
-                    item.setPosition(selected_item.get(i).getPosition());
-                    item.setPhoneNumbers(selected_item.get(i).getPhoneNumbers());
-                    item.setDisplayName(selected_item.get(i).getDisplayName());
-                    item.setSelected(selected_item.get(i).isSelected());
-                    item.setContact_or_friend(selected_item.get(i).getContact_or_friend());
-                    item.setFriend_position(selected_item.get(i).getFriend_position());
-                    item.setFriend_selected(selected_item.get(i).isFriend_selected());
-                    Log.d("리브", selected_item.get(i).getAmount() + "/" + selected_item.get(i).getDisplayName() + "/" + selected_item.get(i).getPosition());
+                    for (int i = 0; i < selected_item.size(); i++) {
+
+                        ContactItem item = realm.createObject(ContactItem.class);
+                        item.setAmount(selected_item.get(i).getAmount());
+                        item.setPosition(selected_item.get(i).getPosition());
+                        item.setPhoneNumbers(selected_item.get(i).getPhoneNumbers());
+                        item.setDisplayName(selected_item.get(i).getDisplayName());
+                        item.setSelected(selected_item.get(i).isSelected());
+                        item.setContact_or_friend(selected_item.get(i).getContact_or_friend());
+                        item.setFriend_position(selected_item.get(i).getFriend_position());
+                        item.setFriend_selected(selected_item.get(i).isFriend_selected());
+                        Log.d("리브", selected_item.get(i).getAmount() + "/" + selected_item.get(i).getDisplayName() + "/" + selected_item.get(i).getPosition());
+                    }
+                    selected_item.clear();
+
+
                 }
-                selected_item.clear();
+            });
 
-
-            }
-        });
-
-        setResult(2, getIntent());
-        Log.d("미션카트", realmResults.size() + "");
-        finish();
+            setResult(2, getIntent());
+            Log.d("미션카트", realmResults.size() + "");
+            finish();
+        } else {
+            Toast.makeText(this, "최대 20명까지 선택할 수 있습니다.", Toast.LENGTH_LONG).show();
+        }
     }
 
 
@@ -373,29 +409,6 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
         realm.close();
     }
 
-    @Override
-    public void onTabSelected(TabLayout.Tab tab) {
-        int p = tab.getPosition();
-        tabFragment(p);
-
-
-    }
-
-    @Override
-    public void onTabUnselected(TabLayout.Tab tab) {
-
-    }
-
-    @Override
-    public void onTabReselected(TabLayout.Tab tab) {
-
-    }
-
-    private void addFragment(Fragment fragment) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.add(R.id.fragment_container, fragment).commit();
-    }
 
     @Override
     public void onRemoveSelected(int position) {
@@ -403,71 +416,7 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
 
     }
 
-    public interface OnUnCheckFromSelectToContactListener {
-        void onUnCheckFromSelectToContact(int position);
 
-
-    }
-
-    public void setOnUnCheckFromSelectToContactListener(OnUnCheckFromSelectToContactListener onUnCheckFromSelectToContactListener) {
-        this.onUnCheckFromSelectToContactListener = onUnCheckFromSelectToContactListener;
-    }
-
-    private void tabFragment(int pos) {
-        switch (pos) {
-            case 0:
-                if (fa == null) {
-                    fa = new ContactSearchFragment(this,realm, onUnCheckFromSelectToContactListener);
-                    addFragment(fa);
-
-                    Log.d("홈프레그", "fa is null");
-                }
-
-                if (fa != null) {
-                    showFragment(fa);
-                    Log.d("홈프레그", "fa is showing");
-                }
-                if (fb != null) {
-                    hideFragment(fb);
-                    Log.d("홈프레그", "fb is hiding");
-                }
-
-                break;
-            case 1:
-
-                if (fb == null) {
-                    fb = new FriendSearchFragment(this, realm, onUnCheckFromSelectToFriendListener);
-                    addFragment(fb);
-                    Log.d("홈프레그", "fb is null");
-                }
-
-                if (fa != null) {
-                    hideFragment(fa);
-                    Log.d("홈프레그", "fa is hiding");
-                }
-                if (fb != null) {
-                    showFragment(fb);
-                    Log.d("홈프레그", "fb is showing");
-                }
-
-
-                break;
-
-        }
-
-    }
-
-    private void hideFragment(Fragment fragment) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.hide(fragment).commit();
-    }
-
-    private void showFragment(Fragment fragment) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.show(fragment).commit();
-    }
 
     public interface OnUnCheckFromSelectToFriendListener {
         void onUnCheckFromSelectToFriend(int position);
@@ -476,4 +425,14 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
     public void setOnUnCheckFromSelectToFriendListener(OnUnCheckFromSelectToFriendListener onUnCheckFromSelectToFriendListener) {
         this.onUnCheckFromSelectToFriendListener = onUnCheckFromSelectToFriendListener;
     }
+
+    public interface OnUnCheckFromSelectToContactListener {
+        void onUnCheckFromSelectToContact(int position);
+
+    }
+
+    public void setOnUnCheckFromSelectToContactListener(OnUnCheckFromSelectToContactListener onUnCheckFromSelectToContactListener) {
+        this.onUnCheckFromSelectToContactListener = onUnCheckFromSelectToContactListener;
+    }
+
 }

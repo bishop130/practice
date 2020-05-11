@@ -12,6 +12,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.database.ValueEventListener;
 import com.suji.lj.myapplication.Items.ItemForMissionByDay;
 import com.suji.lj.myapplication.MissionDetailActivity;
 import com.suji.lj.myapplication.R;
@@ -23,9 +24,12 @@ public class RecyclerPastMissionAdapter extends RecyclerView.Adapter<RecyclerPas
 
     List<ItemForMissionByDay> list;
     Context context;
-    public RecyclerPastMissionAdapter(Context context,List<ItemForMissionByDay> list){
+    OnLoadMissionFromPastListener onLoadMissionFromPastListener;
+    public RecyclerPastMissionAdapter(Context context, List<ItemForMissionByDay> list, OnLoadMissionFromPastListener onLoadMissionFromPastListener){
         this.context = context;
         this.list = list;
+        this.onLoadMissionFromPastListener = onLoadMissionFromPastListener;
+
 
     }
 
@@ -47,12 +51,12 @@ public class RecyclerPastMissionAdapter extends RecyclerView.Adapter<RecyclerPas
         holder.tv_date.setText(DateTimeUtils.makeDateForHuman(list.get(position).getDate()));
         holder.tv_time.setText(DateTimeUtils.makeTimeForHuman(list.get(position).getTime()));
         if(list.get(position).isSuccess()){
-            holder.ly_is_success.setBackgroundColor(context.getResources().getColor(R.color.colorSuccess));
+            //holder.ly_is_success.setBackgroundColor(context.getResources().getColor(R.color.colorSuccess));
             holder.tv_missionTitle.setTextColor(context.getResources().getColor(R.color.colorSuccess));
             holder.ic_is_success.setImageDrawable(context.getDrawable(R.drawable.ic_success));
 
         }else{
-            holder.ly_is_success.setBackgroundColor(context.getResources().getColor(R.color.colorError));
+            //holder.ly_is_success.setBackgroundColor(context.getResources().getColor(R.color.colorError));
             holder.tv_missionTitle.setTextColor(context.getResources().getColor(R.color.colorError));
             holder.ic_is_success.setImageDrawable(context.getDrawable(R.drawable.ic_fail));
 
@@ -60,9 +64,8 @@ public class RecyclerPastMissionAdapter extends RecyclerView.Adapter<RecyclerPas
         holder.view_container.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(context, MissionDetailActivity.class);
-                intent.putExtra("mission_id", list.get(position).getMother_id());
-                context.startActivity(intent);
+                onLoadMissionFromPastListener.onLoadMissionFromPast(list.get(position).getMother_id());
+
             }
         });
 
@@ -80,7 +83,6 @@ public class RecyclerPastMissionAdapter extends RecyclerView.Adapter<RecyclerPas
         TextView tv_date;
         TextView tv_time;
         TextView tv_address;
-        LinearLayout ly_is_success;
         ImageView ic_is_success;
 
         LinearLayout view_container;
@@ -95,13 +97,16 @@ public class RecyclerPastMissionAdapter extends RecyclerView.Adapter<RecyclerPas
             tv_date = itemView.findViewById(R.id.date_display);
             tv_time = itemView.findViewById(R.id.time_display);
             tv_address = itemView.findViewById(R.id.address_display);
-            ly_is_success = itemView.findViewById(R.id.ly_is_success);
             ic_is_success = itemView.findViewById(R.id.ic_is_success);
 
 
 
 
         }
+
+    }
+    public interface OnLoadMissionFromPastListener{
+        void onLoadMissionFromPast(String mission_id);
 
     }
 }

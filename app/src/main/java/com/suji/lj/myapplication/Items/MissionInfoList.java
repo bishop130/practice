@@ -1,10 +1,11 @@
 package com.suji.lj.myapplication.Items;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class MissionInfoList {
+public class MissionInfoList implements Serializable {
 
     public MissionInfoList() {
 
@@ -16,23 +17,55 @@ public class MissionInfoList {
     public boolean valid;
     public double lat;
     public double lng;
-    public ArrayList<String> arrayList;
     public List<ContactItemForServer> friends_selected_list;
     public Map<String, ItemForDateTimeByList> mission_dates;
     String min_date;
     String max_date;
     String mission_id;
+    String bank_name;
+    String account_num;
+    int penalty_amount;
+    String account_holder;
+    int mission_mode;
 
-    public MissionInfoList(String mission_title, String address, boolean success, double lat, double lng, ArrayList<String> arrayList, Map<String, ItemForDateTimeByList> mission_dates,String max_date,String min_date) {
-        this.mission_title = mission_title;
-        this.address = address;
-        this.success = success;
-        this.lat = lat;
-        this.lng = lng;
-        this.arrayList = arrayList;
-        this.mission_dates = mission_dates;
-        this.min_date = min_date;
-        this.max_date = max_date;
+    public int getMission_mode() {
+        return mission_mode;
+    }
+
+    public void setMission_mode(int mission_mode) {
+        this.mission_mode = mission_mode;
+    }
+
+    public String getAccount_holder() {
+        return account_holder;
+    }
+
+    public void setAccount_holder(String account_holder) {
+        this.account_holder = account_holder;
+    }
+
+    public String getBank_name() {
+        return bank_name;
+    }
+
+    public void setBank_name(String bank_name) {
+        this.bank_name = bank_name;
+    }
+
+    public String getAccount_num() {
+        return account_num;
+    }
+
+    public void setAccount_num(String account_num) {
+        this.account_num = account_num;
+    }
+
+    public int getPenalty_amount() {
+        return penalty_amount;
+    }
+
+    public void setPenalty_amount(int penalty_amount) {
+        this.penalty_amount = penalty_amount;
     }
 
     public String getMission_id() {
@@ -113,14 +146,6 @@ public class MissionInfoList {
 
     public void setLng(double lng) {
         this.lng = lng;
-    }
-
-    public ArrayList<String> getArrayList() {
-        return arrayList;
-    }
-
-    public void setArrayList(ArrayList<String> arrayList) {
-        this.arrayList = arrayList;
     }
 
     public Map<String, ItemForDateTimeByList> getMission_dates() {

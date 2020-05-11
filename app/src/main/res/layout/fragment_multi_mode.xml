@@ -10,26 +10,29 @@
 
 
     <androidx.appcompat.widget.SearchView
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
         android:id="@+id/contact_search"
-        />
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/rounded_searchview"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view_contact"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:scrollbars="vertical"
         android:layout_below="@+id/contact_search"
-        android:splitMotionEvents="false"
         android:clipToPadding="false"
-        />
+        android:scrollbars="vertical"
+        android:layout_marginTop="8dp"
+        android:splitMotionEvents="false" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="32dp"
         android:layout_marginTop="12dp"
+        android:layout_marginBottom="32dp"
         android:orientation="vertical">
 
         <LinearLayout
@@ -42,73 +45,94 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                >
+                android:orientation="vertical">
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recycler_friend_select"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="12dp"
-                    android:background="@drawable/rounded_edittext" />
+                    android:background="@drawable/rounded_edittext"
+                    android:minHeight="50dp"
+                    android:padding="12dp" />
+
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="8dp">
+                    android:orientation="horizontal">
+
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="bottom"
                         android:text="1회 실패시 벌칙금"
                         android:textColor="@color/black"
                         android:textSize="16sp" />
 
-                    <EditText
-                        android:id="@+id/if_fail"
-                        android:layout_width="120dp"
-                        android:layout_height="32dp"
-                        android:background="@drawable/rounded_edittext"
-                        android:inputType="number"
-                        android:maxLength="6"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginEnd="4dp"
-                        android:textAlignment="center"
-                        android:textColor="@color/black"
-                        android:textSize="16sp" />
-                    <TextView
+
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="16sp"
-                        android:textColor="@color/black"
-                        android:text="원"/>
-                </LinearLayout>
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    >
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="16sp"
-                        android:textColor="@color/black"
-                        android:text="누적벌칙금은 "/>
-                    <TextView
-                        android:id="@+id/custom_portion"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="20sp"
-                        android:textColor="@color/colorPrimary"
-                        android:text="정해진 비율"/>
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/amount_warning"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textColor="@color/colorError" />
+
+
+                        <EditText
+                            android:id="@+id/if_fail"
+                            android:layout_width="120dp"
+                            android:layout_height="32dp"
+                            android:background="@drawable/rounded_edittext"
+                            android:inputType="number"
+                            android:maxLength="6"
+                            android:imeOptions="actionDone"
+                            android:gravity="center"
+                            android:textColor="@color/black"
+                            android:textSize="16sp" />
+                    </LinearLayout>
+
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="16sp"
+                        android:layout_gravity="bottom"
+                        android:text="원"
                         android:textColor="@color/black"
-                        android:text="에 따라 분배"/>
+                        android:textSize="16sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="누적벌칙금은 "
+                        android:textColor="@color/black"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:id="@+id/custom_portion"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="정해진 비율"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="20sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="에 따라 분배"
+                        android:textColor="@color/black"
+                        android:textSize="16sp" />
 
                 </LinearLayout>
 
@@ -118,43 +142,7 @@
 
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="32dp"
-                android:text="총 이체금액"
-                android:textColor="@color/colorPrimary" />
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
-
-            <TextView
-                android:id="@+id/total_amount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0"
-                android:textColor="@color/colorPrimary"
-                android:textSize="60sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="32dp"
-                android:text="원"
-                android:textColor="@color/colorPrimary"
-                android:textSize="16sp" />
-
-
-        </LinearLayout>
     </LinearLayout>
-
 
 
 </LinearLayout>

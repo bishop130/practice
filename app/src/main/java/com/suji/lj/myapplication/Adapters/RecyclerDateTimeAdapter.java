@@ -2,14 +2,11 @@ package com.suji.lj.myapplication.Adapters;
 
 import android.app.TimePickerDialog;
 import android.content.Context;
-import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
@@ -21,7 +18,6 @@ import com.suji.lj.myapplication.R;
 import com.suji.lj.myapplication.SingleModeActivity;
 import com.suji.lj.myapplication.Utils.DateTimeUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import io.realm.Realm;

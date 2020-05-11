@@ -41,9 +41,9 @@ public class RecyclerFriendsAdapter extends RecyclerView.Adapter<RecyclerFriends
     private Context context;
     private int count = 0;
     private static final int MAX_CONTACTS = 10;
-    OnFriendSelectListener onFriendSelectListener;
-    OnFriendUnSelectListener onFriendUnSelectListener;
-    Realm realm;
+    private OnFriendSelectListener onFriendSelectListener;
+    private OnFriendUnSelectListener onFriendUnSelectListener;
+    private Realm realm;
 
 
     public RecyclerFriendsAdapter(Context context, List<ItemForFriends> itemList, Realm realm, OnFriendSelectListener onFriendSelectListener,OnFriendUnSelectListener onFriendUnSelectListener) {
@@ -63,16 +63,16 @@ public class RecyclerFriendsAdapter extends RecyclerView.Adapter<RecyclerFriends
         View view;
         LayoutInflater inflater = LayoutInflater.from(context);
         view = inflater.inflate(R.layout.item_friend_select, parent, false);
-        RecyclerViewContactHolder recyclerViewContactHolder = new RecyclerViewContactHolder(view);
 
-        return recyclerViewContactHolder;
+        return new RecyclerViewContactHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull final RecyclerViewContactHolder holder, final int position) {
 
         holder.name.setText(itemList.get(position).getName());
-        //holder.first_name.setText(String.valueOf(itemList.get(position).getName().charAt(0)));
+        //holder.first_name.setText(Strin
+        // g.valueOf(itemList.get(position).getName().charAt(0)));
         holder.contact_container.setBackgroundColor(itemList.get(position).isSelected() ? Color.WHITE : Color.WHITE);
         holder.select_box.setImageDrawable(itemList.get(position).isSelected() ? context.getDrawable(R.drawable.checked_icon) : context.getDrawable(R.drawable.ring));
 
@@ -226,7 +226,7 @@ public class RecyclerFriendsAdapter extends RecyclerView.Adapter<RecyclerFriends
         ImageView checked_contact;
         ImageView select_box;
 
-        public RecyclerViewContactHolder(@NonNull View itemView) {
+        private RecyclerViewContactHolder(@NonNull View itemView) {
             super(itemView);
             contact_container = itemView.findViewById(R.id.ly_friend);
             name = itemView.findViewById(R.id.friend_name);

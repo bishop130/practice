@@ -7,19 +7,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.suji.lj.myapplication.Items.ContactItem;
-import com.suji.lj.myapplication.Items.DateItem;
 import com.suji.lj.myapplication.Items.ItemForDateTime;
 import com.suji.lj.myapplication.Items.MissionCartItem;
-import com.suji.lj.myapplication.MissionCartActivity;
 import com.suji.lj.myapplication.R;
 import com.suji.lj.myapplication.SingleModeActivity;
 import com.suji.lj.myapplication.Utils.DateTimeUtils;

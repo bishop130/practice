@@ -285,6 +285,14 @@ public class DateTimeUtils {
 
         return simpleDate.format(date);
     }
+    public static String getCurrentDateTimeForKey() {
+        long now = System.currentTimeMillis();
+        Date date = new Date(now);
+        SimpleDateFormat simpleDate = new SimpleDateFormat("yyyyMMddHHmm", Locale.KOREA);
+
+
+        return simpleDate.format(date);
+    }
 
     public static String getCurrentHourMin() {
         long now = System.currentTimeMillis();

@@ -1,10 +1,18 @@
 package com.suji.lj.myapplication.Items;
 
-public class ItemForDateTimeByList  {
+import java.io.Serializable;
+
+public class ItemForDateTimeByList implements Serializable {
     String date;
     String time;
     boolean success;
     String time_stamp;
+    int year;
+    int month;
+    int day;
+    int hour;
+    int min;
+
     public ItemForDateTimeByList(){
 
     }
@@ -14,6 +22,46 @@ public class ItemForDateTimeByList  {
         this.date = date;
         this.time = time;
         this.success = success;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public void setYear(int year) {
+        this.year = year;
+    }
+
+    public int getMonth() {
+        return month;
+    }
+
+    public void setMonth(int month) {
+        this.month = month;
+    }
+
+    public int getDay() {
+        return day;
+    }
+
+    public void setDay(int day) {
+        this.day = day;
+    }
+
+    public int getHour() {
+        return hour;
+    }
+
+    public void setHour(int hour) {
+        this.hour = hour;
+    }
+
+    public int getMin() {
+        return min;
+    }
+
+    public void setMin(int min) {
+        this.min = min;
     }
 
     public String getTime_stamp() {

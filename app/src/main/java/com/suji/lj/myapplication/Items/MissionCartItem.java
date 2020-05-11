@@ -18,6 +18,7 @@ public class MissionCartItem extends RealmObject {
     String date;
     String address;
     RealmList<ItemForDateTime> calendarDayList = new RealmList<>();
+    RealmList<ItemPortion> portionList = new RealmList<>();
     int hour;
     int min;
     boolean no_time_limit;
@@ -25,24 +26,103 @@ public class MissionCartItem extends RealmObject {
     double lng;
     String min_date;
     String max_date;
+    String bank_name;
+    String account_num;
+    String account_holder;
+    int mission_mode;
+
+    int single_point;
+    int single_amount;
+    int multi_point;
+    int multi_amount;
+    int pay_method;
+
+
+
 
     public MissionCartItem(){}
 
 
 
-    public MissionCartItem(String title, String date, String address, RealmList<ItemForDateTime> calendarDayList, int hour, int min, boolean no_time_limit,double lat,double lng,String min_date,String max_date,String id) {
-        this.title = title;
-        this.date = date;
-        this.address = address;
-        this.calendarDayList = calendarDayList;
-        this.hour = hour;
-        this.min = min;
-        this.no_time_limit = no_time_limit;
-        this.lat = lat;
-        this.lng = lng;
-        this.min_date = min_date;
-        this.max_date = max_date;
-        this.id = id;
+    public int getPay_method() {
+        return pay_method;
+    }
+
+    public void setPay_method(int pay_method) {
+        this.pay_method = pay_method;
+    }
+
+    public int getMission_mode() {
+        return mission_mode;
+    }
+
+
+    public int getSingle_point() {
+        return single_point;
+    }
+
+    public void setSingle_point(int single_point) {
+        this.single_point = single_point;
+    }
+
+    public int getSingle_amount() {
+        return single_amount;
+    }
+
+    public void setSingle_amount(int single_amount) {
+        this.single_amount = single_amount;
+    }
+
+    public int getMulti_point() {
+        return multi_point;
+    }
+
+    public void setMulti_point(int multi_point) {
+        this.multi_point = multi_point;
+    }
+
+    public int getMulti_amount() {
+        return multi_amount;
+    }
+
+    public void setMulti_amount(int multi_amount) {
+        this.multi_amount = multi_amount;
+    }
+
+    public void setMission_mode(int mission_mode) {
+        this.mission_mode = mission_mode;
+    }
+
+    public String getBank_name() {
+        return bank_name;
+    }
+
+    public void setBank_name(String bank_name) {
+        this.bank_name = bank_name;
+    }
+
+    public String getAccount_num() {
+        return account_num;
+    }
+
+    public void setAccount_num(String account_num) {
+        this.account_num = account_num;
+    }
+
+    public String getAccount_holder() {
+        return account_holder;
+    }
+
+    public void setAccount_holder(String account_holder) {
+        this.account_holder = account_holder;
+    }
+
+    public RealmList<ItemPortion> getPortionList() {
+        return portionList;
+    }
+
+    public void setPortionList(RealmList<ItemPortion> portionList) {
+        this.portionList = portionList;
     }
 
     public String getId() {

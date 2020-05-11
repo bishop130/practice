@@ -1,10 +1,13 @@
 package com.suji.lj.myapplication.Items;
 
-public class ContactItemForServer {
+import java.io.Serializable;
+
+public class ContactItemForServer implements Serializable {
 
     private String friend_name;
     private String phone_num;
     private int amount;
+    private int contact_or_friend;
     public ContactItemForServer() {
 
     }
@@ -13,6 +16,14 @@ public class ContactItemForServer {
         this.friend_name = friend_name;
         this.phone_num = phone_num;
         this.amount = amount;
+    }
+
+    public int getContact_or_friend() {
+        return contact_or_friend;
+    }
+
+    public void setContact_or_friend(int contact_or_friend) {
+        this.contact_or_friend = contact_or_friend;
     }
 
     public String getFriend_name() {

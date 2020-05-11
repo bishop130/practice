@@ -1,13 +1,63 @@
 package com.suji.lj.myapplication.Items;
 
-public class ItemForFriendResponseForRequest {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class ItemForFriendResponseForRequest implements Parcelable {
     String friend_id;
     String friend_uuid;
     String friend_name;
     String friend_fintech_num;
     String thumbnail;
+    boolean accept;
 
     public ItemForFriendResponseForRequest(){}
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.friend_id);
+        dest.writeString(this.friend_uuid);
+        dest.writeString(this.friend_name);
+        dest.writeString(this.friend_fintech_num);
+        dest.writeString(this.thumbnail);
+        dest.writeByte((byte) (this.accept ? 1 : 0));
+
+    }
+
+    public ItemForFriendResponseForRequest(Parcel in) {
+        this.friend_id = in.readString();
+        this.friend_uuid = in.readString();
+        this.friend_name = in.readString();
+        this.friend_fintech_num = in.readString();
+        this.thumbnail = in.readString();
+        this.accept = in.readByte() != 0;
+
+    }
+
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+
+        @Override
+        public ItemForFriendResponseForRequest createFromParcel(Parcel in) {
+            return new ItemForFriendResponseForRequest(in);
+        }
+
+        @Override
+        public ItemForFriendResponseForRequest[] newArray(int size) {
+            // TODO Auto-generated method stub
+            return new ItemForFriendResponseForRequest[size];
+        }
+
+    };
+
+
+
+
 
 
     public String getThumbnail() {
@@ -50,4 +100,11 @@ public class ItemForFriendResponseForRequest {
         this.friend_fintech_num = friend_fintech_num;
     }
 
+    public boolean isAccept() {
+        return accept;
+    }
+
+    public void setAccept(boolean accept) {
+        this.accept = accept;
+    }
 }

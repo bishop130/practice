@@ -67,7 +67,7 @@ public class MultiRequestFragment extends Fragment {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-                    List<ItemForMultiModeRequest> list = new ArrayList<>();
+                    ArrayList<ItemForMultiModeRequest> list = new ArrayList<>();
                     for(DataSnapshot snapshot:dataSnapshot.getChildren()) {
 
                         String key = snapshot.getKey();
@@ -93,7 +93,7 @@ public class MultiRequestFragment extends Fragment {
 
     }
 
-    private void setupRecyclerViewRequest(List<ItemForMultiModeRequest> list){
+    private void setupRecyclerViewRequest(ArrayList<ItemForMultiModeRequest> list){
         RecyclerInvitationAdapter recyclerAdapter = new RecyclerInvitationAdapter(getContext(),list);
         //recyclerAdapter.notifyDataSetChanged();
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));

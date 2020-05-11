@@ -24,11 +24,13 @@ public class RecyclerMissionDayAdapter extends RecyclerView.Adapter<RecyclerMiss
 
     List<ItemForMissionByDay> list = new ArrayList<>();
     Context context;
+    OnLoadMissionListListener onLoadMissionListListener;
 
 
-    public RecyclerMissionDayAdapter(Context context, List<ItemForMissionByDay> list){
+    public RecyclerMissionDayAdapter(Context context, List<ItemForMissionByDay> list,OnLoadMissionListListener onLoadMissionListListener){
         this.list = list;
         this.context = context;
+        this.onLoadMissionListListener = onLoadMissionListListener;
 
     }
 
@@ -53,9 +55,10 @@ public class RecyclerMissionDayAdapter extends RecyclerView.Adapter<RecyclerMiss
         holder.view_container.setOnClickListener(new OnSingleClickListener() {
             @Override
             public void onSingleClick(View v) {
-                Intent intent = new Intent(context, MissionDetailActivity.class);
-                intent.putExtra("mission_id", list.get(position).getMother_id());
-                context.startActivity(intent);
+                //Intent intent = new Intent(context, MissionDetailActivity.class);
+                //intent.putExtra("mission_id", list.get(position).getMother_id());
+                //context.startActivity(intent);
+                onLoadMissionListListener.onLoadMissionList(list.get(position).getMother_id());
             }
         });
 
@@ -89,6 +92,11 @@ public class RecyclerMissionDayAdapter extends RecyclerView.Adapter<RecyclerMiss
 
 
         }
+
+    }
+
+    public interface OnLoadMissionListListener{
+        void onLoadMissionList(String mission_id);
 
     }
 }

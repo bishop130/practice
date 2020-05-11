@@ -22,7 +22,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".Main2Activity"></activity>
+        <activity android:name=".MissionCheckActivity"/>
+        <activity android:name=".Main2Activity" />
         <activity android:name=".InvitationInfoActivity" />
         <activity android:name=".MultiModeDetailActivity" />
         <activity android:name=".FriendsActivity" />
@@ -31,7 +32,6 @@
         <activity android:name=".DetailSettingActivity" />
         <activity android:name=".OpenBankingActivity" />
         <activity android:name=".SingleModeActivity" />
-        <activity android:name=".BuyCarrotActivity" />
         <activity android:name=".FAQActivity" />
 
         <uses-library
@@ -49,6 +49,8 @@
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW"/>
+
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
@@ -57,7 +59,6 @@
         <activity android:name=".ContactActivity" />
         <activity android:name=".DaumMapActivity" />
         <activity android:name=".RecyclerResultActivity" />
-        <activity android:name=".MissionCartActivity" />
 
         <receiver
             android:name=".Adapters.BroadCastService"

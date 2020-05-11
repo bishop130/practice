@@ -60,16 +60,30 @@ import es.dmoral.toasty.Toasty;
 public class SampleLoginActivity extends AppCompatActivity {
 
     // view
-    private SessionCallback callback;
+    private ISessionCallback callback =  new ISessionCallback() {
+        @Override
+        public void onSessionOpened() {
+            Log.d("카카오세", "세션 오픈됨1");
+            requestAccessTokenInfo();
+
+        }
+
+        @Override
+        public void onSessionOpenFailed(KakaoException exception) {
+            if (exception != null) {
+                Toasty.error(getApplicationContext(), "세션실패", Toasty.LENGTH_LONG, true).show();
+            }
+        }
+
+    };
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calendar);
-        callback = new SessionCallback();
         Session.getCurrentSession().addCallback(callback);
         Session.getCurrentSession().checkAndImplicitOpen();
-        Session.getCurrentSession().isClosed();
+        //Session.getCurrentSession().isClosed();
 
     }
 
@@ -86,22 +100,6 @@ public class SampleLoginActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         Session.getCurrentSession().removeCallback(callback);
-    }
-
-    private class SessionCallback implements ISessionCallback {
-        @Override
-        public void onSessionOpened() {
-            Log.d("카카오세" , "세션 오픈됨1");
-            requestAccessTokenInfo();
-
-        }
-
-        @Override
-        public void onSessionOpenFailed(KakaoException exception) {
-            if(exception != null) {
-                Toasty.error(getApplicationContext(),"세션실패",Toasty.LENGTH_LONG,true).show();
-            }
-        }
     }
 
 

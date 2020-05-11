@@ -1,6 +1,7 @@
 package com.suji.lj.myapplication.Fragments;
 
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,18 +27,12 @@ import com.suji.lj.myapplication.Adapters.RecyclerDateTimeAdapter;
 import com.suji.lj.myapplication.Items.ItemForDateTime;
 import com.suji.lj.myapplication.Items.MissionCartItem;
 import com.suji.lj.myapplication.R;
+import com.suji.lj.myapplication.SingleModeActivity;
 import com.suji.lj.myapplication.Utils.DateTimeFormatter;
 import com.suji.lj.myapplication.Utils.DateTimeUtils;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import io.realm.Realm;
 import io.realm.RealmList;
@@ -59,10 +54,10 @@ public class CalendarSelectFragment extends Fragment implements RecyclerDateTime
     int selected_month = calendar.get(Calendar.MONTH) + 1;
     int selected_day = calendar.get(Calendar.DATE);
     String min_date = selected_year + "-" + selected_month + "-" + selected_day;
+    OnResetAmountFromCalendarListener onResetAmountListener;
 
-    public CalendarSelectFragment(RealmList<ItemForDateTime> list, Realm realm) {
-        this.list = list;
-        this.realm = realm;
+
+    public CalendarSelectFragment() {
 
     }
 
@@ -76,6 +71,11 @@ public class CalendarSelectFragment extends Fragment implements RecyclerDateTime
         ly_date_error = view.findViewById(R.id.ly_date_error);
         no_time_switch = view.findViewById(R.id.no_time_switch);
         common_time = view.findViewById(R.id.common_time);
+        realm = Realm.getDefaultInstance();
+        MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
+        list = item.getCalendarDayList();
+
+
         common_time.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -172,8 +172,6 @@ public class CalendarSelectFragment extends Fragment implements RecyclerDateTime
                                             list.add(i + 1, item);
                                             recyclerDateTimeAdapter.notifyItemInserted(i + 1);
                                             break;
-
-
                                         }
 
                                     } else {
@@ -187,10 +185,10 @@ public class CalendarSelectFragment extends Fragment implements RecyclerDateTime
 
                             }
 
-
                         }
-                    });
 
+                    });
+                    onResetAmountListener.onResetAmountFromCalendar();//날짜를 선택할때마다 총 금액을 업데이트한다
                 } else {
                     for (int i = 0; i < list.size(); i++) {
 
@@ -208,6 +206,7 @@ public class CalendarSelectFragment extends Fragment implements RecyclerDateTime
                             recyclerDateTimeAdapter.notifyItemRangeChanged(i, list.size());
                         }
                     }
+                    onResetAmountListener.onResetAmountFromCalendar();//날짜를 선택할때마다 총 금액을 업데이트한다
                 }
                 if (materialCalendarView.getSelectedDates().size() == 0) {
                     ly_date_error.setVisibility(View.VISIBLE);
@@ -350,5 +349,27 @@ public class CalendarSelectFragment extends Fragment implements RecyclerDateTime
     }
 
      */
+
+    @Override
+    public void onAttach(@NonNull  Context context) {
+        super.onAttach(context);
+        try {
+            onResetAmountListener = (OnResetAmountFromCalendarListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString()
+                    + " must implement TextClicked");
+        }
+    }
+    @Override
+    public void onDetach() {
+        onResetAmountListener = null; // => avoid leaking, thanks @Deepscorn
+        super.onDetach();
+    }
+
+    public interface OnResetAmountFromCalendarListener{
+        void onResetAmountFromCalendar();
+
+
+    }
 
 }

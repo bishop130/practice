@@ -1,9 +1,12 @@
 package com.suji.lj.myapplication.Items;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import io.realm.RealmModel;
 import io.realm.RealmObject;
 
-public class ItemForDateTime extends RealmObject {
+public class ItemForDateTime extends RealmObject implements Parcelable {
 
     String date;
     String time;
@@ -18,6 +21,54 @@ public class ItemForDateTime extends RealmObject {
     public ItemForDateTime(){
 
     }
+    public ItemForDateTime(Parcel in) {
+        this.date = in.readString();
+        this.time = in.readString();
+        this.select = in.readByte() != 0;
+        this.position = in.readInt();
+        this.year = in.readInt();
+        this.month = in.readInt();
+        this.day = in.readInt();
+        this.hour = in.readInt();
+        this.min = in.readInt();
+
+
+
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.date);
+        dest.writeString(this.time);
+        dest.writeByte((byte) (this.select ? 1 : 0));
+        dest.writeInt(this.position);
+        dest.writeInt(this.year);
+        dest.writeInt(this.month);
+        dest.writeInt(this.day);
+        dest.writeInt(this.hour);
+        dest.writeInt(this.min);
+
+
+    }
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+
+        @Override
+        public ItemForDateTime createFromParcel(Parcel in) {
+            return new ItemForDateTime(in);
+        }
+
+        @Override
+        public ItemForDateTime[] newArray(int size) {
+            // TODO Auto-generated method stub
+            return new ItemForDateTime[size];
+        }
+
+    };
 
 
     public ItemForDateTime(String date, String time, boolean select) {

@@ -66,7 +66,38 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@color/White">
+
+                    <com.prolificinteractive.materialcalendarview.MaterialCalendarView
+                        android:id="@+id/material_calendarView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginEnd="20dp"
+                        app:mcv_headerTextAppearance="@style/CalendarWidgetHeader"
+                        app:mcv_selectionColor="@color/colorPrimary"
+                        app:mcv_selectionMode="single"
+                        app:mcv_showOtherDates="all"
+                        app:mcv_weekDayTextAppearance="@style/CalendarWidgetWeek" />
+
+                    <TextView
+                        android:id="@+id/selected_date"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/black"
+                        android:layout_marginStart="40dp"
+                        android:layout_marginTop="12dp"
+                        android:textSize="18sp" />
+
+                </LinearLayout>
 
 
                 <RelativeLayout
@@ -207,8 +238,6 @@
                         android:elevation="4dp">
 
 
-
-
                     </FrameLayout>
 
 
@@ -236,9 +265,9 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="20dp"
                         android:text="주소"
-                        android:textStyle="bold"
                         android:textColor="@color/black"
-                        android:textSize="18sp" />
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/address_detail"
@@ -266,9 +295,9 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="벌칙"
-                            android:textStyle="bold"
                             android:textColor="@color/black"
-                            android:textSize="18sp" />
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
 
 
                         <TextView

@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -48,6 +49,7 @@ import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
 import com.suji.lj.myapplication.Adapters.RecyclerDetailFriendsAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerMissionProgressAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerViewContactAdapter;
+import com.suji.lj.myapplication.Decorators.OneDayDecorator;
 import com.suji.lj.myapplication.Fragments.MapFragment;
 import com.suji.lj.myapplication.Items.ContactItemForServer;
 import com.suji.lj.myapplication.Items.ItemForDateTime;
@@ -82,9 +84,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -94,7 +99,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.opengles.GL10;
 
-public class MissionDetailActivity extends AppCompatActivity implements  View.OnClickListener {
+public class MissionDetailActivity extends AppCompatActivity implements View.OnClickListener {
 
     //MaterialCalendarView materialCalendarView;
 
@@ -127,18 +132,21 @@ public class MissionDetailActivity extends AppCompatActivity implements  View.On
 
     DateTimeFormatter dtf = new DateTimeFormatter();
     Date initial_date;
-
+    MaterialCalendarView materialCalendarView;
+    Collection<CalendarDay> cal;
+    List<ItemForDateTimeByList> itemForDateTimeByLists;
+    TextView selected_date;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mission_detail);
-        getIntents();
+
 
         toolbar = findViewById(R.id.mission_detail_toolbar);
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
-        if(getSupportActionBar()!=null) {
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
         //Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
@@ -158,15 +166,68 @@ public class MissionDetailActivity extends AppCompatActivity implements  View.On
         tv_date_progress = findViewById(R.id.tv_date_progress);
         circularProgressBar = findViewById(R.id.circularProgressBar);
         recyclerView_friends_list = findViewById(R.id.recycler_friends_list);
+        selected_date = findViewById(R.id.selected_date);
 
+        getIntents();
         //some_image.setImageBitmap(getBitmapFromView(test));
 
         //Log.d("안될듯",viewToBitmap().toString());
 
 
-
-
         //query();
+
+        materialCalendarView = findViewById(R.id.material_calendarView);
+        //recycler_date_time = findViewById(R.id.recycler_date_time);
+
+        materialCalendarView.state().edit()
+                .setMinimumDate(CalendarDay.today())
+                .commit();
+
+
+        materialCalendarView.setTitleFormatter(new TitleFormatter() {
+            @Override
+            public CharSequence format(CalendarDay calendarDay) {
+
+                StringBuffer buffer = new StringBuffer();
+                int yearOne = calendarDay.getYear();
+                int monthOne = calendarDay.getMonth();
+                buffer.append(yearOne).append("년  ").append(monthOne).append("월");
+                return buffer;
+            }
+        });
+
+        materialCalendarView.addDecorator(new EventDecorator(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary), cal));
+
+        materialCalendarView.setOnDateChangedListener(new OnDateSelectedListener() {
+            @Override
+            public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
+                //widget.removeDecorators();
+                widget.addDecorator(new EventDecorator(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary), cal));
+                if (cal.contains(date)) {
+                    OneDayDecorator one = new OneDayDecorator(getResources().getColor(R.color.White));
+                    one.setDate(date);
+                    widget.addDecorator(one);
+                    for (int i = 0; i < itemForDateTimeByLists.size(); i++) {
+                        int year = itemForDateTimeByLists.get(i).getYear();
+                        int month = itemForDateTimeByLists.get(i).getMonth();
+                        int day = itemForDateTimeByLists.get(i).getDay();
+                        if (year == date.getYear()) {
+                            if (month == date.getMonth()) {
+                                if (day == date.getDay()) {
+                                    int hour = itemForDateTimeByLists.get(i).getHour();
+                                    int min = itemForDateTimeByLists.get(i).getMin();
+                                    selected_date.setText(DateTimeUtils.makeTimeForHumanInt(hour, min));
+
+                                }
+                            }
+                        }
+                    }
+                }else{
+                    selected_date.setText("");
+                }
+            }
+
+        });
 
 
     }
@@ -246,17 +307,98 @@ public class MissionDetailActivity extends AppCompatActivity implements  View.On
 
 
     private void getIntents() {
+        itemForDateTimeByLists = new ArrayList<>();
 
+        Intent intent = getIntent();
+
+        MissionInfoList item = (MissionInfoList) intent.getSerializableExtra("mission_info_list");
+
+        if (item != null) {
+
+            String address = item.getAddress();
+            mission_latitude = item.getLat();
+            mission_longitude = item.getLng();
+            String min_date = item.getMin_date();
+            String max_date = item.getMax_date();
+            String mission_title = item.getMission_title();
+            //total_dates = item.getMission_dates().size();
+            friendsLists = item.getFriends_selected_list();
+            for (int i = 0; i < friendsLists.size(); i++) {
+                Log.d("친구", friendsLists.get(i).getFriend_name());
+                Log.d("친구", friendsLists.get(i).getPhone_num());
+
+            }
+
+            setRecyclerViewFriendsList(friendsLists);
+
+
+            mission_date_start.setText(DateTimeUtils.makeDateSimple(min_date));
+            mission_date_end.setText(DateTimeUtils.makeDateSimple(max_date));
+            address_result.setText(address);
+            toolbar.setTitle(mission_title);
+            setSupportActionBar(toolbar);
+
+
+            Map<String, ItemForDateTimeByList> map = item.getMission_dates();
+
+            for (ItemForDateTimeByList object : map.values()) {
+
+                Collections.addAll(itemForDateTimeByLists, object);
+                Collections.sort(itemForDateTimeByLists, new Comparator<ItemForDateTimeByList>() {
+                    @Override
+                    public int compare(ItemForDateTimeByList o1, ItemForDateTimeByList o2) {
+                        return o1.getDate().compareTo(o2.getDate());
+                    }
+                });
+
+                //Collections.add
+                //itemForDateTimeByLists.add(object);
+            }
+
+            mission_time_start.setText(DateTimeUtils.makeTimeSimple(itemForDateTimeByLists.get(0).getTime()));
+            mission_time_end.setText(DateTimeUtils.makeTimeSimple(itemForDateTimeByLists.get(itemForDateTimeByLists.size() - 1).getTime()));
+
+
+            int count = 0;
+            cal = new HashSet<CalendarDay>();
+            for (int i = 0; i < itemForDateTimeByLists.size(); i++) {
+
+
+                int year = itemForDateTimeByLists.get(i).getYear();
+                int month = itemForDateTimeByLists.get(i).getMonth();
+                int day = itemForDateTimeByLists.get(i).getDay();
+
+                String date = itemForDateTimeByLists.get(i).getDate();
+                String time = itemForDateTimeByLists.get(i).getTime();
+                cal.add(CalendarDay.from(year, month, day));
+                Log.d("아이템바이", itemForDateTimeByLists.get(i).getDate() + "/" + itemForDateTimeByLists.get(i).getTime());
+                if (!DateTimeUtils.compareIsFuture(date + time)) {
+                    count++;
+                }
+
+
+            }
+            tv_date_progress.setText(count + "/" + item.getMission_dates().size() + "일");
+            makeCircularProgressBar(count, itemForDateTimeByLists.size());
+            setRecyclerView(itemForDateTimeByLists);
+            addMapFragment(new MapFragment(mainScrollView, mission_latitude, mission_longitude));
+        }
+        /*
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
+
+
+
+
+
             mission_time = extras.getString("time");
             String mission_id = extras.getString("mission_id");
             Log.d("아이템바이", mission_id);
             String user_id = getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
             DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
             if (!Utils.isEmpty(mission_id) && !Utils.isEmpty(user_id))
-                databaseReference.child("user_data").child(user_id).child("mission_info_list").child(mission_id).addValueEventListener(new ValueEventListener() {
+                databaseReference.child("user_data").child(user_id).child("mission_info_lit").child(mission_id).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         List<ItemForDateTimeByList> itemForDateTimeByLists = new ArrayList<>();
@@ -322,20 +464,28 @@ public class MissionDetailActivity extends AppCompatActivity implements  View.On
                             tv_date_progress.setText(count + "/" + item.getMission_dates().size() + "일");
                             makeCircularProgressBar(count, itemForDateTimeByLists.size());
                             setRecyclerView(itemForDateTimeByLists);
-
+                            addMapFragment(new MapFragment(mainScrollView,mission_latitude,mission_longitude));
+                        }else{
+                            Toast.makeText(getApplicationContext(),"데이터를 불러오는데 실패했습니다.",Toast.LENGTH_LONG).show();
+                            finish();
                         }
-                        addMapFragment(new MapFragment(mainScrollView,mission_latitude,mission_longitude));
+
 
                     }
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {
 
+                        finish();
                     }
                 });
 
 
+
+
         }
+
+         */
     }
 
 

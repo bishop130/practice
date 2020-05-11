@@ -1,30 +1,21 @@
 package com.suji.lj.myapplication.Adapters;
 
 import android.content.Context;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
 import com.suji.lj.myapplication.Items.ContactItem;
 import com.suji.lj.myapplication.R;
 import com.suji.lj.myapplication.SingleModeActivity;
 
 import java.text.DecimalFormat;
-import java.text.ParseException;
 
 import io.realm.Realm;
-import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 
 public class RecyclerTransferRespectivelyAdapter extends RecyclerView.Adapter<RecyclerTransferRespectivelyAdapter.ViewHolder> {
@@ -35,13 +26,15 @@ public class RecyclerTransferRespectivelyAdapter extends RecyclerView.Adapter<Re
     private DecimalFormat dfnd = new DecimalFormat("#,###");
     Context context;
     private boolean hasFractionalPart;
+    OnResetAmountDisplayListener onResetAmountDisplayListener;
 
 
-    public RecyclerTransferRespectivelyAdapter(Context context, RealmResults<ContactItem> realmResults, Realm realm) {
+    public RecyclerTransferRespectivelyAdapter(Context context, RealmResults<ContactItem> realmResults, Realm realm,OnResetAmountDisplayListener onResetAmountDisplayListener) {
 
         this.context = context;
         this.realmResults = realmResults;
         this.realm = realm;
+        this.onResetAmountDisplayListener = onResetAmountDisplayListener;
 
     }
 
@@ -56,6 +49,23 @@ public class RecyclerTransferRespectivelyAdapter extends RecyclerView.Adapter<Re
             holder.name.setText("# " + realmResults.get(position).getDisplayName());
 
         }
+
+        holder.name.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                realm.executeTransaction(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        realmResults.deleteFromRealm(position);
+                        notifyItemRemoved(position);
+                        notifyItemRangeChanged(position,realmResults.size());
+
+
+                    }
+                });
+                onResetAmountDisplayListener.onResetAmountDisplay();
+            }
+        });
 
 
     }
@@ -88,6 +98,11 @@ public class RecyclerTransferRespectivelyAdapter extends RecyclerView.Adapter<Re
 
 
         }
+
+    }
+
+    public interface OnResetAmountDisplayListener{
+        void onResetAmountDisplay();
 
     }
 }

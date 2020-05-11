@@ -2,6 +2,7 @@ package com.suji.lj.myapplication.Fragments;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -21,9 +22,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.suji.lj.myapplication.Adapters.RecyclerMissionDayAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerPastMissionAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerViewDivider;
 import com.suji.lj.myapplication.Items.ItemForMissionByDay;
+import com.suji.lj.myapplication.Items.MissionInfoList;
+import com.suji.lj.myapplication.MissionDetailActivity;
 import com.suji.lj.myapplication.R;
 import com.suji.lj.myapplication.Utils.DateTimeUtils;
 import com.suji.lj.myapplication.Utils.Utils;
@@ -37,7 +41,7 @@ import static android.content.Context.MODE_PRIVATE;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MissionByPastFragment extends Fragment {
+public class MissionByPastFragment extends Fragment implements RecyclerPastMissionAdapter.OnLoadMissionFromPastListener {
 
 
     //List<ItemForMissionByDay> list = new ArrayList<>();
@@ -73,7 +77,7 @@ public class MissionByPastFragment extends Fragment {
     }
 
     private void getDatabase() {
-        String key = Utils.getCurrentTime();
+        String key = DateTimeUtils.getCurrentDateTimeForKey();
         Double lll = Double.valueOf(key);
         long yyy = Math.round(lll) + 1000 * 60 * 30;
 
@@ -86,7 +90,7 @@ public class MissionByPastFragment extends Fragment {
         Log.d("데이트타임", lll + "double");
         Log.d("데이트타임", yyy + 1000 * 60 * 30 + "long");
         if (!Utils.isEmpty(user_id))
-            databaseReference.child("user_data").child(user_id).child("mission_display").orderByKey().endAt(key).addListenerForSingleValueEvent(new ValueEventListener() {
+            databaseReference.child("user_data").child(user_id).child("mission_display").orderByChild("date_time").endAt(key).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     List<ItemForMissionByDay> list = new ArrayList<>();
@@ -98,7 +102,7 @@ public class MissionByPastFragment extends Fragment {
 
                     //no_mission_ly.setVisibility(View.GONE);
                     //ly_latest_mission.setVisibility(View.VISIBLE);
-                    Log.d("지난약속",dataSnapshot.getChildrenCount()+"");
+                    Log.d("지난약속", dataSnapshot.getChildrenCount() + "");
 
 
                     databaseReference.child("user_data").child(user_id).child("mission_display").orderByKey().startAt(key).endAt(Utils.getCustomTime()).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -108,16 +112,16 @@ public class MissionByPastFragment extends Fragment {
                                 ItemForMissionByDay itemForMissionByDay = data.getValue(ItemForMissionByDay.class);
 
 
-                                if(itemForMissionByDay.isSuccess()) {
+                                if (itemForMissionByDay.isSuccess()) {
                                     list.add(itemForMissionByDay);
-                                    Log.d("지난약속",itemForMissionByDay.getTitle());
+                                    Log.d("지난약속", itemForMissionByDay.getTitle());
                                 }
                             }
                             Log.d("과거", list.size() + "");
                             //Log.d("과거", list.size()+"");
                             Collections.reverse(list);
 
-                            RecyclerPastMissionAdapter adapter = new RecyclerPastMissionAdapter(mContext, list);
+                            RecyclerPastMissionAdapter adapter = new RecyclerPastMissionAdapter(mContext, list,MissionByPastFragment.this::onLoadMissionFromPast);
                             recyclerView.setLayoutManager(new LinearLayoutManager(mContext));
                             recyclerView.setAdapter(adapter);
                             recyclerView.setVisibility(View.VISIBLE);
@@ -130,9 +134,6 @@ public class MissionByPastFragment extends Fragment {
 
                         }
                     });
-
-
-
 
 
                 }
@@ -154,5 +155,28 @@ public class MissionByPastFragment extends Fragment {
         mContext = context;
 
     }
+
+    @Override
+    public void onLoadMissionFromPast(String mission_id) {
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+        databaseReference.child("user_data").child(user_id).child("mission_info_list").child(mission_id).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                MissionInfoList item = dataSnapshot.getValue(MissionInfoList.class);
+                Intent intent = new Intent(mContext, MissionDetailActivity.class);
+                intent.putExtra("mission_info_list", item);
+                mContext.startActivity(intent);
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+
 
 }

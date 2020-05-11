@@ -24,16 +24,19 @@ import com.suji.lj.myapplication.R;
 import java.util.Collections;
 import java.util.List;
 
-public class RecyclerContactFriendAdapter extends RecyclerView.Adapter<RecyclerContactFriendAdapter.ItemViewHolder>{
+public class RecyclerContactFriendAdapter extends RecyclerView.Adapter<RecyclerContactFriendAdapter.ItemViewHolder> {
 
 
     Context context;
     List<ItemForFriends> list;
     OnAddSelectedListener onAddSelectedListener;
-    public RecyclerContactFriendAdapter(Context context, List<ItemForFriends> list,OnAddSelectedListener onAddSelectedListener) {
+    int contact_size;
+
+    public RecyclerContactFriendAdapter(Context context, List<ItemForFriends> list, OnAddSelectedListener onAddSelectedListener) {
         this.context = context;
         this.list = list;
         this.onAddSelectedListener = onAddSelectedListener;
+        this.contact_size = contact_size;
     }
 
     @NonNull
@@ -58,12 +61,12 @@ public class RecyclerContactFriendAdapter extends RecyclerView.Adapter<RecyclerC
         holder.thumbnail.setClipToOutline(true);
 
 
-        if(!list.get(i).getImage().isEmpty()){
+        if (!list.get(i).getImage().isEmpty()) {
             Picasso.with(context)
                     .load(list.get(i).getImage())
                     .fit()
                     .into(holder.thumbnail);
-            Log.d("이미지","이미지있음");
+            Log.d("이미지", "이미지있음");
         }
 
         //holder.first_name.setBackgroundResource(itemList.get(position).isSelected() ? R.drawable.checked_icon : R.drawable.contact_circle);
@@ -73,50 +76,44 @@ public class RecyclerContactFriendAdapter extends RecyclerView.Adapter<RecyclerC
         holder.ly_friend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                list.get(i).setSelected(!list.get(i).isSelected()); //스위치
-                list.get(i).setPosition(i);
-                //Log.d("멀티", itemList.get(position).isSelected() + "선택");
-                //Log.d("라니스터","position  "+position+"\n"+"isture"+itemList.get(position).isSelected());
 
-                if (list.get(i).isSelected()) {
+                    list.get(i).setSelected(!list.get(i).isSelected()); //스위치
+                    list.get(i).setPosition(i);
+                    //Log.d("멀티", itemList.get(position).isSelected() + "선택");
+                    //Log.d("라니스터","position  "+position+"\n"+"isture"+itemList.get(position).isSelected());
 
-
-                    ItemForFriends item = new ItemForFriends();
-                    item.setName(list.get(i).getName());
-                    item.setUuid(list.get(i).getUuid());
-                    item.setId(list.get(i).getId());
-                    item.setImage(list.get(i).getImage());
-                    item.setFavorite(list.get(i).isFavorite());
-                    //item.setAmount(1000);
-                    item.setPosition(i);
-                    item.setSelected(true);
-                    Log.d("멀티", i + "포지션");
+                    if (list.get(i).isSelected()) {
 
 
-                    //onFriendSelectListener.onFriendSelect(item, i);
-                    //((MultiModeFragment) context).selectedList(item, position);
-                    ((ContactActivity)context).addFromFriendToSelect(item);
-                    notifyDataSetChanged();
+                        ItemForFriends item = new ItemForFriends();
+                        item.setName(list.get(i).getName());
+                        item.setUuid(list.get(i).getUuid());
+                        item.setId(list.get(i).getId());
+                        item.setImage(list.get(i).getImage());
+                        item.setFavorite(list.get(i).isFavorite());
+                        //item.setAmount(1000);
+                        item.setPosition(i);
+                        item.setSelected(true);
+                        Log.d("멀티", i + "포지션");
 
-                } else {
 
+                        //onFriendSelectListener.onFriendSelect(item, i);
+                        //((MultiModeFragment) context).selectedList(item, position);
+                        ((ContactActivity) context).addFromFriendToSelect(item, i);
+                        notifyDataSetChanged();
 
-                    ((ContactActivity)context).removeFromFriendToSelect(i);
-                    notifyDataSetChanged();
-                    //onFriendUnSelectListener.onFriendUnSelect(i);
+                    }
+                    else{
 
+                        ((ContactActivity) context).removeFromFriendToSelect(i);
+                        notifyDataSetChanged();
+                        //onFriendUnSelectListener.onFriendUnSelect(i);
+                    }
 
-                }
 
 
             }
         });
-
-
-
-
-
-
 
 
     }
@@ -134,8 +131,6 @@ public class RecyclerContactFriendAdapter extends RecyclerView.Adapter<RecyclerC
         LinearLayout ly_friend;
 
 
-
-
         public ItemViewHolder(View itemView) {
             super(itemView);
 
@@ -148,7 +143,7 @@ public class RecyclerContactFriendAdapter extends RecyclerView.Adapter<RecyclerC
         }
     }
 
-    public interface OnAddSelectedListener{
+    public interface OnAddSelectedListener {
         void onAddSelected();
 
     }

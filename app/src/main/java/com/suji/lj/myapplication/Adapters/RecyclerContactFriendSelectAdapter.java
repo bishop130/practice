@@ -57,7 +57,8 @@ public class RecyclerContactFriendSelectAdapter extends RecyclerView.Adapter<Rec
 
         if(itemList.get(position).getContact_or_friend()==1){
             holder.title.setTextColor(context.getResources().getColor(R.color.colorPrimary));
-
+        }else{
+            holder.title.setTextColor(context.getResources().getColor(R.color.black));
         }
         holder.title.setText("#"+itemList.get(position).getDisplayName());
         //holder.phone_number.setText(itemList.get(position).getPhoneNumbers());

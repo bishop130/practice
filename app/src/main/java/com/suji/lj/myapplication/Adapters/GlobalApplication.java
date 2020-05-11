@@ -1,37 +1,66 @@
 package com.suji.lj.myapplication.Adapters;
 
-import android.app.Activity;
 
-import com.crashlytics.android.Crashlytics;
+import com.kakao.auth.ApprovalType;
+import com.kakao.auth.AuthType;
+import com.kakao.auth.IApplicationConfig;
+import com.kakao.auth.ISessionConfig;
+import com.kakao.auth.KakaoAdapter;
 import com.kakao.auth.KakaoSDK;
 
 import android.app.Application;
-import io.fabric.sdk.android.Fabric;
+import android.content.Context;
 
 public class GlobalApplication extends Application {
-    private static volatile GlobalApplication obj = null;
-    private static volatile Activity currentActivity = null;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        Fabric.with(this, new Crashlytics());
-        obj = this;
-        KakaoSDK.init(new KakaoSDKAdapter());
+        KakaoSDK.init(new KakaoAdapter() {
+            @Override
+            public IApplicationConfig getApplicationConfig() {
+                return new IApplicationConfig() {
+                    @Override
+                    public Context getApplicationContext() {
+                        return GlobalApplication.this;
+                    }
+                };
+            }
+            @Override
+            public ISessionConfig getSessionConfig() {
+                return new ISessionConfig() {
+                    @Override
+                    public AuthType[] getAuthTypes() {
+                        return new AuthType[]{AuthType.KAKAO_TALK};
+                    }
+
+                    @Override
+                    public boolean isUsingWebviewTimer() {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean isSecureMode() {
+                        return false;
+                    }
+
+
+                    @Override
+                    public ApprovalType getApprovalType() {
+                        return ApprovalType.INDIVIDUAL;
+                    }
+
+                    @Override
+                    public boolean isSaveFormData() {
+                        return true;
+                    }
+                };
+            }
+
+
+        });
     }
 
-    public static GlobalApplication getGlobalApplicationContext() {
-        return obj;
-    }
-
-    public static Activity getCurrentActivity() {
-        return currentActivity;
-    }
-
-    // Activity가 올라올때마다 Activity의 onCreate에서 호출해줘야한다.
-    public static void setCurrentActivity(Activity currentActivity) {
-        GlobalApplication.currentActivity = currentActivity;
-    }
 
 }
 

@@ -3,6 +3,7 @@ package com.suji.lj.myapplication.Adapters;
 import android.content.Context;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,7 +47,10 @@ public class RecyclerInvitationFriendAdapter extends RecyclerView.Adapter<Recycl
         holder.friend_name.setText(list.get(i).getFriend_name());
         holder.friend_image.setBackground(new ShapeDrawable(new OvalShape()));
         holder.friend_image.setClipToOutline(true);
-        if(list.get(i).getThumbnail()!=null) {
+        String thumbnail = list.get(i).getThumbnail();
+
+
+        if (!thumbnail.equals("")) {
             Picasso.with(context).load(list.get(i).getThumbnail()).fit().into(holder.friend_image);
         }
 

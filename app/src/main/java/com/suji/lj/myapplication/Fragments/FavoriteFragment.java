@@ -1,35 +1,27 @@
 package com.suji.lj.myapplication.Fragments;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.content.res.AppCompatResources;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.os.CountDownTimer;
-import android.text.TextUtils;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.borax12.materialdaterangepicker.date.DatePickerDialog;
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.firebase.ui.database.paging.FirebaseRecyclerPagingAdapter;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
@@ -37,19 +29,13 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.leinardi.android.speeddial.SpeedDialActionItem;
-import com.leinardi.android.speeddial.SpeedDialView;
 
 import com.suji.lj.myapplication.Items.ItemForMissionByDay;
 import com.suji.lj.myapplication.Items.MissionInfoList;
 import com.suji.lj.myapplication.Items.RecyclerItem;
-import com.suji.lj.myapplication.Main2Activity;
 import com.suji.lj.myapplication.MissionDetailActivity;
-import com.suji.lj.myapplication.MultiModeActivity;
 import com.suji.lj.myapplication.R;
-import com.kakao.network.ErrorResult;
 import com.suji.lj.myapplication.SingleModeActivity;
 import com.suji.lj.myapplication.Utils.DateTimeFormatter;
 import com.suji.lj.myapplication.Utils.DateTimeUtils;
@@ -57,7 +43,6 @@ import com.suji.lj.myapplication.Utils.OnSingleClickListener;
 import com.suji.lj.myapplication.Utils.Utils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -92,9 +77,11 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
     String mother_id;
     String user_id;
     //SwipeRefreshLayout ly_swipe_refresh;
-    Fragment fa, fb, fc;
-    FragmentTransaction ft;
+    Fragment fb, fc;
     String key_for_day;
+    ArrayList<ItemForMissionByDay> list = new ArrayList<>();
+    LinearLayout ly_latest;
+    MissionByDayFragment missionByDayFragment;
 
     @Nullable
     @Override
@@ -113,8 +100,8 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
         rest_time_display = view.findViewById(R.id.rest_time_display);
         address_display_ly = view.findViewById(R.id.address_display_layout);
         rest_time_display_ly = view.findViewById(R.id.rest_time_display_layout);
+        ly_latest = view.findViewById(R.id.ly_latest);
         //ly_swipe_refresh = view.findViewById(R.id.ly_swipe_refresh);
-
         //loading_panel = view.findViewById(R.id.loadingPanel);
         //recyclerView = view.findViewById(R.id.recycler_day);
         //recyclerView.setNestedScrollingEnabled(false);
@@ -128,14 +115,26 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
         tab_ly.addTab(tab_ly.newTab().setText("지난약속"));
         tab_ly.addTab(tab_ly.newTab().setText("전체약속"));
 
-        ft = getChildFragmentManager().beginTransaction();
         tab_ly.addOnTabSelectedListener(this);
         ly_latest_mission.setOnClickListener(new OnSingleClickListener() {
             @Override
             public void onSingleClick(View v) {
-                Intent intent = new Intent(mContext, MissionDetailActivity.class);
-                intent.putExtra("mission_id", mother_id);
-                mContext.startActivity(intent);
+                DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+                databaseReference.child("user_data").child(user_id).child("mission_info_list").child(mother_id).addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        MissionInfoList item = dataSnapshot.getValue(MissionInfoList.class);
+                        Intent intent = new Intent(mContext, MissionDetailActivity.class);
+                        intent.putExtra("mission_info_list", item);
+                        mContext.startActivity(intent);
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
             }
         });
         appBar.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
@@ -160,7 +159,6 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
                 startActivity(new Intent(mContext, SingleModeActivity.class));
             }
         });
-
 
 
         //recyclerView.addItemDecoration(new RecyclerViewDivider(36));
@@ -219,101 +217,86 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
         });
 
  */
-        String key = DateTimeUtils.getCurrentTime();
-        queryData(key);
+        Activity activity = getActivity();
+
+        if (isAdded() && activity != null) {
+            Log.d("favorite", "isAdd");
+            String key = DateTimeUtils.getCurrentDateTimeForKey();
+            missionByDayFragment = new MissionByDayFragment();
+            addFragment(missionByDayFragment, "day");
+            if (missionByDayFragment != null) {
+                Log.d("favorite", "널이 아니야");
+                newQueryData(key, missionByDayFragment);
+            }
+            //missionByDayFragment = (MissionByDayFragment) getChildFragmentManager().findFragmentByTag("day");
+
+        }
+
+
+        //queryData(key);
 
         return view;
     }
 
-    private void queryData(String key) {
-        Log.d("카카오세션", user_id + "  favorite");
+    private void newQueryData(String key, MissionByDayFragment fragment) {
+
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-        Log.d("데이트타임", DateTimeUtils.getCurrentTime());
+        //Log.d("데이트타임", DateTimeUtils.getCurrentTime());
         if (!Utils.isEmpty(user_id))
-            databaseReference.child("user_data").child(user_id).child("mission_display").orderByKey().limitToFirst(2).startAt(key).addValueEventListener(new ValueEventListener() {
+            databaseReference.child("user_data").child(user_id).child("mission_display").orderByChild("date_time").startAt(key).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    no_mission_ly.setVisibility(View.GONE);
-                    ly_latest_mission.setVisibility(View.VISIBLE);
+                    list = new ArrayList<>();
 
-                    List<ItemForMissionByDay> list = new ArrayList<>();
-                    Log.d("수정", list.size() + "사이즈");
-                    for (DataSnapshot data : dataSnapshot.getChildren()) {
-                        ItemForMissionByDay itemForMissionByDay = data.getValue(ItemForMissionByDay.class);
-                        list.add(itemForMissionByDay);
-                    }
-                    if (list.size() == 1) {
-                        if (list.get(0).isSuccess()) {
-                            //String key = list.get(1).getDate() + list.get(1).getTime();
-                            //queryData(key);
-                            Log.d("수정", "사이즈 1 성공이라면");
-                        } else {
-                            Log.d("수정", "사이즈 1 실패라면");
-                            String title = list.get(0).getTitle();
-                            String date = list.get(0).getDate();
-                            String time = list.get(0).getTime();
-                            String address = list.get(0).getAddress();
-                            mother_id = list.get(0).getMother_id();
-
-                            tv_mission_title.setText(title);
-                            date_display.setText(DateTimeUtils.makeDateForHumanIfToday(date));
-                            time_display.setText(DateTimeUtils.makeTimeForHuman(time));
-                            address_display.setText(address);
-                            setTimer(date + time);
-                            data_loaded = true;
-                            ly_latest_mission.setClickable(true);
-
-                            //replaceFragment(new MissionByDayFragment(key_for_day));
-                            //checkResult(key);
-
-
-                        }
-
-                    }
-                    if (list.size() > 1) {
-
-                        if (list.get(0).isSuccess()) {
-                            String key = list.get(1).getDate() + list.get(1).getTime();
-                            queryData(key);
-                        } else {
-                            String title = list.get(0).getTitle();
-                            String date = list.get(0).getDate();
-                            String time = list.get(0).getTime();
-                            String address = list.get(0).getAddress();
-                            mother_id = list.get(0).getMother_id();
-
-                            tv_mission_title.setText(title);
-                            date_display.setText(DateTimeUtils.makeDateForHumanIfToday(date));
-                            time_display.setText(DateTimeUtils.makeTimeForHuman(time));
-                            address_display.setText(address);
-                            setTimer(date + time);
-                            data_loaded = true;
-                            ly_latest_mission.setClickable(true);
-                            if (list.size() != 1) {
-                                key_for_day = list.get(1).getDate() + list.get(1).getTime();
-                                if (!isAdded()) return;
-                                replaceFragment(new MissionByDayFragment(key_for_day));
-                                //checkResult(key);
-
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        ItemForMissionByDay item = snapshot.getValue(ItemForMissionByDay.class);
+                        if (item != null) {
+                            if (!item.isSuccess()) {
+                                list.add(item);
                             }
-
                         }
-
-                    } else {
-                        Log.d("수정", "사이즈 0 없음");
-                        //loading_panel.setVisibility(View.GONE);
-                        no_mission_ly.setVisibility(View.VISIBLE);
-                        ly_latest_mission.setVisibility(View.GONE);
-
-
                     }
 
+                    //single인지 multi인지 구분하기
+                    if (list.size() > 0) {
+
+                        String title = list.get(0).getTitle();
+                        String date = list.get(0).getDate();
+                        String time = list.get(0).getTime();
+                        String address = list.get(0).getAddress();
+                        mother_id = list.get(0).getMother_id();
+                        ly_latest_mission.setClickable(true);
+
+
+                        tv_mission_title.setText(title);
+                        date_display.setText(DateTimeUtils.makeDateForHumanIfToday(date));
+                        time_display.setText(DateTimeUtils.makeTimeForHuman(time));
+                        address_display.setText(address);
+                        setTimer(date + time);
+                        data_loaded = true;
+                        ly_latest_mission.setClickable(true);
+
+                        list.remove(0);
+                        ly_latest.setVisibility(View.VISIBLE);
+
+
+                        if (fragment != null) {
+                            Log.d("favorite", "favorite update");
+
+                            fragment.update(list);
+                        }
+
+
+                        Log.d("들어와", "파이어베이스");
+                        //addFragment(MissionByDayFragment.newInstance(list));
+                    }
 
                 }
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {
-                    Toast.makeText(getContext(), databaseError.toString(), Toast.LENGTH_LONG).show();
+                   // missionByDayFragment = new MissionByDayFragment();
+                    //addFragment(missionByDayFragment, "day");
 
                 }
             });
@@ -333,7 +316,6 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
             timer = new CountDownTimer(diff, 1000) {
                 @Override
                 public void onTick(long l) {
-                    Log.d("타이머", "isrunning");
                     isTimerRunning = true;
                     long days = TimeUnit.MILLISECONDS.toDays(l);
                     long remainingHoursInMillis = l - TimeUnit.DAYS.toMillis(days);
@@ -363,7 +345,7 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
 
                 @Override
                 public void onFinish() {
-                    queryData(Utils.getCurrentTime());
+                    newQueryData(Utils.getCurrentTime(), new MissionByDayFragment());
                     isTimerRunning = false;
 
 
@@ -414,23 +396,11 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
     public void onStart() {
         super.onStart();
 
-        fa = null;
+        missionByDayFragment = null;
         fb = null;
         fc = null;
         Log.d("홈프레그", "TabPosition" + tab_ly.getSelectedTabPosition());
-        //tabFragment(tab_ly.getSelectedTabPosition());
-
-
-        //addFragment(new MissionByDayFragment());
-
-
-        //getChildFragmentManager().beginTransaction().remove(getChildFragmentManager().findFragmentById(R.id.fragment_container)).commit();
-        //getChildFragmentManager().beginTransaction().remove(new MissionByMissionFragment()).commit();
-
         Log.d("홈프레그", "onStart");
-        //adapter.startListening();
-
-        //loading_panel.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -465,10 +435,10 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
         tabFragment(pos);
     }
 
-    private void addFragment(Fragment fragment) {
+    private void addFragment(Fragment fragment, String tag) {
         FragmentManager fragmentManager = getChildFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.add(R.id.fragment_container, fragment).commit();
+        fragmentTransaction.add(R.id.fragment_container, fragment, tag).commit();
     }
 
     private void hideFragment(Fragment fragment) {
@@ -486,22 +456,27 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
     private void replaceFragment(Fragment fragment) {
         FragmentManager fragmentManager = getChildFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_container, fragment).commitAllowingStateLoss();
+        fragmentTransaction.replace(R.id.fragment_container, fragment).commit();
     }
 
     private void tabFragment(int pos) {
         switch (pos) {
             case 0:
-                if (fa == null) {
-                        fa = new MissionByDayFragment(key_for_day);
-                        addFragment(fa);
-
-                    Log.d("홈프레그", "fa is null");
+                Log.d("리스트", list.size() + "favorite");
+                if (missionByDayFragment == null) {
+                    missionByDayFragment = new MissionByDayFragment();
+                    addFragment(missionByDayFragment, "day");
+                    String key = DateTimeUtils.getCurrentTime();
+                    newQueryData(key, missionByDayFragment);
+                    Log.d("홈프레그", "missionByMissionFragment is null");
                 }
 
-                if (fa != null) {
-                    showFragment(fa);
-                    Log.d("홈프레그", "fa is showing");
+                if (missionByDayFragment != null) {
+                    //   missionByDayFragment.update(list);
+                    // String key = DateTimeUtils.getCurrentTime();
+                    //newQueryData(key);
+                    showFragment(missionByDayFragment);
+                    Log.d("홈프레그", "missionByMissionFragment is showing");
                 }
                 if (fb != null) {
                     hideFragment(fb);
@@ -517,13 +492,13 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
 
                 if (fb == null) {
                     fb = new MissionByPastFragment();
-                    addFragment(fb);
+                    addFragment(fb, "past");
                     Log.d("홈프레그", "fb is null");
                 }
 
-                if (fa != null) {
-                    hideFragment(fa);
-                    Log.d("홈프레그", "fa is hiding");
+                if (missionByDayFragment != null) {
+                    hideFragment(missionByDayFragment);
+                    Log.d("홈프레그", "missionByMissionFragment is hiding");
                 }
                 if (fb != null) {
                     showFragment(fb);
@@ -539,13 +514,13 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
                 if (fc == null) {
                     fc = new MissionByMissionFragment();
 
-                    addFragment(fc);
+                    addFragment(fc, "mission");
                     Log.d("홈프레그", "fc is null");
                 }
 
-                if (fa != null) {
-                    hideFragment(fa);
-                    Log.d("홈프레그", "fa is hiding");
+                if (missionByDayFragment != null) {
+                    hideFragment(missionByDayFragment);
+                    Log.d("홈프레그", "missionByMissionFragment is hiding");
                 }
                 if (fb != null) {
                     hideFragment(fb);
@@ -559,6 +534,12 @@ public class FavoriteFragment extends Fragment implements DatePickerDialog.OnDat
 
                 break;
         }
+
+    }
+    public void refresh() {
+        String key = DateTimeUtils.getCurrentTime();
+        newQueryData(key, new MissionByDayFragment());
+        Log.d("들어와", "리프레시");
 
     }
 }

@@ -79,25 +79,39 @@ public class RecyclerFriendRequestAdapter extends RecyclerView.Adapter<RecyclerF
         holder.accept_request.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ItemRegisterAccount item = new ItemRegisterAccount();
+                ItemRegisterAccount friend_item = new ItemRegisterAccount();
 
-                item.setUser_name(list.get(i).getUser_name());
-                item.setThumnail_img(list.get(i).getThumnail_img());
-                item.setEmail(list.get(i).getEmail());
-                item.setUser_id(list.get(i).getUser_id());
-                item.setProfile_img(list.get(i).getProfile_img());
-                item.setIs_public(list.get(i).isIs_public());
+                friend_item.setUser_name(list.get(i).getUser_name());
+                friend_item.setThumnail_img(list.get(i).getThumnail_img());
+                friend_item.setEmail(list.get(i).getEmail());
+                friend_item.setUser_id(list.get(i).getUser_id());
+                friend_item.setProfile_img(list.get(i).getProfile_img());
+                friend_item.setIs_public(list.get(i).isIs_public());
 
 
                 // String user_id = context.getSharedPreferences("Kakao",Context.MODE_PRIVATE).getString("token","");
                 DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-                databaseReference.child("user_data").child(user_id).child("friends_list").child(friend_id).setValue(item).addOnCompleteListener(new OnCompleteListener<Void>() {
+                databaseReference.child("user_data").child(friend_id).child("friend_accept_waiting").child(user_id).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                        databaseReference.child("user_data").child(user_id).child("friend_accept_waiting").child(friend_id).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                        databaseReference.child("user_data").child(user_id).child("friend_request").child(friend_id).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
-                                databaseReference.child("user_data").child(user_id).child("friend_request").child(friend_id).removeValue();
+                                ItemRegisterAccount item = new ItemRegisterAccount();
+                                String user_name = context.getSharedPreferences("Kakao", MODE_PRIVATE).getString("user_name", "");
+                                String thumbnail = context.getSharedPreferences("Kakao", MODE_PRIVATE).getString("thumbnail", "");
+
+                                item.setUser_name(user_name);
+                                item.setThumnail_img(thumbnail);
+                                item.setUser_id(user_id);
+
+                                databaseReference.child("user_data").child(friend_id).child("friends_list").child(user_id).setValue(item).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        databaseReference.child("user_data").child(user_id).child("friends_list").child(friend_id).setValue(friend_item);
+                                    }
+                                });
+
                             }
                         });
 

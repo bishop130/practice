@@ -4,9 +4,7 @@
     android:id="@+id/main_recycler_view_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginStart="12dp"
-    android:layout_marginEnd="12dp"
-    android:background="@drawable/rounded"
+    android:background="@color/White"
     android:orientation="vertical">
 
     <LinearLayout
@@ -28,7 +26,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:src="@drawable/ic_error"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="10dp"
                     android:layout_gravity="center"
                     android:layout_marginStart="28dp"
                     android:layout_marginBottom="8dp"/>
@@ -123,13 +121,6 @@
                 android:src="@drawable/right_arrow" />
         </LinearLayout>
     </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/ly_is_success"
-        android:layout_width="match_parent"
-        android:layout_height="4dp"
-        android:background="@color/colorPrimary"
-        android:orientation="horizontal" />
 
 
 </LinearLayout>

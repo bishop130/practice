@@ -29,7 +29,6 @@ import androidx.core.app.NotificationCompat;
 public class AlarmService extends Service {
 
     private SimpleDateFormat date_time = new SimpleDateFormat("yyyy-M-dd HH:mm:ss", Locale.KOREA);
-    DBHelper dbHelper;
 
     @Nullable
     @Override
@@ -149,46 +148,7 @@ public class AlarmService extends Service {
 
         startForeground(2, builder.build());
 
-    }
 
-    private void setNextAlarm() {
-        dbHelper = new DBHelper(AlarmService.this, "alarm_manager.db", null, 4);
-        String query = "SELECT * FROM alarm_table ORDER BY ABS(`date_time` - 'now') LIMIT 1 WHERE is_success = 'false";
-        dbHelper.setNextAlarm(query);
-        /*
-        if(result!=null) {
-            while (result.moveToNext()) {
-                int id = result.getInt(0);
-                String time = result.getString(1);
-                String lat = result.getString(2);
-                String lng = result.getString(3);
-                String mission_id = result.getString(4);
-                String date = result.getString(5);
-                String date_time = result.getString(6);
-                String is_success = result.getString(7);
-
-                Log.d("디바2", "id:" + id + "   lat:" + String.valueOf(lat) + "   " +
-                        "lng:" + String.valueOf(lng) + "     time:" + time + "     mission_id:" + mission_id + "   " +
-                        "  date:" + date + "     date+time:" + date_time + "      is_success:" + is_success);
-                Intent service = new Intent(this, AlarmService.class);
-                service.putExtra("mission_time", time);
-                service.putExtra("date_array", date);
-                service.putExtra("mission_id", mission_id);
-                service.putExtra("lat", lat);
-                service.putExtra("lng", lng);
-                //service.putExtra("title",title);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    ContextCompat.startForegroundService(this, service);
-                } else {
-                    startService(service);
-                }
-
-            }
-        }
-        else{
-
-        }
-*/
 
     }
 }

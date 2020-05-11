@@ -13,7 +13,6 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
@@ -44,7 +43,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import es.dmoral.toasty.Toasty;
-import io.fabric.sdk.android.Fabric;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 
@@ -83,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
     String[] REQUIRED_PERMISSIONS = {Manifest.permission.ACCESS_FINE_LOCATION, // 카메라
             Manifest.permission.READ_CONTACTS, Manifest.permission.READ_PHONE_STATE, Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS};
     private static final int PERMISSIONS_REQUEST_CODE = 100;
-    private Fragment fa, fb, fc, fd;
+    private Fragment fa, fb, fc;
     private FragmentManager fragmentManager;
     private BackPressHandler backPressHandler = new BackPressHandler(this);
     String TAG = "메인";
@@ -92,7 +90,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_main);
         if (Session.getCurrentSession().isClosed()) {
             Log.d("카카오", Session.getCurrentSession().isClosed() + "");
@@ -221,7 +218,6 @@ public class MainActivity extends AppCompatActivity {
                             if (fa != null) fragmentManager.beginTransaction().show(fa).commit();
                             if (fb != null) fragmentManager.beginTransaction().hide(fb).commit();
                             if (fc != null) fragmentManager.beginTransaction().hide(fc).commit();
-                            if (fd != null) fragmentManager.beginTransaction().hide(fd).commit();
 
                             break;
                         case R.id.nav_search:
@@ -234,7 +230,6 @@ public class MainActivity extends AppCompatActivity {
                             if (fa != null) fragmentManager.beginTransaction().hide(fa).commit();
                             if (fb != null) fragmentManager.beginTransaction().show(fb).commit();
                             if (fc != null) fragmentManager.beginTransaction().hide(fc).commit();
-                            if (fd != null) fragmentManager.beginTransaction().hide(fd).commit();
                             //Realm.init(getApplicationContext());
                             //Realm.setDefaultConfiguration(getRealmConfig());
 
@@ -250,18 +245,6 @@ public class MainActivity extends AppCompatActivity {
                             if (fa != null) fragmentManager.beginTransaction().hide(fa).commit();
                             if (fb != null) fragmentManager.beginTransaction().hide(fb).commit();
                             if (fc != null) fragmentManager.beginTransaction().show(fc).commit();
-                            if (fd != null) fragmentManager.beginTransaction().hide(fd).commit();
-
-                            break;
-                        case R.id.nav_location:
-                            if (fd == null) {
-                                fd = new SettingFragment();
-                                fragmentManager.beginTransaction().add(R.id.fragment_container, fd).commit();
-                            }
-                            if (fa != null) fragmentManager.beginTransaction().hide(fa).commit();
-                            if (fb != null) fragmentManager.beginTransaction().hide(fb).commit();
-                            if (fc != null) fragmentManager.beginTransaction().hide(fc).commit();
-                            if (fd != null) fragmentManager.beginTransaction().show(fd).commit();
 
                             break;
 
@@ -313,6 +296,12 @@ public class MainActivity extends AppCompatActivity {
 
 //commit realm changes
                 realm.commitTransaction();
+
+                //FirebaseDatabase.getInstance().getReference().child("common").child("service_account").removeValue();
+
+
+
+
                 return true;
 
 
@@ -509,6 +498,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
 
 
 

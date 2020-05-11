@@ -17,15 +17,12 @@ import android.net.ConnectivityManager;
 import android.os.Build;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.text.format.DateUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
-import android.widget.ScrollView;
-import android.widget.Toast;
 
 import androidx.core.widget.NestedScrollView;
 
@@ -39,13 +36,11 @@ import com.android.volley.toolbox.Volley;
 import com.github.tamir7.contacts.Contact;
 import com.github.tamir7.contacts.Contacts;
 import com.github.tamir7.contacts.Query;
+import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.gson.GsonBuilder;
-import com.kakao.usermgmt.response.model.User;
-import com.suji.lj.myapplication.Adapters.DBHelper;
 import com.suji.lj.myapplication.Adapters.NewLocationService;
 import com.suji.lj.myapplication.Items.ContactItem;
 import com.suji.lj.myapplication.Items.UserAccountItem;
-import com.suji.lj.myapplication.MainActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -55,6 +50,7 @@ import java.io.ByteArrayOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -332,62 +328,6 @@ public class Utils {
         return false;
     }
 
-
-    public static void refreshDatabase(Context context, final String user_id) {
-        RequestQueue requestQueue = Volley.newRequestQueue(context);
-        String refreshDatabaseURL = "http://bishop130.cafe24.com/refreshDB.php";
-
-        DBHelper dbHelper = new DBHelper(context, "alarm_manager.db", null, 5);
-        StringRequest request = new StringRequest(Request.Method.POST, refreshDatabaseURL, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-
-                Log.d("메인", "DB_refresh");
-                String sql = "DELETE FROM alarm_table";
-                dbHelper.selectData(sql);
-                try {
-                    JSONArray jsonArray = new JSONArray(response);
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        JSONObject jsonObject = jsonArray.getJSONObject(i);
-                        String mission_id = jsonObject.getString("mission_id");
-                        String time = jsonObject.getString("mission_time");
-                        String lat = jsonObject.getString("mission_lat");
-                        String lng = jsonObject.getString("mission_lng");
-                        String title = jsonObject.getString("mission_name");
-                        String date = jsonObject.getString("time");
-                        String date_time = date + " " + time;
-
-                        String query = "INSERT INTO alarm_table VALUES(null,'" + time + "','" + lat + "','" + lng + "','" +
-                                mission_id + "','" + date + "','" + date_time + "','false','" + title + "','" + user_id + "')";
-                        Log.d("메인", "   lat:" + String.valueOf(lat) + "   " +
-                                "lng:" + String.valueOf(lng) + "     time:" + time + "     mission_id:" + mission_id + "   " +
-                                "  date:" + date + "     date+time:" + date_time + "      title:" + title + "       user_id:" + user_id);
-                        dbHelper.insert(query);
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-                //Toast.makeText(context, "전송실패" + error, Toast.LENGTH_LONG).show();
-            }
-        }) {
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                HashMap<String, String> hashMap = new HashMap<String, String>();
-                hashMap.put("user_id", user_id);
-
-                return hashMap;
-            }
-        };
-        requestQueue.add(request);
-
-    }
-
     public static String getCurrentTimeForBankNum() {
         return new SimpleDateFormat("HHmmssSSS", Locale.KOREA).format(new Date());
     }
@@ -620,15 +560,37 @@ public class Utils {
     }
 
     public static List<Integer> makeBalancePortion(int person_num) {
-        List<Integer> list = new ArrayList<>();
+        List<Integer> list_portion = new ArrayList<>();
+        int total_portion = 0;
         double result;
 
         for (int i = 0; i < person_num; i++) {
             result = 1.0 / person_num;
-            list.add((int) (result * 100));
+            list_portion.add((int) (result * 100));
         }
+
+        for (int i = 0; i < person_num; i++) {
+
+            total_portion += list_portion.get(i);
+
+        }
+
+        if (!(total_portion == 100)) {
+
+            for (int i = 0; i < person_num; i++) {
+
+                list_portion.set(i, list_portion.get(i) + 1);
+                if (is100(list_portion)) {
+                    break;
+                }
+
+
+            }
+        }
+
+
         Log.d("에디트", "리스트포션 내용");
-        return list;
+        return list_portion;
     }
 
     public static List<Integer> makeRankPriorityPortion(int person_num) {
@@ -699,5 +661,22 @@ public class Utils {
 
         }
 
+    }
+    public static int getStringLength(String string) {
+        if (Strings.isNullOrEmpty(string)) {
+            return 0;
+        }
+        int length = string.length();
+        int charLength = 0;
+        for (int i = 0; i < length; i++) {
+            charLength += string.codePointAt(i) > 0x00ff ? 2 : 1;
+        }
+        return charLength;
+    }
+
+    public static String makeNumberComma(double num){
+
+
+        return new DecimalFormat("###,###.##").format(num);
     }
 }

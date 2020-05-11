@@ -17,6 +17,8 @@ import com.suji.lj.myapplication.SingleModeActivity;
 
 import java.util.List;
 
+import static android.content.Context.MODE_PRIVATE;
+
 public class RecyclerAccountAdapter extends RecyclerView.Adapter<RecyclerAccountAdapter.ItemViewHolder>{
 
     List<UserAccountItem> userAccountItemList;
@@ -58,8 +60,8 @@ public class RecyclerAccountAdapter extends RecyclerView.Adapter<RecyclerAccount
         holder.ly_account.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String fintech_num = userAccountItemList.get(position).getFintech_use_num();
-                ((SingleModeActivity)context).changeAccount(fintech_num);
+                ((SingleModeActivity)context).changeAccount(userAccountItemList.get(position));
+                context.getSharedPreferences("OpenBanking", MODE_PRIVATE).edit().putString("fintech_num", userAccountItemList.get(position).getFintech_use_num()).apply();
             }
         });
 

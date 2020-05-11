@@ -1,14 +1,12 @@
 package com.suji.lj.myapplication;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.UiThread;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatCheckBox;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
-import androidx.cardview.widget.CardView;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
@@ -17,64 +15,45 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.Manifest;
-import android.annotation.SuppressLint;
-import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
+import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.DisplayMetrics;
+import android.text.style.UnderlineSpan;
 import android.util.Log;
-import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.CompoundButton;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
+import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.SeekBar;
-import android.widget.Spinner;
-import android.widget.Switch;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.TimePicker;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.prolificinteractive.materialcalendarview.CalendarDay;
-import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
-import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
-import com.prolificinteractive.materialcalendarview.format.TitleFormatter;
-import com.suji.lj.myapplication.Adapters.AccountDialog;
+import com.google.firebase.database.ValueEventListener;
 import com.suji.lj.myapplication.Adapters.NewLocationService;
 import com.suji.lj.myapplication.Adapters.OpenBanking;
-import com.suji.lj.myapplication.Adapters.PlaceRecyclerAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerAccountAdapter;
-import com.suji.lj.myapplication.Adapters.RecyclerDateTimeAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerTransferRespectivelyAdapter;
 import com.suji.lj.myapplication.Fragments.CalendarSelectFragment;
 import com.suji.lj.myapplication.Fragments.EventModeFragment;
@@ -86,40 +65,51 @@ import com.suji.lj.myapplication.Items.ContactItem;
 import com.suji.lj.myapplication.Items.ItemForDateTime;
 import com.suji.lj.myapplication.Items.ItemForFriends;
 import com.suji.lj.myapplication.Items.MissionCartItem;
-import com.suji.lj.myapplication.Items.PlaceItem;
 import com.suji.lj.myapplication.Items.UserAccountItem;
-import com.suji.lj.myapplication.Utils.DateTimeFormatter;
+import com.suji.lj.myapplication.Utils.Account;
 import com.suji.lj.myapplication.Utils.DateTimeUtils;
 import com.suji.lj.myapplication.Utils.FirebaseDB;
+import com.suji.lj.myapplication.Utils.KakaoRest;
 import com.suji.lj.myapplication.Utils.Utils;
 
 
-import net.daum.mf.map.api.MapReverseGeoCoder;
-
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import io.realm.Realm;
 import io.realm.RealmList;
 import io.realm.RealmResults;
-import retrofit2.Call;
-import retrofit2.http.GET;
-import retrofit2.http.Header;
-import retrofit2.http.Query;
+import kr.co.bootpay.Bootpay;
+import kr.co.bootpay.BootpayAnalytics;
+import kr.co.bootpay.enums.Method;
+import kr.co.bootpay.enums.PG;
+import kr.co.bootpay.enums.UX;
+import kr.co.bootpay.listener.CancelListener;
+import kr.co.bootpay.listener.CloseListener;
+import kr.co.bootpay.listener.ConfirmListener;
+import kr.co.bootpay.listener.DoneListener;
+import kr.co.bootpay.listener.ErrorListener;
+import kr.co.bootpay.listener.ReadyListener;
+import kr.co.bootpay.model.BootExtra;
+import kr.co.bootpay.model.BootUser;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 public class SingleModeActivity extends AppCompatActivity implements TextWatcher,
-        View.OnClickListener, CompoundButton.OnCheckedChangeListener {
+        View.OnClickListener, CompoundButton.OnCheckedChangeListener, CalendarSelectFragment.OnResetAmountFromCalendarListener, RecyclerTransferRespectivelyAdapter.OnResetAmountDisplayListener, SingleModeFragment.OnResetAmountFromSingleModeListener, MultiModeFragment.OnResetAmountFromMultiListener {
     private final okhttp3.Callback user_account_info_callback = new okhttp3.Callback() {
         @Override
         public void onFailure(okhttp3.Call call, IOException e) {
@@ -149,7 +139,7 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                displayBankAccount(userAccountItemList);
+                                // displayBankAccount(userAccountItemList);
                             }
                         });
 
@@ -198,7 +188,7 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
             open_banking_token.apply();
             open_banking_token.commit();
 
-            openBankingSetting();
+            //openBankingSetting();
 
 
         }
@@ -221,7 +211,8 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
                 public void run() {
                     if (rsp_code.equals("A0000")) {
                         Log.d("유아이", "in");
-                        dataSave();
+
+                        //dataSave();
                     } else {
                         String message = Utils.getValueFromJson(body, "rsp_message");
                         alertMessage(message);
@@ -232,36 +223,91 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
 
         }
     };
+    Callback get_address = new Callback() {
+        @Override
+        public void onFailure(@NonNull Call call, IOException e) {
+            Toast.makeText(getApplicationContext(), "주소를 불러오던 중 문제가 생겼습니다.", Toast.LENGTH_LONG).show();
+
+        }
+
+        @Override
+        public void onResponse(@NonNull Call call, Response response) throws IOException {
+
+            String body = response.body().string();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+
+                    try {
+                        Log.d("주소", body);
+                        JSONObject obj = new JSONObject(body);
+                        JSONArray jsonArray = obj.getJSONArray("documents");
+                        JSONObject object = (JSONObject) jsonArray.get(0);
+
+                        String is_road = object.getString("road_address");
+                        String old_address = object.getJSONObject("address").getString("address_name");
+                        Log.d("주소", old_address + "일반");
+
+                        Log.d("주소", is_road + "is_road");
+                        if (!is_road.equals("null")) {
+                            String road_address = object.getJSONObject("road_address").getString("address_name");
+                            Log.d("주소", road_address);
+                            realm.executeTransaction(new Realm.Transaction() {
+
+                                @Override
+                                public void execute(Realm realm) {
+                                    MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
+                                    item.setAddress(road_address);
+                                    //transferAmount();
+                                    bootPayRequest(realm.copyFromRealm(item));
+
+                                    //startActivity(new Intent(getApplicationContext(), MissionCheckActivity.class));
+                                }
+                            });
+                        } else {
+                            Log.d("주소", old_address + "일반들어옴");
+                            realm.executeTransaction(new Realm.Transaction() {
+                                @Override
+                                public void execute(Realm realm) {
+                                    MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
+                                    item.setAddress(old_address);
+                                    // transferAmount();
+
+                                    bootPayRequest(realm.copyFromRealm(item));
+                                    //startActivity(new Intent(getApplicationContext(), MissionCheckActivity.class));
+                                }
+                            });
+
+                        }
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+
+                    }
+                }
+            });
+
+
+            //
+        }
+    };
 
     TextView next_btn;
     TextView total_amount;
     TextInputLayout textInputLayout;
-    TextInputEditText textInputEditText;
+    EditText textInputEditText;
     Intent intent;
-
-
     RecyclerView transfer_recyclerView;
-    RecyclerTransferRespectivelyAdapter transfer_recycler_adapter;
-
-
     LinearLayout ly_contact_error;
-
-
     RealmList<ItemForDateTime> stringList = new RealmList<>();
-
-
     NestedScrollView scrollView;
-    PlaceRecyclerAdapter placeRecyclerAdapter;
     RecyclerView recyclerView;
     SearchView searchView;
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
     List<UserAccountItem> userAccountItemList = new ArrayList<>();
     OpenBanking openBanking = OpenBanking.getInstance();
-
-
     Realm realm;
-
-    LinearLayout account_select;
     TextView detail_setting;
     TextView bank_name_tv;
     TextView account_num_tv;
@@ -269,7 +315,6 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
     boolean TERMS_AGREE_1 = false; // No Check = 0, Check = 1
     boolean TERMS_AGREE_2 = false; // No Check = 0, Check = 1
 
-    AccountDialog accountDialog;
     Toolbar toolbar;
 
     Fragment fa, fb, fc;
@@ -279,8 +324,44 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
     BottomSheetDialog bottomSheetDialog;
     private RecyclerView recyclerView_account;
     TextView user_name;
-
     LinearLayout title;
+    TabLayout tab_rule;
+    TextView add_new_account;
+    KakaoRest kakaoRest;
+    TextView title_error;
+    RelativeLayout text_clear;
+    TextView text_length;
+    LinearLayout ly_title_error;
+    ToggleButton kakao_pay;
+    ToggleButton naver_pay;
+    ToggleButton credit_pay;
+    TextView text_rest_point;
+    EditText edit_point;
+    TextView text_total_payment, text_point_total;
+    TextView text_actual_payment;
+    boolean point_callback_state = false;
+    boolean pay_method_select = false;
+    int pay_method = 0;
+    int point_input = 0;
+    int point_amount = 0;
+    int total = 0;
+    int display_point = 0;
+    int actual_payment = 0;
+
+
+    static final int SINGLE_MODE = 0;
+    static final int MULTI_MODE = 1;
+    static final int KAKAO_PAY = 0;
+    static final int NAVER_PAY = 1;
+    String user_id;
+    String mission_id;
+    DatabaseReference mRootRef;
+    List<ContactItem> contactItemList;
+    List<ItemForFriends> itemForFriendsList;
+
+    private boolean hasFractionalPart;
+    DecimalFormat df = new DecimalFormat("#,###.##");
+    private DecimalFormat dfnd = new DecimalFormat("#,###");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -292,13 +373,9 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
         next_btn = findViewById(R.id.mission_basic_send);
         textInputEditText = findViewById(R.id.mission_basic_editText);
         textInputLayout = findViewById(R.id.mission_basic_inputLayout);
-
         transfer_recyclerView = findViewById(R.id.transfer_recyclerView);
-
-
         scrollView = findViewById(R.id.main_scroll_view);
         recyclerView = findViewById(R.id.place_recycler);
-
         searchView = findViewById(R.id.daum_map_search);
         detail_setting = findViewById(R.id.detail_setting);
         bank_name_tv = findViewById(R.id.bank_name);
@@ -306,126 +383,276 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
         checkBox_term_use = findViewById(R.id.agree_terms_use);
         checkBox_term_private = findViewById(R.id.agree_terms_private);
         checkBox_term_all = findViewById(R.id.agree_terms_all);
-        total_amount = findViewById(R.id.total_amount);
 
-        account_select = findViewById(R.id.account_select);
-
+        tab_rule = findViewById(R.id.rule_tab);
         toolbar = findViewById(R.id.toolbar);
         ly_contact_error = findViewById(R.id.ly_contact_error);
-
-        Spinner spinner = findViewById(R.id.mission_mode);
-
+        title_error = findViewById(R.id.title_error);
+        text_clear = findViewById(R.id.text_clear);
+        text_length = findViewById(R.id.text_length);
+        ly_title_error = findViewById(R.id.ly_title_error);
+        kakao_pay = findViewById(R.id.kakao_pay);
+        naver_pay = findViewById(R.id.naver_pay);
+        credit_pay = findViewById(R.id.credit_pay);
+        text_rest_point = findViewById(R.id.rest_point);
+        edit_point = findViewById(R.id.edit_point);
+        text_total_payment = findViewById(R.id.total_payment);
+        text_point_total = findViewById(R.id.point_total);
+        text_actual_payment = findViewById(R.id.actual_payment);
         title = findViewById(R.id.title);
+
+        user_id = Account.getUserId(this);
+        kakaoRest = KakaoRest.getInstance();
+        mRootRef = FirebaseDatabase.getInstance().getReference();
 
 
         Realm.init(this);
 
-        realm = Realm.getDefaultInstance();
 
+        realm = Realm.getDefaultInstance();
         textInputEditText.addTextChangedListener(this);
         next_btn.setOnClickListener(this);
         checkBox_term_use.setOnCheckedChangeListener(this);
         checkBox_term_private.setOnCheckedChangeListener(this);
         checkBox_term_all.setOnCheckedChangeListener(this);
-        account_select.setOnClickListener(this);
-
-
         next_btn.setEnabled(false);
         next_btn.setClickable(false);
 
         //Utils.fixMapScroll(imageView,scrollView);
 
-        toolbar.setTitle("새 약속 정하");
+        toolbar.setTitle("새 약속");
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                R.array.mission_mode, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-        fa = new SingleModeFragment();
-        addFragment(fa);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        tab_rule.addTab(tab_rule.newTab().setText("혼자서"));
+        tab_rule.addTab(tab_rule.newTab().setText("여럿이서"));
+        tab_rule.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Log.d("스피너", position + "");
-                switch (position) {
-                    case 0:
-                        if (fa == null) {
-                            fa = new SingleModeFragment();
-                            addFragment(fa);
+            public void onTabSelected(TabLayout.Tab tab) {
+                selectTab(tab);
 
-                        }
-                        if (fa != null) showFragment(fa);
-                        if (fb != null) hideFragment(fb);
-                        if (fc != null) hideFragment(fc);
-                        mission_mode = 0;
+            }
 
-                        break;
-                    case 1:
-                        if (fb == null) {
-                            fb = new MultiModeFragment(SingleModeActivity.this);
-                            addFragment(fb);
-                        }
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
 
-                        if (fa != null) hideFragment(fa);
-                        if (fb != null) showFragment(fb);
-                        if (fc != null) hideFragment(fc);
-                        mission_mode = 1;
+            }
 
-                        break;
-                    case 2:
-                        if (fc == null) {
-                            fc = new EventModeFragment();
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+                selectTab(tab);
 
-                            addFragment(fc);
-                        }
+            }
+        });
+        text_clear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                text_clear.setVisibility(View.INVISIBLE);
+                textInputEditText.setText("");
+            }
+        });
 
-                        if (fa != null) hideFragment(fa);
-                        if (fb != null) hideFragment(fb);
-                        if (fc != null) showFragment(fc);
-                        mission_mode = 2;
-                        break;
+        edit_point.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    Log.d("에디트", v.getText().toString());
+                    if (!v.getText().toString().equals("")) {
+                        point_input = Integer.valueOf(v.getText().toString().replaceAll(",", ""));
+                    } else {
+                        point_input = 0;
+                    }
+                    pointCalculate(point_input);
 
 
+                    edit_point.clearFocus();
+                    InputMethodManager imm = (InputMethodManager) v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+
+
+                    //amountDisplay();
+
+
+                    return true;
+                }
+                return false;
+            }
+        });
+        edit_point.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+
+                if (s.toString().contains(String.valueOf(df.getDecimalFormatSymbols().getDecimalSeparator()))) {
+                    hasFractionalPart = true;
+                } else {
+                    hasFractionalPart = false;
                 }
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
+            public void afterTextChanged(Editable s) {
+                Log.d("오픈뱅킹", "after_changed");
+                edit_point.removeTextChangedListener(this);
+
+                try {
+                    int inilen, endlen;
+                    inilen = edit_point.getText().length();
+
+                    String v = s.toString().replace(String.valueOf(df.getDecimalFormatSymbols().getGroupingSeparator()), "");
+                    Number n = df.parse(v);
+                    int cp = edit_point.getSelectionStart();
+                    if (hasFractionalPart) {
+                        edit_point.setText(df.format(n));
+                    } else {
+                        edit_point.setText(dfnd.format(n));
+                    }
+                    endlen = edit_point.getText().length();
+                    int sel = (cp + (endlen - inilen));
+                    if (sel > 0 && sel <= edit_point.getText().length()) {
+                        edit_point.setSelection(sel);
+                    } else {
+                        // place cursor at the end?
+                        edit_point.setSelection(edit_point.getText().length() - 1);
+                    }
+                } catch (NumberFormatException nfe) {
+                    // do nothing?
+                } catch (ParseException e) {
+                    // do nothing?
+                }
+                edit_point.addTextChangedListener(this);
+
 
             }
         });
 
-        openBankingSetting();
+        textInputEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    Log.d("에디트", v.getText().toString());
 
+                    InputMethodManager imm = (InputMethodManager) v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    realm.executeTransaction(new Realm.Transaction() {
+                        @Override
+                        public void execute(Realm realm) {
+                            MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
+                            item.setTitle(v.getText().toString());
+
+                        }
+                    });
+
+                    return true;
+                }
+                return false;
+            }
+        });
+        CompoundButton.OnCheckedChangeListener changeChecker = new CompoundButton.OnCheckedChangeListener() {
+
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    if (buttonView == kakao_pay) {
+                        naver_pay.setChecked(false);
+                        credit_pay.setChecked(false);
+                        pay_method = 0;
+                        pay_method_select = true;
+                    }
+                    if (buttonView == naver_pay) {
+                        kakao_pay.setChecked(false);
+                        credit_pay.setChecked(false);
+                        pay_method = 1;
+                        pay_method_select = true;
+                    }
+                    if (buttonView == credit_pay) {
+                        kakao_pay.setChecked(false);
+                        naver_pay.setChecked(false);
+                        pay_method = 2;
+                        pay_method_select = true;
+                    }
+                } else {
+                    pay_method_select = false;
+                }
+                payButtonManager(kakao_pay, kakao_pay.isChecked());
+                payButtonManager(naver_pay, naver_pay.isChecked());
+                payButtonManager(credit_pay, credit_pay.isChecked());
+
+            }
+        };
+        kakao_pay.setOnCheckedChangeListener(changeChecker);
+        naver_pay.setOnCheckedChangeListener(changeChecker);
+        credit_pay.setOnCheckedChangeListener(changeChecker);
+
+
+        String user_id = Account.getUserId(this);
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+        databaseReference.child("user_data").child(user_id).child("point").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Double point = dataSnapshot.getValue(Double.class);
+                if (point != null) {
+
+                    point_callback_state = true;
+                    point_amount = point.intValue();
+                    String rest_point_string = Utils.makeNumberComma(point) + " P";
+                    text_rest_point.setText(rest_point_string);
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                text_rest_point.setText("error!");
+            }
+        });
+
+        //openBankingSetting();
+        initiate();
+        TabLayout.Tab tab = tab_rule.getTabAt(mission_mode);
+        if (tab != null)
+            tab.select();
 
         mHandler = new Handler();
         runnable = new Runnable() {
             @Override
             public void run() {
-                initiate();
+
                 addMapFragment(new MapMissionFragment(scrollView));
 
-                addCalendarFragment(new CalendarSelectFragment(stringList, realm));
+                addCalendarFragment(new CalendarSelectFragment());
+
+
             }
         };
         mHandler.post(runnable);
+    }
+
+    private void payButtonManager(ToggleButton button, boolean isChecked) {
+        if (isChecked) {
+            button.setBackgroundDrawable(getDrawable(R.drawable.rounded_rectangle));
+            button.setTextColor(getResources().getColor(R.color.White));
+        } else {
+            button.setBackgroundDrawable(getDrawable(R.drawable.rectangle_stroke));
+            button.setTextColor(getResources().getColor(R.color.colorPrimary));
 
 
-        //setDateTimeRecyclerView(stringList);
-        //stringList.clear();
+        }
+
     }
 
 
     private void initiate() {
         long count = realm.where(MissionCartItem.class).count();
-        Log.d("날짜", count + "카운트");
+
         if (count == 0) {
             //setDateTimeRecyclerView(stringList);
-            Log.d("날짜", stringList.size() + "string카운트");
             realm.executeTransaction(new Realm.Transaction() {
                 @Override
                 public void execute(Realm realm) {
@@ -433,101 +660,81 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
                     RealmList<ItemForDateTime> realmList = item.getCalendarDayList();
                     stringList.clear();
                     stringList = realmList;
-                    for (int i = 0; i < realmList.size(); i++) {
-
-                        int year = realmList.get(i).getYear();
-                        int month = realmList.get(i).getMonth();
-                        int day = realmList.get(i).getDay();
-                        Log.d("번들 날", year + " " + month + " " + day);
-
-
-                    }
                     //setDateTimeRecyclerView(realmList);
                 }
             });
-            Log.d("날짜", realm.where(MissionCartItem.class).count() + "카운트out");
 
         } else {
             MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
-            Log.d("날짜", item.getCalendarDayList().size() + "이니시");
             stringList = item.getCalendarDayList();
-            Log.d("날짜", stringList.size() + "string카운트");
-            Log.d("날짜", stringList.size() + "string카운트");
 
             //setDateTimeRecyclerView(stringList);
+            mission_mode = item.getMission_mode();
             textInputEditText.setText(item.getTitle());
 
 
             //recyclerDateTimeAdapter.notifyDataSetChanged();
 
         }
+        singleAmountDisplay();
 
     }
 
 
     @Override
     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        Log.d("액션", "before");
+
 
     }
 
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
+        Log.d("액션", "on");
+        int length = Utils.getStringLength(s.toString());
 
-        isTitleValid(s.toString());
+        if (length == 0) {
+            text_clear.setVisibility(View.INVISIBLE);
+            text_length.setVisibility(View.INVISIBLE);
+        } else {
+            isTitleValid(length);
+            text_length.setVisibility(View.VISIBLE);
+            text_clear.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
     public void afterTextChanged(Editable s) {
-
+        Log.d("액션", "after");
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
                 MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
                 item.setTitle(s.toString());
+
             }
         });
-
-
     }
 
-    private void accountDialog() {
-
-
-        accountDialog = new AccountDialog(this, userAccountItemList);
-
-        accountDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        accountDialog.setContentView(R.layout.fragment_account_dialog);
-        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-        lp.copyFrom(accountDialog.getWindow().getAttributes());
-
-        DisplayMetrics metrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(metrics);
-
-        lp.width = (int) (metrics.widthPixels * 0.9f);
-        lp.height = (int) (metrics.heightPixels * 0.7f);
-        //lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        lp.gravity = Gravity.CENTER;
-        lp.flags = WindowManager.LayoutParams.FLAG_DIM_BEHIND;
-        lp.dimAmount = 0.8f;
-
-
-        accountDialog.getWindow().setAttributes(lp);
-        //accountDialog.getWindow().setBackgroundDrawable(getResources().getDrawable(R.drawable.rounded));
-
-        accountDialog.show();
-
-
-    }
 
     private void createBottomSheetDialog() {
-
         View view = LayoutInflater.from(this).inflate(R.layout.fragment_account_dialog, null);
 
         recyclerView_account = view.findViewById(R.id.recycler_account);
         user_name = view.findViewById(R.id.user_name);
+        add_new_account = view.findViewById(R.id.add_new_account);
         String fintech_num = getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("fintech_num", "");
 
         user_name.setText(userAccountItemList.get(0).getUser_name());
+        SpannableString content = new SpannableString("+ 새 계좌등록");
+        content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
+        add_new_account.setText(content);
+        add_new_account.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(), OpenBankingActivity.class));
+            }
+        });
         setRecyclerView(fintech_num);
 
 
@@ -547,22 +754,25 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
 
     }
 
-    public void changeAccount(String fintech_num) {
-        for (int i = 0; i < userAccountItemList.size(); i++) {
-
-            if (userAccountItemList.get(i).getFintech_use_num().equals(fintech_num)) {
-                String bank_name = userAccountItemList.get(i).getBank_name();
-                String account_num = userAccountItemList.get(i).getAccount_num_masked();
-                String account_holder = userAccountItemList.get(i).getAccount_holder_name();
-
-                bank_name_tv.setText(bank_name);
-                account_num_tv.setText(account_num);
+    public void changeAccount(UserAccountItem item) {
 
 
-                getSharedPreferences("OpenBanking", MODE_PRIVATE).edit().putString("fintech_num", fintech_num).apply();
+        String bank_name = item.getBank_name();
+        String account_num = item.getAccount_num_masked();
+        String account_holder = item.getAccount_holder_name();
 
+        bank_name_tv.setText(bank_name);
+        account_num_tv.setText(account_num);
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                MissionCartItem missionCartItem = realm.where(MissionCartItem.class).findFirst();
+                missionCartItem.setBank_name(bank_name);
+                missionCartItem.setAccount_num(account_num);
+                missionCartItem.setAccount_holder(account_holder);
             }
-        }
+        });
+
 
         bottomSheetDialog.dismiss();
 
@@ -570,12 +780,13 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
     }
 
 
-    private void isTitleValid(String title) {
-
-        if (title.length() > 1) {
-
-        } else {
+    private void isTitleValid(int length) {
+        text_length.setText(length + "/" + 20);
+        if (length < 20) {
+            text_length.setTextColor(getResources().getColor(R.color.colorError));
             //제목이 너무 짧습니다. 최소 두 글자부터 입력이 가능합니다.
+        } else {
+            text_length.setTextColor(getResources().getColor(R.color.colorSuccess));
         }
 
 
@@ -596,13 +807,24 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
                 break;
 
             case R.id.account_select:
-                //accountDialog();
                 createBottomSheetDialog();
+                // MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
+                // kakaoRest.getAddressFromLocation(get_address, item.getLat(), item.getLng());
+
+
+                break;
+            case R.id.kakao_pay:
+
+
+                break;
+            case R.id.naver_pay:
+                break;
+            case R.id.credit_pay:
+                break;
 
 
         }
     }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -615,8 +837,6 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
             } else {
                 ly_contact_error.setVisibility(View.VISIBLE);
             }
-            //refreshFragment(new SingleModeFragment());
-            //setTransferRecyclerView(realmResults2);
 
         }
 
@@ -624,14 +844,10 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
 
 
     private void dataCheck() {
+
+
         MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
         boolean isValid = true;
-        Log.d("날짜", stringList.size() + "스트링out");
-        Log.d("날짜", item.getCalendarDayList().size() + "캘린더out");
-
-
-        Log.d("날짜", stringList.size() + "스트링");
-        Log.d("날짜", item.getCalendarDayList().size() + "캘린더");
         for (int i = 0; i < item.getCalendarDayList().size(); i++) {
             Log.d("증명", item.getCalendarDayList().get(i).getDate());
         }
@@ -639,9 +855,6 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
         RealmResults<ContactItem> friend_list = realm.where(ContactItem.class).findAll();
         RealmResults<ItemForFriends> itemForFriends = realm.where(ItemForFriends.class).findAll();
 
-
-        //mapReverseGeoCoder = new MapReverseGeoCoder("7ff2c8cb39b23bad249dc2f805898a69", mapView.getMapCenterPoint(), this, this);
-        //mapReverseGeoCoder.startFindingAddress();
         if (TextUtils.isEmpty(item.getTitle())) {
             isValid = false;
             Toast.makeText(getApplicationContext(), "제목을 입력해주세요", Toast.LENGTH_LONG).show();
@@ -657,6 +870,7 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
                 boolean is30 = DateTimeUtils.compareIsFuture30min(date + time);
                 if (!is30) {
                     isValid = false;
+                    Toast.makeText(getApplicationContext(), "시간을 30분 이후 부터 선택해주세요", Toast.LENGTH_LONG).show();
                 }
                 Log.d("비니", date + "/" + time + "/" + is30);
             }
@@ -671,16 +885,22 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
         }
         if (mission_mode == 0) {
             if (friend_list.size() == 0) {
-                Toast.makeText(getApplicationContext(), "연락를 선택해주세요", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "연락처를 선택해주세요", Toast.LENGTH_LONG).show();
                 ly_contact_error.setVisibility(View.VISIBLE);
 
                 isValid = false;
             }
 
         }
+        if (!pay_method_select) {
+            Toast.makeText(getApplicationContext(), "결제수단을 선택해주세요", Toast.LENGTH_LONG).show();
+            isValid = false;
+        }
 
         if (!TERMS_AGREE_1) {
+
             isValid = false;
+
         }
         if (!TERMS_AGREE_2) {
             isValid = false;
@@ -688,16 +908,26 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
         if (isValid) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage("약속을 등록하시겠습니까?");
-
+            item = realm.copyFromRealm(realm.where(MissionCartItem.class).findFirst());
+            RealmResults<ContactItem> result = realm.where(ContactItem.class).findAll();
+            contactItemList = realm.copyFromRealm(result);
+            double lat = item.getLat();
+            double lng = item.getLng();
+            RealmResults<ItemForFriends> realmResults = realm.where(ItemForFriends.class).findAll();
+            itemForFriendsList = realm.copyFromRealm(realmResults);
             builder.setPositiveButton("네", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
 
                     if (Utils.isNetworkConnected(getApplicationContext())) {
-                        transferAmount();
+
+
+                        kakaoRest.getAddressFromLocation(get_address, lat, lng);
+
+                        //finish();
+
                     } else {
                         Toast.makeText(getApplicationContext(), "인터넷 연결이 끊어졌습니다.", Toast.LENGTH_LONG).show();
-
                     }
 
                 }
@@ -717,85 +947,6 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
         openBanking.requestTransfer(transfer_callback, this);
 
     }
-
-
-    private void dataSave() {
-        DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
-        String user_id = getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
-        MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
-        if (mission_mode == 0) {
-            String mission_id = Utils.getCurrentTime() + "U" + user_id;
-
-
-            FirebaseDB.registerCheckForServer(mRootRef, user_id, mission_id, item);
-            FirebaseDB.registerMainDisplay(this, mRootRef, user_id, mission_id, item);
-            FirebaseDB.registerKakaoToken(mRootRef, user_id);
-            FirebaseDB.registerMissionInfoList(mRootRef, user_id, mission_id, realm);
-
-
-            Intent service = new Intent(SingleModeActivity.this, NewLocationService.class);
-            boolean is_running = Utils.isServiceRunningInForeground(this, NewLocationService.class);
-            if (is_running) {
-                stopService(service);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    ContextCompat.startForegroundService(this, service);
-
-                } else {
-                    startService(service);
-                }
-            } else {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    ContextCompat.startForegroundService(this, service);
-
-                } else {
-                    startService(service);
-                }
-            }
-
-        }
-        if (mission_mode == 1) {
-
-            FirebaseDB.registerInvitationForFriend(mRootRef, this, realm, item);
-
-
-        }
-        if (mission_mode == 2) {
-
-        }
-
-
-        deleteAllTemporaryData();
-
-
-    }
-
-    private void deleteAllTemporaryData() {
-        realm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
-                //RealmResults<ItemForDateTime> itemForDateTimes = realm.where(ItemForDateTime.class).findAll();
-                SharedPreferences.Editor editor = getSharedPreferences("location_setting", MODE_PRIVATE).edit();
-                editor.putLong("lat", Double.doubleToRawLongBits(item.getLat()));
-                editor.putLong("lng", Double.doubleToRawLongBits(item.getLng()));
-                editor.apply();
-                editor.commit();
-                //itemForDateTimes.deleteAllFromRealm();
-                stringList.clear();
-
-                item.deleteFromRealm();
-                RealmResults<ContactItem> realmResults = realm.where(ContactItem.class).findAll();
-                realmResults.deleteAllFromRealm();
-                //Intent intent = new Intent();
-                //setResult(0, intent);
-                finish();
-
-            }
-        });
-
-
-    }
-
 
     @Override
     protected void onDestroy() {
@@ -820,23 +971,10 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
         Log.d("번들", "onBackPressed");
 
         realm.close();
-
-
         super.onBackPressed();
 
     }
-
-
-    public interface KeywordSearch {
-        String base = "https://dapi.kakao.com/";
-        String key = "KakaoAK 7ff2c8cb39b23bad249dc2f805898a69";
-
-
-        @GET("v2/local/search/keyword.json?")
-        Call<JsonObject> keywordSearch(@Header("Authorization") String key, @Query("query") String query);
-    }
-
-
+/*
     private void openBankingSetting() {
         SharedPreferences sharedPreferences = getSharedPreferences("OpenBanking", MODE_PRIVATE);
         String access_token = sharedPreferences.getString("access_token", "");
@@ -859,6 +997,7 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
 
     }
 
+
     private void displayBankAccount(List<UserAccountItem> userAccountItemList) {
 
         String fintech_num = getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("fintech_num", "");
@@ -870,11 +1009,23 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
 
                 bank_name_tv.setText(bank_name);
                 account_num_tv.setText(account_num);
+                realm.executeTransaction(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
+                        item.setBank_name(bank_name);
+                        item.setAccount_num(account_num);
+                        item.setAccount_holder(account_holder);
+                    }
+                });
             }
         }
 
 
     }
+
+
+ */
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -928,6 +1079,7 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
                         Log.d("약관", "123");
                         TERMS_AGREE_1 = false;
                         TERMS_AGREE_2 = false;
+                        TERMS_AGREE_2 = false;
                     }
                 }
 
@@ -957,10 +1109,10 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
 
     }
 
-    private void addFragment(Fragment fragment) {
+    private void addFragment(Fragment fragment, String tag) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.add(R.id.fragment_container, fragment).commit();
+        fragmentTransaction.add(R.id.fragment_container, fragment, tag).commit();
     }
 
     private void addMapFragment(Fragment fragment) {
@@ -987,12 +1139,411 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
         fragmentTransaction.show(fragment).commit();
     }
 
-    private void refreshFragment(Fragment fragment) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.detach(fragment).attach(fragment).commit();
+
+    public void singleAmountDisplay() {
+        RealmResults<ContactItem> realmResults2 = realm.where(ContactItem.class).findAll();
+        MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
+
+        int dates = item.getCalendarDayList().size();
+        int amount = item.getSingle_amount();
+        total = realmResults2.size() * amount * dates;
+
+        edit_point.setText(String.valueOf(0));
+        String point_total_string = 0 + " P";
+        text_point_total.setText(point_total_string);
+        point_input = 0;
+        text_actual_payment.setText(Utils.makeNumberComma(total));
+        String total_payment_string = Utils.makeNumberComma(total) + " 원";
+        text_total_payment.setText(total_payment_string);
+        String rest_point_string = point_amount + " P";
+        text_rest_point.setText(rest_point_string);
+    }
+
+    public void multiAmountDisplay() {
+        MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
+        RealmResults<ItemForFriends> realmResults = realm.where(ItemForFriends.class).findAll();
+
+        int dates = item.getCalendarDayList().size();
+        int amount = item.getMulti_amount();
+        int friend_num = realmResults.size();
+        total = friend_num * amount * dates;
+
+        edit_point.setText(String.valueOf(0));
+        String point_total_string = 0 + " P";
+        text_point_total.setText(point_total_string);
+        point_input = 0;
+        text_actual_payment.setText(Utils.makeNumberComma(total));
+        String total_payment_string = Utils.makeNumberComma(total) + " 원";
+        text_total_payment.setText(total_payment_string);
+        String rest_point_string = point_amount + " P";
+        text_rest_point.setText(rest_point_string);
 
 
     }
 
+    @Override
+    public void onResetAmountDisplay() {
+        Log.d("옵티마", "들어와");
+
+    }
+
+    @Override
+    public void onResetAmountFromSingleMode() {
+        switch (mission_mode) {
+            case 0:
+                //singleFragmentAmountDisplay();
+                singleAmountDisplay();
+                break;
+            case 1:
+                //multiModeFragmentAmountDisplay();
+                multiAmountDisplay();
+                break;
+
+
+        }
+    }
+
+    @Override
+    public void onResetAmountFromMulti() {
+        switch (mission_mode) {
+            case 0:
+                //singleFragmentAmountDisplay();
+                singleAmountDisplay();
+                break;
+            case 1:
+                //multiModeFragmentAmountDisplay();
+                multiAmountDisplay();
+                break;
+
+
+        }
+    }
+
+    @Override
+    public void onResetAmountFromCalendar() {
+        switch (mission_mode) {
+            case 0:
+                singleAmountDisplay();
+                break;
+            case 1:
+                multiAmountDisplay();
+                break;
+
+
+        }
+
+    }
+
+    private void pointCalculate(int point_input) {
+        if (point_callback_state) {
+
+            if ((point_input <= point_amount) && (point_amount <= total)) {
+                display_point = point_input;
+
+            }
+            if ((point_input <= point_amount) && (total <= point_amount)) {
+                display_point = point_input;
+
+            }
+            if ((point_amount <= total) && (total <= point_input)) {
+                display_point = point_amount;
+
+            }
+            if ((point_amount <= point_input) && (point_input <= total)) {
+                display_point = point_amount;
+
+            }
+            if ((total <= point_input) && (point_input <= point_amount)) {
+                display_point = total;
+
+            }
+            if ((total <= point_amount) && (point_amount <= point_input)) {
+                display_point = total;
+
+
+            }
+
+            edit_point.setText(String.valueOf(display_point));
+            String point_total_string = Utils.makeNumberComma(display_point) + " P";
+            text_point_total.setText(point_total_string);
+            String actual_payment_string = String.valueOf(total - display_point);
+            actual_payment = total - display_point;
+            text_actual_payment.setText(actual_payment_string);
+            String rest_point_string = Utils.makeNumberComma(point_amount - display_point) + " P";
+            text_rest_point.setText(rest_point_string);
+
+
+        }
+
+
+    }
+
+
+    public void bootPayRequest(MissionCartItem item) {
+        // 결제호출
+        //int stuck = 10;
+        String key = "5d25d429396fa67ca2bd0f45";
+        BootpayAnalytics.init(this, key);
+        mission_id = Utils.getCurrentTime() + "U" + user_id;
+        BootUser bootUser = new BootUser().setPhone("010-1234-5678");
+        BootExtra bootExtra = new BootExtra().setQuotas(new int[]{0, 2, 3});
+
+        Bootpay.init(getFragmentManager())
+                .setApplicationId(key) // 해당 프로젝트(안드로이드)의 application id 값
+                .setPG(PG.KAKAO) // 결제할 PG 사
+                .setMethod(Method.EASY) // 결제수단
+                .setContext(this)
+                .setBootUser(bootUser)
+                .setBootExtra(bootExtra)
+                .setTaxFree(10000.0)
+                .setUX(UX.PG_DIALOG)
+//              .setUserPhone("010-1234-5678") // 구매자 전화번호
+                .setName(item.getTitle()) // 결제할 상품명
+                .setOrderId("1234") // 결제 고유번호expire_month
+                .setPrice(item.getSingle_amount() - item.getSingle_point()) // 결제할 금액
+                .addItem(item.getTitle(), 1, "ITEM_CODE_MOUSE", 100) // 주문정보에 담길 상품정보, 통계를 위해 사용
+                // 주문정보에 담길 상품정보, 통계를 위해 사용
+                .onConfirm(new ConfirmListener() { // 결제가 진행되기 바로 직전 호출되는 함수로, 주로 재고처리 등의 로직이 수행
+                    @Override
+                    public void onConfirm(@Nullable String message) {
+
+                        Bootpay.confirm(message); // 재고가 있을 경우.
+                        //else Bootpay.removePaymentWindow(); // 재고가 없어 중간에 결제창을 닫고 싶을 경우
+
+                        Log.d("부트", message + "confirm");
+                    }
+                })
+                .onDone(new DoneListener() { // 결제완료시 호출, 아이템 지급 등 데이터 동기화 로직을 수행합니다
+                    @Override
+                    public void onDone(@Nullable String message) {
+                        Log.d("부트", message + "done");
+                        //chargePoint(message);
+                        function(message, item);
+
+                    }
+                })
+                .onReady(new ReadyListener() { // 가상계좌 입금 계좌번호가 발급되면 호출되는 함수입니다.
+                    @Override
+                    public void onReady(@Nullable String message) {
+                        Log.d("부트", message + "ready");
+                    }
+                })
+                .onCancel(new CancelListener() { // 결제 취소시 호출
+                    @Override
+                    public void onCancel(@Nullable String message) {
+
+                        Log.d("부트", message);
+                        finish();
+                    }
+                })
+                .onError(new ErrorListener() { // 에러가 났을때 호출되는 부분
+                    @Override
+                    public void onError(@Nullable String message) {
+                        Log.d("부트", message);
+                        finish();
+                    }
+                })
+                .onClose(new CloseListener() { //결제창이 닫힐때 실행되는 부분
+                    @Override
+                    public void onClose(String message) {
+                        Log.d("부트", "close");
+                        // finish();
+                    }
+                })
+                .request();
+    }
+
+    private void function(String message, MissionCartItem item) {//영수증 검증
+        OkHttpClient httpClient = new OkHttpClient();
+        // HttpUrl.Builder httpBuider = HttpUrl.parse("").newBuilder();
+        String url = "https://us-central1-cloudmessaging-dcdf0.cloudfunctions.net/bootpay";
+
+
+        RequestBody formBody = new FormBody.Builder()
+                .add("receipt_id", Utils.getValueFromJson(message, "receipt_id"))
+                .add("price", Utils.getValueFromJson(message, "price"))
+                .add("user_id", user_id)
+                .add("message", message)
+                .add("point", String.valueOf(item.getSingle_point()))
+                .add("total_payment", String.valueOf(item.getSingle_amount()))
+                .add("mission_id", mission_id)
+                .build();
+        Request request = new Request.Builder()
+                .post(formBody)
+                .url(url)
+                .build();
+
+        httpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Log.d("부트페이", "실패");
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                ResponseBody responseBody = response.body();
+                String resp = "";
+                if (!response.isSuccessful()) {
+                    Log.d("부트페이", "fail response from firebase cloud function");
+                } else {
+                    if (responseBody != null) {
+                        String receipt = responseBody.string();
+
+                        Log.d("부트페이", "성공" + user_id);
+                        //Log.d("부트페이", "성공" + Utils.getValueFromJson(responseBody.string(), "date_time"));
+                        //displayReceipt(result);
+                        dataSave(item, receipt);
+                    }
+                }
+
+            }
+        });
+    }
+
+    private void dataSave(MissionCartItem item, String receipt) {
+        Log.d("순서", "dataSave");
+
+
+        //MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
+
+        if (mission_mode == SINGLE_MODE) {
+            //int amount = Integer.valueOf(total_amount.getText().toString().replaceAll(",", ""));
+
+
+            //FirebaseDB.registerCheckForServer(mRootRef, user_id, mission_id, item);
+            //FirebaseDB.registerMainDisplay(mRootRef, user_id, mission_id, item);
+            //FirebaseDB.registerKakaoToken(mRootRef, user_id);
+            FirebaseDB.registerMissionInfoList(mRootRef, this, mission_id, item, contactItemList, receipt);//미션목록추가
+
+            /** 파이어베이스 추가후 deleteRealm **/
+
+
+        }
+        if (mission_mode == MULTI_MODE) {//multi
+            FirebaseDB.registerInvitationForFriend(mRootRef, this, itemForFriendsList, item,receipt);
+
+
+        }
+
+        //deleteAllTemporaryData();
+
+
+    }
+
+    private void selectTab(TabLayout.Tab tab) {
+        switch (tab.getPosition()) {
+            case 0:
+                if (fa == null) {
+                    fa = new SingleModeFragment();
+                    addFragment(fa, "single");
+
+                }
+                if (fa != null) showFragment(fa);
+                if (fb != null) hideFragment(fb);
+                if (fc != null) hideFragment(fc);
+                mission_mode = 0;
+                realm.executeTransaction(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
+                        item.setMission_mode(mission_mode);
+                    }
+                });
+                singleAmountDisplay();
+
+                break;
+            case 1:
+                if (fb == null) {
+                    fb = new MultiModeFragment(SingleModeActivity.this);
+                    addFragment(fb, "multi");
+                }
+
+                if (fa != null) hideFragment(fa);
+                if (fb != null) showFragment(fb);
+                if (fc != null) hideFragment(fc);
+                mission_mode = 1;
+                realm.executeTransaction(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
+                        item.setMission_mode(mission_mode);
+                    }
+                });
+
+                multiAmountDisplay();
+
+                break;
+            case 2:
+                if (fc == null) {
+                    fc = new EventModeFragment();
+
+                    addFragment(fc, "event");
+                }
+
+                if (fa != null) hideFragment(fa);
+                if (fb != null) hideFragment(fb);
+                if (fc != null) showFragment(fc);
+                mission_mode = 2;
+                break;
+
+
+        }
+
+
+    }
+
+
+    public void deleteAllTemporaryData(String receipt, MissionCartItem item) {
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+
+                //RealmResults<ItemForDateTime> itemForDateTimes = realm.where(ItemForDateTime.class).findAll();
+                SharedPreferences.Editor editor = getSharedPreferences("location_setting", MODE_PRIVATE).edit();
+                editor.putLong("lat", Double.doubleToRawLongBits(item.getLat()));
+                editor.putLong("lng", Double.doubleToRawLongBits(item.getLng()));
+                editor.apply();
+                editor.commit();
+                MissionCartItem missionCartItem = realm.where(MissionCartItem.class).findFirst();
+                missionCartItem.deleteFromRealm();
+                RealmResults<ContactItem> realmResults = realm.where(ContactItem.class).findAll();
+                realmResults.deleteAllFromRealm();
+
+                /** 포어그라운드 서비스 활성화 **/
+
+
+                Intent service = new Intent(getApplicationContext(), NewLocationService.class);
+                boolean is_running = Utils.isServiceRunningInForeground(getApplicationContext(), NewLocationService.class);
+                if (is_running) {
+                    stopService(service);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        ContextCompat.startForegroundService(getApplicationContext(), service);
+
+                    } else {
+                        startService(service);
+                    }
+                } else {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        ContextCompat.startForegroundService(getApplicationContext(), service);
+
+                    } else {
+                        startService(service);
+                    }
+                }
+                Intent intent = new Intent(getApplicationContext(), MissionCheckActivity.class);
+                intent.putExtra("receipt", receipt);
+                startActivity(intent);
+
+            }
+
+        });
+
+
+    }
+
+
 }
+
+/**
+ * 확인 -> 주소불러오기(api콜 절약을 위해 확인 뒤에 넣음) -> 결제 -> 영수증검증 -> db저장 -> relam초기화 -> 포어그라운드 서비스 활성화 -> 영수증 액티비
+ **/

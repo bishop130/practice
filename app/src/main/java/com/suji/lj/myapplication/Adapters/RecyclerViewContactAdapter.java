@@ -11,12 +11,10 @@ import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.suji.lj.myapplication.ContactActivity;
 import com.suji.lj.myapplication.Items.ContactItem;
 
-import com.suji.lj.myapplication.MissionCartActivity;
 import com.suji.lj.myapplication.R;
 import com.suji.lj.myapplication.Utils.HangulUtils;
 
@@ -24,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import io.realm.Realm;
@@ -37,6 +34,7 @@ public class RecyclerViewContactAdapter extends RecyclerView.Adapter<RecyclerVie
     private Context context;
     private int count = 0;
     private static final int MAX_CONTACTS = 10;
+    int contact_size;
 
     Realm realm;
 
@@ -46,6 +44,7 @@ public class RecyclerViewContactAdapter extends RecyclerView.Adapter<RecyclerVie
         this.context = context;
         this.exampleListFull = new ArrayList<>(itemList);
         this.realm = realm;
+        this.contact_size = contact_size;
 
     }
 
@@ -75,6 +74,7 @@ public class RecyclerViewContactAdapter extends RecyclerView.Adapter<RecyclerVie
         holder.contact_container.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 itemList.get(position).setSelected(!itemList.get(position).isSelected()); //스위치
                 itemList.get(position).setPosition(position);
                 //Log.d("라니스터","position  "+position+"\n"+"isture"+itemList.get(position).isSelected());
@@ -107,9 +107,9 @@ public class RecyclerViewContactAdapter extends RecyclerView.Adapter<RecyclerVie
                     notifyDataSetChanged();
 
                 }
-
-
             }
+
+
         });
 
 

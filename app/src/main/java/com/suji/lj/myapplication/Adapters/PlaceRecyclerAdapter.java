@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.suji.lj.myapplication.DaumMapActivity;
 import com.suji.lj.myapplication.Items.PlaceItem;
 import com.suji.lj.myapplication.R;
 import com.suji.lj.myapplication.SingleModeActivity;

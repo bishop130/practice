@@ -42,7 +42,6 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import com.suji.lj.myapplication.Adapters.BroadCastAlarm;
-import com.suji.lj.myapplication.Adapters.DBHelper;
 import com.suji.lj.myapplication.Utils.DateTimeFormatter;
 
 import com.suji.lj.myapplication.Items.AlarmItem;
@@ -103,7 +102,6 @@ public class RecyclerResultActivity extends AppCompatActivity implements MapView
     LinearLayout layout_if_success;
     LinearLayout layout_if_success_not;
     private MapViewLocationManager mapViewLocationManager;
-    DBHelper dbHelper;
     List<AlarmItem> alarmItemList = new ArrayList<>();
 
     @Override
@@ -132,7 +130,6 @@ public class RecyclerResultActivity extends AppCompatActivity implements MapView
 
         requestQueue = Volley.newRequestQueue(this);
         //dbHelper = new DBHelper(this, "alarm_manager.db", null, 5);
-        dbHelper = new DBHelper(RecyclerResultActivity.this, "alarm_manager.db", null, 5);
         dtf = new DateTimeFormatter();
 
         //setMyLocation();
@@ -460,7 +457,6 @@ public class RecyclerResultActivity extends AppCompatActivity implements MapView
                         public void onResponse(String response) {
 
                             //cancelAlarm();
-                            deleteDB(user_id, mission_date_time);
                             instantAlarm(mission_title, "위치등록에 성공했습니다.");
 
                             Intent intent = new Intent(RecyclerResultActivity.this, MainActivity.class);
@@ -538,12 +534,6 @@ public class RecyclerResultActivity extends AppCompatActivity implements MapView
         editor.putString("longitude", String.valueOf(Current_Longitude));
         editor.apply();
 
-    }
-
-    private void deleteDB(String mission_id, String date_time) {
-        dbHelper = new DBHelper(RecyclerResultActivity.this, "alarm_manager.db", null, 5);
-        String query = "DELETE FROM alarm_table WHERE mission_id = '" + mission_id + "' AND date_time = '" + date_time + "'";
-        dbHelper.update(query);
     }
 
     private void instantAlarm(String title, String content) {

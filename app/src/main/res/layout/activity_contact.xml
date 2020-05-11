@@ -40,15 +40,15 @@
         android:layout_height="wrap_content">
 
     </com.google.android.material.tabs.TabLayout>
-    <FrameLayout
-        android:id="@+id/fragment_container"
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/fragment_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/wall_paper2"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
 
-    </FrameLayout>
+    </androidx.viewpager.widget.ViewPager>
 
 
 

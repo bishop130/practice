@@ -1,8 +1,11 @@
 package com.suji.lj.myapplication.Items;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import io.realm.RealmObject;
 
-public class ItemForMissionByDay extends RealmObject {
+public class ItemForMissionByDay extends RealmObject implements Parcelable {
 
 
     String title;
@@ -13,17 +16,67 @@ public class ItemForMissionByDay extends RealmObject {
     double lng;
     boolean success;
     String mother_id;
-    public ItemForMissionByDay(){}
+    String date_time;
 
-    public ItemForMissionByDay(String title, String address, String date, String time, double lat, double lng,boolean success,String mother_id) {
-        this.title = title;
-        this.address = address;
-        this.date = date;
-        this.time = time;
-        this.lat = lat;
-        this.lng = lng;
-        this.success = success;
-        this.mother_id = mother_id;
+    public ItemForMissionByDay() {
+    }
+
+    public ItemForMissionByDay(Parcel in) {
+        this.title = in.readString();
+        this.address = in.readString();
+        this.date = in.readString();
+        this.time = in.readString();
+        this.lat = in.readDouble();
+        this.lng = in.readDouble();
+        this.success = in.readByte() != 0;
+        this.mother_id = in.readString();
+        this.date_time = in.readString();
+
+
+    }
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.title);
+        dest.writeString(this.address);
+        dest.writeString(this.date);
+        dest.writeString(this.time);
+
+        dest.writeDouble(this.lat);
+        dest.writeDouble(this.lng);
+        dest.writeByte((byte) (this.success ? 1 : 0));
+        dest.writeString(this.mother_id);
+        dest.writeString(this.date_time);
+
+    }
+
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+
+        @Override
+        public ItemForMissionByDay createFromParcel(Parcel in) {
+            return new ItemForMissionByDay(in);
+        }
+
+        @Override
+        public ItemForMissionByDay[] newArray(int size) {
+            // TODO Auto-generated method stub
+            return new ItemForMissionByDay[size];
+        }
+
+    };
+
+    public String getDate_time() {
+        return date_time;
+    }
+
+    public void setDate_time(String date_time) {
+        this.date_time = date_time;
     }
 
     public String getMother_id() {

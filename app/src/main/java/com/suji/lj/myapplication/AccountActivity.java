@@ -3,24 +3,15 @@ package com.suji.lj.myapplication;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
-import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.suji.lj.myapplication.Adapters.AccountDialog;
 import com.suji.lj.myapplication.Adapters.AccountManagementDialog;
 
 import com.suji.lj.myapplication.Adapters.OpenBanking;

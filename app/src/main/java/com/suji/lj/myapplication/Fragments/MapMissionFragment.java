@@ -1,7 +1,6 @@
 package com.suji.lj.myapplication.Fragments;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -9,14 +8,10 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -197,6 +192,7 @@ public class MapMissionFragment extends Fragment implements MapView.CurrentLocat
                 break;
             case R.id.zoom_out:
                 mapView.zoomOut(true);
+
                 break;
 
 
@@ -283,10 +279,26 @@ public class MapMissionFragment extends Fragment implements MapView.CurrentLocat
             Log.d("위치", lng + "");
             mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(lat, lng), true);
             drawCircle(geoCoordinate.latitude, geoCoordinate.longitude, radius);
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    MissionCartItem missionCartItem = realm.where(MissionCartItem.class).findFirst();
+                    missionCartItem.setLat(geoCoordinate.latitude);
+                    missionCartItem.setLng(geoCoordinate.longitude);
+                }
+            });
         } else {
             Log.d("위치", "초기화안됨" + item.getLat());
             mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(item.getLat(), item.getLng()), true);
             drawCircle(geoCoordinate.latitude, geoCoordinate.longitude, radius);
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    MissionCartItem missionCartItem = realm.where(MissionCartItem.class).findFirst();
+                    missionCartItem.setLat(geoCoordinate.latitude);
+                    missionCartItem.setLng(geoCoordinate.longitude);
+                }
+            });
         }
 
 
@@ -415,10 +427,10 @@ public class MapMissionFragment extends Fragment implements MapView.CurrentLocat
     private void loadAddress(String query) {
         final Retrofit retrofit2 = new Retrofit.Builder().
                 addConverterFactory(GsonConverterFactory.create()).
-                baseUrl(SingleModeActivity.KeywordSearch.base).
+                baseUrl(KeywordSearch.base).
                 build();
-        SingleModeActivity.KeywordSearch keywordSearch = retrofit2.create(SingleModeActivity.KeywordSearch.class);
-        Call<JsonObject> call = keywordSearch.keywordSearch(SingleModeActivity.KeywordSearch.key, query);
+        KeywordSearch keywordSearch = retrofit2.create(KeywordSearch.class);
+        Call<JsonObject> call = keywordSearch.keywordSearch(KeywordSearch.key, query);
 
         call.enqueue(new Callback<JsonObject>() {
             @Override

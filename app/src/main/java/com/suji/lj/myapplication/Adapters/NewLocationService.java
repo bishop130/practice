@@ -129,7 +129,7 @@ public class NewLocationService extends Service {
 
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
         if (!Utils.isEmpty(user_id)) {
-            databaseReference.child("user_data").child(user_id).child("mission_display").orderByKey().startAt(date_time).limitToFirst(1).addListenerForSingleValueEvent(new ValueEventListener() {
+            databaseReference.child("user_data").child(user_id).child("mission_display").orderByChild("date_time").startAt(date_time).limitToFirst(1).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if (dataSnapshot.exists()) {

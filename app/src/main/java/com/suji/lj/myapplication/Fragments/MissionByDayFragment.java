@@ -33,6 +33,7 @@ import com.suji.lj.myapplication.Adapters.RecyclerFriendsSelectedAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerMissionDayAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerPastMissionAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerViewDivider;
+import com.suji.lj.myapplication.ContactActivity;
 import com.suji.lj.myapplication.Items.ItemForMissionByDay;
 import com.suji.lj.myapplication.Items.MissionInfoList;
 import com.suji.lj.myapplication.MissionDetailActivity;
@@ -49,19 +50,22 @@ import static android.content.Context.MODE_PRIVATE;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MissionByDayFragment extends Fragment {
+public class MissionByDayFragment extends Fragment implements RecyclerMissionDayAdapter.OnLoadMissionListListener {
 
     private RecyclerView recyclerView;
     private SwipeRefreshLayout ly_swipe_refresh;
     private Context mContext;
     private ProgressBar loading_panel;
     private String user_id;
+    List<ItemForMissionByDay> list = new ArrayList<>();
     String key;
-    public MissionByDayFragment(String key) {
-        // Required empty public constructor
-        this.key = key;
+    RecyclerMissionDayAdapter adapter;
+
+
+    public MissionByDayFragment() {
+
+
     }
-    public MissionByDayFragment(){}
 
 
     @Override
@@ -74,76 +78,91 @@ public class MissionByDayFragment extends Fragment {
         loading_panel = view.findViewById(R.id.loadingPanel);
         user_id = mContext.getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
         recyclerView.addItemDecoration(new RecyclerViewDivider(28));
+
+
+        //.setOnMissionDayDisplayListener(this);
+
+        if (isAdded() && getActivity() != null) {
+            Log.d("favorite", "isAdd Missionday");
+        }
+
         ly_swipe_refresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
 
-                if(!TextUtils.isEmpty(key)) {
-                    getDatabase();
-                    ly_swipe_refresh.setRefreshing(false);
-                }else{
-                    recyclerView.setVisibility(View.VISIBLE);
-                    loading_panel.setVisibility(View.GONE);
-                    ly_swipe_refresh.setRefreshing(false);
-                }
+
+                //getDatabase();
+
+                FavoriteFragment fa = (FavoriteFragment) getChildFragmentManager().findFragmentByTag("day");
+                if (fa != null)
+                    fa.refresh();
+                //displayData();
+                Log.d("들어와", "리프레시해줘");
+                ly_swipe_refresh.setRefreshing(false);
+                recyclerView.setVisibility(View.VISIBLE);
+                loading_panel.setVisibility(View.GONE);
+
 
             }
         });
-        if(!TextUtils.isEmpty(key)) {
-            getDatabase();
-        }else{
-            recyclerView.setVisibility(View.VISIBLE);
-            loading_panel.setVisibility(View.GONE);
-        }
 
+        displayData();
 
 
         return view;
     }
 
+    private void displayData() {
+
+        adapter = new RecyclerMissionDayAdapter(mContext, list, this);
+        recyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+        recyclerView.setAdapter(adapter);
+        Log.d("들어", "여기요");
+        recyclerView.setVisibility(View.VISIBLE);
+        loading_panel.setVisibility(View.GONE);
 
 
-    private void getDatabase(){
-        FirebaseDatabase.getInstance().getReference().child("user_data").child(user_id).child("mission_display").orderByKey().startAt(key).addValueEventListener(new ValueEventListener() {
+    }
+
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        mContext = context;
+    }
+
+    public void update(ArrayList<ItemForMissionByDay> list) {
+        Log.d("들어와", "업데이트");
+        this.list = list;
+        adapter = new RecyclerMissionDayAdapter(mContext, list, this);
+        recyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+        recyclerView.setAdapter(adapter);
+        Log.d("들어와", "여기요");
+        recyclerView.setVisibility(View.VISIBLE);
+        loading_panel.setVisibility(View.GONE);
+
+
+    }
+
+    @Override
+    public void onLoadMissionList(String mission_id) {
+
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+        databaseReference.child("user_data").child(user_id).child("mission_info_list").child(mission_id).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                List<ItemForMissionByDay> list = new ArrayList<>();
-                for (DataSnapshot data : dataSnapshot.getChildren()) {
-                    ItemForMissionByDay item = data.getValue(ItemForMissionByDay.class);
-                    list.add(item);
-                    Log.d("아이템바이", data.getKey());
-                }
-                RecyclerMissionDayAdapter adapter = new RecyclerMissionDayAdapter(mContext,list);
-                recyclerView.setLayoutManager(new LinearLayoutManager(mContext));
-                recyclerView.setAdapter(adapter);
-                Log.d("에러","여기요");
-                recyclerView.setVisibility(View.VISIBLE);
-                loading_panel.setVisibility(View.GONE);
+                MissionInfoList item = dataSnapshot.getValue(MissionInfoList.class);
+                Intent intent = new Intent(mContext, MissionDetailActivity.class);
+                intent.putExtra("mission_info_list", item);
+                mContext.startActivity(intent);
 
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                Log.d("에러","에런가");
             }
         });
 
-
-
-
     }
-
-
-
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-
-        Log.d("홈프레그", "onAttach_SearchFragment");
-        mContext = context;
-
-    }
-
-
 }
