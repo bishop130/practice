@@ -64,7 +64,7 @@ public class RecyclerPastMissionAdapter extends RecyclerView.Adapter<RecyclerPas
         holder.view_container.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onLoadMissionFromPastListener.onLoadMissionFromPast(list.get(position).getMother_id());
+                onLoadMissionFromPastListener.onLoadMissionFromPast(list.get(position).getMission_id());
 
             }
         });

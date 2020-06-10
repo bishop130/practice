@@ -3,6 +3,10 @@ package com.suji.lj.myapplication.Items;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import io.realm.RealmList;
 import io.realm.RealmModel;
 import io.realm.RealmObject;
 
@@ -17,6 +21,7 @@ public class ItemForDateTime extends RealmObject implements Parcelable {
     int day;
     int hour;
     int min;
+    //List<ItemForFriendMissionCheck> friendMissionCheckList = new ArrayList<>();
 
     public ItemForDateTime(){
 
@@ -31,6 +36,7 @@ public class ItemForDateTime extends RealmObject implements Parcelable {
         this.day = in.readInt();
         this.hour = in.readInt();
         this.min = in.readInt();
+        //in.readList(this.friendMissionCheckList, ItemForFriendMissionCheck.class.getClassLoader());
 
 
 
@@ -52,6 +58,7 @@ public class ItemForDateTime extends RealmObject implements Parcelable {
         dest.writeInt(this.day);
         dest.writeInt(this.hour);
         dest.writeInt(this.min);
+        //dest.writeList(this.friendMissionCheckList);
 
 
     }
@@ -76,6 +83,8 @@ public class ItemForDateTime extends RealmObject implements Parcelable {
         this.time = time;
         this.select = select;
     }
+
+
 
     public String getDate() {
         return date;

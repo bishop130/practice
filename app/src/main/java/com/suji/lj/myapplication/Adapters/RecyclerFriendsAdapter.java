@@ -26,6 +26,7 @@ import com.suji.lj.myapplication.Items.ContactItem;
 import com.suji.lj.myapplication.Items.ItemForFriends;
 import com.suji.lj.myapplication.R;
 import com.suji.lj.myapplication.Utils.HangulUtils;
+import com.suji.lj.myapplication.Utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,10 +82,11 @@ public class RecyclerFriendsAdapter extends RecyclerView.Adapter<RecyclerFriends
 
 
         if(!itemList.get(position).getImage().isEmpty()){
-            Picasso.with(context)
-                    .load(itemList.get(position).getImage())
-                    .fit()
-                    .into(holder.checked_contact);
+            //String bitmap_string = itemList.get(position).getImage();
+            //holder.checked_contact.setImageBitmap(Utils.getBitmapFromString(bitmap_string));
+
+
+            Picasso.with(context).load(itemList.get(position).getImage()).fit().into(holder.checked_contact);
             Log.d("이미지","이미지있음");
         }
 

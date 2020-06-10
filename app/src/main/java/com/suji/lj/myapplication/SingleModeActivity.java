@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatCheckBox;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -19,7 +18,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
@@ -43,6 +41,8 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputLayout;
@@ -51,7 +51,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.suji.lj.myapplication.Adapters.NewLocationService;
 import com.suji.lj.myapplication.Adapters.OpenBanking;
 import com.suji.lj.myapplication.Adapters.RecyclerAccountAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerTransferRespectivelyAdapter;
@@ -63,7 +62,13 @@ import com.suji.lj.myapplication.Fragments.MultiModeFragment;
 import com.suji.lj.myapplication.Fragments.SingleModeFragment;
 import com.suji.lj.myapplication.Items.ContactItem;
 import com.suji.lj.myapplication.Items.ItemForDateTime;
+import com.suji.lj.myapplication.Items.ItemForDateTimeCheck;
+import com.suji.lj.myapplication.Items.ItemForFriendMissionCheck;
+import com.suji.lj.myapplication.Items.ItemForFriendResponseForRequest;
 import com.suji.lj.myapplication.Items.ItemForFriends;
+import com.suji.lj.myapplication.Items.ItemForMultiInvitationKey;
+import com.suji.lj.myapplication.Items.ItemForMultiModeRequest;
+import com.suji.lj.myapplication.Items.ItemPortion;
 import com.suji.lj.myapplication.Items.MissionCartItem;
 import com.suji.lj.myapplication.Items.UserAccountItem;
 import com.suji.lj.myapplication.Utils.Account;
@@ -259,8 +264,17 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
                                     MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
                                     item.setAddress(road_address);
                                     //transferAmount();
-                                    bootPayRequest(realm.copyFromRealm(item));
+                                    MissionCartItem missionCartItem = realm.copyFromRealm(item);
+                                    int multi_amount = missionCartItem.getMulti_amount();
+                                    int multi_point = missionCartItem.getMulti_point();
+                                    int single_amount = missionCartItem.getSingle_amount();
+                                    int single_point = missionCartItem.getSingle_point();
+                                    if (mission_mode == 0) {
+                                        bootPayRequest(missionCartItem, single_amount - single_point);
+                                    } else {
+                                        bootPayRequest(missionCartItem, multi_amount - multi_point);
 
+                                    }
                                     //startActivity(new Intent(getApplicationContext(), MissionCheckActivity.class));
                                 }
                             });
@@ -272,8 +286,18 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
                                     MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
                                     item.setAddress(old_address);
                                     // transferAmount();
+                                    MissionCartItem missionCartItem = realm.copyFromRealm(item);
+                                    int multi_amount = missionCartItem.getMulti_amount();
+                                    int multi_point = missionCartItem.getMulti_point();
+                                    int single_amount = missionCartItem.getSingle_amount();
+                                    int single_point = missionCartItem.getSingle_point();
+                                    if (mission_mode == 0) {
+                                        bootPayRequest(missionCartItem, single_amount - single_point);
+                                    } else {
+                                        bootPayRequest(missionCartItem, multi_amount - multi_point);
 
-                                    bootPayRequest(realm.copyFromRealm(item));
+                                    }
+
                                     //startActivity(new Intent(getApplicationContext(), MissionCheckActivity.class));
                                 }
                             });
@@ -354,7 +378,7 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
     static final int KAKAO_PAY = 0;
     static final int NAVER_PAY = 1;
     String user_id;
-    String mission_id;
+    //String mission_id;
     DatabaseReference mRootRef;
     List<ContactItem> contactItemList;
     List<ItemForFriends> itemForFriendsList;
@@ -846,11 +870,28 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
     private void dataCheck() {
 
 
-        MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                MissionCartItem missionCartItem = realm.where(MissionCartItem.class).findFirst();
+                RealmResults<ContactItem> result = realm.where(ContactItem.class).findAll();
+                RealmList<ContactItem> contactList = new RealmList<>();
+                contactList.addAll(result.subList(0, result.size()));
+                missionCartItem.setContactList(contactList);
+
+                RealmResults<ItemForFriends> realmResults = realm.where(ItemForFriends.class).findAll();
+                RealmList<ItemForFriends> friendList = new RealmList<>();
+                friendList.addAll(realmResults.subList(0, realmResults.size()));
+                missionCartItem.setFriendsList(friendList);
+                String mission_id = Utils.getCurrentTime() + "U" + user_id;
+                missionCartItem.setMission_id(mission_id);
+
+            }
+        });
+
+        //MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
+        MissionCartItem item = realm.copyFromRealm(realm.where(MissionCartItem.class).findFirst());
         boolean isValid = true;
-        for (int i = 0; i < item.getCalendarDayList().size(); i++) {
-            Log.d("증명", item.getCalendarDayList().get(i).getDate());
-        }
 
         RealmResults<ContactItem> friend_list = realm.where(ContactItem.class).findAll();
         RealmResults<ItemForFriends> itemForFriends = realm.where(ItemForFriends.class).findAll();
@@ -908,13 +949,10 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
         if (isValid) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage("약속을 등록하시겠습니까?");
-            item = realm.copyFromRealm(realm.where(MissionCartItem.class).findFirst());
-            RealmResults<ContactItem> result = realm.where(ContactItem.class).findAll();
-            contactItemList = realm.copyFromRealm(result);
+
+
             double lat = item.getLat();
             double lng = item.getLng();
-            RealmResults<ItemForFriends> realmResults = realm.where(ItemForFriends.class).findAll();
-            itemForFriendsList = realm.copyFromRealm(realmResults);
             builder.setPositiveButton("네", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
@@ -1279,12 +1317,12 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
     }
 
 
-    public void bootPayRequest(MissionCartItem item) {
+    public void bootPayRequest(MissionCartItem item, int actual_payment) {
         // 결제호출
         //int stuck = 10;
         String key = "5d25d429396fa67ca2bd0f45";
         BootpayAnalytics.init(this, key);
-        mission_id = Utils.getCurrentTime() + "U" + user_id;
+
         BootUser bootUser = new BootUser().setPhone("010-1234-5678");
         BootExtra bootExtra = new BootExtra().setQuotas(new int[]{0, 2, 3});
 
@@ -1300,7 +1338,7 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
 //              .setUserPhone("010-1234-5678") // 구매자 전화번호
                 .setName(item.getTitle()) // 결제할 상품명
                 .setOrderId("1234") // 결제 고유번호expire_month
-                .setPrice(item.getSingle_amount() - item.getSingle_point()) // 결제할 금액
+                .setPrice(actual_payment) // 결제할 금액
                 .addItem(item.getTitle(), 1, "ITEM_CODE_MOUSE", 100) // 주문정보에 담길 상품정보, 통계를 위해 사용
                 // 주문정보에 담길 상품정보, 통계를 위해 사용
                 .onConfirm(new ConfirmListener() { // 결제가 진행되기 바로 직전 호출되는 함수로, 주로 재고처리 등의 로직이 수행
@@ -1333,14 +1371,14 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
                     public void onCancel(@Nullable String message) {
 
                         Log.d("부트", message);
-                        finish();
+                        //finish();
                     }
                 })
                 .onError(new ErrorListener() { // 에러가 났을때 호출되는 부분
                     @Override
                     public void onError(@Nullable String message) {
                         Log.d("부트", message);
-                        finish();
+                        //finish();
                     }
                 })
                 .onClose(new CloseListener() { //결제창이 닫힐때 실행되는 부분
@@ -1366,7 +1404,7 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
                 .add("message", message)
                 .add("point", String.valueOf(item.getSingle_point()))
                 .add("total_payment", String.valueOf(item.getSingle_amount()))
-                .add("mission_id", mission_id)
+                .add("mission_id", item.getMission_id())
                 .build();
         Request request = new Request.Builder()
                 .post(formBody)
@@ -1413,14 +1451,124 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
             //FirebaseDB.registerCheckForServer(mRootRef, user_id, mission_id, item);
             //FirebaseDB.registerMainDisplay(mRootRef, user_id, mission_id, item);
             //FirebaseDB.registerKakaoToken(mRootRef, user_id);
-            FirebaseDB.registerMissionInfoList(mRootRef, this, mission_id, item, contactItemList, receipt);//미션목록추가
+            FirebaseDB.registerMissionInfoList(mRootRef, this, item, receipt);//미션목록추가
 
             /** 파이어베이스 추가후 deleteRealm **/
 
 
         }
         if (mission_mode == MULTI_MODE) {//multi
-            FirebaseDB.registerInvitationForFriend(mRootRef, this, itemForFriendsList, item,receipt);
+
+
+            String title = item.getTitle();
+            String address = item.getAddress();
+            String mission_id = item.getMission_id();
+            String manager_id = user_id;
+            String user_name = Account.getUserName(this);
+            String image = Account.getUserThumbnail(this);
+            List<ItemPortion> portionList = item.getPortionList();
+            List<ItemForDateTime> dateTimeList = item.getCalendarDayList();
+            List<ItemForDateTimeCheck> dateTimeCheckList = new ArrayList<>();
+            double lat = item.getLat();
+            double lng = item.getLng();
+
+
+
+            List<ItemForFriendMissionCheck> friendMissionCheckList = new ArrayList<>();
+            List<ItemForFriendResponseForRequest> requestList = new ArrayList<>();
+            for (int i = 0; i < item.getFriendsList().size(); i++) {
+                ItemForFriendResponseForRequest request = new ItemForFriendResponseForRequest();
+                request.setFriend_id(item.getFriendsList().get(i).getId());
+                request.setThumbnail(item.getFriendsList().get(i).getImage());
+                request.setFriend_name(item.getFriendsList().get(i).getName());
+                request.setFriend_uuid(item.getFriendsList().get(i).getUuid());
+                request.setMission_success(false);
+                request.setMission_success_time("");
+                request.setAccept(0);
+
+                ItemForFriendMissionCheck itemForFriendMissionCheck = new ItemForFriendMissionCheck();
+                itemForFriendMissionCheck.setUser_id(item.getFriendsList().get(i).getId());
+                itemForFriendMissionCheck.setUser_image(item.getFriendsList().get(i).getImage());
+                itemForFriendMissionCheck.setUser_name(item.getFriendsList().get(i).getName());
+                itemForFriendMissionCheck.setUser_uuid(item.getFriendsList().get(i).getUuid());
+                itemForFriendMissionCheck.setSuccess(false);
+                itemForFriendMissionCheck.setSuccess_time("");
+
+
+                friendMissionCheckList.add(itemForFriendMissionCheck);
+                requestList.add(request);
+
+
+            }
+            ItemForFriendResponseForRequest me = new ItemForFriendResponseForRequest();
+            me.setFriend_name(user_name);
+            me.setFriend_id(user_id);
+            me.setThumbnail(image);
+            me.setAccept(1);
+            me.setMission_success(false);
+            me.setMission_success_time("");
+            requestList.add(0, me);
+
+            for (int i = 0; i < dateTimeList.size(); i++) {
+                ItemForDateTime itemForDateTime = dateTimeList.get(i);
+                ItemForDateTimeCheck itemForDateTimeCheck = new ItemForDateTimeCheck();
+                itemForDateTimeCheck.setDate(itemForDateTime.getDate());
+                itemForDateTimeCheck.setTime(itemForDateTime.getTime());
+                itemForDateTimeCheck.setYear(itemForDateTime.getYear());
+                itemForDateTimeCheck.setMonth(itemForDateTime.getMonth());
+                itemForDateTimeCheck.setDay(itemForDateTime.getDay());
+                itemForDateTimeCheck.setHour(itemForDateTime.getHour());
+                itemForDateTimeCheck.setMin(itemForDateTime.getMin());
+                itemForDateTimeCheck.setFriendMissionCheckList(friendMissionCheckList);
+
+
+                dateTimeCheckList.add(itemForDateTimeCheck);
+            }
+
+
+            ItemForMultiModeRequest multiModeRequest = new ItemForMultiModeRequest();
+            multiModeRequest.setTitle(title);
+            multiModeRequest.setAddress(address);
+            multiModeRequest.setMission_id(mission_id);
+            multiModeRequest.setLat(lat);
+            multiModeRequest.setLng(lng);
+            multiModeRequest.setManager_id(manager_id);
+            multiModeRequest.setManager_thumbnail(image);
+            multiModeRequest.setManager_name(user_name);
+            multiModeRequest.setFriendRequestList(requestList);
+            multiModeRequest.setItemPortionList(portionList);
+            multiModeRequest.setCalendarDayList(dateTimeList);
+            multiModeRequest.setDateTimeCheckList(dateTimeCheckList);
+
+
+
+            for(int i=0; i<requestList.size(); i++) {
+
+                String friend_id = requestList.get(i).getFriend_id();
+                mRootRef.child("user_data").child(friend_id).child("invitation").push().setValue(multiModeRequest).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+
+                        realm.executeTransaction(new Realm.Transaction() {
+                            @Override
+                            public void execute(Realm realm) {
+
+                            }
+                        });
+
+                    }
+                });
+
+            }
+            Intent intent = new Intent(getApplicationContext(), MissionCheckActivity.class);
+            intent.putExtra("receipt", receipt);
+            startActivity(intent);
+            realm.close();
+            finish();
+
+
+            //FirebaseDB.registerInvitationForFriend(mRootRef, this, item, receipt);
+            //FirebaseDB.registerMissionInfoList(mRootRef, this, item, receipt);
 
 
         }
@@ -1493,53 +1641,6 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
     }
 
 
-    public void deleteAllTemporaryData(String receipt, MissionCartItem item) {
-        realm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-
-                //RealmResults<ItemForDateTime> itemForDateTimes = realm.where(ItemForDateTime.class).findAll();
-                SharedPreferences.Editor editor = getSharedPreferences("location_setting", MODE_PRIVATE).edit();
-                editor.putLong("lat", Double.doubleToRawLongBits(item.getLat()));
-                editor.putLong("lng", Double.doubleToRawLongBits(item.getLng()));
-                editor.apply();
-                editor.commit();
-                MissionCartItem missionCartItem = realm.where(MissionCartItem.class).findFirst();
-                missionCartItem.deleteFromRealm();
-                RealmResults<ContactItem> realmResults = realm.where(ContactItem.class).findAll();
-                realmResults.deleteAllFromRealm();
-
-                /** 포어그라운드 서비스 활성화 **/
-
-
-                Intent service = new Intent(getApplicationContext(), NewLocationService.class);
-                boolean is_running = Utils.isServiceRunningInForeground(getApplicationContext(), NewLocationService.class);
-                if (is_running) {
-                    stopService(service);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        ContextCompat.startForegroundService(getApplicationContext(), service);
-
-                    } else {
-                        startService(service);
-                    }
-                } else {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        ContextCompat.startForegroundService(getApplicationContext(), service);
-
-                    } else {
-                        startService(service);
-                    }
-                }
-                Intent intent = new Intent(getApplicationContext(), MissionCheckActivity.class);
-                intent.putExtra("receipt", receipt);
-                startActivity(intent);
-
-            }
-
-        });
-
-
-    }
 
 
 }

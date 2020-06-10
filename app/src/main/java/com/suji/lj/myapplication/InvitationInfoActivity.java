@@ -2,6 +2,7 @@ package com.suji.lj.myapplication;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.widget.NestedScrollView;
@@ -12,8 +13,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
@@ -27,7 +28,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -38,27 +38,21 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.prolificinteractive.materialcalendarview.CalendarDay;
-import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
-import com.prolificinteractive.materialcalendarview.format.TitleFormatter;
-import com.suji.lj.myapplication.Adapters.RecyclerInvitationDateTimeAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerInvitationFriendAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerPortionInvitationAdapter;
-import com.suji.lj.myapplication.Fragments.CalendarSelectFragment;
 import com.suji.lj.myapplication.Fragments.CalendarShowFragment;
 import com.suji.lj.myapplication.Fragments.MapFragment;
-import com.suji.lj.myapplication.Fragments.MapMissionFragment;
 import com.suji.lj.myapplication.Items.ItemForDateTime;
 import com.suji.lj.myapplication.Items.ItemForFriendResponseForRequest;
-import com.suji.lj.myapplication.Items.ItemForFriendsList;
+import com.suji.lj.myapplication.Items.ItemForFriends;
 import com.suji.lj.myapplication.Items.ItemForMultiModeRequest;
+import com.suji.lj.myapplication.Items.ItemForTransaction;
 import com.suji.lj.myapplication.Items.ItemPortion;
 import com.suji.lj.myapplication.Items.MissionCartItem;
 import com.suji.lj.myapplication.Utils.Account;
 import com.suji.lj.myapplication.Utils.Utils;
 
-import net.daum.mf.map.api.MapCircle;
-import net.daum.mf.map.api.MapPoint;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -88,7 +82,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
-public class InvitationInfoActivity extends AppCompatActivity {
+public class InvitationInfoActivity extends AppCompatActivity implements View.OnClickListener {
 
 
     RecyclerView recyclerView;
@@ -96,7 +90,21 @@ public class InvitationInfoActivity extends AppCompatActivity {
 
     NestedScrollView scrollView;
     RecyclerView recycler_portion;
-    LinearLayout ly_mission_accept;
+    LinearLayout ly_accept_or_decline;
+    TextView tv_accept;
+    TextView tv_decline;
+
+    LinearLayout ly_activate_or_cancel;
+    TextView tv_activate;
+    TextView tv_cancel;
+
+    LinearLayout ly_join_cancel;
+    TextView tv_join_cancel;
+
+    LinearLayout ly_payment;
+    LinearLayout ly_agreement;
+
+
     TextView tv_address;
     TextView tv_fail_penalty;
     Runnable runnable;
@@ -124,6 +132,7 @@ public class InvitationInfoActivity extends AppCompatActivity {
     private DecimalFormat dfnd = new DecimalFormat("#,###");
 
 
+    List<MissionCartItem> list3 = new ArrayList<>();
     int price;
 
     @Override
@@ -134,7 +143,21 @@ public class InvitationInfoActivity extends AppCompatActivity {
         recycler_portion = findViewById(R.id.recycler_distribution);
         toolbar = findViewById(R.id.toolbar);
         scrollView = findViewById(R.id.scroll_view);
-        ly_mission_accept = findViewById(R.id.accept);
+        ly_accept_or_decline = findViewById(R.id.ly_accept_or_decline);
+        tv_accept = findViewById(R.id.tv_accept);
+        tv_decline = findViewById(R.id.tv_decline);
+
+        ly_activate_or_cancel = findViewById(R.id.ly_activate_or_cancel);
+        tv_activate = findViewById(R.id.tv_activate);
+        tv_cancel = findViewById(R.id.tv_cancel);
+
+        ly_join_cancel = findViewById(R.id.ly_join_cancel);
+        tv_join_cancel = findViewById(R.id.tv_join_cancel);
+
+        ly_payment = findViewById(R.id.ly_payment);
+        ly_agreement = findViewById(R.id.ly_agreement);
+
+
         tv_address = findViewById(R.id.address);
         tv_fail_penalty = findViewById(R.id.penalty);
         kakao_pay = findViewById(R.id.kakao_pay);
@@ -145,6 +168,12 @@ public class InvitationInfoActivity extends AppCompatActivity {
         text_total_payment = findViewById(R.id.total_payment);
         text_point_total = findViewById(R.id.point_total);
         text_actual_payment = findViewById(R.id.actual_payment);
+
+        tv_accept.setOnClickListener(this);
+        tv_decline.setOnClickListener(this);
+        tv_activate.setOnClickListener(this);
+        tv_cancel.setOnClickListener(this);
+        tv_join_cancel.setOnClickListener(this);
 
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null)
@@ -157,6 +186,44 @@ public class InvitationInfoActivity extends AppCompatActivity {
 
         item = getIntent().getParcelableExtra("item");
         if (item != null) {
+
+            if (item.getManager_id().equals(user_id)) {
+                ly_accept_or_decline.setVisibility(View.GONE);
+                ly_activate_or_cancel.setVisibility(View.VISIBLE);
+                ly_join_cancel.setVisibility(View.GONE);
+                ly_agreement.setVisibility(View.GONE);
+                ly_payment.setVisibility(View.GONE);
+            } else {
+
+                switch (item.getAccept()) {
+                    case 0:
+                        ly_join_cancel.setVisibility(View.GONE);
+                        ly_activate_or_cancel.setVisibility(View.GONE);
+                        ly_accept_or_decline.setVisibility(View.VISIBLE);
+                        ly_agreement.setVisibility(View.VISIBLE);
+                        ly_payment.setVisibility(View.VISIBLE);
+                        break;
+                    case 1:
+                        ly_join_cancel.setVisibility(View.VISIBLE);
+                        ly_activate_or_cancel.setVisibility(View.GONE);
+                        ly_accept_or_decline.setVisibility(View.GONE);
+                        ly_agreement.setVisibility(View.GONE);
+                        ly_payment.setVisibility(View.GONE);
+                        break;
+                    case 2://거절한상태
+                        ly_join_cancel.setVisibility(View.GONE);
+                        ly_activate_or_cancel.setVisibility(View.GONE);
+                        ly_accept_or_decline.setVisibility(View.GONE);
+                        ly_agreement.setVisibility(View.GONE);
+                        ly_payment.setVisibility(View.GONE);
+                        break;
+
+
+                }
+
+            }
+
+
             DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
             databaseReference.child("user_data").child(user_id).child("point").addValueEventListener(new ValueEventListener() {
                 @Override
@@ -185,7 +252,7 @@ public class InvitationInfoActivity extends AppCompatActivity {
             Log.d("제목", item.getFail_penalty() + "");
             toolbar.setTitle(item.getTitle());
             tv_address.setText(item.getAddress());
-            mission_id = item.getMission_key();
+            mission_id = item.getMission_id();
             tv_fail_penalty.setText(Utils.makeNumberComma(item.getFail_penalty()) + " 원");
             total = item.getFail_penalty() * item.getCalendarDayList().size();
             actual_payment = total - point_input;
@@ -205,16 +272,6 @@ public class InvitationInfoActivity extends AppCompatActivity {
 
             setUpRecyclerViewPortion(item.getItemPortionList());
 
-
-            ly_mission_accept.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    //databaseReference.child("")
-                    bootPayRequest();
-
-
-                }
-            });
 
             CompoundButton.OnCheckedChangeListener changeChecker = new CompoundButton.OnCheckedChangeListener() {
 
@@ -550,7 +607,7 @@ public class InvitationInfoActivity extends AppCompatActivity {
                         //displayReceipt(result);
 
 
-                        dataSave();
+                        //dataSave(1);//수락
                         Intent intent = new Intent(getApplicationContext(), MissionCheckActivity.class);
                         intent.putExtra("receipt", receipt);
                         startActivity(intent);
@@ -561,7 +618,7 @@ public class InvitationInfoActivity extends AppCompatActivity {
         });
     }
 
-    private void dataSave() {
+    private void dataSave(int accept) {//미션수락시 친구들에게 수락여부 알림
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
         String mission_id = item.getMission_id();
 
@@ -572,7 +629,7 @@ public class InvitationInfoActivity extends AppCompatActivity {
                 databaseReference.child("user_data").child(friend_id).child("invitation").orderByChild("mission_id").equalTo(mission_id).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        for(DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                             ItemForMultiModeRequest item = snapshot.getValue(ItemForMultiModeRequest.class);
 
                             String key = snapshot.getKey();
@@ -586,9 +643,10 @@ public class InvitationInfoActivity extends AppCompatActivity {
                                 for (int i = 0; i < friendsLists.size(); i++) {
                                     if (user_id.equals(friendsLists.get(i).getFriend_id())) {
                                         ItemForFriendResponseForRequest request = friendsLists.get(i);
-                                        request.setAccept(false);
+                                        request.setAccept(accept);
                                         friendsLists.set(i, request);
                                         item.setFriendRequestList(friendsLists);
+                                        item.setAccept(accept);
                                         databaseReference.child("user_data").child(friend_id).child("invitation").child(key).setValue(item);
 
                                     }
@@ -608,13 +666,340 @@ public class InvitationInfoActivity extends AppCompatActivity {
                     }
                 });
 
+            } else {
+                databaseReference.child("user_data").child(user_id).child("invitation").orderByChild("mission_id").equalTo(mission_id).addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                            ItemForMultiModeRequest item = snapshot.getValue(ItemForMultiModeRequest.class);
+
+                            String key = snapshot.getKey();
+
+                            Log.d("수락", key + " key");
+
+
+                            if (item != null && key != null) {
+                                Log.d("수락", item.getAddress() + " address");
+                                List<ItemForFriendResponseForRequest> friendsLists = item.getFriendRequestList();
+                                for (int i = 0; i < friendsLists.size(); i++) {
+                                    if (user_id.equals(friendsLists.get(i).getFriend_id())) {
+                                        ItemForFriendResponseForRequest request = friendsLists.get(i);
+                                        request.setAccept(accept);
+                                        friendsLists.set(i, request);
+                                        item.setFriendRequestList(friendsLists);
+                                        item.setAccept(accept);
+                                        databaseReference.child("user_data").child(user_id).child("invitation").child(key).setValue(item).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+
+
+                                            }
+                                        });
+
+                                    }
+
+
+                                }
+
+
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+
+
             }
 
         }
 
 
+    }
+
+
+
+    private void dataDelete() {
+
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+        String mission_id = item.getMission_id();
+
+
+        for (int i = 0; i < item.getFriendRequestList().size(); i++) {
+            String friend_id = item.getFriendRequestList().get(i).getFriend_id();
+            databaseReference.child("user_data").child(friend_id).child("invitation").orderByChild("mission_id").equalTo(mission_id).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+
+                            String key = snapshot.getKey();
+                            if (key != null) {
+                                databaseReference.child("user_data").child(friend_id).child("invitation").child(key).removeValue();
+                            }
+                        }
+                    }
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+        }
+
 
     }
+
+
+
+    private void dataUpdate(String up) {
+
+
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.tv_accept:
+                bootPayRequest();
+                /** 결제 -> 영수증저장 -> 본인포함 친구데이터에 db 1로 설정 **/
+                break;
+
+            case R.id.tv_decline:
+                int accept = 2;
+                /** 본인포함 친구데이터에 db 2로 설정 **/
+                //dataSave(accept);
+                break;
+
+            case R.id.tv_activate:
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage("약속을 등록하시겠습니까?");
+                builder.setPositiveButton("네", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                       // missionActivate();
+                    }
+                });
+                builder.setNegativeButton("아니오", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+
+                    }
+                });
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
+
+                /** 최소인원 2명 확인 -> 초대db 삭 -> missioninfolist 생성 -> display 생성 -> server_list 생성 **/
+                break;
+            case R.id.tv_cancel:
+                /** 친구각각의 mission_id로 찾기 -> 찾은영수증으로 결제취소요청 -> 본인포함 친구데이터 삭제 **/
+
+                DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+                databaseReference.child("multi").removeValue();
+
+                AlertDialog.Builder cancel_builder = new AlertDialog.Builder(this);
+                cancel_builder.setMessage("약속을 등록하시겠습니까?");
+                cancel_builder.setPositiveButton("네", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        requestPaymentJoinCancel(user_id);
+                    }
+                });
+                cancel_builder.setNegativeButton("아니오", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                });
+                cancel_builder.create().show();
+
+/*
+
+                for (int i = 0; i < item.getFriendRequestList().size(); i++) {
+                    String friend_id = item.getFriendRequestList().get(i).getFriend_id();
+                    if (!user_id.equals(friend_id)) {
+                        requestPaymentCancel(friend_id);
+                    }
+
+                }
+                requestPaymentCancel(user_id);
+
+ */
+
+
+                break;
+            case R.id.tv_join_cancel:
+                //결제취소
+                AlertDialog.Builder join_cancel_builder = new AlertDialog.Builder(this);
+                join_cancel_builder.setMessage("약속을 등록하시겠습니까?");
+                join_cancel_builder.setPositiveButton("네", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        requestPaymentJoinCancel(user_id);
+                    }
+                });
+                join_cancel_builder.setNegativeButton("아니오", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                });
+                join_cancel_builder.create().show();
+
+
+
+
+                /** mission_id 로 영수증 찾기 -> 찾은 영수증으로 결제취소요청 -> 본인포함 친구데이터에서 db상태 0으로 변경  **/
+
+
+                break;
+
+
+        }
+    }
+
+    /**
+     * 친구들것을 먼저 취소하고 그다음 본인것 취소
+     **/
+    private void requestPaymentCancel(String user) {
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+        databaseReference.child("user_data").child(user).child("transaction").orderByChild("mission_id").equalTo(mission_id).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        ItemForTransaction transaction = snapshot.getValue(ItemForTransaction.class);
+                        if (transaction != null) {
+
+                            OkHttpClient httpClient = new OkHttpClient();
+                            String receipt_id = transaction.getReceipt_id();
+
+                            String url = "https://api.bootpay.co.kr/cancel";
+
+                            RequestBody formBody = new FormBody.Builder()
+                                    .add("receipt_id", receipt_id)
+                                    .build();
+
+                            Request request = new Request.Builder()
+                                    .header("Authorization", "5d25d429396fa67ca2bd0f45")
+                                    .url(url)
+                                    .post(formBody)
+                                    .build();
+
+
+                            httpClient.newCall(request).enqueue(new Callback() {
+                                @Override
+                                public void onFailure(@NotNull Call call, @NotNull IOException e) {
+
+                                }
+
+                                @Override
+                                public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                                    boolean purchased_or_cancel = false;
+                                    //dataSave(0);
+                                    Log.d("취소", response.toString() + "영수증");
+
+
+                                    if (user_id.equals(user)) {//본인 결제를 취소했으면 취소영수증으로 넘어가기
+                                        //dataDelete();//친구들 초대 데이터 삭제
+
+                                        String result = response.toString();
+                                        Intent intent = new Intent(getApplicationContext(), MissionCheckActivity.class);
+                                        intent.putExtra("result", result);
+                                        startActivity(intent);
+                                    }
+
+                                }
+                            });
+
+
+                        }
+
+
+                    }
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+
+    }
+
+    private void requestPaymentJoinCancel(String user_id) {
+
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+        databaseReference.child("user_data").child(user_id).child("transaction").orderByChild("mission_id").equalTo(mission_id).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        ItemForTransaction transaction = snapshot.getValue(ItemForTransaction.class);
+                        if (transaction != null) {
+
+                            OkHttpClient httpClient = new OkHttpClient();
+                            String receipt_id = transaction.getReceipt_id();
+
+                            String url = "https://api.bootpay.co.kr/cancel";
+
+                            RequestBody formBody = new FormBody.Builder()
+                                    .add("receipt_id", receipt_id)
+                                    .build();
+
+                            Request request = new Request.Builder()
+                                    .header("Authorization", "5d25d429396fa67ca2bd0f45")
+                                    .url(url)
+                                    .post(formBody)
+                                    .build();
+
+
+                            httpClient.newCall(request).enqueue(new Callback() {
+                                @Override
+                                public void onFailure(@NotNull Call call, @NotNull IOException e) {
+
+                                }
+
+                                @Override
+                                public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+
+                                    Log.d("취소", response.toString() + "영수증");
+
+                                    //dataSave(0);
+                                    String result = response.toString();
+                                    Intent intent = new Intent(getApplicationContext(), MissionCheckActivity.class);
+                                    intent.putExtra("result", result);
+                                    startActivity(intent);
+
+                                }
+                            });
+
+
+                        }
+
+
+                    }
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
 
 
 }

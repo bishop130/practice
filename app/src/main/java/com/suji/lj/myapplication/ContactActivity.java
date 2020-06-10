@@ -44,7 +44,7 @@ import java.util.List;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
-public class ContactActivity extends AppCompatActivity implements View.OnClickListener, RecyclerContactFriendSelectAdapter.OnFriendsCountListener,  RecyclerContactFriendSelectAdapter.OnRemoveSelectedListener {
+public class ContactActivity extends AppCompatActivity implements View.OnClickListener, RecyclerContactFriendSelectAdapter.OnFriendsCountListener, RecyclerContactFriendSelectAdapter.OnRemoveSelectedListener {
 
 
     RecyclerContactFriendSelectAdapter recyclerContactFriendSelectAdapter;
@@ -86,9 +86,7 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
 
 
         confirm_button.setOnClickListener(this);
-       // tab_ly.addOnTabSelectedListener(this);
-
-
+        // tab_ly.addOnTabSelectedListener(this);
 
 
         checkContactPermission();
@@ -318,6 +316,10 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
             contactItem.setContact_or_friend(1);
             contactItem.setFriend_selected(true);
             contactItem.setFriend_position(item.getPosition());
+            contactItem.setThumbnail(item.getImage());
+            contactItem.setUuid(item.getUuid());
+            contactItem.setFriend_id(item.getId());
+            contactItem.setPortion((int) item.getPortion());
 
 
             selected_item.add(contactItem);
@@ -415,7 +417,6 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
         //onRemoveSelectedListener.onRemoveSelected(position);
 
     }
-
 
 
     public interface OnUnCheckFromSelectToFriendListener {

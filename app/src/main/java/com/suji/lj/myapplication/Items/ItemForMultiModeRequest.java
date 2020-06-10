@@ -15,6 +15,8 @@ public class ItemForMultiModeRequest implements Parcelable {
     String manager_thumbnail;
     String address;
     String mission_id;
+
+    int accept;
     double lat;
     double lng;
 
@@ -24,9 +26,11 @@ public class ItemForMultiModeRequest implements Parcelable {
     List<ItemForDateTime> calendarDayList = new ArrayList<>();
     List<ItemForFriendResponseForRequest> friendRequestList = new ArrayList<>();
     List<ItemPortion> itemPortionList = new ArrayList<>();
+    List<ItemForDateTimeCheck> dateTimeCheckList = new ArrayList<>();
 
 
-    public ItemForMultiModeRequest(){}
+    public ItemForMultiModeRequest() {
+    }
 
     public ItemForMultiModeRequest(Parcel in) {
         this.title = in.readString();
@@ -37,14 +41,16 @@ public class ItemForMultiModeRequest implements Parcelable {
         this.manager_thumbnail = in.readString();
         this.address = in.readString();
         this.mission_id = in.readString();
+
+        this.accept = in.readInt();
         this.lat = in.readDouble();
         this.lng = in.readDouble();
         this.late_penalty = in.readInt();
         this.fail_penalty = in.readInt();
         in.readList(this.calendarDayList, ItemForDateTime.class.getClassLoader());
-        in.readList(this.friendRequestList,ItemForFriendResponseForRequest.class.getClassLoader());
-        in.readList(this.itemPortionList,ItemPortion.class.getClassLoader());
-
+        in.readList(this.friendRequestList, ItemForFriendResponseForRequest.class.getClassLoader());
+        in.readList(this.itemPortionList, ItemPortion.class.getClassLoader());
+        in.readList(this.dateTimeCheckList,ItemForDateTimeCheck.class.getClassLoader());
 
 
     }
@@ -65,8 +71,6 @@ public class ItemForMultiModeRequest implements Parcelable {
     };
 
 
-
-
     @Override
     public int describeContents() {
         return 0;
@@ -83,6 +87,8 @@ public class ItemForMultiModeRequest implements Parcelable {
         dest.writeString(this.manager_thumbnail);
         dest.writeString(this.address);
         dest.writeString(this.mission_id);
+
+        dest.writeInt(this.accept);
         dest.writeDouble(this.lat);
         dest.writeDouble(this.lng);
         dest.writeInt(this.late_penalty);
@@ -90,9 +96,25 @@ public class ItemForMultiModeRequest implements Parcelable {
         dest.writeList(this.calendarDayList);
         dest.writeList(this.friendRequestList);
         dest.writeList(this.itemPortionList);
+        dest.writeList(this.dateTimeCheckList);
 
     }
 
+    public List<ItemForDateTimeCheck> getDateTimeCheckList() {
+        return dateTimeCheckList;
+    }
+
+    public void setDateTimeCheckList(List<ItemForDateTimeCheck> dateTimeCheckList) {
+        this.dateTimeCheckList = dateTimeCheckList;
+    }
+
+    public int getAccept() {
+        return accept;
+    }
+
+    public void setAccept(int accept) {
+        this.accept = accept;
+    }
 
     public String getMission_id() {
         return mission_id;
@@ -109,6 +131,7 @@ public class ItemForMultiModeRequest implements Parcelable {
     public void setItemPortionList(List<ItemPortion> itemPortionList) {
         this.itemPortionList = itemPortionList;
     }
+
 
     public String getMission_key() {
         return mission_key;

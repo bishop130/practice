@@ -76,7 +76,7 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class SettingFragment extends Fragment implements View.OnClickListener {
 
-    private TextView kakao_name_setting;
+    private TextView tv_user_name;
     private ImageView profile_image_setting;
     private Context mContext;
     private LinearLayout alarm_setting_go;
@@ -118,7 +118,7 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
 
 
         View view = inflater.inflate(R.layout.fragment_setting, container, false);
-        kakao_name_setting = view.findViewById(R.id.kakao_name_setting);
+        tv_user_name = view.findViewById(R.id.kakao_name_setting);
         profile_image_setting = view.findViewById(R.id.profile_image_setting);
         alarm_setting_go = view.findViewById(R.id.alarm_setting_go);
         go_to_my_profile = view.findViewById(R.id.go_to_my_profile);
@@ -151,13 +151,17 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
         SharedPreferences sharedPreferences = mContext.getSharedPreferences("Kakao", MODE_PRIVATE);
         String name = sharedPreferences.getString("user_name", "");
         String profile_image = sharedPreferences.getString("thumbnail", null);
-        if (!Utils.isEmpty(profile_image)) {
+        if (!Utils.isEmpty(profile_image)) {//프로필 사진이 있을 때
 
-            kakao_name_setting.setText(name);
+            tv_user_name.setText(name);
             Picasso.with(getActivity())
                     .load(profile_image)
                     .fit()
                     .into(profile_image_setting);
+        }else{//프로필 사진이 없을 때
+
+            tv_user_name.setText(name);
+
         }
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
         databaseReference.child("user_data").child(user_id).child("point").addValueEventListener(new ValueEventListener() {

@@ -224,7 +224,7 @@ public class FriendsActivity extends AppCompatActivity implements RecyclerFriend
                             ItemForFriends item = new ItemForFriends();
                             item.setName(result.getFriends().get(i).getProfileNickname());
                             item.setImage(result.getFriends().get(i).getProfileThumbnailImage());
-                            item.setId(result.getFriends().get(i).getId());
+                            item.setId(String.valueOf(result.getFriends().get(i).getId()));
                             item.setUuid(result.getFriends().get(i).getUUID());
                             item.setFavorite(result.getFriends().get(i).isFavorite().getBoolean());
                             item.setSelected(false);

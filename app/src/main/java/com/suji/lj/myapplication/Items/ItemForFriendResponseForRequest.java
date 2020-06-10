@@ -3,13 +3,19 @@ package com.suji.lj.myapplication.Items;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import io.realm.RealmModel;
+import io.realm.RealmObject;
+
 public class ItemForFriendResponseForRequest implements Parcelable {
     String friend_id;
     String friend_uuid;
     String friend_name;
     String friend_fintech_num;
     String thumbnail;
-    boolean accept;
+    int accept;
+    boolean mission_success;
+    String mission_success_time;
+
 
     public ItemForFriendResponseForRequest(){}
 
@@ -26,7 +32,9 @@ public class ItemForFriendResponseForRequest implements Parcelable {
         dest.writeString(this.friend_name);
         dest.writeString(this.friend_fintech_num);
         dest.writeString(this.thumbnail);
-        dest.writeByte((byte) (this.accept ? 1 : 0));
+        dest.writeInt(this.accept);
+        dest.writeByte((byte) (this.mission_success ? 1 : 0));
+        dest.writeString(this.mission_success_time);
 
     }
 
@@ -36,7 +44,9 @@ public class ItemForFriendResponseForRequest implements Parcelable {
         this.friend_name = in.readString();
         this.friend_fintech_num = in.readString();
         this.thumbnail = in.readString();
-        this.accept = in.readByte() != 0;
+        this.accept = in.readInt();
+        this.mission_success = in.readByte() != 0;
+        this.mission_success_time = in.readString();
 
     }
 
@@ -56,9 +66,21 @@ public class ItemForFriendResponseForRequest implements Parcelable {
     };
 
 
+    public boolean isMission_success() {
+        return mission_success;
+    }
 
+    public void setMission_success(boolean mission_success) {
+        this.mission_success = mission_success;
+    }
 
+    public String getMission_success_time() {
+        return mission_success_time;
+    }
 
+    public void setMission_success_time(String mission_success_time) {
+        this.mission_success_time = mission_success_time;
+    }
 
     public String getThumbnail() {
         return thumbnail;
@@ -100,11 +122,11 @@ public class ItemForFriendResponseForRequest implements Parcelable {
         this.friend_fintech_num = friend_fintech_num;
     }
 
-    public boolean isAccept() {
+    public int getAccept() {
         return accept;
     }
 
-    public void setAccept(boolean accept) {
+    public void setAccept(int accept) {
         this.accept = accept;
     }
 }

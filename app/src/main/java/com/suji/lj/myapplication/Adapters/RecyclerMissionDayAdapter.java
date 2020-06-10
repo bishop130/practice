@@ -2,6 +2,7 @@ package com.suji.lj.myapplication.Adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,14 +21,14 @@ import com.suji.lj.myapplication.Utils.OnSingleClickListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RecyclerMissionDayAdapter extends RecyclerView.Adapter<RecyclerMissionDayAdapter.ViewHolder>{
+public class RecyclerMissionDayAdapter extends RecyclerView.Adapter<RecyclerMissionDayAdapter.ViewHolder> {
 
     List<ItemForMissionByDay> list = new ArrayList<>();
     Context context;
     OnLoadMissionListListener onLoadMissionListListener;
 
 
-    public RecyclerMissionDayAdapter(Context context, List<ItemForMissionByDay> list,OnLoadMissionListListener onLoadMissionListListener){
+    public RecyclerMissionDayAdapter(Context context, List<ItemForMissionByDay> list, OnLoadMissionListListener onLoadMissionListListener) {
         this.list = list;
         this.context = context;
         this.onLoadMissionListListener = onLoadMissionListListener;
@@ -40,7 +41,6 @@ public class RecyclerMissionDayAdapter extends RecyclerView.Adapter<RecyclerMiss
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(R.layout.main_recycler_view_item, parent, false);
-
 
 
         return new RecyclerMissionDayAdapter.ViewHolder(view);
@@ -58,9 +58,11 @@ public class RecyclerMissionDayAdapter extends RecyclerView.Adapter<RecyclerMiss
                 //Intent intent = new Intent(context, MissionDetailActivity.class);
                 //intent.putExtra("mission_id", list.get(position).getMother_id());
                 //context.startActivity(intent);
-                onLoadMissionListListener.onLoadMissionList(list.get(position).getMother_id());
+                Log.d("어댑트",list.get(position).getMission_id());
+                onLoadMissionListListener.onLoadMissionList(list.get(position).getMission_id());
             }
         });
+
 
     }
 
@@ -79,7 +81,6 @@ public class RecyclerMissionDayAdapter extends RecyclerView.Adapter<RecyclerMiss
         LinearLayout view_container;
 
 
-
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
@@ -90,12 +91,11 @@ public class RecyclerMissionDayAdapter extends RecyclerView.Adapter<RecyclerMiss
             tv_address = itemView.findViewById(R.id.address_display);
 
 
-
         }
 
     }
 
-    public interface OnLoadMissionListListener{
+    public interface OnLoadMissionListListener {
         void onLoadMissionList(String mission_id);
 
     }

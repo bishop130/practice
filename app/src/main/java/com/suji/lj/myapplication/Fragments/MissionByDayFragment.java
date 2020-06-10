@@ -57,7 +57,7 @@ public class MissionByDayFragment extends Fragment implements RecyclerMissionDay
     private Context mContext;
     private ProgressBar loading_panel;
     private String user_id;
-    List<ItemForMissionByDay> list = new ArrayList<>();
+    ArrayList<ItemForMissionByDay> list = new ArrayList<>();
     String key;
     RecyclerMissionDayAdapter adapter;
 
@@ -89,8 +89,6 @@ public class MissionByDayFragment extends Fragment implements RecyclerMissionDay
         ly_swipe_refresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-
-
                 //getDatabase();
 
                 FavoriteFragment fa = (FavoriteFragment) getChildFragmentManager().findFragmentByTag("day");
@@ -106,8 +104,9 @@ public class MissionByDayFragment extends Fragment implements RecyclerMissionDay
             }
         });
 
-        displayData();
-
+        //displayData();
+        String key = DateTimeUtils.getCurrentDateTimeForKey();
+        newQueryData(key);
 
         return view;
     }
@@ -122,6 +121,42 @@ public class MissionByDayFragment extends Fragment implements RecyclerMissionDay
         loading_panel.setVisibility(View.GONE);
 
 
+    }
+    private void newQueryData(String key) {
+
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+        //Log.d("데이트타임", DateTimeUtils.getCurrentTime());
+        if (!Utils.isEmpty(user_id))
+            databaseReference.child("user_data").child(user_id).child("mission_display").orderByChild("date_time").startAt(key).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    list = new ArrayList<>();
+
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        ItemForMissionByDay item = snapshot.getValue(ItemForMissionByDay.class);
+                        if (item != null) {
+                            if (!item.isSuccess()) {
+                                list.add(item);
+                            }
+                        }
+                    }
+
+                    update(list);
+
+                    //single인지 multi인지 구분하기
+
+                    Log.d("들어와", "파이어베이스");
+                    //addFragment(MissionByDayFragment.newInstance(list));
+                }
+
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    // missionByDayFragment = new MissionByDayFragment();
+                    //addFragment(missionByDayFragment, "day");
+
+                }
+            });
     }
 
 
@@ -147,14 +182,25 @@ public class MissionByDayFragment extends Fragment implements RecyclerMissionDay
     @Override
     public void onLoadMissionList(String mission_id) {
 
+        Log.d("어댑터", mission_id);
+        Log.d("어댑터", user_id);
+
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-        databaseReference.child("user_data").child(user_id).child("mission_info_list").child(mission_id).addValueEventListener(new ValueEventListener() {
+        databaseReference.child("user_data").child(user_id).child("mission_info_list").orderByChild("mission_id").equalTo(mission_id).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                MissionInfoList item = dataSnapshot.getValue(MissionInfoList.class);
-                Intent intent = new Intent(mContext, MissionDetailActivity.class);
-                intent.putExtra("mission_info_list", item);
-                mContext.startActivity(intent);
+
+                for(DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    MissionInfoList item = snapshot.getValue(MissionInfoList.class);
+                    if (item != null) {
+
+                        Log.d("어댑터", item.getAddress());
+                        Log.d("어댑터", item.getMission_title());
+                        Intent intent = new Intent(mContext, MissionDetailActivity.class);
+                        intent.putExtra("mission_info_list", item);
+                        mContext.startActivity(intent);
+                    }
+                }
 
             }
 

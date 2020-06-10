@@ -88,7 +88,8 @@ public class MissionCheckActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mission_check);
-        //realm = Realm.getDefaultInstance();
+        Realm.init(this);
+        realm = Realm.getDefaultInstance();
         //mFunctions = FirebaseFunctions.getInstance();
         confirm = findViewById(R.id.confirm);
         pay_method = findViewById(R.id.pay_method);
@@ -100,7 +101,9 @@ public class MissionCheckActivity extends AppCompatActivity {
         Bundle bundle = getIntent().getExtras();
         if(bundle!=null) {
             String receipt = bundle.getString("receipt");
+            deleteAllTemporaryData();
             displayReceipt(receipt);
+            activateService();
         }
 
 
@@ -109,6 +112,7 @@ public class MissionCheckActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                finish();
             }
         });
 
@@ -146,6 +150,71 @@ public class MissionCheckActivity extends AppCompatActivity {
 
     }
 
+
+    private void activateService(){
+        Intent service = new Intent(getApplicationContext(), NewLocationService.class);
+        boolean is_running = Utils.isServiceRunningInForeground(getApplicationContext(), NewLocationService.class);
+        if (is_running) {
+            stopService(service);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                ContextCompat.startForegroundService(getApplicationContext(), service);
+
+            } else {
+                startService(service);
+            }
+        } else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                ContextCompat.startForegroundService(getApplicationContext(), service);
+
+            } else {
+                startService(service);
+            }
+        }
+
+
+    }
+
+    public void deleteAllTemporaryData() {
+        Log.d("어댑터","deletedata");
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+
+                //RealmResults<ItemForDateTime> itemForDateTimes = realm.where(ItemForDateTime.class).findAll();
+
+
+                MissionCartItem missionCartItem = realm.where(MissionCartItem.class).findFirst();
+                if(missionCartItem!=null) {
+                    Log.d("어댑터","널이 아닙니다");
+                    SharedPreferences.Editor editor = getSharedPreferences("location_setting", MODE_PRIVATE).edit();
+                    editor.putLong("lat", Double.doubleToRawLongBits(missionCartItem.getLat()));
+                    editor.putLong("lng", Double.doubleToRawLongBits(missionCartItem.getLng()));
+                    editor.apply();
+                    editor.commit();
+                    missionCartItem.deleteFromRealm();
+                    RealmResults<ContactItem> realmResults = realm.where(ContactItem.class).findAll();
+                    realmResults.deleteAllFromRealm();
+
+                    /** 포어그라운드 서비스 활성화 **/
+                }else{
+                    Log.d("어댑터","널이다");
+
+                }
+
+
+            }
+
+        });
+
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        realm.close();
+
+    }
 
     //
 

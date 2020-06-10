@@ -3,6 +3,7 @@ package com.suji.lj.myapplication.Fragments;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -373,8 +374,10 @@ public class MultiModeFragment extends Fragment implements RecyclerFriendsAdapte
                         for (int i = 0; i < result.getFriends().size(); i++) {
                             ItemForFriends item = new ItemForFriends();
                             item.setName(result.getFriends().get(i).getProfileNickname());
-                            item.setImage(result.getFriends().get(i).getProfileThumbnailImage());
-                            item.setId(result.getFriends().get(i).getId());
+                            String Image = result.getFriends().get(i).getProfileThumbnailImage();
+                            //Bitmap bitMap = Utils.getBitmapFromURL(Image);
+                            item.setImage(Image);
+                            item.setId(String.valueOf(result.getFriends().get(i).getId()));
                             item.setUuid(result.getFriends().get(i).getUUID());
                             item.setFavorite(result.getFriends().get(i).isFavorite().getBoolean());
                             item.setSelected(false);

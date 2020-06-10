@@ -100,15 +100,17 @@ public class RecyclerFriendRequestAdapter extends RecyclerView.Adapter<RecyclerF
                                 ItemRegisterAccount item = new ItemRegisterAccount();
                                 String user_name = context.getSharedPreferences("Kakao", MODE_PRIVATE).getString("user_name", "");
                                 String thumbnail = context.getSharedPreferences("Kakao", MODE_PRIVATE).getString("thumbnail", "");
+                                String email = context.getSharedPreferences("Kakao",MODE_PRIVATE).getString("email","");
 
                                 item.setUser_name(user_name);
                                 item.setThumnail_img(thumbnail);
                                 item.setUser_id(user_id);
+                                item.setEmail(email);
 
-                                databaseReference.child("user_data").child(friend_id).child("friends_list").child(user_id).setValue(item).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                databaseReference.child("user_data").child(friend_id).child("friends_list").push().setValue(item).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
-                                        databaseReference.child("user_data").child(user_id).child("friends_list").child(friend_id).setValue(friend_item);
+                                        databaseReference.child("user_data").child(user_id).child("friends_list").push().setValue(friend_item);
                                     }
                                 });
 

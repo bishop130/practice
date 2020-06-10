@@ -217,6 +217,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/ly_payment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -455,33 +456,213 @@
 
                     </RelativeLayout>
                 </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ly_agreement"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@color/White"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <androidx.appcompat.widget.AppCompatCheckBox
+                        android:id="@+id/agree_terms_use"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:layout_centerVertical="true"
+                        android:text="이용약관동의"
+                        android:textSize="14sp"
+
+                        />
+
+                    <TextView
+                        android:id="@+id/agree_terms_use_detail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerInParent="true"
+                        android:layout_marginStart="32dp"
+                        android:gravity="center"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:text="약관 자세히 보기"
+                        android:textSize="12sp" />
+
+                </RelativeLayout>
+
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <androidx.appcompat.widget.AppCompatCheckBox
+                        android:id="@+id/agree_terms_private"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="개인정보취급약관 동의"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/agree_terms_private_detail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerInParent="true"
+                        android:layout_marginStart="32dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:text="약관 자세히 보기"
+                        android:textSize="12sp" />
+
+
+                </RelativeLayout>
 
 
                 <LinearLayout
-                    android:id="@+id/accept"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-
-                    android:background="@color/colorPrimary">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="12dp"
-                        android:layout_marginBottom="12dp"
-                        android:gravity="center"
-                        android:text="수락"
-                        android:textColor="@color/White"
-                        android:textSize="22sp"
-                        android:textStyle="bold" />
+                    android:layout_height="2dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@color/divider_line">
 
 
                 </LinearLayout>
+
+
+                <androidx.appcompat.widget.AppCompatCheckBox
+                    android:id="@+id/agree_terms_all"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:text="모두 동의"
+                    android:textSize="14sp"
+
+                    >
+
+
+                </androidx.appcompat.widget.AppCompatCheckBox>
+
+
             </LinearLayout>
 
+
+            <LinearLayout
+               android:id="@+id/ly_accept_or_decline"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_accept"
+                    android:layout_width="match_parent"
+
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+
+                    android:gravity="center"
+                    android:text="수락"
+                    android:paddingBottom="12dp"
+                    android:paddingTop="12dp"
+                    android:background="@color/colorSuccess"
+                    android:textColor="@color/White"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_decline"
+                    android:layout_width="match_parent"
+
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp"
+                    android:gravity="center"
+                    android:text="거절"
+                    android:textColor="@color/colorError"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+
+
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/ly_activate_or_cancel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_activate"
+                    android:layout_width="match_parent"
+
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+
+                    android:gravity="center"
+                    android:text="시작"
+                    android:paddingBottom="12dp"
+                    android:paddingTop="12dp"
+                    android:background="@color/colorSuccess"
+                    android:textColor="@color/White"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_cancel"
+                    android:layout_width="match_parent"
+
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp"
+                    android:gravity="center"
+                    android:text="취소"
+                    android:textColor="@color/colorError"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+
+
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/ly_join_cancel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_join_cancel"
+                    android:layout_width="match_parent"
+
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+
+                    android:gravity="center"
+                    android:text="수락취소"
+                    android:paddingBottom="12dp"
+                    android:paddingTop="12dp"
+                    android:background="@color/colorSuccess"
+                    android:textColor="@color/White"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+
+
+            </LinearLayout>
         </LinearLayout>
+
 
     </androidx.core.widget.NestedScrollView>
 

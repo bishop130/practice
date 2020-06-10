@@ -9,15 +9,6 @@
     <!-- TODO: Update blank fragment layout -->
 
 
-    <androidx.appcompat.widget.SearchView
-        android:id="@+id/contact_search"
-        android:layout_width="match_parent"
-        android:layout_height="36dp"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp"
-        android:layout_marginTop="8dp"
-        android:background="@drawable/rounded_searchview"/>
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view_contact"
         android:layout_width="match_parent"

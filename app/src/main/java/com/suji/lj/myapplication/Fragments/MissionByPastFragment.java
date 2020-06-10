@@ -159,13 +159,20 @@ public class MissionByPastFragment extends Fragment implements RecyclerPastMissi
     @Override
     public void onLoadMissionFromPast(String mission_id) {
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-        databaseReference.child("user_data").child(user_id).child("mission_info_list").child(mission_id).addValueEventListener(new ValueEventListener() {
+        databaseReference.child("user_data").child(user_id).child("mission_info_list").orderByChild("mission_id").equalTo(mission_id).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                MissionInfoList item = dataSnapshot.getValue(MissionInfoList.class);
-                Intent intent = new Intent(mContext, MissionDetailActivity.class);
-                intent.putExtra("mission_info_list", item);
-                mContext.startActivity(intent);
+                for(DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    MissionInfoList item = snapshot.getValue(MissionInfoList.class);
+                    if (item != null) {
+
+                        Log.d("어댑터", item.getAddress());
+                        Log.d("어댑터", item.getMission_title());
+                        Intent intent = new Intent(mContext, MissionDetailActivity.class);
+                        intent.putExtra("mission_info_list", item);
+                        mContext.startActivity(intent);
+                    }
+                }
 
             }
 

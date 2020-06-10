@@ -57,6 +57,8 @@ public class MainRecyclerAdapter extends RecyclerView.Adapter<MainRecyclerAdapte
     @Override
     public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
 
+
+
         holder.tv_missionTitle.setText(recyclerItemList.get(position).getMissionTitle());
         holder.tv_address.setText(recyclerItemList.get(position).getAddress()+" 인근");
         setDisplayDateTime(holder,position);

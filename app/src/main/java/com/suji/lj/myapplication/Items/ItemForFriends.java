@@ -7,7 +7,7 @@ public class ItemForFriends extends RealmObject {
     String name;
     String image;
     String uuid;
-    long id;
+    String id;
     boolean favorite;
     boolean selected;
     int position;
@@ -50,11 +50,11 @@ public class ItemForFriends extends RealmObject {
         this.uuid = uuid;
     }
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

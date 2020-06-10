@@ -39,6 +39,10 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.flexbox.AlignItems;
+import com.google.android.flexbox.FlexDirection;
+import com.google.android.flexbox.FlexboxLayoutManager;
+import com.google.android.flexbox.JustifyContent;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -51,6 +55,7 @@ import com.suji.lj.myapplication.Adapters.RecyclerMissionProgressAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerViewContactAdapter;
 import com.suji.lj.myapplication.Decorators.OneDayDecorator;
 import com.suji.lj.myapplication.Fragments.MapFragment;
+import com.suji.lj.myapplication.Items.ContactItem;
 import com.suji.lj.myapplication.Items.ContactItemForServer;
 import com.suji.lj.myapplication.Items.ItemForDateTime;
 import com.suji.lj.myapplication.Items.ItemForDateTimeByList;
@@ -111,22 +116,14 @@ public class MissionDetailActivity extends AppCompatActivity implements View.OnC
     TextView penalty_name_list;
     TextView mission_date_start;
     TextView mission_date_end;
-    TextView penalty_content;
     TextView mission_time_start;
     TextView mission_time_end;
-    List<ContactItemForServer> friendsLists;
-    String mission_time;
-    String min_date;
-    String max_date;
-    public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
-    Bitmap snapshotBitmap;
-    ImageView some_image;
-    LinearLayout test;
-    ViewGroup mapViewContainer;
+    List<ContactItem> friendsLists;
+
     RecyclerView recyclerView;
     int total_dates;
-    TextView tv_date_progress;
-    CircularProgressBar circularProgressBar;
+    //TextView tv_date_progress;
+    //CircularProgressBar circularProgressBar;
     Toolbar toolbar;
     RecyclerView recyclerView_friends_list;
 
@@ -136,6 +133,7 @@ public class MissionDetailActivity extends AppCompatActivity implements View.OnC
     Collection<CalendarDay> cal;
     List<ItemForDateTimeByList> itemForDateTimeByLists;
     TextView selected_date;
+    TextView tv_penalty_summary;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -159,14 +157,12 @@ public class MissionDetailActivity extends AppCompatActivity implements View.OnC
         penalty_name_list = findViewById(R.id.penalty_name_list);
         mission_date_start = findViewById(R.id.mission_date_start);
         mission_date_end = findViewById(R.id.mission_date_end);
-        penalty_content = findViewById(R.id.penalty_content);
         mission_time_start = findViewById(R.id.mission_time_start);
         mission_time_end = findViewById(R.id.mission_time_end);
         recyclerView = findViewById(R.id.recycler_progress_detail);
-        tv_date_progress = findViewById(R.id.tv_date_progress);
-        circularProgressBar = findViewById(R.id.circularProgressBar);
-        recyclerView_friends_list = findViewById(R.id.recycler_friends_list);
+        recyclerView_friends_list = findViewById(R.id.recycler_friend_list);
         selected_date = findViewById(R.id.selected_date);
+        tv_penalty_summary = findViewById(R.id.penalty_summary);
 
         getIntents();
         //some_image.setImageBitmap(getBitmapFromView(test));
@@ -222,7 +218,7 @@ public class MissionDetailActivity extends AppCompatActivity implements View.OnC
                             }
                         }
                     }
-                }else{
+                } else {
                     selected_date.setText("");
                 }
             }
@@ -241,7 +237,7 @@ public class MissionDetailActivity extends AppCompatActivity implements View.OnC
 
 
     }
-
+/*
     private void makeCircularProgressBar(int date, int total_dates) {
 
 
@@ -284,7 +280,7 @@ public class MissionDetailActivity extends AppCompatActivity implements View.OnC
 
 
     }
-
+*/
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -294,15 +290,6 @@ public class MissionDetailActivity extends AppCompatActivity implements View.OnC
             }
         }
         return super.onOptionsItemSelected(item);
-    }
-
-
-    private void displayPenaltyContent() {
-        String user_name = getSharedPreferences("kakao_profile", MODE_PRIVATE).getString("name", "");
-        String content = user_name + "님이 '" + mission_title + "' 미션에 실패하셨습니다. 테스트중입니다.";
-        penalty_content.setText(content);
-
-
     }
 
 
@@ -323,17 +310,13 @@ public class MissionDetailActivity extends AppCompatActivity implements View.OnC
             String mission_title = item.getMission_title();
             //total_dates = item.getMission_dates().size();
             friendsLists = item.getFriends_selected_list();
-            for (int i = 0; i < friendsLists.size(); i++) {
-                Log.d("친구", friendsLists.get(i).getFriend_name());
-                Log.d("친구", friendsLists.get(i).getPhone_num());
-
-            }
 
             setRecyclerViewFriendsList(friendsLists);
 
 
-            mission_date_start.setText(DateTimeUtils.makeDateSimple(min_date));
-            mission_date_end.setText(DateTimeUtils.makeDateSimple(max_date));
+            mission_date_start.setText(DateTimeUtils.makeDateForHuman(min_date));
+            mission_date_end.setText(DateTimeUtils.makeDateForHuman(max_date));
+            tv_penalty_summary.setText("*매 일 실패시 "+item.getPenalty_amount()+" 차감");
             address_result.setText(address);
             toolbar.setTitle(mission_title);
             setSupportActionBar(toolbar);
@@ -355,8 +338,8 @@ public class MissionDetailActivity extends AppCompatActivity implements View.OnC
                 //itemForDateTimeByLists.add(object);
             }
 
-            mission_time_start.setText(DateTimeUtils.makeTimeSimple(itemForDateTimeByLists.get(0).getTime()));
-            mission_time_end.setText(DateTimeUtils.makeTimeSimple(itemForDateTimeByLists.get(itemForDateTimeByLists.size() - 1).getTime()));
+            mission_time_start.setText(DateTimeUtils.makeTimeForHuman(itemForDateTimeByLists.get(0).getTime()));
+            mission_time_end.setText(DateTimeUtils.makeTimeForHuman(itemForDateTimeByLists.get(itemForDateTimeByLists.size() - 1).getTime()));
 
 
             int count = 0;
@@ -378,8 +361,8 @@ public class MissionDetailActivity extends AppCompatActivity implements View.OnC
 
 
             }
-            tv_date_progress.setText(count + "/" + item.getMission_dates().size() + "일");
-            makeCircularProgressBar(count, itemForDateTimeByLists.size());
+
+            //makeCircularProgressBar(count, itemForDateTimeByLists.size());
             setRecyclerView(itemForDateTimeByLists);
             addMapFragment(new MapFragment(mainScrollView, mission_latitude, mission_longitude));
         }
@@ -489,9 +472,13 @@ public class MissionDetailActivity extends AppCompatActivity implements View.OnC
     }
 
 
-    private void setRecyclerViewFriendsList(List<ContactItemForServer> friendsLists) {
+    private void setRecyclerViewFriendsList(List<ContactItem> friendsLists) {
+        FlexboxLayoutManager layoutManager = new FlexboxLayoutManager(this);
+        layoutManager.setFlexDirection(FlexDirection.ROW);
+        layoutManager.setJustifyContent(JustifyContent.CENTER);
+        layoutManager.setAlignItems(AlignItems.CENTER);
+        recyclerView_friends_list.setLayoutManager(layoutManager);
         RecyclerDetailFriendsAdapter adapter = new RecyclerDetailFriendsAdapter(friendsLists);
-        recyclerView_friends_list.setLayoutManager(new LinearLayoutManager(this));
         recyclerView_friends_list.setAdapter(adapter);
 
 

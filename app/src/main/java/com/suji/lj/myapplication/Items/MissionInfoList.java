@@ -17,7 +17,7 @@ public class MissionInfoList implements Serializable {
     public boolean valid;
     public double lat;
     public double lng;
-    public List<ContactItemForServer> friends_selected_list;
+    public List<ContactItem> friends_selected_list;
     public Map<String, ItemForDateTimeByList> mission_dates;
     String min_date;
     String max_date;
@@ -27,6 +27,7 @@ public class MissionInfoList implements Serializable {
     int penalty_amount;
     String account_holder;
     int mission_mode;
+
 
     public int getMission_mode() {
         return mission_mode;
@@ -76,11 +77,11 @@ public class MissionInfoList implements Serializable {
         this.mission_id = mission_id;
     }
 
-    public List<ContactItemForServer> getFriends_selected_list() {
+    public List<ContactItem> getFriends_selected_list() {
         return friends_selected_list;
     }
 
-    public void setFriends_selected_list(List<ContactItemForServer> friends_selected_list) {
+    public void setFriends_selected_list(List<ContactItem> friends_selected_list) {
         this.friends_selected_list = friends_selected_list;
     }
 

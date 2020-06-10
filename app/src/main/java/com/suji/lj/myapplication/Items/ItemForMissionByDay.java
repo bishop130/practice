@@ -15,8 +15,10 @@ public class ItemForMissionByDay extends RealmObject implements Parcelable {
     double lat;
     double lng;
     boolean success;
-    String mother_id;
+    boolean activation;
+    String mission_id;
     String date_time;
+    String mission_mode;
 
     public ItemForMissionByDay() {
     }
@@ -29,8 +31,10 @@ public class ItemForMissionByDay extends RealmObject implements Parcelable {
         this.lat = in.readDouble();
         this.lng = in.readDouble();
         this.success = in.readByte() != 0;
-        this.mother_id = in.readString();
+        this.activation = in.readByte() != 0;
+        this.mission_id = in.readString();
         this.date_time = in.readString();
+        this.mission_mode = in.readString();
 
 
     }
@@ -51,8 +55,10 @@ public class ItemForMissionByDay extends RealmObject implements Parcelable {
         dest.writeDouble(this.lat);
         dest.writeDouble(this.lng);
         dest.writeByte((byte) (this.success ? 1 : 0));
-        dest.writeString(this.mother_id);
+        dest.writeByte((byte) (this.activation ? 1 : 0));
+        dest.writeString(this.mission_id);
         dest.writeString(this.date_time);
+        dest.writeString(this.mission_mode);
 
     }
 
@@ -71,6 +77,22 @@ public class ItemForMissionByDay extends RealmObject implements Parcelable {
 
     };
 
+    public String getMission_mode() {
+        return mission_mode;
+    }
+
+    public void setMission_mode(String mission_mode) {
+        this.mission_mode = mission_mode;
+    }
+
+    public boolean isActivation() {
+        return activation;
+    }
+
+    public void setActivation(boolean activation) {
+        this.activation = activation;
+    }
+
     public String getDate_time() {
         return date_time;
     }
@@ -79,12 +101,12 @@ public class ItemForMissionByDay extends RealmObject implements Parcelable {
         this.date_time = date_time;
     }
 
-    public String getMother_id() {
-        return mother_id;
+    public String getMission_id() {
+        return mission_id;
     }
 
-    public void setMother_id(String mother_id) {
-        this.mother_id = mother_id;
+    public void setMission_id(String mission_id) {
+        this.mission_id = mission_id;
     }
 
     public boolean isSuccess() {

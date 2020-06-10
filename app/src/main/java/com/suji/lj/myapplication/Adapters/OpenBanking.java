@@ -42,6 +42,7 @@ public class OpenBanking {
     }
 
 
+    /** 오픈뱅킹 가입창 로드 **/
     public String requestWebServer() {
 
         String url = "https://testapi.openbanking.or.kr/oauth/2.0/authorize";
@@ -77,7 +78,7 @@ public class OpenBanking {
 
         //client.newCall(request).enqueue(callback);
     }
-
+    /** 오픈뱅킹 토큰 요청**/
     public void requestAccessToken(Callback callback, String code) {
 
         String url = "https://testapi.openbanking.or.kr/oauth/2.0/token";
@@ -99,7 +100,7 @@ public class OpenBanking {
         client.newCall(request).enqueue(callback);
 
     }
-
+    /** 사용자 계좌정보 요청**/
     public void requestUserAccountInfo(Callback callback, String access_token, String user_seq_num) {
 
         HttpUrl.Builder urlBuilder = HttpUrl.parse("https://testapi.openbanking.or.kr/v2.0/user/me").newBuilder();
@@ -117,6 +118,7 @@ public class OpenBanking {
 
 
     }
+    /** 출금이체 요청**/
 
     public void requestTransfer(Callback callback, Context context) {
 
@@ -132,8 +134,8 @@ public class OpenBanking {
                 Map<String, String> params = new HashMap<String, String>();
                 params.put("bank_tran_id", Utils.makeBankTranId());
                 params.put("cntr_account_type", "N");
-                params.put("cntr_account_num", "85768576");
-                params.put("dps_print_content", "이불안은위험해");
+                params.put("cntr_account_num", "290302");
+                params.put("dps_print_content", "테스트");
                 params.put("fintech_use_num", fintech_num);
                 params.put("wd_print_content", "오픈");
                 params.put("tran_amt", String.valueOf(1000));
@@ -147,21 +149,13 @@ public class OpenBanking {
                 params.put("sub_frnc_name", "이름");
                 params.put("sub_frnc_num", "12345678");
                 params.put("sub_frnc_business_num", "12345678");
-                params.put("recv_client_name", "이불안");
+                params.put("recv_client_name", "이불");
                 params.put("recv_client_bank_code", "004");
-                params.put("recv_client_account_num", "85768576");
+                params.put("recv_client_account_num", "290302");
 
                 JSONObject parameter = new JSONObject(params);
                 RequestBody formBody = RequestBody.create(JSON, parameter.toString());
-
-                Log.d("송금", userAccountItemList.get(i).getFintech_use_num());
-
-
-                Log.d("송금", context.getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("transfer_amount", ""));
-                Log.d("송금", Utils.getCurrentTime());
-                Log.d("송금", "핀테크" + userAccountItemList.get(i).getFintech_use_num());
-                Log.d("송금", userAccountItemList.get(i).getUser_seq_no());
-
+                
                 Request request = new Request.Builder()
                         .header("Authorization", "Bearer " + access_token)
                         .url(url)
@@ -180,6 +174,7 @@ public class OpenBanking {
 
     }
 
+    /** 계좌조회 **/
     public void transferDeposit(Callback callback, Context context) {
 
         String url = "https://openapi.openbanking.or.kr/v2.0/transfer/deposit/acnt_num";
@@ -192,7 +187,7 @@ public class OpenBanking {
         MediaType JSON = MediaType.parse("application/json; charset=utf-8");
         Map<String, String> params = new HashMap<String, String>();
         params.put("cntr_account_type", "N");
-        params.put("cntr_account_num", "85768576");
+        params.put("cntr_account_num", "29030204202663");
         params.put("wd_pass_phrase", "");
         params.put("wd_print_content", "오픈");
         params.put("name_check_option", "off");
@@ -245,6 +240,7 @@ public class OpenBanking {
 
     }
 
+    /** 센터인증토큰 요청 **/
     public void requestCenterToken(Callback callback) {
 
 
@@ -268,6 +264,7 @@ public class OpenBanking {
 
     }
 
+    /** 사용자 실명조회 **/
     public void requestRealName(Callback callback) {
 
 
@@ -299,6 +296,7 @@ public class OpenBanking {
 
     }
 
+    /** 사용자 토큰 갱신 **/
     public void requestAccessTokenFromRefreshToken(Callback callback, String refresh_token) {
 
 
@@ -322,6 +320,7 @@ public class OpenBanking {
         client.newCall(request).enqueue(callback);
     }
 
+    /** 오픈뱅킹 등록계좌 삭제 **/
     public void requestAccountCancel(Callback callback,Context context){
         String access_token = context.getSharedPreferences("OpenBanking",MODE_PRIVATE).getString("access_token","");
         String fintech_num = context.getSharedPreferences("OpenBanking",MODE_PRIVATE).getString("fintech_num","");
@@ -352,6 +351,8 @@ public class OpenBanking {
 
     }
 
+    /** 등록계좌 조회 **/
+
     public void requestAccountList(Callback callback, Context context){
         String access_token = context.getSharedPreferences("OpenBanking",MODE_PRIVATE).getString("access_token","");
         String user_seq_num = context.getSharedPreferences("OpenBanking",MODE_PRIVATE).getString("user_seq_num","");
@@ -374,6 +375,7 @@ public class OpenBanking {
 
 
     }
+    /** 계좌명 변경 **/
 
     public void requestChangeAccountName(Context context,Callback callback,String fintech_num,String new_account_name){
 
@@ -405,14 +407,13 @@ public class OpenBanking {
     }
 
 
-
+    /** 계좌삭제 **/
     public void requestAccountClose(Context context,Callback callback){
         String url = "https://testapi.openbanking.or.kr/v2.0/user/close";
         String access_token = context.getSharedPreferences("OpenBanking",MODE_PRIVATE).getString("access_token","");
         String user_seq_num = context.getSharedPreferences("OpenBanking",MODE_PRIVATE).getString("user_seq_num","");
         String client_use_code = context.getSharedPreferences("OpenBanking",MODE_PRIVATE).getString("center_id","");
-        Log.d("라스트",user_seq_num);
-        Log.d("라스트",client_use_code);
+
         MediaType JSON = MediaType.parse("application/json; charset=utf-8");
         Map<String, String> params = new HashMap<String, String>();
         params.put("client_use_code", client_use_code);

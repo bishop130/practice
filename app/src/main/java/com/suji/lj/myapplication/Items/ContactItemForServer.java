@@ -6,8 +6,12 @@ public class ContactItemForServer implements Serializable {
 
     private String friend_name;
     private String phone_num;
+    String friend_image;
+    String friend_uuid;
+    String friend_id;
     private int amount;
     private int contact_or_friend;
+
     public ContactItemForServer() {
 
     }
@@ -16,6 +20,31 @@ public class ContactItemForServer implements Serializable {
         this.friend_name = friend_name;
         this.phone_num = phone_num;
         this.amount = amount;
+    }
+
+
+    public String getFriend_image() {
+        return friend_image;
+    }
+
+    public void setFriend_image(String friend_image) {
+        this.friend_image = friend_image;
+    }
+
+    public String getFriend_uuid() {
+        return friend_uuid;
+    }
+
+    public void setFriend_uuid(String friend_uuid) {
+        this.friend_uuid = friend_uuid;
+    }
+
+    public String getFriend_id() {
+        return friend_id;
+    }
+
+    public void setFriend_id(String friend_id) {
+        this.friend_id = friend_id;
     }
 
     public int getContact_or_friend() {

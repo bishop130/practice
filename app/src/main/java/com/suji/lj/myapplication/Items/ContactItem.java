@@ -4,9 +4,11 @@ import android.app.Person;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.io.Serializable;
+
 import io.realm.RealmObject;
 
-public class ContactItem extends RealmObject implements Parcelable {
+public class ContactItem extends RealmObject implements Parcelable, Serializable {
 
 
     private String displayName;
@@ -17,6 +19,10 @@ public class ContactItem extends RealmObject implements Parcelable {
     private boolean friend_selected;
     private int friend_position;
     private int contact_or_friend;
+    private String thumbnail;
+    private String uuid;
+    private String friend_id;
+    private int portion;
 
 
     public ContactItem() {
@@ -40,6 +46,10 @@ public class ContactItem extends RealmObject implements Parcelable {
         dest.writeByte((byte) (this.friend_selected ? 1 : 0));
         dest.writeInt(this.friend_position);
         dest.writeInt(this.contact_or_friend);
+        dest.writeString(this.thumbnail);
+        dest.writeString(this.uuid);
+        dest.writeString(this.friend_id);
+        dest.writeInt(this.portion);
 
 
     }
@@ -68,6 +78,10 @@ public class ContactItem extends RealmObject implements Parcelable {
         this.friend_selected = in.readByte() !=0;
         this.friend_position = in.readInt();
         this.contact_or_friend = in.readInt();
+        this.thumbnail = in.readString();
+        this.uuid = in.readString();
+        this.friend_id = in.readString();
+        this.portion = in.readInt();
 
 
 
@@ -136,6 +150,39 @@ public class ContactItem extends RealmObject implements Parcelable {
 
     public void setContact_or_friend(int contact_or_friend) {
         this.contact_or_friend = contact_or_friend;
+    }
+
+    public String getThumbnail() {
+        return thumbnail;
+    }
+
+    public void setThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+
+    public String getFriend_id() {
+        return friend_id;
+    }
+
+    public void setFriend_id(String friend_id) {
+        this.friend_id = friend_id;
+    }
+
+    public int getPortion() {
+        return portion;
+    }
+
+    public void setPortion(int portion) {
+        this.portion = portion;
     }
 
     @SuppressWarnings("rawtypes")

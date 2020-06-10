@@ -1,6 +1,8 @@
 package com.suji.lj.myapplication.Utils;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -34,41 +36,74 @@ import io.realm.RealmResults;
 
 public class FirebaseDB {
 
-    public static void registerMissionInfoList(DatabaseReference databaseReference, Context context, String mission_id, MissionCartItem item, List<ContactItem> contactList, String receipt) {
+    private final static int SINGLE_MODE = 0;
+    private final static int MULTI_MODE = 1;
+
+    public static void registerMissionInfoList(DatabaseReference databaseReference, Context context, MissionCartItem item, String receipt) {
 
         String user_id = Account.getUserId(context);
 
-        Map<String, Object> mission_info_list = new HashMap<>();
+        //Map<String, Object> mission_info_list = new HashMap<>();
 
-
-        List<ContactItemForServer> list = new ArrayList<>();
-        for (int i = 0; i < contactList.size(); i++) {
-            ContactItemForServer object = new ContactItemForServer();
-
-            String phone_num = contactList.get(i).getPhoneNumbers().replaceAll("[^0-9]", "");
-            object.setPhone_num(phone_num);
-            //object.setAmount(realmResults.get(i).getAmount());
-            object.setFriend_name(contactList.get(i).getDisplayName());
-            object.setContact_or_friend(contactList.get(i).getContact_or_friend());
-
-            list.add(object);
-        }
 
         MissionInfoList missionInfoList = new MissionInfoList();
         Map<String, ItemForDateTimeByList> mission_dates = new HashMap<>();
 
-        missionInfoList.setFriends_selected_list(list);
+
         missionInfoList.setMission_title(item.getTitle());
         missionInfoList.setAddress(item.getAddress());
         missionInfoList.setSuccess(false);
         //missionInfoList.setValid(true);
         missionInfoList.setLat(item.getLat());
         missionInfoList.setLng(item.getLng());
-        missionInfoList.setMission_id("E" + mission_id);
+        missionInfoList.setMission_id("E" + item.getMission_id());
         String min_date = item.getCalendarDayList().get(0).getDate();//이론상 최소날짜
         String max_date = item.getCalendarDayList().get(item.getCalendarDayList().size() - 1).getDate();//이론상 최대날짜
         missionInfoList.setMin_date(min_date);
         missionInfoList.setMax_date(max_date);
+        if (item.getMission_mode() == SINGLE_MODE) {
+            missionInfoList.setMission_mode(SINGLE_MODE);
+
+            // List<ContactItemForServer> list = new ArrayList<>();
+            List<ContactItem> contactItemList = item.getContactList();
+            /*
+            for (int i = 0; i < contactItemList.size(); i++) {
+                ContactItemForServer object = new ContactItemForServer();
+
+                String phone_num = contactItemList.get(i).getPhoneNumbers().replaceAll("[^0-9]", "");
+                object.setPhone_num(phone_num);
+                //object.setAmount(realmResults.get(i).getAmount());
+                object.setFriend_image(contactItemList.get(i).get);
+                object.setFriend_uuid(contactItemList.get(i).getUuid());
+                object.setFriend_id(String.valueOf(friendsList.get(i).getId()));
+                object.setFriend_name(contactItemList.get(i).getDisplayName());
+                object.setContact_or_friend(contactItemList.get(i).getContact_or_friend());
+
+                list.add(object);
+            }
+
+             */
+            missionInfoList.setFriends_selected_list(contactItemList);
+        } else {
+/*
+            missionInfoList.setMission_mode(MULTI_MODE);
+
+            List<ContactItemForServer> list = new ArrayList<>();
+            List<ItemForFriends> friendsList = item.getFriendsList();
+            for (int i = 0; i < friendsList.size(); i++) {
+                ContactItemForServer object = new ContactItemForServer();
+
+                object.setFriend_name(friendsList.get(i).getName());
+                object.setFriend_image(friendsList.get(i).getImage());
+                object.setFriend_uuid(friendsList.get(i).getUuid());
+                object.setFriend_id(String.valueOf(friendsList.get(i).getId()));
+
+                list.add(object);
+            }
+            missionInfoList.setFriends_selected_list(list);
+
+ */
+        }
         //missionInfoList.setBank_name(item.getBank_name());
         //missionInfoList.setAccount_num(item.getAccount_num());
         //missionInfoList.setAccount_holder(item.getAccount_holder());
@@ -102,20 +137,23 @@ public class FirebaseDB {
         }
         missionInfoList.setMission_dates(mission_dates);
 
-        mission_info_list.put("E" + mission_id, missionInfoList);
+
+        //mission_info_list.put("E" + item.getMission_id(), missionInfoList);
 
 
-        databaseReference.child("user_data").child(user_id).child("mission_info_list").updateChildren(mission_info_list).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                Log.d("깃발", task.isComplete() + "iscomplete");
-                Log.d("깃발", task.isSuccessful() + "issuccessful");
+        if (item.getMission_mode() == SINGLE_MODE) {
+
+            databaseReference.child("user_data").child(user_id).child("mission_info_list").push().setValue(missionInfoList).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    Log.d("파베전송", task.isComplete() + "register_mission_info_single");
 
 
-                registerCheckForServer(databaseReference, user_id, mission_id, item, context, receipt);
+                    registerCheckForServer(databaseReference, user_id, item.getMission_id(), item, context, receipt);
 
-            }
-        });
+                }
+            });
+        }
     }
 
 
@@ -145,6 +183,8 @@ public class FirebaseDB {
             itemForServer.setIs_success(false);
             //itemForServer.setRoot_id("S" + mission_id);
             itemForServer.setChildren_id("E" + mission_id);
+
+
             itemForServerArrayList.add(itemForServer);
 
 
@@ -152,9 +192,34 @@ public class FirebaseDB {
             databaseReference.child("check_for_server").child(date + time_id).push().setValue(itemForServer).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
-                    registerMainDisplay(databaseReference, user_id, mission_id, item, context, receipt);
+                    Log.d("파베전송", task.isComplete() + "register_mission_info_multi_server");
+
+                    SharedPreferences preferences = context.getSharedPreferences("onComplete", Context.MODE_PRIVATE);
+                    if (preferences != null) {
+                        int count = preferences.getInt("count", 0);//전송 성공 횟수
+
+                        count++;
+
+
+                        if (count == item.getCalendarDayList().size()) {
+                            Log.d("파베전송", task.isComplete() + "register_mission_info_multi_display_self");
+
+                            registerMainDisplay(databaseReference, user_id, mission_id, item, context, receipt);
+                            preferences.edit().clear().apply();
+
+
+                        } else {
+                            SharedPreferences.Editor editor = preferences.edit();
+                            editor.putInt("count", count);
+                            editor.apply();
+
+                        }
+                    }
+
+
                 }
             });
+
 
         }
 
@@ -175,7 +240,8 @@ public class FirebaseDB {
             itemForMissionByDay.setTime(DateTimeUtils.makeTimeForServer(item.getCalendarDayList().get(j).getHour(), item.getCalendarDayList().get(j).getMin()));
             itemForMissionByDay.setLat(item.getLat());
             itemForMissionByDay.setLng(item.getLng());
-            itemForMissionByDay.setMother_id("E" + mission_id);
+            itemForMissionByDay.setMission_id("E" + mission_id);
+            itemForMissionByDay.setMission_mode("SINGLE");
 
 
             int year = item.getCalendarDayList().get(j).getYear();
@@ -184,7 +250,6 @@ public class FirebaseDB {
             String date = DateTimeUtils.makeDateForServer(year, month, day);
 
             itemForMissionByDay.setDate(date);
-
             itemForMissionByDay.setSuccess(false);
 
 
@@ -192,16 +257,43 @@ public class FirebaseDB {
             int min = item.getCalendarDayList().get(j).getMin();
             String time = DateTimeUtils.makeTimeForServer(hour, min);
             itemForMissionByDay.setDate_time(date + time);
+
             //mission_main_list.put(date + time, itemForMissionByDay);
-            databaseReference.child("user_data").child(user_id).child("mission_display").push().setValue(itemForMissionByDay).addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    if (task.isSuccessful()) {
-                        Log.d("파베전송", task.isSuccessful() + "");
-                        ((SingleModeActivity) context).deleteAllTemporaryData(receipt, item);
+
+            if (user_id.equals(Account.getUserId(context))) {
+                databaseReference.child("user_data").child(user_id).child("mission_display").push().setValue(itemForMissionByDay).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            SharedPreferences preferences = context.getSharedPreferences("onComplete", Context.MODE_PRIVATE);
+                            if (preferences != null) {
+                                int count = preferences.getInt("count", 0);//전송 성공 횟수
+
+                                count++;
+
+
+                                if (count == item.getCalendarDayList().size()) {
+                                    preferences.edit().clear().apply();
+                                    Log.d("파베전송", task.isComplete() + "register_mission_info_multi_display_self");
+                                    Intent intent = new Intent(context, MissionCheckActivity.class);
+                                    intent.putExtra("receipt", receipt);
+                                    context.startActivity(intent);
+
+
+
+                                } else {
+                                    SharedPreferences.Editor editor = preferences.edit();
+                                    editor.putInt("count", count);
+                                    editor.apply();
+
+
+                                }
+                            }
+                        }
                     }
-                }
-            });
+                });
+            }
+
 
         }
 
@@ -219,12 +311,13 @@ public class FirebaseDB {
 
     }
 
-    public static void registerInvitationForFriend(DatabaseReference databaseReference, Context context, List<ItemForFriends> itemForFriendsList, MissionCartItem missionCartItem, String receipt) {
+    public static void registerInvitationForFriend(DatabaseReference databaseReference, Context context, MissionCartItem missionCartItem, String receipt) {
         //RealmResults<ItemForFriends> realmResults = realm.where(ItemForFriends.class).findAll();
         String user_name = Account.getUserName(context);
         String user_id = Account.getUserId(context);
         String user_thumbnail = Account.getUserThumbnail(context);
-        String mission_id = DateTimeUtils.getCurrentTime()+"U"+user_id;
+        String mission_id = missionCartItem.getMission_id();
+        List<ItemForFriends> itemForFriendsList = missionCartItem.getFriendsList();
 
         ItemForMultiModeRequest item = new ItemForMultiModeRequest();
         item.setLat(missionCartItem.getLat());
@@ -246,7 +339,7 @@ public class FirebaseDB {
             item1.setFriend_name(itemForFriendsList.get(j).getName());
             item1.setFriend_uuid(itemForFriendsList.get(j).getUuid());
             item1.setThumbnail(itemForFriendsList.get(j).getImage());
-            item1.setAccept(false);
+            item1.setAccept(0);
             requestList.add(item1);
         }
         ItemForFriendResponseForRequest me = new ItemForFriendResponseForRequest();
@@ -254,7 +347,7 @@ public class FirebaseDB {
         me.setFriend_name(user_name);
         me.setThumbnail(user_thumbnail);
         /** uuid 구하기 **/
-        me.setAccept(true);
+        me.setAccept(1);
         requestList.add(me);
 
 
@@ -306,7 +399,7 @@ public class FirebaseDB {
                 databaseReference.child("user_data").child(friend_id).child("invitation").push().setValue(item).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-
+                        Log.d("파베전송", task.isComplete() + "register_mission_info_multi_invitation_friend");
                     }
                 });
 
@@ -319,11 +412,23 @@ public class FirebaseDB {
         databaseReference.child("user_data").child(user_id).child("invitation").push().setValue(item).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-
-                ((SingleModeActivity) context).deleteAllTemporaryData(receipt, missionCartItem);
+                Log.d("파베전송", task.isComplete() + "register_mission_info_multi_invitation_self");
+                registerMissionInfoList(databaseReference, context, missionCartItem, receipt);
+                //((SingleModeActivity) context).deleteAllTemporaryData(receipt, missionCartItem);
 
 
             }
         });
     }
+
+
+    public static void registerMissionInfoListForMulti(DatabaseReference databaseReference, Context context) {
+        String user_id = Account.getUserId(context);
+
+
+        // databaseReference.child("user_data").child("mission_info_list").push().setValue();
+
+
+    }
+
 }

@@ -320,7 +320,7 @@ public class NewLocationService extends Service {
                                                     ItemForMissionByDay item = dataSnapshot.getValue(ItemForMissionByDay.class);
                                                     if (item != null) {
                                                         item.setSuccess(true);
-                                                        item.getMother_id();
+                                                        //item.getMission_id();
                                                     }
 
                                                     ref.child("user_data").child(user_id).child("mission_display").child(date + time).setValue(item).addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -340,7 +340,7 @@ public class NewLocationService extends Service {
                                                                     ref.child("user_data").child(user_id).child("mission_info_list").child(mission_id).child("mission_dates").child(date).setValue(item).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                         @Override
                                                                         public void onComplete(@NonNull Task<Void> task) {
-                                                                            Log.d("서비스", "성공인가 = " + item.getDate());
+                                                                            //Log.d("서비스", "성공인가 = " + item.getDate());
                                                                             stopLocationUpdates();
                                                                             queryData(date + time);
                                                                         }

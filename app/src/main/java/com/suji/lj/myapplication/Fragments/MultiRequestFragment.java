@@ -1,12 +1,7 @@
 package com.suji.lj.myapplication.Fragments;
 
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,16 +20,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.suji.lj.myapplication.Adapters.RecyclerInvitationAdapter;
-import com.suji.lj.myapplication.InvitationInfoActivity;
+import com.suji.lj.myapplication.Items.ItemForMultiInvitationKey;
 import com.suji.lj.myapplication.Items.ItemForMultiModeRequest;
 import com.suji.lj.myapplication.R;
 import com.suji.lj.myapplication.Utils.Account;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.List;
-
-import io.realm.Realm;
 
 public class MultiRequestFragment extends Fragment {
 
@@ -53,33 +44,32 @@ public class MultiRequestFragment extends Fragment {
         progressBar = view.findViewById(R.id.progress_bar);
 
 
-
         loadMissionRequest();
         return view;
     }
 
 
-    private void loadMissionRequest(){
+    private void loadMissionRequest() {
+        ArrayList<ItemForMultiModeRequest> list = new ArrayList<>();
         String user_id = Account.getUserId(context);
         DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
-        if(!TextUtils.isEmpty(user_id)) {
+        if (!TextUtils.isEmpty(user_id)) {
             mRootRef.child("user_data").child(user_id).child("invitation").orderByKey().addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    //int count = (int) dataSnapshot.getChildrenCount();
 
-                    ArrayList<ItemForMultiModeRequest> list = new ArrayList<>();
-                    for(DataSnapshot snapshot:dataSnapshot.getChildren()) {
+                    if (dataSnapshot.exists()) {
+                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                            ItemForMultiModeRequest multiModeRequest = snapshot.getValue(ItemForMultiModeRequest.class);
+                            Log.d("호반꿀", multiModeRequest.getTitle());
 
-                        String key = snapshot.getKey();
-                        ItemForMultiModeRequest item = snapshot.getValue(ItemForMultiModeRequest.class);
+                            list.add(multiModeRequest);
+                        }
+                        setupRecyclerViewRequest(list);
 
-                        if(item!=null)
-                        item.setMission_key(key);
-
-                        list.add(item);
                     }
 
-                    setupRecyclerViewRequest(list);
 
                 }
 
@@ -93,8 +83,8 @@ public class MultiRequestFragment extends Fragment {
 
     }
 
-    private void setupRecyclerViewRequest(ArrayList<ItemForMultiModeRequest> list){
-        RecyclerInvitationAdapter recyclerAdapter = new RecyclerInvitationAdapter(getContext(),list);
+    private void setupRecyclerViewRequest(ArrayList<ItemForMultiModeRequest> list) {
+        RecyclerInvitationAdapter recyclerAdapter = new RecyclerInvitationAdapter(getContext(), list);
         //recyclerAdapter.notifyDataSetChanged();
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(recyclerAdapter);
@@ -170,7 +160,6 @@ public class MultiRequestFragment extends Fragment {
     }
 
  */
-
 
 
 }

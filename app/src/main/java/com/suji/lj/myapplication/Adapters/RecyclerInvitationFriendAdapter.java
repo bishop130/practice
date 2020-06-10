@@ -1,6 +1,10 @@
 package com.suji.lj.myapplication.Adapters;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
 import android.util.Log;
@@ -12,6 +16,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
@@ -53,8 +58,24 @@ public class RecyclerInvitationFriendAdapter extends RecyclerView.Adapter<Recycl
         if (!thumbnail.equals("")) {
             Picasso.with(context).load(list.get(i).getThumbnail()).fit().into(holder.friend_image);
         }
+        if(list.get(i).getAccept()==0){
+            holder.check_state.setImageDrawable(changeDrawableColor(context,R.drawable.faq_icon, context.getResources().getColor(R.color.colorPrimary)));
+
+
+        }
 
     }
+    public static Drawable changeDrawableColor(Context context, int icon, int newColor) {
+        Drawable mDrawable = ContextCompat.getDrawable(context, icon);
+        if(mDrawable!=null){
+            mDrawable.mutate();
+            mDrawable.setColorFilter(new PorterDuffColorFilter(newColor, PorterDuff.Mode.SRC_IN));
+        }
+
+        return mDrawable;
+    }
+
+
 
     @Override
     public int getItemCount() {

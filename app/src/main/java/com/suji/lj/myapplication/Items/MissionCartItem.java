@@ -7,6 +7,7 @@ import java.util.List;
 
 import io.realm.RealmList;
 import io.realm.RealmObject;
+import io.realm.RealmResults;
 import io.realm.annotations.PrimaryKey;
 
 
@@ -17,8 +18,11 @@ public class MissionCartItem extends RealmObject {
     String title;
     String date;
     String address;
+    String mission_id;
     RealmList<ItemForDateTime> calendarDayList = new RealmList<>();
     RealmList<ItemPortion> portionList = new RealmList<>();
+    RealmList<ContactItem> contactList = new RealmList<>();
+    RealmList<ItemForFriends> friendsList = new RealmList<>();
     int hour;
     int min;
     boolean no_time_limit;
@@ -43,6 +47,29 @@ public class MissionCartItem extends RealmObject {
     public MissionCartItem(){}
 
 
+    public String getMission_id() {
+        return mission_id;
+    }
+
+    public void setMission_id(String mission_id) {
+        this.mission_id = mission_id;
+    }
+
+    public RealmList<ContactItem> getContactList() {
+        return contactList;
+    }
+
+    public void setContactList(RealmList<ContactItem> contactList) {
+        this.contactList = contactList;
+    }
+
+    public RealmList<ItemForFriends> getFriendsList() {
+        return friendsList;
+    }
+
+    public void setFriendsList(RealmList<ItemForFriends> friendsList) {
+        this.friendsList = friendsList;
+    }
 
     public int getPay_method() {
         return pay_method;
