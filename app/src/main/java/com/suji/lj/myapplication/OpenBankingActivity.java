@@ -85,11 +85,7 @@ public class OpenBankingActivity extends AppCompatActivity {
                 view.loadUrl(url);
 
                 if(url.startsWith("https://naver.com")) {
-                    //Log.d(TAG, "shouldOvverride:");
-                    /*
-                     * AuthorizationCode 발급이 완료된 이후에, 해당 코드를 사용하여 토큰발급까지의 흐름을 UI상에 보여주기 위해서 추가한 코드 예시
-                     * 이용기관에서는 redirect uri 에 해당하는 웹페이지에서 에러처리를 해야한다.
-                     */
+
                     String code = Utils.getParamValFromUrlString(url, "code");//authorization_code
 
 
@@ -99,8 +95,7 @@ public class OpenBankingActivity extends AppCompatActivity {
                     openBanking.requestAccessToken(access_token_callback, code);
                     //sendFintech(code);
                     Log.d("오픈뱅킹", "authorization code "+code);
-                    //Intent intent = new Intent(OpenBankingActivity.this,KakaoActivity.class);
-                    //startActivity(intent);
+
 
                     return true;
                 }

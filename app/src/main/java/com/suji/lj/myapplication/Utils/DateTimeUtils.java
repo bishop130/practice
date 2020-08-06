@@ -3,12 +3,15 @@ package com.suji.lj.myapplication.Utils;
 import android.text.format.DateUtils;
 import android.util.Log;
 
+import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 public class DateTimeUtils {
+
 
 
     public static String makeDateTimeForHuman(String date, String time) {
@@ -63,6 +66,7 @@ public class DateTimeUtils {
     }
 
     public static String makeDateForHumanIfToday(String date) {
+
         Calendar cal = Calendar.getInstance();
         cal.setTime(DateTimeFormatter.dateParser(date, "yyyyMMdd"));
         Log.d("날짜이상", date);
@@ -89,15 +93,14 @@ public class DateTimeUtils {
     public static String makeDateForHuman(String date) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(DateTimeFormatter.dateParser(date, "yyyyMMdd"));
-        Log.d("날짜이상", date);
-        int mission_year = Integer.valueOf(date.substring(2, 4));
-        int mission_month = Integer.valueOf(date.substring(4, 6));
-        int mission_day = Integer.valueOf(date.substring(6));
+
+        int mission_month = cal.get(Calendar.MONTH)+1;
+        int mission_day = cal.get(Calendar.DAY_OF_MONTH);
 
         Log.d("날짜이상", mission_month + "   " + mission_day);
 
 
-        return mission_year + "년 " + mission_month + "월 " + mission_day + "일 (" + makeDayOfWeek(date) + ")";
+        return mission_month + "월 " + mission_day + "일 (" + makeDayOfWeek(date) + ")";
 
 
     }
@@ -118,11 +121,15 @@ public class DateTimeUtils {
 
     }
 
-    public static String makeTimeForHuman(String time) {
+    public static String makeTimeForHuman(String date_time,String pattern) {
 
         String minutes;
-        int hour = Integer.valueOf(time.substring(0, 2));
-        int min = Integer.valueOf(time.substring(2));
+        Date  date = DateTimeFormatter.dateParser(date_time,pattern);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        int min = calendar.get(Calendar.MINUTE);
+
         if (min < 10) {
             minutes = "0" + min;
         } else {
@@ -345,6 +352,7 @@ public class DateTimeUtils {
 
         Calendar calendar = Calendar.getInstance();
 
+
         calendar.setTime(date);
         String day_of_week = "?";
 
@@ -375,6 +383,7 @@ public class DateTimeUtils {
 
         return day_of_week;
     }
+
 
 
 }

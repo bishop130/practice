@@ -1,36 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/container"
+
+    android:id="@+id/ly_swipe_refresh"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".Fragments.MissionByDayFragment">
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+
+    <FrameLayout
         android:layout_width="match_parent"
-        android:id="@+id/ly_swipe_refresh"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@color/wall_paper2">
 
-        <FrameLayout
-            android:layout_width="match_parent"
+
+        <ProgressBar
+            android:id="@+id/loadingPanel"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@color/wall_paper2">
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            android:visibility="visible" />
+        <!-- TODO: Update blank fragment layout -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_day"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/rl_is_empty"
+            android:visibility="gone">
 
-
-            <ProgressBar
-                android:id="@+id/loadingPanel"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:indeterminate="true"
-                android:visibility="visible" />
-            <!-- TODO: Update blank fragment layout -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerView"
-                android:splitMotionEvents="false"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-        </FrameLayout>
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+                android:orientation="vertical"
+                android:layout_centerInParent="true">
 
-</LinearLayout>
+                <ImageView
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:layout_gravity="center"
+
+                    android:src="@drawable/ic_time_gray" />
+
+                <TextView
+                    android:layout_marginTop="20dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/nexon_level2_gothic"
+                    android:text="약속이 없습니다."
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:textSize="18sp"/>
+
+                <TextView
+                    android:id="@+id/tv_add_mission"
+                    android:layout_marginTop="8dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="약속 등록"
+                    android:background="@drawable/rounded_filled"
+                    android:padding="8dp"
+                    android:textSize="18sp"
+                    android:layout_gravity="center"
+                    android:textColor="@color/White"
+                    android:fontFamily="@font/nexon_level2_gothic"/>
+
+            </LinearLayout>
+        </RelativeLayout>
+    </FrameLayout>
+
+
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

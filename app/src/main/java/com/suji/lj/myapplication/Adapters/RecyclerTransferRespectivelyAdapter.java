@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.suji.lj.myapplication.Items.ContactItem;
+import com.suji.lj.myapplication.Items.ItemForFriends;
 import com.suji.lj.myapplication.R;
 import com.suji.lj.myapplication.SingleModeActivity;
 
@@ -21,7 +22,7 @@ import io.realm.RealmResults;
 public class RecyclerTransferRespectivelyAdapter extends RecyclerView.Adapter<RecyclerTransferRespectivelyAdapter.ViewHolder> {
 
     Realm realm;
-    RealmResults<ContactItem> realmResults;
+    RealmResults<ItemForFriends> realmResults;
     DecimalFormat df = new DecimalFormat("#,###.##");
     private DecimalFormat dfnd = new DecimalFormat("#,###");
     Context context;
@@ -29,7 +30,7 @@ public class RecyclerTransferRespectivelyAdapter extends RecyclerView.Adapter<Re
     OnResetAmountDisplayListener onResetAmountDisplayListener;
 
 
-    public RecyclerTransferRespectivelyAdapter(Context context, RealmResults<ContactItem> realmResults, Realm realm,OnResetAmountDisplayListener onResetAmountDisplayListener) {
+    public RecyclerTransferRespectivelyAdapter(Context context, RealmResults<ItemForFriends> realmResults, Realm realm, OnResetAmountDisplayListener onResetAmountDisplayListener) {
 
         this.context = context;
         this.realmResults = realmResults;
@@ -41,14 +42,9 @@ public class RecyclerTransferRespectivelyAdapter extends RecyclerView.Adapter<Re
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
-        if(realmResults.get(position).getContact_or_friend()==1) {
+        holder.name.setTextColor(context.getResources().getColor(R.color.colorPrimary));
+        holder.name.setText("# " + realmResults.get(position).getName());
 
-            holder.name.setTextColor(context.getResources().getColor(R.color.colorPrimary));
-            holder.name.setText("# " + realmResults.get(position).getDisplayName());
-        }else{
-            holder.name.setText("# " + realmResults.get(position).getDisplayName());
-
-        }
 
         holder.name.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,7 +54,7 @@ public class RecyclerTransferRespectivelyAdapter extends RecyclerView.Adapter<Re
                     public void execute(Realm realm) {
                         realmResults.deleteFromRealm(position);
                         notifyItemRemoved(position);
-                        notifyItemRangeChanged(position,realmResults.size());
+                        notifyItemRangeChanged(position, realmResults.size());
 
 
                     }
@@ -101,7 +97,7 @@ public class RecyclerTransferRespectivelyAdapter extends RecyclerView.Adapter<Re
 
     }
 
-    public interface OnResetAmountDisplayListener{
+    public interface OnResetAmountDisplayListener {
         void onResetAmountDisplay();
 
     }

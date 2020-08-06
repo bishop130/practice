@@ -1,50 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <integer-array name="google_colors">
-        <item>@color/red</item>
-        <item>@color/blue</item>
-        <item>@color/yellow</item>
-        <item>@color/green</item>
-    </integer-array>
-
-    <string-array name="custom_weekdays">
-        <item>월</item>
-        <item>화</item>
-        <item>수</item>
-        <item>목</item>
-        <item>금</item>
-        <item>토</item>
-        <item>일</item>
-    </string-array>
-    <string-array name="mission_mode">
-        <item>혼자하기</item>
-        <item>친구와 같이하기</item>
-        <item>친구에게 제안하기</item>
-    </string-array>
 
 
-    <string-array name="custom_months">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-        <item>7</item>
-        <item>8</item>
-        <item>9</item>
-        <item>10</item>
-        <item>11</item>
-        <item>12</item>
+    <string-array name="bank_name">
+        <item>KDB 산업</item>
+
+        <item>IBK 기업</item>
+        <item>국민</item>
+        <item>수협</item>
+        <item>농협</item>
+        <item>우리</item>
+        <item>SC 제일</item>
+        <item>씨티</item>
+
+        <item>대구</item>
+        <item>부산</item>
+        <item>광주</item>
+
+        <item>제주</item>
+
+        <item>전북</item>
+
+
+        <item>경남</item>
+
+        <item>KEB 하나</item>
+
+        <item>신한</item>
+
+        <item>K 뱅크</item>
+
+        <item>카카오 뱅크</item>
     </string-array>
-    <string-array name="steps_titles">
-        <item>제목</item>
-        <item>장소선택</item>
-        <item>날짜선택</item>
-        <item>시간선택</item>
-        <item>친구 연락처 선택</item>
-        <item>계좌 확인</item>
+    <string-array name="bank_code">
+        <item>002</item>
+        <item>003</item>
+        <item>004</item>
+        <item>007</item>
+        <item>011</item>
+        <item>020</item>
+        <item>023</item>
+        <item>027</item>
+        <item>031</item>
+
+        <item>032</item>
+        <item>034</item>
+        <item>035</item>
+        <item>037</item>
+        <item>039</item>
+        <item>081</item>
+        <item>088</item>
+        <item>089</item>
+        <item>090</item>
     </string-array>
+
+
 
 
 

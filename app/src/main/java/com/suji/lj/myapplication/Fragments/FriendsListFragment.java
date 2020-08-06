@@ -59,6 +59,7 @@ import com.suji.lj.myapplication.Items.ItemRegisterAccount;
 import com.suji.lj.myapplication.Items.MissionCartItem;
 import com.suji.lj.myapplication.R;
 import com.suji.lj.myapplication.Utils.Account;
+import com.suji.lj.myapplication.Utils.FCM;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -208,6 +209,10 @@ public class FriendsListFragment extends Fragment {
     //본인제외 검색 && 요청대기 제
     private void searchFriend(String email) {
         String user_id = Account.getUserId(context);
+        String my_name = Account.getUserName(context);
+        String my_image = Account.getUserThumbnail(context);
+
+
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
 
 
@@ -216,6 +221,8 @@ public class FriendsListFragment extends Fragment {
         if (email.contains("@")) {
             String str = email.substring(0, email.indexOf("@"));
 
+
+            /** account에서 친구찾**/
             databaseReference.child("account").child(str).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -231,6 +238,7 @@ public class FriendsListFragment extends Fragment {
                         String friend_id = registerAccount.getUser_id();
                         boolean is_public = registerAccount.isIs_public();
                         if (is_public) {
+                            /** 찾은 친구가 본인인지 확인하기 본인이 아니면 카카오친구와 비교**/
                             if (!user_id.equals(friend_id)) {//1 본인인지 확
 
                                 AppFriendContext friendContext = new AppFriendContext(true, 0, 100, "asc");
@@ -265,12 +273,13 @@ public class FriendsListFragment extends Fragment {
                                                 for (int i = 0; i < result.getFriends().size(); i++) {
 
 
+                                                    /** 검색한 친구와 카카오친구가 일치한다면 **/
                                                     if (friend_id.equals(result.getFriends().get(i).getId() + "")) {
 
 
                                                         item.setFriends_name(result.getFriends().get(i).getProfileNickname());
                                                         item.setFriends_image(result.getFriends().get(i).getProfileThumbnailImage());
-                                                        item.setId(result.getFriends().get(i).getId());
+                                                        item.setFriend_id(String.valueOf(result.getFriends().get(i).getId()));
                                                         item.setUuid(result.getFriends().get(i).getUUID());
                                                         item.setFavorite(result.getFriends().get(i).isFavorite().getBoolean());
                                                         Log.d("친구", item.getFriends_name() + "확인");
@@ -279,123 +288,71 @@ public class FriendsListFragment extends Fragment {
 
                                                 }
 
+                                                /** 상대 친구가 나에게 친구요청 한적이 있는지 확인**/
                                                 databaseReference.child("user_data").child(user_id).child("friend_accept_waiting").child(friend_id).addListenerForSingleValueEvent(new ValueEventListener() {
                                                     @Override
                                                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-                                                        Log.d("검색", dataSnapshot.getKey() + "getkey" + dataSnapshot.exists() + "  ");
-
                                                         if (!dataSnapshot.exists()) {//3 친구 요청중인지 확인
                                                             ly_error_result.setVisibility(View.GONE);
 
-
-                                                            Log.d("검색", "들어왔냐 ");
+                                                            /** 내가 상대에게 친구요청을 했는지 확인**/
 
                                                             databaseReference.child("user_data").child(user_id).child("friend_request").child(friend_id).addListenerForSingleValueEvent(new ValueEventListener() {
                                                                 @Override
                                                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                                                     if (!dataSnapshot.exists()) {//4 친구요청이 이미 들어왓는지 확
                                                                         Log.d("친구", "들어왔냐2 ");
+                                                                        /** 이미 친구인지 확인**/
                                                                         databaseReference.child("user_data").child(user_id).child("friends_list").orderByChild("user_id").equalTo(friend_id).addListenerForSingleValueEvent(new ValueEventListener() {
                                                                             @Override
                                                                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                                                                 Log.d("친구", "들어왔냐3 ");
-                                                                                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+
+                                                                                /** 이미 친구임**/
+                                                                                if (dataSnapshot.exists()) {
 
 
-                                                                                    ItemRegisterAccount item = snapshot.getValue(ItemRegisterAccount.class);
-                                                                                    if (item != null) {
-                                                                                        String friend_email = item.getEmail();
-                                                                                        if (!email.equals(friend_email)) {
-                                                                                            Log.d("친구", "진짜완료");
+                                                                                } else {/** 친구아니라면 요청보내기**/
 
-                                                                                            friend_name.setText(user_name);
-                                                                                            if (thumb_img != null) {
-                                                                                                Picasso.with(getContext())
-                                                                                                        .load(thumb_img)
-                                                                                                        .fit()
-                                                                                                        .into(friend_image);
-                                                                                            }
-                                                                                            ly_add_friend.setVisibility(View.VISIBLE);
+                                                                                    friend_name.setText(user_name);
+                                                                                    if (thumb_img != null) {
+                                                                                        Picasso.with(getContext())
+                                                                                                .load(thumb_img)
+                                                                                                .fit()
+                                                                                                .into(friend_image);
+                                                                                    }
+                                                                                    ly_add_friend.setVisibility(View.VISIBLE);
 
 
-                                                                                            request_friend.setOnClickListener(new View.OnClickListener() {
+                                                                                    request_friend.setOnClickListener(new View.OnClickListener() {
+                                                                                        @Override
+                                                                                        public void onClick(View v) {
+                                                                                            databaseReference.child("user_data").child(user_id).child("friend_accept_waiting").child(friend_id).setValue(registerAccount).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                                                 @Override
-                                                                                                public void onClick(View v) {
-                                                                                                    Log.d("토클", "눌리냐/");
-
-                                                                                                    if (key != null) {
+                                                                                                public void onComplete(@NonNull Task<Void> task) {
+                                                                                                    Log.d("친구", "성공");
 
 
-                                                                                                        databaseReference.child("user_data").child(user_id).child("friend_accept_waiting").child(friend_id).setValue(item).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                                            @Override
-                                                                                                            public void onComplete(@NonNull Task<Void> task) {
-                                                                                                                databaseReference.child("user_data").child(friend_id).child("friend_request").child(user_id).setValue(item);
+                                                                                                    ItemRegisterAccount profile = new ItemRegisterAccount();
+                                                                                                    profile.setUser_id(user_id);
+                                                                                                    profile.setThumnail_img(my_image);
+                                                                                                    profile.setUser_name(my_name);
 
-                                                                                                            }
-                                                                                                        });
-                                                                                                    }
-
-
+                                                                                                    databaseReference.child("user_data").child(friend_id).child("friend_request").child(user_id).setValue(profile);
                                                                                                     ly_add_friend.setVisibility(View.GONE);
+
+                                                                                                    FCM.fcmPushAlarm(user_id, "친구추가", "친구요청!");
+
+
                                                                                                 }
                                                                                             });
-
-
-                                                                                        } else {
-                                                                                            Log.d("검색", "이미 친구추가함");
-                                                                                            ly_add_friend.setVisibility(View.GONE);
-                                                                                            ly_error_result.setVisibility(View.VISIBLE);
-                                                                                            tv_error_result.setText(email + "와 이미 친구입니다.");
-
                                                                                         }
-                                                                                    } else {
-                                                                                        friend_name.setText(user_name);
-                                                                                        if (thumb_img != null) {
-                                                                                            Picasso.with(getContext())
-                                                                                                    .load(thumb_img)
-                                                                                                    .fit()
-                                                                                                    .into(friend_image);
-                                                                                        }
-                                                                                        ly_add_friend.setVisibility(View.VISIBLE);
 
 
-                                                                                        request_friend.setOnClickListener(new View.OnClickListener() {
-                                                                                            @Override
-                                                                                            public void onClick(View v) {
-                                                                                                Log.d("토클", "눌리냐/");
-
-                                                                                                if (key != null) {
-                                                                                                    Log.d("친구", "여기구나11 " + user_id);
-                                                                                                    Log.d("친구", "여기구나22 " + friend_id);
-
-                                                                                                    databaseReference.child("user_data").child(user_id).child("friend_accept_waiting").child(friend_id).setValue(registerAccount).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                                        @Override
-                                                                                                        public void onComplete(@NonNull Task<Void> task) {
-                                                                                                            Log.d("친구", "성공");
-                                                                                                            // String user_id = context.getSharedPreferences("Kakao",MODE_PRIVATE).getString("user_id","");
-                                                                                                            String thumbnail = context.getSharedPreferences("Kakao", MODE_PRIVATE).getString("thumbnail", "");
-                                                                                                            String user_name = context.getSharedPreferences("Kakao", MODE_PRIVATE).getString("user_name", "");
-
-                                                                                                            ItemRegisterAccount profile = new ItemRegisterAccount();
-                                                                                                            profile.setUser_id(user_id);
-                                                                                                            profile.setThumnail_img(thumbnail);
-                                                                                                            profile.setUser_name(user_name);
-
-                                                                                                            databaseReference.child("user_data").child(friend_id).child("friend_request").child(user_id).setValue(profile);
-                                                                                                            ly_add_friend.setVisibility(View.GONE);
+                                                                                    });
 
 
-                                                                                                        }
-                                                                                                    });
-                                                                                                }
-
-
-                                                                                            }
-                                                                                        });
-
-
-                                                                                    }
                                                                                 }
 
 

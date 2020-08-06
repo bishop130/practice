@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
         android:id="@+id/nav_favorite"
@@ -7,12 +8,22 @@
         android:title=""/>
     <item
         android:id="@+id/nav_search"
-        android:icon="@drawable/people_icon"
+        android:icon="@drawable/ic_people_black"
         android:title=""/>
+    <item
+        android:id="@+id/nav_gift"
+        android:title=""
+        android:icon="@drawable/carrot_and_stick"/>
+    <item
+        android:id="@+id/nav_notification"
+        android:icon="@drawable/notification"
+        android:title="" />
     <item
         android:id="@+id/nav_setting"
         android:icon="@drawable/ic_settings_black_24dp"
         android:title=""/>
+
+
 
 
 

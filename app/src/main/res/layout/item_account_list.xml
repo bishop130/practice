@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:id="@+id/ly_recent_account"
+    android:background="@color/White">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp">
+
+        <ImageView
+            android:id="@+id/ivBankImage"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center_vertical"
+           />
+
+        <LinearLayout
+            android:layout_marginStart="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="center_vertical">
+            <TextView
+                android:id="@+id/tv_account_holder_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                app:fontFamily="@font/nexon_level2_gothic"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/tv_bank_name_account_num"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:fontFamily="@font/nexon_level2_gothic"
+                android:textSize="14sp" />
+
+
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+</LinearLayout>

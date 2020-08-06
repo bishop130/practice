@@ -8,9 +8,36 @@ public class ItemForTransaction {
     String payment_method;
     String receipt_id;
     String mission_id;
+    String title;
     int point;
     int cash;
+    int missionMode;
+    int transactionCode;
 
+
+    public int getTransactionCode() {
+        return transactionCode;
+    }
+
+    public void setTransactionCode(int transactionCode) {
+        this.transactionCode = transactionCode;
+    }
+
+    public int getMissionMode() {
+        return missionMode;
+    }
+
+    public void setMissionMode(int missionMode) {
+        this.missionMode = missionMode;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
     public String getUser_id() {
         return user_id;

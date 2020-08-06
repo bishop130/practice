@@ -15,6 +15,7 @@ public class ItemForMultiModeRequest implements Parcelable {
     String manager_thumbnail;
     String address;
     String mission_id;
+    String register_time;
 
     int accept;
     double lat;
@@ -22,6 +23,7 @@ public class ItemForMultiModeRequest implements Parcelable {
 
     int late_penalty;
     int fail_penalty;
+    int radius;
 
     List<ItemForDateTime> calendarDayList = new ArrayList<>();
     List<ItemForFriendResponseForRequest> friendRequestList = new ArrayList<>();
@@ -41,6 +43,7 @@ public class ItemForMultiModeRequest implements Parcelable {
         this.manager_thumbnail = in.readString();
         this.address = in.readString();
         this.mission_id = in.readString();
+        this.register_time = in.readString();
 
         this.accept = in.readInt();
         this.lat = in.readDouble();
@@ -51,6 +54,7 @@ public class ItemForMultiModeRequest implements Parcelable {
         in.readList(this.friendRequestList, ItemForFriendResponseForRequest.class.getClassLoader());
         in.readList(this.itemPortionList, ItemPortion.class.getClassLoader());
         in.readList(this.dateTimeCheckList,ItemForDateTimeCheck.class.getClassLoader());
+        this.radius = in.readInt();
 
 
     }
@@ -87,6 +91,7 @@ public class ItemForMultiModeRequest implements Parcelable {
         dest.writeString(this.manager_thumbnail);
         dest.writeString(this.address);
         dest.writeString(this.mission_id);
+        dest.writeString(this.register_time);
 
         dest.writeInt(this.accept);
         dest.writeDouble(this.lat);
@@ -97,7 +102,25 @@ public class ItemForMultiModeRequest implements Parcelable {
         dest.writeList(this.friendRequestList);
         dest.writeList(this.itemPortionList);
         dest.writeList(this.dateTimeCheckList);
+        dest.writeInt(this.radius);
 
+    }
+
+
+    public int getRadius() {
+        return radius;
+    }
+
+    public void setRadius(int radius) {
+        this.radius = radius;
+    }
+
+    public String getRegister_time() {
+        return register_time;
+    }
+
+    public void setRegister_time(String register_time) {
+        this.register_time = register_time;
     }
 
     public List<ItemForDateTimeCheck> getDateTimeCheckList() {

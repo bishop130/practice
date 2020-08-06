@@ -16,6 +16,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -43,13 +44,21 @@ import com.suji.lj.myapplication.Adapters.RecyclerPortionInvitationAdapter;
 import com.suji.lj.myapplication.Fragments.CalendarShowFragment;
 import com.suji.lj.myapplication.Fragments.MapFragment;
 import com.suji.lj.myapplication.Items.ItemForDateTime;
+import com.suji.lj.myapplication.Items.ItemForDateTimeByList;
+import com.suji.lj.myapplication.Items.ItemForDateTimeCheck;
+import com.suji.lj.myapplication.Items.ItemForFriendByDay;
+import com.suji.lj.myapplication.Items.ItemForFriendMissionCheck;
 import com.suji.lj.myapplication.Items.ItemForFriendResponseForRequest;
 import com.suji.lj.myapplication.Items.ItemForFriends;
+import com.suji.lj.myapplication.Items.ItemForMissionByDay;
 import com.suji.lj.myapplication.Items.ItemForMultiModeRequest;
 import com.suji.lj.myapplication.Items.ItemForTransaction;
 import com.suji.lj.myapplication.Items.ItemPortion;
 import com.suji.lj.myapplication.Items.MissionCartItem;
+import com.suji.lj.myapplication.Items.MissionInfoList;
 import com.suji.lj.myapplication.Utils.Account;
+import com.suji.lj.myapplication.Utils.DateTimeFormatter;
+import com.suji.lj.myapplication.Utils.DateTimeUtils;
 import com.suji.lj.myapplication.Utils.Utils;
 
 import org.jetbrains.annotations.NotNull;
@@ -57,8 +66,14 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import kr.co.bootpay.Bootpay;
 import kr.co.bootpay.BootpayAnalytics;
@@ -76,11 +91,13 @@ import kr.co.bootpay.model.BootUser;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import okio.BufferedSink;
 
 public class InvitationInfoActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -106,7 +123,6 @@ public class InvitationInfoActivity extends AppCompatActivity implements View.On
 
 
     TextView tv_address;
-    TextView tv_fail_penalty;
     Runnable runnable;
     Handler mHandler;
     ToggleButton kakao_pay;
@@ -130,9 +146,14 @@ public class InvitationInfoActivity extends AppCompatActivity implements View.On
     private boolean hasFractionalPart;
     DecimalFormat df = new DecimalFormat("#,###.##");
     private DecimalFormat dfnd = new DecimalFormat("#,###");
+    TextView tv_rest_time;
+    TextView tv_penalty;
+    boolean isTimerRunning = false;
+    CountDownTimer timer;
+    List<ItemForFriendResponseForRequest> friendList = new ArrayList<>();
 
+    DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
 
-    List<MissionCartItem> list3 = new ArrayList<>();
     int price;
 
     @Override
@@ -158,16 +179,17 @@ public class InvitationInfoActivity extends AppCompatActivity implements View.On
         ly_agreement = findViewById(R.id.ly_agreement);
 
 
-        tv_address = findViewById(R.id.address);
-        tv_fail_penalty = findViewById(R.id.penalty);
+        tv_address = findViewById(R.id.tv_address);
+        tv_penalty = findViewById(R.id.tv_penalty);
         kakao_pay = findViewById(R.id.kakao_pay);
         naver_pay = findViewById(R.id.naver_pay);
         credit_pay = findViewById(R.id.credit_pay);
-        text_rest_point = findViewById(R.id.rest_point);
+        text_rest_point = findViewById(R.id.tv_rest_point);
         edit_point = findViewById(R.id.edit_point);
         text_total_payment = findViewById(R.id.total_payment);
         text_point_total = findViewById(R.id.point_total);
         text_actual_payment = findViewById(R.id.actual_payment);
+        tv_rest_time = findViewById(R.id.tv_rest_time);
 
         tv_accept.setOnClickListener(this);
         tv_decline.setOnClickListener(this);
@@ -184,7 +206,64 @@ public class InvitationInfoActivity extends AppCompatActivity implements View.On
         //Bundle extras = getIntent().getExtras();
 
 
-        item = getIntent().getParcelableExtra("item");
+        databaseReference.child("user_data").child(user_id).child("point").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Double point = dataSnapshot.getValue(Double.class);
+                if (point != null) {
+
+                    point_callback_state = true;
+                    point_amount = point.intValue();
+                    String rest_point_string = Utils.makeNumberComma(point) + " P";
+                    text_rest_point.setText(rest_point_string);
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                text_rest_point.setText("error!");
+            }
+        });
+
+
+        String mission_id = getIntent().getExtras().getString("mission_id", "");
+
+        Log.d("리퀘스트", mission_id + "  미션");
+
+        databaseReference.child("multi_data").child("invitation").child("detail").orderByChild("mission_id").equalTo(mission_id).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        item = snapshot.getValue(ItemForMultiModeRequest.class);
+                        displayData(item);
+
+
+                    }
+
+
+                } else {
+                    //데이터가 없으면 종료
+
+                    finish();
+
+
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+
+    }
+
+    private void displayData(ItemForMultiModeRequest item) {
         if (item != null) {
 
             if (item.getManager_id().equals(user_id)) {
@@ -224,51 +303,24 @@ public class InvitationInfoActivity extends AppCompatActivity implements View.On
             }
 
 
-            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-            databaseReference.child("user_data").child(user_id).child("point").addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    Double point = dataSnapshot.getValue(Double.class);
-                    if (point != null) {
-
-                        point_callback_state = true;
-                        point_amount = point.intValue();
-                        String rest_point_string = Utils.makeNumberComma(point) + " P";
-                        text_rest_point.setText(rest_point_string);
-                    }
-
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-                    text_rest_point.setText("error!");
-                }
-            });
-
-
-            List<ItemForFriendResponseForRequest> list = item.getFriendRequestList();
-            setupRecyclerView(list);
+            String first_date_time = item.getCalendarDayList().get(0).getDate() + item.getCalendarDayList().get(0).getTime() + "00";
+            String register_date_time = item.getRegister_time();
+            displayRestTime(register_date_time, first_date_time);
+            friendList = item.getFriendRequestList();
+            setupRecyclerView(friendList);
             Log.d("제목", item.getTitle());
             Log.d("제목", item.getFail_penalty() + "");
-            toolbar.setTitle(item.getTitle());
+            getSupportActionBar().setTitle(item.getTitle());
             tv_address.setText(item.getAddress());
             mission_id = item.getMission_id();
-            tv_fail_penalty.setText(Utils.makeNumberComma(item.getFail_penalty()) + " 원");
+            tv_penalty.setText(Utils.makeNumberComma(item.getFail_penalty()) + " 원");
             total = item.getFail_penalty() * item.getCalendarDayList().size();
             actual_payment = total - point_input;
             text_actual_payment.setText(Utils.makeNumberComma(total));
             text_total_payment.setText(Utils.makeNumberComma(total));
-            mHandler = new Handler();
-            runnable = new Runnable() {
-                @Override
-                public void run() {
-                    addCalendarFragment(new CalendarShowFragment(getApplicationContext(), item.getCalendarDayList()));
-                    addFragment(new MapFragment(scrollView, item.getLat(), item.getLng()));
 
-
-                }
-            };
-            mHandler.post(runnable);
+            addCalendarFragment(new CalendarShowFragment(getApplicationContext(), item.getCalendarDayList()));
+            addFragment(new MapFragment(scrollView, item.getLat(), item.getLng()));
 
             setUpRecyclerViewPortion(item.getItemPortionList());
 
@@ -389,6 +441,7 @@ public class InvitationInfoActivity extends AppCompatActivity implements View.On
             });
         }
 
+
     }
 
     private void payButtonManager(ToggleButton button, boolean isChecked) {
@@ -483,11 +536,7 @@ public class InvitationInfoActivity extends AppCompatActivity implements View.On
             text_actual_payment.setText(actual_payment_string);
             String rest_point_string = Utils.makeNumberComma(point_amount - display_point) + " P";
             text_rest_point.setText(rest_point_string);
-
-
         }
-
-
     }
 
 
@@ -602,15 +651,7 @@ public class InvitationInfoActivity extends AppCompatActivity implements View.On
                     if (responseBody != null) {
                         String receipt = responseBody.string();
 
-                        Log.d("부트페이", "성공" + user_id);
-                        //Log.d("부트페이", "성공" + Utils.getValueFromJson(responseBody.string(), "date_time"));
-                        //displayReceipt(result);
-
-
-                        //dataSave(1);//수락
-                        Intent intent = new Intent(getApplicationContext(), MissionCheckActivity.class);
-                        intent.putExtra("receipt", receipt);
-                        startActivity(intent);
+                        dataSave();
                     }
                 }
 
@@ -618,36 +659,66 @@ public class InvitationInfoActivity extends AppCompatActivity implements View.On
         });
     }
 
-    private void dataSave(int accept) {//미션수락시 친구들에게 수락여부 알림
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+    private void dataSave() {//미션수락시 친구들에게 수락여부 알림
         String mission_id = item.getMission_id();
 
 
-        for (int i = 0; i < item.getFriendRequestList().size(); i++) {
-            String friend_id = item.getFriendRequestList().get(i).getFriend_id();
-            if (!user_id.equals(friend_id)) {//나를 제외한 친구들
-                databaseReference.child("user_data").child(friend_id).child("invitation").orderByChild("mission_id").equalTo(mission_id).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                            ItemForMultiModeRequest item = snapshot.getValue(ItemForMultiModeRequest.class);
+        databaseReference.child("user_data").child(user_id).child("invitation").child("detail").orderByChild("mission_id").equalTo(mission_id).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        ItemForMultiModeRequest multiModeRequest = snapshot.getValue(ItemForMultiModeRequest.class);
+                        if (multiModeRequest != null) {
+                            int count = 0;
+                            List<ItemForFriendResponseForRequest> list = multiModeRequest.getFriendRequestList();
+                            for (int i = 0; i < list.size(); i++) {
+                                if (list.get(i).getAccept() == 1) {
+                                    count++;
+                                    if (count == list.size() - 1) {/** 내가 마지막으로 수락하는거라면**/
 
-                            String key = snapshot.getKey();
 
-                            Log.d("수락", key + " key");
+                                        for (int j = 0; j < list.size(); j++) {
+                                            String friend_id = list.get(j).getFriend_id();
+                                            //나를 제외한 친구들
+                                            databaseReference.child("user_data").child(friend_id).child("invitation").child("detail").orderByChild("mission_id").equalTo(mission_id).addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                                                        ItemForMultiModeRequest item = snapshot.getValue(ItemForMultiModeRequest.class);
+
+                                                        if (item != null) {
+
+                                                            List<ItemForFriendResponseForRequest> friendsLists = item.getFriendRequestList();
+                                                            int count = 0;
+                                                            for (int i = 0; i < friendsLists.size(); i++) {
+                                                                if (user_id.equals(friendsLists.get(i).getFriend_id())) {
+                                                                    ItemForFriendResponseForRequest request = friendsLists.get(i);
+                                                                    request.setAccept(1);
+                                                                    friendsLists.set(i, request);
+                                                                    item.setFriendRequestList(friendsLists);
+                                                                    snapshot.getRef().setValue(item);
+
+                                                                }
 
 
-                            if (item != null && key != null) {
-                                Log.d("수락", item.getAddress() + " address");
-                                List<ItemForFriendResponseForRequest> friendsLists = item.getFriendRequestList();
-                                for (int i = 0; i < friendsLists.size(); i++) {
-                                    if (user_id.equals(friendsLists.get(i).getFriend_id())) {
-                                        ItemForFriendResponseForRequest request = friendsLists.get(i);
-                                        request.setAccept(accept);
-                                        friendsLists.set(i, request);
-                                        item.setFriendRequestList(friendsLists);
-                                        item.setAccept(accept);
-                                        databaseReference.child("user_data").child(friend_id).child("invitation").child(key).setValue(item);
+                                                            }
+
+
+                                                        }
+                                                    }
+
+                                                }
+
+                                                @Override
+                                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                }
+                                            });
+
+
+                                        }
+
 
                                     }
 
@@ -656,108 +727,21 @@ public class InvitationInfoActivity extends AppCompatActivity implements View.On
 
 
                             }
+
                         }
 
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
                     }
-                });
-
-            } else {
-                databaseReference.child("user_data").child(user_id).child("invitation").orderByChild("mission_id").equalTo(mission_id).addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                            ItemForMultiModeRequest item = snapshot.getValue(ItemForMultiModeRequest.class);
-
-                            String key = snapshot.getKey();
-
-                            Log.d("수락", key + " key");
 
 
-                            if (item != null && key != null) {
-                                Log.d("수락", item.getAddress() + " address");
-                                List<ItemForFriendResponseForRequest> friendsLists = item.getFriendRequestList();
-                                for (int i = 0; i < friendsLists.size(); i++) {
-                                    if (user_id.equals(friendsLists.get(i).getFriend_id())) {
-                                        ItemForFriendResponseForRequest request = friendsLists.get(i);
-                                        request.setAccept(accept);
-                                        friendsLists.set(i, request);
-                                        item.setFriendRequestList(friendsLists);
-                                        item.setAccept(accept);
-                                        databaseReference.child("user_data").child(user_id).child("invitation").child(key).setValue(item).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-
-
-                                            }
-                                        });
-
-                                    }
-
-
-                                }
-
-
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });
-
-
+                }
             }
 
-        }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
-
-    }
-
-
-
-    private void dataDelete() {
-
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-        String mission_id = item.getMission_id();
-
-
-        for (int i = 0; i < item.getFriendRequestList().size(); i++) {
-            String friend_id = item.getFriendRequestList().get(i).getFriend_id();
-            databaseReference.child("user_data").child(friend_id).child("invitation").orderByChild("mission_id").equalTo(mission_id).addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.exists()) {
-                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-
-                            String key = snapshot.getKey();
-                            if (key != null) {
-                                databaseReference.child("user_data").child(friend_id).child("invitation").child(key).removeValue();
-                            }
-                        }
-                    }
-
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });
-        }
-
-
-    }
-
-
-
-    private void dataUpdate(String up) {
+            }
+        });
 
 
     }
@@ -773,42 +757,81 @@ public class InvitationInfoActivity extends AppCompatActivity implements View.On
             case R.id.tv_decline:
                 int accept = 2;
                 /** 본인포함 친구데이터에 db 2로 설정 **/
-                //dataSave(accept);
+               // deleteFriendData(false);
                 break;
 
             case R.id.tv_activate:
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setMessage("약속을 등록하시겠습니까?");
-                builder.setPositiveButton("네", new DialogInterface.OnClickListener() {
+
+                databaseReference.child("user_data").child(user_id).child("invitation").child("detail").orderByChild("mission_id").equalTo(mission_id).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                       // missionActivate();
-                    }
-                });
-                builder.setNegativeButton("아니오", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+
+                            for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                                int count = 0;
+                                List<ItemForFriendResponseForRequest> list = snapshot.getValue(ItemForMultiModeRequest.class).getFriendRequestList();
+                                for (int i = 0; i < list.size(); i++) {
+                                    if (list.get(i).getAccept() == 1) {
+                                        count++;
+                                    }
+                                }
+
+                                if (count > 1) {/** 2명이상 수락했으면 약속 시**/
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
+                                    builder.setMessage("약속을 시작하시겠습니까?");
+                                    builder.setPositiveButton("네", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+
+                                            deleteFriendData(false);
+                                            missionActivate();
+                                        }
+                                    });
+                                    builder.setNegativeButton("아니오", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+
+
+                                        }
+                                    });
+                                    AlertDialog alertDialog = builder.create();
+                                    alertDialog.show();
+
+
+                                } else {
+                                    Utils.makeAlertDialog("2명 이상이 약속을 수락하면 시작할 수 있습니다.", InvitationInfoActivity.this);
+
+
+                                }
+
+
+                            }
+                        }
 
 
                     }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
                 });
-                AlertDialog alertDialog = builder.create();
-                alertDialog.show();
+
 
                 /** 최소인원 2명 확인 -> 초대db 삭 -> missioninfolist 생성 -> display 생성 -> server_list 생성 **/
                 break;
             case R.id.tv_cancel:
                 /** 친구각각의 mission_id로 찾기 -> 찾은영수증으로 결제취소요청 -> 본인포함 친구데이터 삭제 **/
 
-                DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-                databaseReference.child("multi").removeValue();
 
                 AlertDialog.Builder cancel_builder = new AlertDialog.Builder(this);
-                cancel_builder.setMessage("약속을 등록하시겠습니까?");
+                cancel_builder.setMessage("약속을 취소하시겠습니까?");
                 cancel_builder.setPositiveButton("네", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        requestPaymentJoinCancel(user_id);
+
+
+                        requestPaymentCancel(user_id);
                     }
                 });
                 cancel_builder.setNegativeButton("아니오", new DialogInterface.OnClickListener() {
@@ -841,7 +864,7 @@ public class InvitationInfoActivity extends AppCompatActivity implements View.On
                 join_cancel_builder.setPositiveButton("네", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        requestPaymentJoinCancel(user_id);
+                        //requestPaymentJoinCancel(user_id);
                     }
                 });
                 join_cancel_builder.setNegativeButton("아니오", new DialogInterface.OnClickListener() {
@@ -851,8 +874,6 @@ public class InvitationInfoActivity extends AppCompatActivity implements View.On
                     }
                 });
                 join_cancel_builder.create().show();
-
-
 
 
                 /** mission_id 로 영수증 찾기 -> 찾은 영수증으로 결제취소요청 -> 본인포함 친구데이터에서 db상태 0으로 변경  **/
@@ -865,141 +886,556 @@ public class InvitationInfoActivity extends AppCompatActivity implements View.On
     }
 
     /**
-     * 친구들것을 먼저 취소하고 그다음 본인것 취소
+     * 제안한 사람이 미션을 취소할 경우 본인의 데이터 삭제
      **/
-    private void requestPaymentCancel(String user) {
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-        databaseReference.child("user_data").child(user).child("transaction").orderByChild("mission_id").equalTo(mission_id).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        ItemForTransaction transaction = snapshot.getValue(ItemForTransaction.class);
-                        if (transaction != null) {
-
-                            OkHttpClient httpClient = new OkHttpClient();
-                            String receipt_id = transaction.getReceipt_id();
-
-                            String url = "https://api.bootpay.co.kr/cancel";
-
-                            RequestBody formBody = new FormBody.Builder()
-                                    .add("receipt_id", receipt_id)
-                                    .build();
-
-                            Request request = new Request.Builder()
-                                    .header("Authorization", "5d25d429396fa67ca2bd0f45")
-                                    .url(url)
-                                    .post(formBody)
-                                    .build();
+    private void deleteFriendData(boolean is_manager) {
 
 
-                            httpClient.newCall(request).enqueue(new Callback() {
-                                @Override
-                                public void onFailure(@NotNull Call call, @NotNull IOException e) {
-
-                                }
-
-                                @Override
-                                public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                                    boolean purchased_or_cancel = false;
-                                    //dataSave(0);
-                                    Log.d("취소", response.toString() + "영수증");
+        /** 내가 방장인지 먼저 확인**/
+        if (is_manager) {
+            /** 이미 결제되어있는 친구들 환불시켜주기**/
 
 
-                                    if (user_id.equals(user)) {//본인 결제를 취소했으면 취소영수증으로 넘어가기
-                                        //dataDelete();//친구들 초대 데이터 삭제
 
-                                        String result = response.toString();
-                                        Intent intent = new Intent(getApplicationContext(), MissionCheckActivity.class);
-                                        intent.putExtra("result", result);
-                                        startActivity(intent);
+
+
+
+
+            /** 공유데이터 detail삭제**/
+
+            databaseReference.child("invitation_data").orderByChild("mission_id").equalTo(mission_id).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if(snapshot.exists()){
+                        for(DataSnapshot shot : snapshot.getChildren()){
+                            shot.getRef().child("detail").removeValue();
+
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
+            /** 방장이면 내 정보 포함 친구들 정보 모두 삭제 **/
+            for (int i = 0; i < friendList.size(); i++) {
+                String friend_id = friendList.get(i).getFriend_id();
+
+                /** preview 삭제 **/
+
+
+                databaseReference.child("user_data").child(friend_id).child("invitation").child("preview").orderByChild("mission_id").equalTo(mission_id).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            dataSnapshot.getRef().removeValue();
+
+
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+
+
+            }
+
+
+        } else {/** 일반 참여자라면 내것만 삭제**/
+
+
+            databaseReference.child("user_data").child(user_id).child("invitation").child("detail").orderByChild("mission_id").equalTo(mission_id).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        dataSnapshot.getRef().removeValue();
+
+
+                    }
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
+            databaseReference.child("user_data").child(user_id).child("invitation").child("preview").orderByChild("mission_id").equalTo(mission_id).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        dataSnapshot.getRef().removeValue();
+
+
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
+            /** 본인을 제외하고 친구들데이터에 본인이 미션을 취소했다는 시그널을 남은 친구들의 invitation detail에  전달**/
+
+            for (int i = 0; i < friendList.size(); i++) {
+                String friend_id = friendList.get(i).getFriend_id();
+                if (!friend_id.equals(user_id)) {
+                    databaseReference.child("user_data").child(friend_id).child("invitation").child("detail").orderByChild("mission_id").equalTo(mission_id).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.exists()) {
+                                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                                    ItemForMultiModeRequest item = snapshot.getValue(ItemForMultiModeRequest.class);
+                                    if (item != null) {
+                                        for (int j = 0; j < item.getFriendRequestList().size(); j++) {
+                                            String id = item.getFriendRequestList().get(j).getFriend_id();
+                                            if (id.equals(user_id)) {
+                                                item.getFriendRequestList().get(j).setAccept(2);
+                                            }
+
+
+                                        }
+
+                                        snapshot.getRef().setValue(item);
                                     }
 
                                 }
-                            });
 
+                            }
 
                         }
 
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                    }
+                        }
+                    });
                 }
 
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
-        });
+
+
+        }
 
 
     }
 
-    private void requestPaymentJoinCancel(String user_id) {
 
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-        databaseReference.child("user_data").child(user_id).child("transaction").orderByChild("mission_id").equalTo(mission_id).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        ItemForTransaction transaction = snapshot.getValue(ItemForTransaction.class);
-                        if (transaction != null) {
+    private void missionActivate() {
 
-                            OkHttpClient httpClient = new OkHttpClient();
-                            String receipt_id = transaction.getReceipt_id();
-
-                            String url = "https://api.bootpay.co.kr/cancel";
-
-                            RequestBody formBody = new FormBody.Builder()
-                                    .add("receipt_id", receipt_id)
-                                    .build();
-
-                            Request request = new Request.Builder()
-                                    .header("Authorization", "5d25d429396fa67ca2bd0f45")
-                                    .url(url)
-                                    .post(formBody)
-                                    .build();
+        String title = item.getTitle();
+        String address = item.getAddress();
+        String mission_id = item.getMission_id();
+        String user_name = Account.getUserName(this);
+        String user_image = Account.getUserThumbnail(this);
+        List<ItemPortion> portionList = item.getItemPortionList();
+        String min_date = item.getCalendarDayList().get(0).getDate();//이론상 최소날짜
+        String max_date = item.getCalendarDayList().get(item.getCalendarDayList().size() - 1).getDate();//이론상 최대날짜
+        List<ItemForDateTime> dateTimeList = item.getCalendarDayList();
+        List<ItemForDateTimeCheck> dateTimeCheckList = item.getDateTimeCheckList();
+        double lat = item.getLat();
+        double lng = item.getLng();
+        int penalty = item.getFail_penalty();
+        int radius = item.getRadius();
 
 
-                            httpClient.newCall(request).enqueue(new Callback() {
-                                @Override
-                                public void onFailure(@NotNull Call call, @NotNull IOException e) {
-
-                                }
-
-                                @Override
-                                public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-
-                                    Log.d("취소", response.toString() + "영수증");
-
-                                    //dataSave(0);
-                                    String result = response.toString();
-                                    Intent intent = new Intent(getApplicationContext(), MissionCheckActivity.class);
-                                    intent.putExtra("result", result);
-                                    startActivity(intent);
-
-                                }
-                            });
+        /** 기본정보 **/
+        MissionInfoList missionInfoList = new MissionInfoList();
+        Map<String, ItemForDateTimeByList> mission_dates = new HashMap<>();
 
 
-                        }
+        missionInfoList.setMission_title(title);
+        missionInfoList.setAddress(address);
+        missionInfoList.setSuccess(false);
+        missionInfoList.setLat(lat);
+        missionInfoList.setLng(lng);
+        missionInfoList.setPenalty(penalty);
+        missionInfoList.setMission_id(mission_id);
+        missionInfoList.setFailed_count(0);
+        missionInfoList.setMin_date(min_date);
+        missionInfoList.setMax_date(max_date);
+        missionInfoList.setPenalty_amount(penalty);
+        missionInfoList.setSingle_mode(false);
+        missionInfoList.setRadius(radius);
+        missionInfoList.setItemPortionList(portionList);
 
 
-                    }
-                }
+        /** 친구정**/
+        List<ItemForFriendByDay> friendByDayList = new ArrayList<>();
+        List<ItemForFriendResponseForRequest> friendRequestList = item.getFriendRequestList();
+        for (int i = 0; i < friendRequestList.size(); i++) {
+            ItemForFriendByDay object = new ItemForFriendByDay();
+            object.setFriend_name(friendRequestList.get(i).getFriend_name());
+            object.setFriend_image(friendRequestList.get(i).getThumbnail());
+            object.setUser_id(friendRequestList.get(i).getFriend_id());
+            object.setSuccess(false);
+            friendByDayList.add(object);
+        }
+        // add my profile
 
+        /** 내정보삽입**/
+        ItemForFriendByDay my_profile = new ItemForFriendByDay();
+        my_profile.setUser_id(user_id);
+        my_profile.setFriend_image(user_image);
+        my_profile.setSuccess(false);
+        my_profile.setFriend_name(user_name);
+
+        friendByDayList.add(my_profile);
+
+        missionInfoList.setFriendByDayList(friendByDayList);
+
+
+        /** 날짜정보입력**/
+        List<ItemForDateTime> itemForDateTimeList = item.getCalendarDayList();
+
+        for (int j = 0; j < itemForDateTimeList.size(); j++) {
+            int year = itemForDateTimeList.get(j).getYear();
+            int month = itemForDateTimeList.get(j).getMonth();
+            int day = itemForDateTimeList.get(j).getDay();
+            int hour = itemForDateTimeList.get(j).getHour();
+            int min = itemForDateTimeList.get(j).getMin();
+
+
+            String date = DateTimeUtils.makeDateForServer(year, month, day);
+            String time = DateTimeUtils.makeTimeForServer(hour, min);
+            //Log.d("파베", "날짜" + date);
+            ItemForDateTimeByList object = new ItemForDateTimeByList();
+            object.setTime_stamp(date + time);
+            object.setSuccess(false);
+            object.setFriendByDayList(friendByDayList);
+            mission_dates.put(date, object);
+        }
+        missionInfoList.setMission_dates(mission_dates);
+
+
+        //mRootRef.child("user_data").child("multi_mode").child("M" + mission_id).child("mission_info_list").setValue(missionInfoList);
+
+        /** missio display 생성 (친구수 * 날짜)**/
+
+        for (int i = 0; i < friendRequestList.size(); i++) {
+            String friend_id = friendRequestList.get(i).getFriend_id();
+            for (int j = 0; j < itemForDateTimeList.size(); j++) {
+
+
+                ItemForMissionByDay itemForMissionByDay = new ItemForMissionByDay();
+
+                itemForMissionByDay.setTitle(title);
+                itemForMissionByDay.setAddress(address);
+                itemForMissionByDay.setTime(DateTimeUtils.makeTimeForServer(itemForDateTimeList.get(j).getHour(), itemForDateTimeList.get(j).getMin()));
+                itemForMissionByDay.setLat(lat);
+                itemForMissionByDay.setLng(lng);
+                itemForMissionByDay.setMission_id(mission_id);
+                itemForMissionByDay.setSingle_mode(false);
+
+
+                int year = itemForDateTimeList.get(j).getYear();
+                int month = itemForDateTimeList.get(j).getMonth();
+                int day = itemForDateTimeList.get(j).getDay();
+                String date = DateTimeUtils.makeDateForServer(year, month, day);
+
+                itemForMissionByDay.setDate(date);
+                itemForMissionByDay.setSuccess(false);
+
+
+                int hour = itemForDateTimeList.get(j).getHour();
+                int min = itemForDateTimeList.get(j).getMin();
+                String time = DateTimeUtils.makeTimeForServer(hour, min);
+                itemForMissionByDay.setDate_time(date + time);
+
+                itemForMissionByDay.setFriendByDayList(friendByDayList);
+
+
+                //mission_main_list.put(date + time, itemForMissionByDay);
+
+                /** 공유데이터 하나 전송**/
+
+
+                databaseReference.child("user_data").child(friend_id).child("mission_display").push().setValue(itemForMissionByDay);
+                databaseReference.child("user_data").child(friend_id).child("mission_info_list").push().setValue(missionInfoList);
             }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
 
-            }
-        });
+        }
+
 
     }
 
+
+    /**
+     * 본인 결제건 취소
+     **/
+    private void requestPaymentCancel(String user) {
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.KOREA);
+        String date_time = simpleDateFormat.format(new Date().getTime());
+        String user_name = Account.getUserName(this);
+        String manager_id = item.getManager_id();
+
+
+        /** 내가 방장이라면 나 포함 친구들 환불모두 처리**/
+        if (manager_id.equals(user_id)) {
+            for (int i = 0; i < friendList.size(); i++) {
+                String friend_id = friendList.get(i).getFriend_id();
+
+
+                databaseReference.child("user_data").child(friend_id).child("transaction").orderByChild("mission_id").equalTo(mission_id).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                                ItemForTransaction transaction = snapshot.getValue(ItemForTransaction.class);
+                                if (transaction != null) {
+
+                                    int point = transaction.getPoint();
+                                    int cash = transaction.getCash();
+
+                                    /** cash only 일때**/
+                                    if (cash > 0 && point == 0) {
+
+                                        OkHttpClient httpClient = new OkHttpClient();
+                                        String receipt_id = transaction.getReceipt_id();
+                                        Log.d("취소", receipt_id);
+                                        String url = "https://us-central1-cloudmessaging-dcdf0.cloudfunctions.net/bootpay_cancel";
+
+                                        RequestBody formBody = new FormBody.Builder()
+                                                .add("receipt_id", receipt_id)
+                                                .add("user_id", user_id)
+                                                .add("mission_id", mission_id)
+                                                .add("title", transaction.getTitle())
+                                                .add("date_time", date_time)
+                                                .add("payment_method", transaction.getPayment_method())
+                                                .add("amount", String.valueOf(transaction.getCash()))
+                                                .add("user_name", user_name)
+                                                .build();
+
+
+                                        Request request = new Request.Builder()
+                                                .header("Authorization", "5d25d429396fa67ca2bd0f45")
+                                                .url(url)
+                                                .post(formBody)
+                                                .build();
+
+
+                                        httpClient.newCall(request).enqueue(new Callback() {
+                                            @Override
+                                            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+
+                                            }
+
+                                            @Override
+                                            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+
+                                                Log.d("취소", response.body().string() + "영수증");
+
+
+                                                boolean is_manager = true;
+                                                deleteFriendData(is_manager);
+
+                                                finish();
+
+                                            }
+                                        });
+
+
+                                        /** point only일 때**/
+                                    } else if (cash == 0 && point > 0) {
+
+
+                                        databaseReference.child("user_data").child(friend_id).child("point").addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                                                if (dataSnapshot.exists()) {
+                                                    Integer cash = dataSnapshot.getValue(Integer.class);
+
+
+                                                }
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                            }
+                                        });
+
+                                    } else {
+                                        /** point + cash 혼합일때 **/
+
+
+                                    }
+                                }
+
+
+                            }
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+
+
+            }
+
+
+        } else {
+            /** 참가자라면 내것만 처리**/
+
+            databaseReference.child("user_data").child(user_id).child("transaction").orderByChild("mission_id").equalTo(mission_id).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                            ItemForTransaction transaction = snapshot.getValue(ItemForTransaction.class);
+                            if (transaction != null) {
+
+
+                                int point = transaction.getPoint();
+                                int cash = transaction.getCash();
+
+                                /** cash only 일때**/
+                                if (cash > 0 && point == 0) {
+
+
+                                    OkHttpClient httpClient = new OkHttpClient();
+                                    String receipt_id = transaction.getReceipt_id();
+                                    Log.d("취소", receipt_id);
+                                    String url = "https://us-central1-cloudmessaging-dcdf0.cloudfunctions.net/bootpay_cancel";
+
+                                    RequestBody formBody = new FormBody.Builder()
+                                            .add("receipt_id", receipt_id)
+                                            .add("user_id", user_id)
+                                            .add("mission_id", mission_id)
+                                            .add("title", transaction.getTitle())
+                                            .add("date_time", date_time)
+                                            .add("payment_method", transaction.getPayment_method())
+                                            .add("amount", String.valueOf(transaction.getCash()))
+                                            .add("user_name", user_name)
+                                            .build();
+
+
+                                    Request request = new Request.Builder()
+                                            .header("Authorization", "5d25d429396fa67ca2bd0f45")
+                                            .url(url)
+                                            .post(formBody)
+                                            .build();
+
+
+                                    httpClient.newCall(request).enqueue(new Callback() {
+                                        @Override
+                                        public void onFailure(@NotNull Call call, @NotNull IOException e) {
+
+                                        }
+
+                                        @Override
+                                        public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+
+                                            Log.d("취소", response.body().string() + "영수증");
+
+
+                                            boolean is_manager = false;
+                                            deleteFriendData(is_manager);
+
+                                        }
+                                    });
+
+
+                                }
+                            }
+
+
+                        }
+                    }
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
+
+        }
+
+
+    }
+
+    /**
+     * 약속 수락 가능시간을 표시하고 시간이 만료되면 결제 layout invisible
+     **/
+    private void displayRestTime(String register_time, String first_time) {
+
+        Date register_date = DateTimeFormatter.dateParser(register_time, "yyyyMMddHHmmss");
+        Date first_date = DateTimeFormatter.dateParser(first_time, "yyyyMMddHHmmss");
+        long register_diff = System.currentTimeMillis();
+
+
+        long first_date_diff = first_date.getTime();
+        Log.d("타이머", register_diff + "    now");
+        Log.d("타이머", first_date_diff + "    first");
+        Log.d("타이머", register_time + "    now");
+        Log.d("타이머", first_time + "    first");
+
+
+        timer = new CountDownTimer(first_date_diff - register_diff - (1000 * 60 * 60), 1000) {//1시간 전에 만료
+            @Override
+            public void onTick(long l) {
+                isTimerRunning = true;
+                long days = TimeUnit.MILLISECONDS.toDays(l);
+                long remainingHoursInMillis = l - TimeUnit.DAYS.toMillis(days);
+                long hours = TimeUnit.MILLISECONDS.toHours(remainingHoursInMillis);
+                long remainingMinutesInMillis = remainingHoursInMillis - TimeUnit.HOURS.toMillis(hours);
+                long minutes = TimeUnit.MILLISECONDS.toMinutes(remainingMinutesInMillis);
+                long remainingSecondsInMillis = remainingMinutesInMillis - TimeUnit.MINUTES.toMillis(minutes);
+                long seconds = TimeUnit.MILLISECONDS.toSeconds(remainingSecondsInMillis);
+                //Log.d("타이머", "position" + position + "   " + holder.getAdapterPosition() + "time:" + l + " " + timer_switch);
+
+                if (days == 0) {
+                    if (l < 10 * 60 * 1000) { //10분
+                        String time2 = minutes + "분 " + seconds + "초 이후 종료";
+                        tv_rest_time.setText(time2);
+                    } else {
+                        String time = hours + "시간 " + minutes + "분 이후 종료";
+
+                        tv_rest_time.setText(time);
+                    }
+                } else {
+                    String time = days + "일 " + hours + "시간 " + minutes + "분 이후 종료";
+
+                    tv_rest_time.setText(time);
+
+
+                }
+
+
+            }
+
+            @Override
+            public void onFinish() {
+                //newQueryData(Utils.getCurrentTime(), new MissionByDayFragment());
+                tv_rest_time.setText("수락가능시간이 만료되었습니다.");
+                isTimerRunning = false;
+
+
+            }
+        }.start();
+
+
+    }
 
 
 }

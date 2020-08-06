@@ -5,6 +5,45 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <RelativeLayout
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/White"
+        android:gravity="bottom">
+
+
+
+        <TextClock
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="20dp"
+            android:gravity="bottom"
+            android:textColor="@color/black"
+            android:textSize="22sp"
+            android:format12Hour="MM월 dd일 hh:mm:ss"
+            app:fontFamily="@font/nexon_level2_gothic" />
+
+        <LinearLayout
+            android:id="@+id/ly_add_mission"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:padding="8dp"
+            android:gravity="center_vertical">
+
+            <ImageView
+
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+
+                android:src="@drawable/ic_add" />
+        </LinearLayout>
+
+
+    </RelativeLayout>
+
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tab_ly"
@@ -17,20 +56,10 @@
         android:orientation="vertical">
 
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_new"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="32dp"
-            android:layout_marginBottom="32dp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentBottom="true"
-            app:backgroundTint="@color/colorPrimary"
-            app:srcCompat="@drawable/ic_add"
-            app:tint="@color/White" />
 
-        <FrameLayout
-            android:id="@+id/fragment_container"
+
+        <androidx.viewpager.widget.ViewPager
+            android:id="@+id/fragment_pager"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
 
@@ -38,6 +67,6 @@
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
 
-        </FrameLayout>
+        </androidx.viewpager.widget.ViewPager>
     </RelativeLayout>
 </LinearLayout>

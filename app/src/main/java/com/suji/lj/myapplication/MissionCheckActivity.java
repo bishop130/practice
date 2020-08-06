@@ -24,6 +24,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.functions.FirebaseFunctions;
 import com.suji.lj.myapplication.Adapters.NewLocationService;
 import com.suji.lj.myapplication.Items.ContactItem;
+import com.suji.lj.myapplication.Items.ItemForFriends;
 import com.suji.lj.myapplication.Items.ItemPoint;
 import com.suji.lj.myapplication.Items.MissionCartItem;
 import com.suji.lj.myapplication.Utils.Account;
@@ -83,7 +84,6 @@ public class MissionCheckActivity extends AppCompatActivity {
     MissionCartItem item;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,20 +98,21 @@ public class MissionCheckActivity extends AppCompatActivity {
         point_use = findViewById(R.id.point);
         date_time = findViewById(R.id.date_time);
 
+        confirm.setClickable(false);
         Bundle bundle = getIntent().getExtras();
-        if(bundle!=null) {
+        if (bundle != null) {
             String receipt = bundle.getString("receipt");
+            String method = bundle.getString("method");
             deleteAllTemporaryData();
             displayReceipt(receipt);
             activateService();
         }
 
 
-
         confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(getApplicationContext(), MainActivity.class));
+               // startActivity(new Intent(getApplicationContext(), MainActivity.class));
                 finish();
             }
         });
@@ -139,19 +140,19 @@ public class MissionCheckActivity extends AppCompatActivity {
         String method = Utils.getValueFromJson(result, "payment_method");
         pay_method.setText(method);
         String price = Utils.getValueFromJson(result, "cash");
-        actual_pay.setText(price + " 원");
+        actual_pay.setText(Utils.makeNumberComma(Integer.valueOf(price)) + " 원");
         String purchased_at = Utils.getValueFromJson(result, "date_time");
         date_time.setText(purchased_at);
         String point = Utils.getValueFromJson(result, "point");
-        point_use.setText(point + " P");
+        point_use.setText(Utils.makeNumberComma(Integer.valueOf(point)) + " P");
         int total_pay = Integer.valueOf(price) + Integer.valueOf(point);
-        total.setText(total_pay + " 원");
+        total.setText(Utils.makeNumberComma(total_pay) + " 원");
 
 
     }
 
 
-    private void activateService(){
+    private void activateService() {
         Intent service = new Intent(getApplicationContext(), NewLocationService.class);
         boolean is_running = Utils.isServiceRunningInForeground(getApplicationContext(), NewLocationService.class);
         if (is_running) {
@@ -175,7 +176,7 @@ public class MissionCheckActivity extends AppCompatActivity {
     }
 
     public void deleteAllTemporaryData() {
-        Log.d("어댑터","deletedata");
+        Log.d("어댑터", "deletedata");
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
@@ -184,8 +185,8 @@ public class MissionCheckActivity extends AppCompatActivity {
 
 
                 MissionCartItem missionCartItem = realm.where(MissionCartItem.class).findFirst();
-                if(missionCartItem!=null) {
-                    Log.d("어댑터","널이 아닙니다");
+                if (missionCartItem != null) {
+                    Log.d("어댑터", "널이 아닙니다");
                     SharedPreferences.Editor editor = getSharedPreferences("location_setting", MODE_PRIVATE).edit();
                     editor.putLong("lat", Double.doubleToRawLongBits(missionCartItem.getLat()));
                     editor.putLong("lng", Double.doubleToRawLongBits(missionCartItem.getLng()));
@@ -193,13 +194,19 @@ public class MissionCheckActivity extends AppCompatActivity {
                     editor.commit();
                     missionCartItem.deleteFromRealm();
                     RealmResults<ContactItem> realmResults = realm.where(ContactItem.class).findAll();
-                    realmResults.deleteAllFromRealm();
+                    RealmResults<ItemForFriends> friendsRealmResults = realm.where(ItemForFriends.class).findAll();
+                    if (realmResults.size() != 0) {
+                        realmResults.deleteAllFromRealm();
+                    }
+                    if (friendsRealmResults.size() != 0) {
+                        realmResults.deleteAllFromRealm();
+
+
+                    }
 
                     /** 포어그라운드 서비스 활성화 **/
-                }else{
-                    Log.d("어댑터","널이다");
-
                 }
+                confirm.setClickable(true);
 
 
             }
@@ -214,6 +221,12 @@ public class MissionCheckActivity extends AppCompatActivity {
         super.onDestroy();
         realm.close();
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
     }
 
     //

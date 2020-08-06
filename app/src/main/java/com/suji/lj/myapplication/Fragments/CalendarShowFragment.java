@@ -16,9 +16,6 @@ import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.format.TitleFormatter;
 import com.suji.lj.myapplication.Adapters.RecyclerInvitationDateTimeAdapter;
 import com.suji.lj.myapplication.Items.ItemForDateTime;
-import com.suji.lj.myapplication.Items.ItemForFriendResponseForRequest;
-import com.suji.lj.myapplication.Items.ItemForMultiModeRequest;
-import com.suji.lj.myapplication.Main2Activity;
 import com.suji.lj.myapplication.R;
 
 import java.util.List;

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -8,7 +9,8 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/White" />
+        android:background="@color/White"
+        app:fontFamily="@font/nexon_level2_gothic" />
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/main_scroll_view"
@@ -39,7 +41,8 @@
                     android:text="제목"
                     android:textColor="@color/black"
                     android:textSize="20sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    app:fontFamily="@font/nexon_level2_gothic" />
 
                 <View
                     android:layout_width="match_parent"
@@ -88,7 +91,6 @@
                             android:id="@+id/mission_basic_editText"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-
                             android:background="@drawable/rounded_edittext"
                             android:hint="제목을 입력하세요"
                             android:iconifiedByDefault="false"
@@ -96,6 +98,7 @@
                             android:inputType="text"
                             android:maxLength="20"
                             android:padding="12dp"
+                            app:fontFamily="@font/nexon_level2_gothic"
                             app:iconifiedByDefault="false" />
                     </LinearLayout>
 
@@ -127,7 +130,7 @@
 
                             android:layout_centerInParent="true"
                             android:layout_marginStart="12dp"
-                            android:src="@drawable/cancel" />
+                            android:src="@drawable/ic_cancel" />
                     </RelativeLayout>
 
                 </LinearLayout>
@@ -155,29 +158,36 @@
                         android:text="장소"
                         android:textColor="@color/black"
                         android:textSize="20sp"
-                        android:textStyle="bold" />
-
-                    <ImageView
-                        android:id="@+id/location_tutorial"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:src="@drawable/unknown_icon" />
+                        android:textStyle="bold"
+                        app:fontFamily="@font/nexon_level2_gothic" />
 
                 </LinearLayout>
 
 
-                <FrameLayout
-                    android:id="@+id/map_fragment"
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="400dp"
-                    android:layout_gravity="center"
-                    android:background="@color/wall_paper2"
-                    android:orientation="vertical">
+                    android:layout_height="wrap_content">
 
 
-                </FrameLayout>
+                    <ProgressBar
+                        android:id="@+id/pb_map"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:indeterminate="true" />
 
+                    <FrameLayout
+                        android:id="@+id/flMap"
+                        android:layout_width="match_parent"
+                        android:layout_height="390dp"
+                        android:layout_gravity="center"
+                        android:background="@color/wall_paper2"
+                        android:orientation="vertical">
+
+
+                    </FrameLayout>
+
+                </RelativeLayout>
 
             </LinearLayout>
 
@@ -204,14 +214,9 @@
                         android:text="날짜 및 시간"
                         android:textColor="@color/black"
                         android:textSize="20sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        app:fontFamily="@font/nexon_level2_gothic" />
 
-                    <ImageView
-                        android:id="@+id/date_time_tutorial"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:src="@drawable/unknown_icon" />
 
                     <View
                         android:layout_width="0dp"
@@ -219,11 +224,10 @@
                         android:layout_weight="1" />
 
                     <ImageView
-                        android:id="@+id/reset"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_marginEnd="32dp"
+                        android:layout_marginEnd="20dp"
                         android:gravity="center"
                         android:padding="12dp"
                         android:src="@drawable/ic_reset"
@@ -267,31 +271,9 @@
                         android:text="규칙"
                         android:textColor="@color/black"
                         android:textSize="20sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        app:fontFamily="@font/nexon_level2_gothic" />
 
-                    <ImageView
-                        android:id="@+id/rule_tutorial"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginStart="12dp"
-                        android:src="@drawable/unknown_icon" />
-
-                    <View
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:layout_weight="1" />
-
-                    <TextView
-                        android:id="@+id/detail_setting"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginEnd="24dp"
-                        android:gravity="center"
-                        android:text="고급설정"
-                        android:textColor="@color/colorPrimary"
-                        android:textSize="16sp" />
                 </LinearLayout>
 
                 <View
@@ -299,48 +281,16 @@
                     android:layout_height="1dp"
                     android:background="@color/divider_line" />
 
-                <LinearLayout
+
+                <FrameLayout
+                    android:id="@+id/flRule"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:padding="24dp">
 
 
-                    <LinearLayout
-                        android:id="@+id/ly_contact_error"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="40dp"
-                        android:orientation="horizontal"
-                        android:visibility="gone">
-
-                        <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:src="@drawable/ic_error" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginStart="4dp"
-                            android:text="연락처를 선택해주세요"
-                            android:textColor="@color/errorColor" />
-                    </LinearLayout>
-
-                    <com.google.android.material.tabs.TabLayout
-                        android:id="@+id/rule_tab"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
-
-
-                    <FrameLayout
-                        android:id="@+id/fragment_container"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
-
-
-                </LinearLayout>
+                </FrameLayout>
 
 
             </LinearLayout>
@@ -352,85 +302,55 @@
                 android:background="@color/White"
                 android:orientation="vertical">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <RelativeLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:layout_marginTop="12dp"
-                    android:layout_marginBottom="12dp"
+                    android:padding="12dp"
+                  >
 
-                    android:text="결제"
-                    android:textColor="@color/black"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+
+                        android:text="결제"
+                        android:textColor="@color/black"
+                        android:textSize="20sp"
+
+                        app:fontFamily="@font/nexon_level2_gothic_bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="보유 포인트 : "
+                        android:layout_centerVertical="true"
+                        android:layout_toStartOf="@+id/rest_point"
+                        app:fontFamily="@font/nexon_level2_gothic" />
+
+                    <TextView
+                        android:id="@+id/rest_point"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 P"
+                        android:layout_centerVertical="true"
+                     android:layout_toStartOf="@+id/tvPointPurchase"
+                        android:textColor="@color/colorPrimary"
+                        app:fontFamily="@font/nexon_level2_gothic" />
+
+                    <TextView
+                        android:layout_marginStart="24dp"
+                        android:layout_width="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_height="wrap_content"
+                        android:text="충전"
+                        android:layout_alignParentEnd="true"
+                        android:id="@+id/tvPointPurchase"/>
+                </RelativeLayout>
 
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="@color/divider_line" />
 
-
-                <LinearLayout
-                    android:id="@+id/change_pay_type"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="12dp"
-                    android:gravity="center"
-                    android:orientation="horizontal">
-
-                    <androidx.appcompat.widget.AppCompatToggleButton
-                        android:id="@+id/kakao_pay"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/rectangle_stroke"
-                        android:minWidth="0dp"
-                        android:minHeight="0dp"
-                        android:paddingStart="12dp"
-                        android:paddingTop="8dp"
-                        android:paddingEnd="12dp"
-                        android:paddingBottom="8dp"
-                        android:textColor="@color/colorPrimary"
-                        android:textOff="카카오페이"
-                        android:textOn="카카오페이"
-                        android:textSize="14sp" />
-
-                    <androidx.appcompat.widget.AppCompatToggleButton
-                        android:id="@+id/naver_pay"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:background="@drawable/rectangle_stroke"
-                        android:minWidth="0dp"
-                        android:minHeight="0dp"
-                        android:paddingStart="12dp"
-                        android:paddingTop="8dp"
-                        android:paddingEnd="12dp"
-                        android:paddingBottom="8dp"
-                        android:textColor="@color/colorPrimary"
-                        android:textOff="네이버페이"
-                        android:textOn="네이버페이"
-                        android:textSize="14sp" />
-
-                    <androidx.appcompat.widget.AppCompatToggleButton
-                        android:id="@+id/credit_pay"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:background="@drawable/rectangle_stroke"
-                        android:minWidth="0dp"
-                        android:minHeight="0dp"
-                        android:paddingStart="12dp"
-                        android:paddingTop="8dp"
-                        android:paddingEnd="12dp"
-                        android:paddingBottom="8dp"
-                        android:textColor="@color/colorPrimary"
-                        android:textOff="신용/체크카드"
-                        android:textOn="신용/체크카드"
-                        android:textSize="14sp" />
-
-
-                </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -440,109 +360,6 @@
                     android:paddingStart="24dp"
                     android:paddingEnd="24dp">
 
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:text="포인트"
-                            android:textColor="@color/black"
-                            android:textSize="14sp" />
-
-
-                        <EditText
-                            android:id="@+id/edit_point"
-                            android:layout_width="100dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:inputType="number"
-                            android:maxLength="6"
-                            android:gravity="center"
-                            android:textColor="@color/black"
-                            android:textSize="16sp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="20dp"
-                            android:text="포인트 : " />
-
-                        <TextView
-                            android:id="@+id/rest_point"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0 P"
-                            android:textColor="@color/colorPrimary" />
-                    </LinearLayout>
-
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/divider_line" />
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp">
-
-                        <TextView
-
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="현금결제금액" />
-
-                        <TextView
-                            android:id="@+id/total_payment"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:text="0 원" />
-                    </RelativeLayout>
-
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="서비스 이용료 (현금결제금액의 +5.5%)" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:text="(+) 550 원" />
-                    </RelativeLayout>
-
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginBottom="8dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="포인트 사용금액" />
-
-                        <TextView
-                            android:id="@+id/point_total"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:text="(-) 0 P" />
-                    </RelativeLayout>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/divider_line" />
 
                     <RelativeLayout
                         android:layout_width="match_parent"
@@ -552,13 +369,15 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
+                            android:layout_alignParentStart="true"
+                            android:layout_marginTop="12dp"
                             android:text="총 보증금"
                             android:textColor="@color/colorPrimary"
-                            android:textSize="24sp" />
+                            android:textSize="24sp"
+                            app:fontFamily="@font/nexon_level2_gothic" />
 
                         <TextView
-                            android:id="@+id/actual_payment"
+                            android:id="@+id/tvTotalAmount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentBottom="true"
@@ -566,7 +385,8 @@
                             android:gravity="end"
                             android:text="0"
                             android:textColor="@color/colorPrimary"
-                            android:textSize="32sp" />
+                            android:textSize="32sp"
+                            app:fontFamily="@font/nexon_level2_gothic" />
 
                         <TextView
                             android:id="@+id/won"
@@ -574,11 +394,12 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
                             android:layout_marginStart="8dp"
-                            android:layout_marginTop="16dp"
+                            android:layout_marginTop="20dp"
                             android:layout_marginBottom="8dp"
                             android:text="원"
                             android:textColor="@color/colorPrimary"
-                            android:textSize="16sp" />
+                            android:textSize="16sp"
+                            app:fontFamily="@font/nexon_level2_gothic" />
 
 
                     </RelativeLayout>
@@ -607,21 +428,22 @@
                         android:layout_centerVertical="true"
                         android:text="이용약관동의"
                         android:textSize="14sp"
+                        app:fontFamily="@font/nexon_level2_gothic"
 
                         />
 
                     <TextView
-                        android:id="@+id/agree_terms_use_detail"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
                         android:layout_centerInParent="true"
                         android:layout_marginStart="32dp"
+                        android:gravity="center"
                         android:paddingStart="8dp"
                         android:paddingEnd="8dp"
-                        android:gravity="center"
                         android:text="약관 자세히 보기"
-                        android:textSize="12sp" />
+                        android:textSize="12sp"
+                        app:fontFamily="@font/nexon_level2_gothic" />
 
                 </RelativeLayout>
 
@@ -636,10 +458,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="개인정보취급약관 동의"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"
+                        app:fontFamily="@font/nexon_level2_gothic" />
 
                     <TextView
-                        android:id="@+id/agree_terms_private_detail"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
@@ -648,7 +470,8 @@
                         android:paddingStart="8dp"
                         android:paddingEnd="8dp"
                         android:text="약관 자세히 보기"
-                        android:textSize="12sp" />
+                        android:textSize="12sp"
+                        app:fontFamily="@font/nexon_level2_gothic" />
 
 
                 </RelativeLayout>
@@ -672,6 +495,7 @@
                     android:layout_centerVertical="true"
                     android:text="모두 동의"
                     android:textSize="14sp"
+                    app:fontFamily="@font/nexon_level2_gothic"
 
                     >
 
@@ -703,7 +527,7 @@
                     android:text="확인"
                     android:textColor="@color/White"
                     android:textSize="18sp"
-                    android:textStyle="bold" />
+                    app:fontFamily="@font/nexon_level2_gothic_bold" />
 
 
             </LinearLayout>

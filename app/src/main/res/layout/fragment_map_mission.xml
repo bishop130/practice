@@ -52,9 +52,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="350dp">
 
-                <fragment
+                <RelativeLayout
                     android:id="@+id/map_view"
-                    class="com.google.android.gms.maps.MapFragment"
                     android:layout_width="match_parent"
                     android:layout_height="350dp" />
 
@@ -191,63 +190,6 @@
                     </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
-
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_below="@id/zoom"
-                android:layout_alignParentRight="true"
-                android:layout_marginStart="160dp"
-                android:layout_marginTop="154dp"
-                android:layout_marginEnd="12dp"
-                android:clipChildren="false"
-                android:clipToPadding="false"
-                android:divider="@android:color/transparent"
-                android:dividerHeight="0.0px"
-                android:elevation="8dp"
-                android:text="현재위치"
-                app:cardCornerRadius="8dp">
-
-                <androidx.appcompat.widget.AppCompatSeekBar
-                    android:id="@+id/circle_seekBar"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-
-
-                    />
-
-            </androidx.cardview.widget.CardView>
-            <ProgressBar
-                android:id="@+id/map_loading"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:visibility="visible"
-                android:indeterminate="true"/>
-
-        </RelativeLayout>
-
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/place_recycler"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:clipToPadding="false"
-                android:orientation="vertical"
-                android:scrollbars="vertical"
-                android:splitMotionEvents="false"
-                android:tooltipText="장소 검색"
-
-                />
 
         </RelativeLayout>
 

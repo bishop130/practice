@@ -43,7 +43,7 @@ public class RecyclerPortionInvitationAdapter extends RecyclerView.Adapter<Recyc
         holder.ranking.setText("# "+rank);
         Log.d("비율",itemPortionList.get(position).getPortion()+"");
         int portion = itemPortionList.get(position).getPortion();
-        holder.portion.setText(portion+"");
+        holder.portion.setText(portion+" %");
 
 
 

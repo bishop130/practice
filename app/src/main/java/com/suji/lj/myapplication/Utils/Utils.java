@@ -7,24 +7,34 @@ import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.os.Build;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.ToggleButton;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import androidx.core.widget.NestedScrollView;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -36,11 +46,16 @@ import com.android.volley.toolbox.Volley;
 import com.github.tamir7.contacts.Contact;
 import com.github.tamir7.contacts.Contacts;
 import com.github.tamir7.contacts.Query;
+import com.google.android.material.bottomnavigation.BottomNavigationItemView;
+import com.google.android.material.bottomnavigation.BottomNavigationMenuView;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.gson.GsonBuilder;
 import com.suji.lj.myapplication.Adapters.NewLocationService;
 import com.suji.lj.myapplication.Items.ContactItem;
 import com.suji.lj.myapplication.Items.UserAccountItem;
+import com.suji.lj.myapplication.R;
+import com.suji.lj.myapplication.SecurityActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -65,7 +80,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 import java.util.StringTokenizer;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Utils {
 
@@ -460,27 +477,19 @@ public class Utils {
         return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
     }
 
-    public static boolean isLocationEnabled(Context context) {
-        int locationMode = 0;
-        String locationProviders;
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            try {
-                locationMode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
-
-            } catch (Settings.SettingNotFoundException e) {
-                e.printStackTrace();
-                return false;
-            }
-
-            return locationMode != Settings.Secure.LOCATION_MODE_OFF;
-
+    public static Boolean isLocationEnabled(Context context)
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+// This is new method provided in API 28
+            LocationManager lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+            return lm.isLocationEnabled();
         } else {
-            locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
-            return !TextUtils.isEmpty(locationProviders);
+// This is Deprecated in API 28
+            int mode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE,
+                    Settings.Secure.LOCATION_MODE_OFF);
+            return  (mode != Settings.Secure.LOCATION_MODE_OFF);
+
         }
-
-
     }
 
     public static boolean isEmpty(Object s) {
@@ -684,6 +693,12 @@ public class Utils {
         return new DecimalFormat("###,###.##").format(num);
     }
 
+    public static String makeNumberCommaWon(int num) {
+
+
+        return new DecimalFormat("###,###.##").format(num) + " 원";
+    }
+
     public static String BitmapToString(Bitmap bitmap) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 70, baos);
@@ -706,4 +721,95 @@ public class Utils {
             return null;
         }
     }
+
+    public static void drawRecyclerViewDivider(Context context, RecyclerView recyclerView) {
+
+        Drawable drawable = ContextCompat.getDrawable(context, R.drawable.line_divider);
+        if (drawable != null) {
+            DividerItemDecoration divider = new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL);
+            divider.setDrawable(drawable);
+            recyclerView.addItemDecoration(divider);
+        }
+
+
+    }
+
+    public static void shuffleArray(int[] ar) {
+        // If running on Java 6 or older, use `new Random()` on RHS here
+        Random rnd = ThreadLocalRandom.current();
+        for (int i = ar.length - 1; i > 0; i--) {
+            int index = rnd.nextInt(i + 1);
+            // Simple swap
+            int a = ar[index];
+            ar[index] = ar[i];
+            ar[i] = a;
+        }
+    }
+
+
+    public static void makeAlertDialog(String text, Context context) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setMessage(text);
+        builder.setPositiveButton("확인", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                //kakaoRest.getAddressFromLocation(get_address, lat, lng);
+
+
+            }
+        });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+
+
+    }
+
+    public static int addIntegerList(List<Integer> list) {
+        int sum = 0;
+
+        for (int i = 0; i < list.size(); i++) {
+            sum = sum + list.get(i);
+        }
+        return sum;
+    }
+
+    public static void showBottomNavigationViewBadge(Context context, BottomNavigationView navigationView, int index) {
+
+        BottomNavigationMenuView bottomNavigationMenuView = (BottomNavigationMenuView) navigationView.getChildAt(0);
+        View v = bottomNavigationMenuView.getChildAt(index);
+        BottomNavigationItemView itemView = (BottomNavigationItemView) v;
+
+        View badge = LayoutInflater.from(context).inflate(R.layout.badge_notification, bottomNavigationMenuView, false);
+
+        TextView count = badge.findViewById(R.id.tv_count);
+        count.setText("7");
+
+        itemView.addView(badge);
+    }
+
+    public static void hideBottomNavigationViewBadge(BottomNavigationView navigationView, int index) {
+        BottomNavigationMenuView bottomNavigationMenuView = (BottomNavigationMenuView) navigationView.getChildAt(0);
+        View v = bottomNavigationMenuView.getChildAt(index);
+        BottomNavigationItemView itemView = (BottomNavigationItemView) v;
+        itemView.removeViewAt(itemView.getChildCount() - 1);
+    }
+
+    public static void toggleButtonSwitchManager(Context context, ToggleButton button, boolean isChecked) {
+
+
+        if (isChecked) {
+            button.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.rounded_rectangle));
+            button.setTextColor(context.getResources().getColor(R.color.White));
+        } else {
+            button.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.rectangle_stroke));
+            button.setTextColor(context.getResources().getColor(R.color.colorPrimary));
+
+
+        }
+
+
+    }
+
+
 }

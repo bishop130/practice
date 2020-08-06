@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
 import com.suji.lj.myapplication.InvitationInfoActivity;
+import com.suji.lj.myapplication.Items.ItemForInvitationPreview;
 import com.suji.lj.myapplication.Items.ItemForMultiModeRequest;
 import com.suji.lj.myapplication.MultiModeActivity;
 import com.suji.lj.myapplication.R;
@@ -25,13 +26,15 @@ import java.util.List;
 public class RecyclerInvitationAdapter extends RecyclerView.Adapter<RecyclerInvitationAdapter.ViewHolder> {
 
 
-    ArrayList<ItemForMultiModeRequest> list;
+    //ArrayList<ItemForMultiModeRequest> list;
+    List<ItemForInvitationPreview> previewList;
     Context context;
 
-    public RecyclerInvitationAdapter(Context context, ArrayList<ItemForMultiModeRequest> list) {
+    public RecyclerInvitationAdapter(Context context, ArrayList<ItemForMultiModeRequest> list, List<ItemForInvitationPreview> previewList) {
 
-        this.list = list;
+        //this.list = list;
         this.context = context;
+        this.previewList = previewList;
 
     }
 
@@ -50,28 +53,31 @@ public class RecyclerInvitationAdapter extends RecyclerView.Adapter<RecyclerInvi
     public void onBindViewHolder(@NonNull ViewHolder holder, int i) {
 
 
+        String title = previewList.get(i).getTitle();
+        String friend_name = previewList.get(i).getFriend_name();
+        String friend_image = previewList.get(i).getFriend_image();
+        String mission_id = previewList.get(i).getMission_id();
+
+        /*
         String title = list.get(i).getTitle();
         String manager_name = list.get(i).getManager_name();
         int friends_num = list.get(i).getFriendRequestList().size();
         String thumbnail = list.get(i).getManager_thumbnail();
-
-
-        Log.d("멀티모드", title + "title");
-        Log.d("멀티모드", manager_name + "manager_name");
-        Log.d("멀티모드", thumbnail + "thumbnail");
-        Log.d("멀티모드", friends_num + "");
-
-        if (!thumbnail.equals("")) {
-            Picasso.with(context).load(list.get(i).getManager_thumbnail()).fit().into(holder.thumbnail);
+ */
+        if (friend_image!=null && !friend_image.isEmpty()) {
+            Picasso.with(context).load(friend_image).fit().into(holder.thumbnail);
         }
 
 
-        holder.text.setText(manager_name + "님이 " + title + "미션에 초대하셨습니다.");
+
+
+        holder.text.setText(friend_name + "님이 " + title + "미션에 초대하셨습니다.");
         holder.ly_multi_request.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(context, InvitationInfoActivity.class);
-                intent.putExtra("item",list.get(i));
+                //intent.putExtra("item",list.get(i));
+                intent.putExtra("mission_id", mission_id);
                 context.startActivity(intent);
 
             }
@@ -81,7 +87,7 @@ public class RecyclerInvitationAdapter extends RecyclerView.Adapter<RecyclerInvi
 
     @Override
     public int getItemCount() {
-        return list.size();
+        return previewList.size();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

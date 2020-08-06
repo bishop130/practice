@@ -1,18 +1,15 @@
 package com.suji.lj.myapplication.Adapters;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -53,14 +50,22 @@ public class RecyclerInvitationFriendAdapter extends RecyclerView.Adapter<Recycl
         holder.friend_image.setBackground(new ShapeDrawable(new OvalShape()));
         holder.friend_image.setClipToOutline(true);
         String thumbnail = list.get(i).getThumbnail();
+        int accept = list.get(i).getAccept();
 
 
-        if (!thumbnail.equals("")) {
+        if (thumbnail!=null && !thumbnail.isEmpty()) {
             Picasso.with(context).load(list.get(i).getThumbnail()).fit().into(holder.friend_image);
         }
-        if(list.get(i).getAccept()==0){
+        if(accept==0){
             holder.check_state.setImageDrawable(changeDrawableColor(context,R.drawable.faq_icon, context.getResources().getColor(R.color.colorPrimary)));
 
+
+        }else if(accept ==1){
+            holder.check_state.setImageDrawable(changeDrawableColor(context,R.drawable.ic_success, context.getResources().getColor(R.color.colorPrimary)));
+
+        }else{
+
+            holder.check_state.setImageDrawable(changeDrawableColor(context,R.drawable.ic_cancel, context.getResources().getColor(R.color.colorPrimary)));
 
         }
 

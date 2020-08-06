@@ -7,7 +7,12 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,9 +35,14 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.suji.lj.myapplication.Adapters.PlaceRecyclerAdapter;
@@ -68,7 +78,7 @@ import retrofit2.http.Query;
 
 import static android.content.Context.MODE_PRIVATE;
 
-public class MapMissionFragment extends Fragment implements MapView.CurrentLocationEventListener, MapReverseGeoCoder.ReverseGeoCodingResultListener, MapView.MapViewEventListener, View.OnClickListener, PlaceRecyclerAdapter.OnMoveSelectedPlaceListener {
+public class MapMissionFragment extends Fragment implements ActivityCompat.OnRequestPermissionsResultCallback, MapView.CurrentLocationEventListener, MapReverseGeoCoder.ReverseGeoCodingResultListener, MapView.MapViewEventListener, View.OnClickListener, PlaceRecyclerAdapter.OnMoveSelectedPlaceListener {
 
 
     MapView mapView;
@@ -83,20 +93,23 @@ public class MapMissionFragment extends Fragment implements MapView.CurrentLocat
     Activity activity;
     RelativeLayout map_layout;
     CardView current_location;
-    RecyclerView recyclerView;
     SearchView searchView;
 
     double current_lat;
     double current_lng;
-    Realm realm;
     NestedScrollView scrollView;
-    int radius = 100;
-    SeekBar circle_seekBar;
+    private final int radius = 50;
     LinearLayout zoom_in;
     LinearLayout zoom_out;
     Switch no_time_switch;
-    ProgressBar map_loading;
 
+    BottomSheetDialog dialog;
+    ViewGroup mapViewContainer;
+
+
+    Realm realm;
+
+    private FusedLocationProviderClient fusedLocationClient;
 
     public MapMissionFragment(NestedScrollView scrollView) {
         this.scrollView = scrollView;
@@ -110,62 +123,32 @@ public class MapMissionFragment extends Fragment implements MapView.CurrentLocat
         View view = inflater.inflate(R.layout.fragment_map_mission, container, false);
 
 
-        mapView = new MapView(activity);
-        ViewGroup mapViewContainer = view.findViewById(R.id.map_view);
-        map_layout = view.findViewById(R.id.map_layout);
+        realm = Realm.getDefaultInstance();
+
 
         imageView = view.findViewById(R.id.transparent_image);
         location_loading = view.findViewById(R.id.location_loading);
         location_loaded = view.findViewById(R.id.location_loaded);
         current_location = view.findViewById(R.id.current_location);
+        mapViewContainer = view.findViewById(R.id.map_view);
+        map_layout = view.findViewById(R.id.map_layout);
 
-        recyclerView = view.findViewById(R.id.place_recycler);
-        circle_seekBar = view.findViewById(R.id.circle_seekBar);
         searchView = view.findViewById(R.id.search_view);
         zoom_in = view.findViewById(R.id.zoom_in);
         zoom_out = view.findViewById(R.id.zoom_out);
         no_time_switch = view.findViewById(R.id.no_time_switch);
-        map_loading = view.findViewById(R.id.map_loading);
-        realm = Realm.getDefaultInstance();
+        mapView = new MapView(activity);
 
+        mapViewContainer.addView(mapView);
+        mapView.setMapViewEventListener(MapMissionFragment.this);
+
+
+        mapView.setCurrentLocationEventListener(this);
         current_location.setOnClickListener(this);
-
-
-
-        mapView.setMapViewEventListener(this);
-
         zoom_in.setOnClickListener(this);
         zoom_out.setOnClickListener(this);
 
 
-        mapViewContainer.addView(mapView);
-        circle_seekBar.setProgress(75);
-        circle_seekBar.setMax(175);
-        circle_seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                radius = seekBar.getProgress() + 25;
-                realm.where(MissionCartItem.class).findFirst();
-
-                drawCircle(mapView.getMapCenterPoint().getMapPointGeoCoord().latitude, mapView.getMapCenterPoint().getMapPointGeoCoord().longitude, radius);
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                radius = seekBar.getProgress() + 25;
-                realm.where(MissionCartItem.class).findFirst();
-
-                drawCircle(mapView.getMapCenterPoint().getMapPointGeoCoord().latitude, mapView.getMapCenterPoint().getMapPointGeoCoord().longitude, radius);
-
-            }
-        });
-
-        checkLocationPermission();
         onAddressSearch();
 
         Utils.fixMapScroll(imageView, scrollView);
@@ -173,12 +156,6 @@ public class MapMissionFragment extends Fragment implements MapView.CurrentLocat
 
         return view;
     }
-
-    private void initiateFragment() {
-
-
-    }
-
 
     @Override
     public void onClick(View v) {
@@ -200,15 +177,6 @@ public class MapMissionFragment extends Fragment implements MapView.CurrentLocat
 
     }
 
-
-    private void setupRecyclerView(List<PlaceItem> placeList) {
-
-        placeRecyclerAdapter = new PlaceRecyclerAdapter(placeList, activity, this);
-        recyclerView.setLayoutManager(new LinearLayoutManager(activity));
-        recyclerView.setAdapter(placeRecyclerAdapter);
-
-    }
-
     public interface KeywordSearch {
         String base = "https://dapi.kakao.com/";
         String key = "KakaoAK 7ff2c8cb39b23bad249dc2f805898a69";
@@ -221,13 +189,6 @@ public class MapMissionFragment extends Fragment implements MapView.CurrentLocat
 
     @Override
     public void onReverseGeoCoderFoundAddress(MapReverseGeoCoder mapReverseGeoCoder, String s) {
-        realm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
-                item.setAddress(s);
-            }
-        });
 
     }
 
@@ -266,40 +227,57 @@ public class MapMissionFragment extends Fragment implements MapView.CurrentLocat
 
     @Override
     public void onMapViewInitialized(MapView mapView) {
-        map_loading.setVisibility(View.GONE);
         MapPoint.GeoCoordinate geoCoordinate = mapView.getMapCenterPoint().getMapPointGeoCoord();
 
-        MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
-        if (item.getLat() == 0.0) {
-            Log.d("위치", "초기화됨");
-            SharedPreferences preferences = activity.getSharedPreferences("location_setting", MODE_PRIVATE);
-            double lat = Double.longBitsToDouble(preferences.getLong("lat", 0));
-            double lng = Double.longBitsToDouble(preferences.getLong("lng", 0));
-            Log.d("위치", lat + "");
-            Log.d("위치", lng + "");
-            mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(lat, lng), true);
-            drawCircle(geoCoordinate.latitude, geoCoordinate.longitude, radius);
-            realm.executeTransaction(new Realm.Transaction() {
+
+        Log.d("위치", "초기화됨");
+        boolean isLocationEnable = Utils.isLocationEnabled(activity);
+
+        if (isLocationEnable) {
+            fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity);
+            fusedLocationClient.getLastLocation().addOnSuccessListener(activity, new OnSuccessListener<Location>() {
                 @Override
-                public void execute(Realm realm) {
-                    MissionCartItem missionCartItem = realm.where(MissionCartItem.class).findFirst();
-                    missionCartItem.setLat(geoCoordinate.latitude);
-                    missionCartItem.setLng(geoCoordinate.longitude);
+                public void onSuccess(Location location) {
+                    // Got last known location. In some rare situations this can be null.
+                    if (location != null) {
+                        current_lat = location.getLatitude();
+                        current_lng = location.getLongitude();
+
+                        Log.d("위치", current_lat + "라스트");
+                        Log.d("위치", current_lng + "라스트");
+                        // Logic to handle location object
+                        mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving);
+                        mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(current_lat, current_lng), true);
+                        mapView.moveCamera(CameraUpdateFactory.newMapPoint(MapPoint.mapPointWithGeoCoord(current_lat, current_lng)));
+                        mapView.setZoomLevel(1, true);
+                        drawCircle(current_lat, current_lng, radius);
+
+                    } else {
+                        SharedPreferences preferences = activity.getSharedPreferences("location_setting", MODE_PRIVATE);
+                        current_lat = Double.longBitsToDouble(preferences.getLong("lat", 0));
+                        current_lng = Double.longBitsToDouble(preferences.getLong("lng", 0));
+
+                    }
+
                 }
             });
-        } else {
-            Log.d("위치", "초기화안됨" + item.getLat());
-            mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(item.getLat(), item.getLng()), true);
+        } else {/** 위치 꺼져있음**/
+
+            Toast.makeText(activity, "위치가 꺼져있습니다. 위치설정을 켜주세요", Toast.LENGTH_SHORT).show();
+            mapView.setZoomLevel(1, true);
             drawCircle(geoCoordinate.latitude, geoCoordinate.longitude, radius);
-            realm.executeTransaction(new Realm.Transaction() {
-                @Override
-                public void execute(Realm realm) {
-                    MissionCartItem missionCartItem = realm.where(MissionCartItem.class).findFirst();
-                    missionCartItem.setLat(geoCoordinate.latitude);
-                    missionCartItem.setLng(geoCoordinate.longitude);
-                }
-            });
+
         }
+
+
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                MissionCartItem missionCartItem = realm.where(MissionCartItem.class).findFirst();
+                missionCartItem.setLat(geoCoordinate.latitude);
+                missionCartItem.setLng(geoCoordinate.longitude);
+            }
+        });
 
 
     }
@@ -343,14 +321,23 @@ public class MapMissionFragment extends Fragment implements MapView.CurrentLocat
     public void onMapViewMoveFinished(MapView mapView, MapPoint mapPoint) {
         MapPoint.GeoCoordinate geoCoordinate = mapView.getMapCenterPoint().getMapPointGeoCoord();
         drawCircle(geoCoordinate.latitude, geoCoordinate.longitude, radius);
-        realm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
-                item.setLat(geoCoordinate.latitude);
-                item.setLng(geoCoordinate.longitude);
-            }
-        });
+        SharedPreferences sharedPreferences = activity.getSharedPreferences("location_setting", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putLong("lat", Double.doubleToRawLongBits(geoCoordinate.latitude));
+        editor.putLong("lng", Double.doubleToRawLongBits(geoCoordinate.longitude));
+        editor.apply();
+
+        if (!realm.isClosed()) {
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    MissionCartItem missionCartItem = realm.where(MissionCartItem.class).findFirst();
+                    missionCartItem.setLat(geoCoordinate.latitude);
+                    missionCartItem.setLng(geoCoordinate.longitude);
+                }
+            });
+        }
+
 
     }
 
@@ -372,6 +359,9 @@ public class MapMissionFragment extends Fragment implements MapView.CurrentLocat
             @Override
             public boolean onQueryTextSubmit(final String query) {
                 mapView.removeAllPOIItems();
+
+                //createBottomSheetForAddress();
+
                 loadAddress(query);
                 final float scale = getResources().getDisplayMetrics().density;
                 int pixels = (int) (300 * scale + 0.5f);
@@ -424,6 +414,48 @@ public class MapMissionFragment extends Fragment implements MapView.CurrentLocat
 
     }
 
+    private void createBottomSheetForAddress(List<PlaceItem> placeList) {
+        View view = View.inflate(activity, R.layout.dialog_address, null);
+
+        LinearLayout ly_dialog_address = view.findViewById(R.id.ly_dialog_address);
+        RecyclerView recycler_address = view.findViewById(R.id.recycler_address);
+
+
+        dialog = new BottomSheetDialog(activity);
+        //String fintech_num = context.getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("fintech_num", "");
+
+        DisplayMetrics metrics = new DisplayMetrics();
+        activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+        int width = metrics.widthPixels;
+        int height = metrics.heightPixels;
+
+        int maxHeight = (int) (height * 0.70);
+
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, maxHeight);
+
+        ly_dialog_address.setLayoutParams(lp);
+
+
+        Drawable drawable = ContextCompat.getDrawable(activity, R.drawable.line_divider);
+        if (drawable != null) {
+            DividerItemDecoration divider = new DividerItemDecoration(recycler_address.getContext(), DividerItemDecoration.VERTICAL);
+            divider.setDrawable(drawable);
+            recycler_address.addItemDecoration(divider);
+        }
+
+
+        placeRecyclerAdapter = new PlaceRecyclerAdapter(placeList, activity, this);
+        recycler_address.setLayoutManager(new LinearLayoutManager(activity));
+        recycler_address.setAdapter(placeRecyclerAdapter);
+
+
+        dialog.setContentView(view);
+        dialog.show();
+
+
+    }
+
     private void loadAddress(String query) {
         final Retrofit retrofit2 = new Retrofit.Builder().
                 addConverterFactory(GsonConverterFactory.create()).
@@ -441,10 +473,9 @@ public class MapMissionFragment extends Fragment implements MapView.CurrentLocat
 
                     JSONObject obj = new JSONObject(con);
                     String check_string = obj.getJSONObject("meta").getString("total_count");
-                    if (Integer.valueOf(check_string) == 0) {
-                        PlaceItem placeItem = new PlaceItem();
-                        placeItem.setPlaceName(query + "(와)과 일치하는 검색결과가 없습니다");
-                        placeList.add(placeItem);
+                    if (Integer.valueOf(check_string) == 0) { //결과가 없을 때
+
+                        Toast.makeText(activity, query + "(와)과 일치하는 검색결과가 없습니다", Toast.LENGTH_LONG).show();
                     } else {
                         JSONArray jsonArray = obj.getJSONArray("documents");
                         for (int i = 0; i < jsonArray.length(); i++) {
@@ -479,13 +510,15 @@ public class MapMissionFragment extends Fragment implements MapView.CurrentLocat
 
 
                         }
+                        createBottomSheetForAddress(placeList);
                     }
 
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
 
-                setupRecyclerView(placeList);
+
+                // setupRecyclerView(placeList);
 
 
             }
@@ -502,7 +535,9 @@ public class MapMissionFragment extends Fragment implements MapView.CurrentLocat
 
     @Override
     public void onMoveSelectedPlace(double lat, double lng) {
+        dialog.dismiss();
         moveSelectedPlace(lat, lng);
+
 
     }
 
@@ -511,24 +546,19 @@ public class MapMissionFragment extends Fragment implements MapView.CurrentLocat
         if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             Log.d("퍼미션", "이미 승인받음");
 
-            mapView.setCurrentLocationEventListener(this);
-            mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving);
+            getCurrentLocationAndInitiateMap();
         } else {
             // Should we show an explanation?
             if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.ACCESS_FINE_LOCATION)) {
 
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
                 new AlertDialog.Builder(activity)
-                        .setTitle("Location Permission Needed")
-                        .setMessage("This app needs the Location permission, please accept to use location functionality")
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        .setTitle("위치정보에대한 권한이 필요합니다.")
+                        .setMessage("서비스 이용을 위해 위치정보에 대한 접근이 필요합니다.")
+                        .setPositiveButton("네", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 //Prompt the user once explanation has been shown
-                                ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                        MY_PERMISSIONS_REQUEST_LOCATION);
+                                ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST_LOCATION);
                             }
                         })
                         .create()
@@ -537,40 +567,13 @@ public class MapMissionFragment extends Fragment implements MapView.CurrentLocat
 
             } else {
                 // No explanation needed, we can request the permission.
-                ActivityCompat.requestPermissions(activity,
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        MY_PERMISSIONS_REQUEST_LOCATION);
+                ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST_LOCATION);
             }
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_LOCATION: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission was granted, yay! Do the
-                    // location-related task you need to do.
-                    if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                        Log.d("퍼미션", "여기는 왜 못들어와");
+    private void getCurrentLocationAndInitiateMap() {
 
-                        mapView.setCurrentLocationEventListener(this);
-                        mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving);
 
-                    }
-
-                } else {
-
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                    Toast.makeText(activity, "permission denied", Toast.LENGTH_LONG).show();
-                }
-                break;
-            }
-
-            // other 'case' lines to check for other
-            // permissions this app might request
-        }
     }
 }

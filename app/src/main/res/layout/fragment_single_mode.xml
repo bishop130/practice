@@ -14,49 +14,29 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
         android:orientation="vertical">
 
 
+
+
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+        >
 
             <TextView
+                android:id="@+id/amount_warning"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
-                android:text="1회 실패시"
-                android:textColor="@color/black"
-                android:textSize="16sp" />
-
-            <TextView
-                android:id="@+id/inform_select_friend"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:text=""
                 android:layout_alignParentEnd="true"
-                android:padding="8dp"
-                android:layout_marginEnd="4dp"
-                android:text="+ 친구선택"
-                android:textColor="@color/colorPrimary"
-                android:textSize="18sp" />
+                android:textColor="@color/colorError"
+                android:visibility="visible" />
         </RelativeLayout>
 
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/single_contact"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/rounded_edittext"
-            android:minHeight="40dp"
-            android:padding="12dp" />
-
-
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
@@ -67,47 +47,42 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
                 android:layout_marginTop="8dp"
-                android:text="에게 각각"
+                android:text="벌칙금"
                 android:textColor="@color/black"
                 android:textSize="16sp" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="4dp"
-                android:orientation="vertical">
+                android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/amount_warning"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="*최소금액 1,000원"
-                    android:textColor="@color/colorError"
-                    android:visibility="visible" />
 
                 <EditText
                     android:id="@+id/if_fail"
                     android:layout_width="120dp"
-                    android:layout_height="40dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
                     android:imeOptions="actionDone"
-                    android:background="@drawable/rounded_edittext"
                     android:inputType="number"
                     android:maxLength="6"
-                    android:gravity="center"
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_marginTop="8dp"
+                    android:text="원"
+                    android:padding="8dp"
                     android:textColor="@color/black"
                     android:textSize="16sp" />
             </LinearLayout>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:layout_marginTop="8dp"
-                android:text="원 송금"
-                android:textColor="@color/black"
-                android:textSize="16sp" />
-        </LinearLayout>
+        </RelativeLayout>
 
 
     </LinearLayout>

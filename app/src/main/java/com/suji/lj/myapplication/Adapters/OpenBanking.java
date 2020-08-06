@@ -3,7 +3,15 @@ package com.suji.lj.myapplication.Adapters;
 import android.content.Context;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.JsonObject;
+import com.suji.lj.myapplication.Items.ItemForCommonOpenBanking;
 import com.suji.lj.myapplication.Items.UserAccountItem;
 import com.suji.lj.myapplication.Utils.DateTimeUtils;
 import com.suji.lj.myapplication.Utils.Utils;
@@ -12,9 +20,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import okhttp3.Callback;
@@ -119,6 +130,86 @@ public class OpenBanking {
 
     }
     /** 출금이체 요청**/
+
+    public void requestWithdraw(Callback callback, Context context){
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+        databaseReference.child("common").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                ItemForCommonOpenBanking item = dataSnapshot.getValue(ItemForCommonOpenBanking.class);
+                if(item!=null) {
+                    String center_id = item.getCenter_id();
+                    String center_access_token = item.getCenter_token();
+
+
+                    String url = " https://testapi.openbanking.or.kr/v2.0/transfer/deposit/acnt_num";
+
+                    MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+                    Map<String, Object> params = new HashMap<>();
+                    Map<String, String> inparam = new HashMap<>();
+
+
+                    inparam.put("tran_no","1");
+                    inparam.put("bank_tran_id",center_id+"U"+new SimpleDateFormat("HHmmssSSS", Locale.KOREA).format(new Date()));
+                    inparam.put("bank_code_std","004");
+                    inparam.put("account_num","29030204202663");
+                    inparam.put("account_holder_name","이정환");
+                    inparam.put("print_content","환불");
+                    inparam.put("tran_amt","500");
+                    inparam.put("req_client_name","이정환");
+                    inparam.put("req_client_bank_code","004");
+                    inparam.put("req_client_account_num","29030204202663");
+                    inparam.put("req_client_num","HONG1234");
+                    inparam.put("transfer_purpose","TR");
+
+                    JSONObject object = new JSONObject(inparam);
+
+                    JSONArray array = new JSONArray();
+                    array.put(object);
+
+                    params.put("cntr_account_type", "N");
+                    params.put("cntr_account_num", "01030331130");
+                    params.put("wd_pass_phrase", "NONE");
+                    params.put("wd_print_content", "입금");
+                    params.put("name_check_option","on");
+                    params.put("sub_frnc_name", "");
+                    params.put("sub_frnc_num", "");
+                    params.put("sub_frnc_business_num", "");
+                    params.put("tran_dtime", Utils.getCurrentTime());
+                    params.put("req_cnt","1");
+                    params.put("req_list", array);
+
+
+                    JSONObject parameter = new JSONObject(params);
+                    RequestBody formBody = RequestBody.create(JSON, parameter.toString());
+
+                    Request request = new Request.Builder()
+                            .header("Authorization", "Bearer " + center_access_token)
+                            .url(url)
+                            .post(formBody)
+                            .build();
+
+                    client.newCall(request).enqueue(callback);
+
+
+
+
+                }
+
+
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+
+
+
+    }
 
     public void requestTransfer(Callback callback, Context context) {
 

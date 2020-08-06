@@ -30,14 +30,15 @@ import java.util.List;
 public class RecyclerDistributionAdapter extends RecyclerView.Adapter<RecyclerDistributionAdapter.ViewHolder> {
 
 
-    List<ItemForFriends> list;
     Context context;
     OnCheckPortionListener listener;
     int portion_id;
     List<Integer> list_portion;
+    int numOfPeople;
 
-    public RecyclerDistributionAdapter(Context context, List<ItemForFriends> list, OnCheckPortionListener listener, List<Integer> list_portion) {
-        this.list = list;
+    public RecyclerDistributionAdapter(Context context, int numOfPeople, OnCheckPortionListener listener, List<Integer> list_portion) {
+
+        this.numOfPeople = numOfPeople;
         this.listener = listener;
         this.list_portion = list_portion;
         this.context = context;
@@ -103,7 +104,7 @@ public class RecyclerDistributionAdapter extends RecyclerView.Adapter<RecyclerDi
 
     @Override
     public int getItemCount() {
-        return list.size() + 1;
+        return numOfPeople;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

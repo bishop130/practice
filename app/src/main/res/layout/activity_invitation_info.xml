@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/White"
@@ -26,16 +26,26 @@
             android:background="@color/wall_paper2"
             android:orientation="vertical">
 
-
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="남은시간" />
+                android:background="@color/White"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_rest_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:fontFamily="@font/nexon_level2_gothic"
+                    android:text="만료"
+                    android:textColor="@color/colorPrimary" />
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
                 android:background="@color/White"
                 android:orientation="vertical">
 
@@ -45,6 +55,7 @@
                     android:layout_marginStart="24dp"
                     android:layout_marginTop="8dp"
                     android:layout_marginBottom="8dp"
+                    android:fontFamily="@font/nexon_level2_gothic"
                     android:text="함께 할 친구"
                     android:textColor="@color/black"
                     android:textSize="18sp"
@@ -101,6 +112,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="32dp"
+                    android:fontFamily="@font/nexon_level2_gothic"
                     android:gravity="center"
                     android:text="주소"
                     android:textColor="@color/black"
@@ -108,11 +120,12 @@
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/address"
+                    android:id="@+id/tv_address"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="24dp"
                     android:layout_marginTop="8dp"
+                    android:fontFamily="@font/nexon_level2_gothic"
                     android:text="" />
 
 
@@ -130,6 +143,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="32dp"
                     android:layout_marginTop="8dp"
+                    android:fontFamily="@font/nexon_level2_gothic"
                     android:gravity="center"
                     android:text="약속조건"
                     android:textColor="@color/black"
@@ -147,6 +161,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
+                        android:fontFamily="@font/nexon_level2_gothic"
                         android:text="- 약속시간 내에 도착시 성공" />
 
                     <LinearLayout
@@ -159,10 +174,11 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
 
+                            android:fontFamily="@font/nexon_level2_gothic"
                             android:text="- 실패할 경우 보증금에서 차감 : " />
 
                         <TextView
-                            android:id="@+id/penalty"
+                            android:id="@+id/tv_penalty"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text=""
@@ -175,6 +191,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
+                        android:fontFamily="@font/nexon_level2_gothic"
                         android:text="- 누적벌침금은 미션 종료 후 분배" />
 
                 </LinearLayout>
@@ -189,6 +206,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="5"
+                        android:fontFamily="@font/nexon_level2_gothic"
                         android:gravity="center"
                         android:text="순위"
                         android:textColor="@color/black" />
@@ -197,6 +215,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="4"
+                        android:fontFamily="@font/nexon_level2_gothic"
                         android:gravity="center"
                         android:text="분배비율"
                         android:textColor="@color/black" />
@@ -230,7 +249,7 @@
                     android:layout_marginStart="12dp"
                     android:layout_marginTop="12dp"
                     android:layout_marginBottom="12dp"
-
+                    android:fontFamily="@font/nexon_level2_gothic"
                     android:text="결제"
                     android:textColor="@color/black"
                     android:textSize="20sp"
@@ -243,7 +262,6 @@
 
 
                 <LinearLayout
-                    android:id="@+id/change_pay_type"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -256,6 +274,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:background="@drawable/rectangle_stroke"
+                        android:fontFamily="@font/nexon_level2_gothic"
                         android:minWidth="0dp"
                         android:minHeight="0dp"
                         android:paddingStart="12dp"
@@ -273,6 +292,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
                         android:background="@drawable/rectangle_stroke"
+                        android:fontFamily="@font/nexon_level2_gothic"
                         android:minWidth="0dp"
                         android:minHeight="0dp"
                         android:paddingStart="12dp"
@@ -290,6 +310,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
                         android:background="@drawable/rectangle_stroke"
+                        android:fontFamily="@font/nexon_level2_gothic"
                         android:minWidth="0dp"
                         android:minHeight="0dp"
                         android:paddingStart="12dp"
@@ -321,6 +342,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
+                            android:fontFamily="@font/nexon_level2_gothic"
                             android:text="포인트"
                             android:textColor="@color/black"
                             android:textSize="14sp" />
@@ -331,6 +353,7 @@
                             android:layout_width="100dp"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
+                            android:fontFamily="@font/nexon_level2_gothic"
                             android:gravity="center"
                             android:inputType="number"
                             android:maxLength="6"
@@ -341,12 +364,14 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="20dp"
+                            android:fontFamily="@font/nexon_level2_gothic"
                             android:text="포인트 : " />
 
                         <TextView
-                            android:id="@+id/rest_point"
+                            android:id="@+id/tv_rest_point"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:fontFamily="@font/nexon_level2_gothic"
                             android:text="0 P"
                             android:textColor="@color/colorPrimary" />
                     </LinearLayout>
@@ -366,6 +391,7 @@
 
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:fontFamily="@font/nexon_level2_gothic"
                             android:text="금액" />
 
                         <TextView
@@ -384,12 +410,14 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:fontFamily="@font/nexon_level2_gothic"
                             android:text="서비스 이용료 (현금결제금액의 +5.5%)" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
+                            android:fontFamily="@font/nexon_level2_gothic"
                             android:text="(+) 550 원" />
                     </RelativeLayout>
 
@@ -402,6 +430,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:fontFamily="@font/nexon_level2_gothic"
                             android:text="포인트 사용금액" />
 
                         <TextView
@@ -409,6 +438,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
+                            android:fontFamily="@font/nexon_level2_gothic"
                             android:text="(-) 0 P" />
                     </RelativeLayout>
 
@@ -426,6 +456,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_centerVertical="true"
+                            android:fontFamily="@font/nexon_level2_gothic"
                             android:text="총 보증금"
                             android:textColor="@color/colorPrimary"
                             android:textSize="24sp" />
@@ -436,6 +467,7 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentBottom="true"
                             android:layout_toLeftOf="@+id/won"
+                            android:fontFamily="@font/nexon_level2_gothic"
                             android:gravity="end"
                             android:text="0"
                             android:textColor="@color/colorPrimary"
@@ -449,6 +481,7 @@
                             android:layout_marginStart="8dp"
                             android:layout_marginTop="16dp"
                             android:layout_marginBottom="8dp"
+                            android:fontFamily="@font/nexon_level2_gothic"
                             android:text="원"
                             android:textColor="@color/colorPrimary"
                             android:textSize="16sp" />
@@ -484,12 +517,12 @@
                         />
 
                     <TextView
-                        android:id="@+id/agree_terms_use_detail"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
                         android:layout_centerInParent="true"
                         android:layout_marginStart="32dp"
+                        android:fontFamily="@font/nexon_level2_gothic"
                         android:gravity="center"
                         android:paddingStart="8dp"
                         android:paddingEnd="8dp"
@@ -512,12 +545,12 @@
                         android:textSize="14sp" />
 
                     <TextView
-                        android:id="@+id/agree_terms_private_detail"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
                         android:layout_centerInParent="true"
                         android:layout_marginStart="32dp"
+                        android:fontFamily="@font/nexon_level2_gothic"
                         android:paddingStart="8dp"
                         android:paddingEnd="8dp"
                         android:text="약관 자세히 보기"
@@ -556,7 +589,7 @@
 
 
             <LinearLayout
-               android:id="@+id/ly_accept_or_decline"
+                android:id="@+id/ly_accept_or_decline"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
@@ -569,12 +602,13 @@
 
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
-
-                    android:gravity="center"
-                    android:text="수락"
-                    android:paddingBottom="12dp"
-                    android:paddingTop="12dp"
                     android:background="@color/colorSuccess"
+
+                    android:fontFamily="@font/nexon_level2_gothic"
+                    android:gravity="center"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp"
+                    android:text="수락"
                     android:textColor="@color/White"
                     android:textSize="22sp"
                     android:textStyle="bold" />
@@ -585,9 +619,10 @@
 
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
+                    android:fontFamily="@font/nexon_level2_gothic"
+                    android:gravity="center"
                     android:paddingTop="12dp"
                     android:paddingBottom="12dp"
-                    android:gravity="center"
                     android:text="거절"
                     android:textColor="@color/colorError"
                     android:textSize="22sp"
@@ -595,6 +630,7 @@
 
 
             </LinearLayout>
+
             <LinearLayout
                 android:id="@+id/ly_activate_or_cancel"
                 android:layout_width="match_parent"
@@ -610,11 +646,12 @@
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
 
-                    android:gravity="center"
-                    android:text="시작"
-                    android:paddingBottom="12dp"
-                    android:paddingTop="12dp"
                     android:background="@color/colorSuccess"
+                    android:fontFamily="@font/nexon_level2_gothic"
+                    android:gravity="center"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp"
+                    android:text="시작"
                     android:textColor="@color/White"
                     android:textSize="22sp"
                     android:textStyle="bold" />
@@ -625,9 +662,10 @@
 
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
+                    android:fontFamily="@font/nexon_level2_gothic"
+                    android:gravity="center"
                     android:paddingTop="12dp"
                     android:paddingBottom="12dp"
-                    android:gravity="center"
                     android:text="취소"
                     android:textColor="@color/colorError"
                     android:textSize="22sp"
@@ -635,6 +673,7 @@
 
 
             </LinearLayout>
+
             <LinearLayout
                 android:id="@+id/ly_join_cancel"
                 android:layout_width="match_parent"
@@ -650,11 +689,12 @@
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
 
-                    android:gravity="center"
-                    android:text="수락취소"
-                    android:paddingBottom="12dp"
-                    android:paddingTop="12dp"
                     android:background="@color/colorSuccess"
+                    android:fontFamily="@font/nexon_level2_gothic"
+                    android:gravity="center"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp"
+                    android:text="수락취소"
                     android:textColor="@color/White"
                     android:textSize="22sp"
                     android:textStyle="bold" />

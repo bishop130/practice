@@ -3,19 +3,22 @@
     android:id="@+id/main_recycler_view_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:clickable="true"
-    android:focusable="false"
-    android:focusableInTouchMode="false"
     android:background="@color/White"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:paddingBottom="12dp">
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_weight="9"
+        android:clickable="false"
         android:orientation="vertical">
 
 
-
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/tv_mission_title"
@@ -23,28 +26,35 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="28dp"
                 android:layout_marginTop="12dp"
+                android:layout_marginBottom="8dp"
+                android:fontFamily="@font/nexon_level2_gothic"
+                android:maxLines="1"
                 android:text="제목"
                 android:textColor="@color/black"
-                android:textSize="18sp"
-                android:maxLines="1"
-                android:layout_marginBottom="8dp"/>
+                android:textSize="20sp" />
 
+
+        </LinearLayout>
 
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
-            android:layout_marginStart="30dp">
+            android:layout_marginStart="31dp"
+            android:layout_marginBottom="4dp">
+
             <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_time"/>
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_time" />
+
             <TextView
                 android:id="@+id/date_display"
-                android:layout_marginStart="12dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="12dp"
+                android:fontFamily="@font/nexon_level2_gothic"
                 android:text="date"
                 android:textSize="14sp" />
 
@@ -52,10 +62,11 @@
                 android:id="@+id/time_display"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:layout_marginStart="8dp"
+                android:fontFamily="@font/nexon_level2_gothic"
                 android:text="time"
                 android:textSize="14sp" />
-
 
 
         </LinearLayout>
@@ -64,14 +75,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="30dp"
-            android:layout_marginBottom="12dp"
 
 
             >
 
             <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:src="@drawable/location_pin" />
 
             <TextView
@@ -80,23 +90,63 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginStart="12dp"
+                android:fontFamily="@font/nexon_level2_gothic"
                 android:text="주소" />
 
 
         </LinearLayout>
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:id="@+id/tv_mode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/rounded_filled"
+                android:fontFamily="@font/nexon_level2_gothic"
+                android:padding="6dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:text="싱글"
+                android:textColor="@color/White"
+                android:textSize="12sp" />
+
+
+            <TextView
+                android:id="@+id/tvTimeLeft"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:fontFamily="@font/nexon_level2_gothic"
+                android:text="시간"
+                android:textColor="@color/colorPrimary"
+
+
+                />
+
+        </RelativeLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_friend_image"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="8dp" />
+
+
     </LinearLayout>
 
-    <View
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_gravity="end"
-        android:layout_marginEnd="12dp">
+        android:layout_weight="1"
+        android:clickable="false">
 
         <ImageView
             android:layout_width="wrap_content"

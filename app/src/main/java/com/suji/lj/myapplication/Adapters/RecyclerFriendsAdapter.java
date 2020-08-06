@@ -75,7 +75,7 @@ public class RecyclerFriendsAdapter extends RecyclerView.Adapter<RecyclerFriends
         //holder.first_name.setText(Strin
         // g.valueOf(itemList.get(position).getName().charAt(0)));
         holder.contact_container.setBackgroundColor(itemList.get(position).isSelected() ? Color.WHITE : Color.WHITE);
-        holder.select_box.setImageDrawable(itemList.get(position).isSelected() ? context.getDrawable(R.drawable.checked_icon) : context.getDrawable(R.drawable.ring));
+        holder.select_box.setImageDrawable(itemList.get(position).isSelected() ? context.getResources().getDrawable(R.drawable.checked_icon) : context.getResources().getDrawable(R.drawable.ring));
 
         holder.checked_contact.setBackground(new ShapeDrawable(new OvalShape()));
         holder.checked_contact.setClipToOutline(true);

@@ -1,6 +1,7 @@
 package com.suji.lj.myapplication.Fragments;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -32,6 +33,11 @@ import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexboxLayoutManager;
 import com.google.android.flexbox.JustifyContent;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.kakao.friends.AppFriendContext;
 import com.kakao.friends.response.AppFriendsResponse;
 import com.kakao.kakaotalk.callback.TalkResponseCallback;
@@ -47,6 +53,7 @@ import com.suji.lj.myapplication.Items.ItemForFriends;
 import com.suji.lj.myapplication.Items.ItemPortion;
 import com.suji.lj.myapplication.Items.MissionCartItem;
 import com.suji.lj.myapplication.R;
+import com.suji.lj.myapplication.Utils.Account;
 import com.suji.lj.myapplication.Utils.Utils;
 
 import java.text.DecimalFormat;
@@ -73,9 +80,10 @@ public class MultiModeFragment extends Fragment implements RecyclerFriendsAdapte
     Utils utils = new Utils();
     RecyclerView confirmed_recycler;
     RealmResults<ItemForFriends> realmResults;
-    Context mContext;
     TextView custom_portion;
-    Context context;
+
+
+    Activity context;
     RecyclerView recycler_distribution;
     RecyclerDistributionAdapter recyclerDistributionAdapter;
     BottomSheetDialog bottomSheetDialog;
@@ -93,11 +101,7 @@ public class MultiModeFragment extends Fragment implements RecyclerFriendsAdapte
     private DecimalFormat dfnd = new DecimalFormat("#,###");
 
     OnResetAmountFromMultiListener onResetAmountFromMultiListener;
-
-    public MultiModeFragment(Context context) {
-        // Required empty public constructor
-        this.context = context;
-    }
+    DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
 
 
     @Override
@@ -114,28 +118,25 @@ public class MultiModeFragment extends Fragment implements RecyclerFriendsAdapte
         amount_warning = view.findViewById(R.id.amount_warning);
 
 
-
         MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
-        if_fail.setText(Utils.makeNumberComma(item.getMulti_amount()));
+        if_fail.setText(Utils.makeNumberComma(item.getMulti_penalty()));
         if_fail.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     Log.d("에디트", v.getText().toString());
-                    if(!v.getText().toString().equals("")) {
+                    if (!v.getText().toString().equals("")) {
                         amount = Integer.valueOf(v.getText().toString().replaceAll(",", ""));
-                    }else{
+                    } else {
                         amount = 0;
                     }
-
-
 
 
                     realm.executeTransaction(new Realm.Transaction() {
                         @Override
                         public void execute(Realm realm) {
                             MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
-                            item.setMulti_amount(amount);
+                            item.setMulti_penalty(amount);
                         }
                     });
 
@@ -204,10 +205,10 @@ public class MultiModeFragment extends Fragment implements RecyclerFriendsAdapte
                     //if_fail.setError("최소금액은 100원입니다.",context.getResources().getDrawable(R.drawable.ic_error));
                 } else {
                     amount = Integer.valueOf(s.toString().replaceAll(",", ""));
-                    if(amount>100000){
+                    if (amount > 100000) {
                         amount_warning.setText("최대금액 100,000원");
                         amount_warning.setVisibility(View.VISIBLE);
-                    }else {
+                    } else {
 
                         if (amount < 1000) {
                             amount_warning.setText("최소금액 1,000원");
@@ -226,7 +227,7 @@ public class MultiModeFragment extends Fragment implements RecyclerFriendsAdapte
             }
         });
 
-        SpannableString content = new SpannableString("정해진 비율");
+        SpannableString content = new SpannableString("설정");
         content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
         custom_portion.setText(content);
 
@@ -234,101 +235,18 @@ public class MultiModeFragment extends Fragment implements RecyclerFriendsAdapte
         custom_portion.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (selected_item.size() > 0)
-                    createBottomSheet();
+                if (selected_item.size() > 0) {
+
+                }
+                    //createBottomSheet();
             }
         });
         requestFriends();
+        //getFriendList();
 
         return view;
     }
 
-
-    private void createBottomSheet() {
-
-        View view = LayoutInflater.from(context).inflate(R.layout.dialog_distribution, null);
-        recycler_distribution = view.findViewById(R.id.recycler_distribution);
-        total_portion = view.findViewById(R.id.total_portion);
-        equal_distribution = view.findViewById(R.id.equal_distribution);
-        rank_distribution = view.findViewById(R.id.rank_distribution);
-        confirm = view.findViewById(R.id.confirm);
-
-        equal_distribution.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                portion_id = 0;
-                portionList = Utils.makeBalancePortion(selected_item.size() + 1);
-                setRecyclerViewPortion(portionList);
-            }
-        });
-        rank_distribution.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                portion_id = 1;
-                portionList = Utils.makeRankPriorityPortion(selected_item.size() + 1);
-                setRecyclerViewPortion(portionList);
-            }
-        });
-        confirm.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (Utils.is100(portionList)) {
-                    realm.executeTransaction(new Realm.Transaction() {
-                        @Override
-                        public void execute(Realm realm) {
-                            MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
-                            RealmList<ItemPortion> realmList = new RealmList<>();
-                            for(int i =0; i<portionList.size(); i++){
-                                ItemPortion portion = realm.createObject(ItemPortion.class);
-                                portion.setPortion(portionList.get(i));
-                                realmList.add(portion);
-
-
-                            }
-                            item.setPortionList(realmList);
-                            custom_portion.setTextColor(context.getResources().getColor(R.color.colorSuccess));
-
-                        }
-                    });
-                    bottomSheetDialog.dismiss();
-                } else {
-                    Toast.makeText(context, "배분비율이 맞지 않습니다.", Toast.LENGTH_LONG).show();
-
-                }
-            }
-        });
-
-        //String fintech_num = context.getSharedPreferences("OpenBanking", MODE_PRIVATE).getString("fintech_num", "");
-
-
-        MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
-        Log.d("포션",item.getPortionList().size()+"portion");
-        Log.d("포션",selected_item.size()+"selected");
-        if(item.getPortionList().size()==selected_item.size()+1) {
-            portionList.clear();
-            for (int i = 0; i < item.getPortionList().size(); i++) {
-                int portion = item.getPortionList().get(i).getPortion();
-                portionList.add(portion);
-            }
-        }else{
-            portionList = Utils.makeRankPriorityPortion(selected_item.size() + 1);
-
-        }
-        setRecyclerViewPortion(portionList);
-
-
-        bottomSheetDialog = new BottomSheetDialog(context);
-        bottomSheetDialog.setContentView(view);
-        bottomSheetDialog.show();
-    }
-
-    private void setRecyclerViewPortion(List<Integer> portionList) {
-            onCheckPortion(portionList);
-            recyclerDistributionAdapter = new RecyclerDistributionAdapter(context, selected_item, this, portionList);
-            recycler_distribution.setLayoutManager(new LinearLayoutManager(context));
-            recycler_distribution.setAdapter(recyclerDistributionAdapter);
-
-    }
 
     @Override
     public void onStart() {
@@ -337,6 +255,7 @@ public class MultiModeFragment extends Fragment implements RecyclerFriendsAdapte
         RealmResults<ItemForFriends> realmResults2 = realm.where(ItemForFriends.class).findAll();
         //setupRecyclerView(realmResults2);
     }
+
 
 
     public void requestFriends() {
@@ -494,7 +413,7 @@ public class MultiModeFragment extends Fragment implements RecyclerFriendsAdapte
     }
 
     @Override
-    public void onRefreshSelect(int position) {
+    public void onRefreshSelect(int position, int size) {
         listItem.get(selected_item.get(position).getPosition()).setSelected(false);
         selected_item.remove(position);
         selectedAdapter.notifyItemRemoved(position);
@@ -508,11 +427,19 @@ public class MultiModeFragment extends Fragment implements RecyclerFriendsAdapte
             }
         });
 
+        if (size == 0) {
+
+
+
+        } else {
+            confirmed_recycler.setVisibility(View.VISIBLE);
+        }
+
 
     }
 
     @Override
-    public void onAttach(@NonNull  Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         try {
             onResetAmountFromMultiListener = (OnResetAmountFromMultiListener) context;
@@ -520,12 +447,18 @@ public class MultiModeFragment extends Fragment implements RecyclerFriendsAdapte
             throw new ClassCastException(context.toString()
                     + " must implement TextClicked");
         }
+
+        if (context instanceof Activity) {
+            this.context = (Activity) context;
+        }
     }
+
     @Override
     public void onDetach() {
         onResetAmountFromMultiListener = null; // => avoid leaking, thanks @Deepscorn
         super.onDetach();
     }
+
     @Override
     public void onCheckPortion(List<Integer> list) {
         int sum = 0;
@@ -544,7 +477,7 @@ public class MultiModeFragment extends Fragment implements RecyclerFriendsAdapte
         total_portion.setText(sum + "%");
     }
 
-    public interface OnResetAmountFromMultiListener{
+    public interface OnResetAmountFromMultiListener {
         void onResetAmountFromMulti();
     }
 }

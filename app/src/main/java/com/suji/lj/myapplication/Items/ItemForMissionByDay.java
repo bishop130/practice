@@ -3,9 +3,13 @@ package com.suji.lj.myapplication.Items;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import io.realm.RealmList;
 import io.realm.RealmObject;
 
-public class ItemForMissionByDay extends RealmObject implements Parcelable {
+public class ItemForMissionByDay {
 
 
     String title;
@@ -18,71 +22,34 @@ public class ItemForMissionByDay extends RealmObject implements Parcelable {
     boolean activation;
     String mission_id;
     String date_time;
-    String mission_mode;
+    boolean single_mode;
+    String multi_code;
+    List<ItemForFriendByDay> friendByDayList = new ArrayList<>();
 
-    public ItemForMissionByDay() {
+
+    public List<ItemForFriendByDay> getFriendByDayList() {
+        return friendByDayList;
     }
 
-    public ItemForMissionByDay(Parcel in) {
-        this.title = in.readString();
-        this.address = in.readString();
-        this.date = in.readString();
-        this.time = in.readString();
-        this.lat = in.readDouble();
-        this.lng = in.readDouble();
-        this.success = in.readByte() != 0;
-        this.activation = in.readByte() != 0;
-        this.mission_id = in.readString();
-        this.date_time = in.readString();
-        this.mission_mode = in.readString();
+    public void setFriendByDayList(List<ItemForFriendByDay> friendByDayList) {
+        this.friendByDayList = friendByDayList;
+    }
 
+    public String getMulti_code() {
+        return multi_code;
+    }
 
+    public void setMulti_code(String multi_code) {
+        this.multi_code = multi_code;
     }
 
 
-    @Override
-    public int describeContents() {
-        return 0;
+    public boolean isSingle_mode() {
+        return single_mode;
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(this.title);
-        dest.writeString(this.address);
-        dest.writeString(this.date);
-        dest.writeString(this.time);
-
-        dest.writeDouble(this.lat);
-        dest.writeDouble(this.lng);
-        dest.writeByte((byte) (this.success ? 1 : 0));
-        dest.writeByte((byte) (this.activation ? 1 : 0));
-        dest.writeString(this.mission_id);
-        dest.writeString(this.date_time);
-        dest.writeString(this.mission_mode);
-
-    }
-
-    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
-
-        @Override
-        public ItemForMissionByDay createFromParcel(Parcel in) {
-            return new ItemForMissionByDay(in);
-        }
-
-        @Override
-        public ItemForMissionByDay[] newArray(int size) {
-            // TODO Auto-generated method stub
-            return new ItemForMissionByDay[size];
-        }
-
-    };
-
-    public String getMission_mode() {
-        return mission_mode;
-    }
-
-    public void setMission_mode(String mission_mode) {
-        this.mission_mode = mission_mode;
+    public void setSingle_mode(boolean single_mode) {
+        this.single_mode = single_mode;
     }
 
     public boolean isActivation() {

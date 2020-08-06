@@ -2,8 +2,16 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/wall_paper2"
     android:orientation="vertical">
+
+    <androidx.appcompat.widget.Toolbar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/toolbar"
+        app:fontFamily="@font/nexon_level2_gothic"
+        android:background="@color/White"/>
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tab_ly_friends"

@@ -12,7 +12,7 @@
         android:textSize="20sp"
         android:layout_marginStart="20dp"
         android:layout_marginTop="12dp"
-        android:textStyle="bold"
+        android:fontFamily="@font/nexon_level2_gothic"
         />
     <LinearLayout
         android:layout_width="match_parent"
@@ -27,7 +27,7 @@
         >
 
         <TextView
-            android:id="@+id/equal_distribution"
+            android:id="@+id/tvEqualDistribution"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="균등분배"
@@ -37,7 +37,7 @@
             android:padding="8dp"
             android:textSize="14sp"/>
         <TextView
-            android:id="@+id/rank_distribution"
+            android:id="@+id/tvRankDistribution"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="순위가중분배"
@@ -77,7 +77,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/recycler_distribution"/>
+        android:id="@+id/rvDistribution"/>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -88,7 +88,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="5"/>
         <TextView
-            android:id="@+id/total_portion"
+            android:id="@+id/tvTotalPortion"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="0%"
@@ -103,7 +103,8 @@
             android:layout_weight="1"/>
     </LinearLayout>
     <TextView
-        android:id="@+id/confirm"
+        android:fontFamily="@font/nexon_level2_gothic"
+        android:id="@+id/tvConfirm"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="확인"

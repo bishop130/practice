@@ -5,8 +5,9 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 
-import com.suji.lj.myapplication.Fragments.FriendsListFragment;
-import com.suji.lj.myapplication.Fragments.MultiRequestFragment;
+import com.suji.lj.myapplication.Fragments.AddFriendFragment;
+import com.suji.lj.myapplication.Fragments.ReceivedFriendRequestFragment;
+import com.suji.lj.myapplication.Fragments.SendFriendRequestFragment;
 
 public class FriendPagerAdapter extends FragmentStatePagerAdapter {
 
@@ -23,14 +24,21 @@ public class FriendPagerAdapter extends FragmentStatePagerAdapter {
     public Fragment getItem(int position) {
         switch (position) {
             case 0:
-                MultiRequestFragment tab1 = new MultiRequestFragment();
+                AddFriendFragment tab1 = new AddFriendFragment();
                 return tab1;
+
             case 1:
-                FriendsListFragment tab2 = new FriendsListFragment();
+                ReceivedFriendRequestFragment tab2 = new ReceivedFriendRequestFragment();
                 return tab2;
-            default:
-                MultiRequestFragment tab3 = new MultiRequestFragment();
+
+            case 2:
+                SendFriendRequestFragment tab3 = new SendFriendRequestFragment();
                 return tab3;
+
+
+            default:
+                AddFriendFragment tab = new AddFriendFragment();
+                return tab;
         }
 
     }

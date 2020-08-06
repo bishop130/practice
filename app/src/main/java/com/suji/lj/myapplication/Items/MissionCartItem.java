@@ -19,6 +19,8 @@ public class MissionCartItem extends RealmObject {
     String date;
     String address;
     String mission_id;
+    int radius;
+
     RealmList<ItemForDateTime> calendarDayList = new RealmList<>();
     RealmList<ItemPortion> portionList = new RealmList<>();
     RealmList<ContactItem> contactList = new RealmList<>();
@@ -36,9 +38,12 @@ public class MissionCartItem extends RealmObject {
     int mission_mode;
 
     int single_point;
-    int single_amount;
+    int single_penalty;
+    int single_total;
+
     int multi_point;
-    int multi_amount;
+    int multi_penalty;
+    int multi_total;
     int pay_method;
 
 
@@ -46,6 +51,14 @@ public class MissionCartItem extends RealmObject {
 
     public MissionCartItem(){}
 
+
+    public int getRadius() {
+        return radius;
+    }
+
+    public void setRadius(int radius) {
+        this.radius = radius;
+    }
 
     public String getMission_id() {
         return mission_id;
@@ -92,12 +105,12 @@ public class MissionCartItem extends RealmObject {
         this.single_point = single_point;
     }
 
-    public int getSingle_amount() {
-        return single_amount;
+    public int getSingle_penalty() {
+        return single_penalty;
     }
 
-    public void setSingle_amount(int single_amount) {
-        this.single_amount = single_amount;
+    public void setSingle_penalty(int single_penalty) {
+        this.single_penalty = single_penalty;
     }
 
     public int getMulti_point() {
@@ -108,12 +121,29 @@ public class MissionCartItem extends RealmObject {
         this.multi_point = multi_point;
     }
 
-    public int getMulti_amount() {
-        return multi_amount;
+
+    public int getSingle_total() {
+        return single_total;
     }
 
-    public void setMulti_amount(int multi_amount) {
-        this.multi_amount = multi_amount;
+    public void setSingle_total(int single_total) {
+        this.single_total = single_total;
+    }
+
+    public int getMulti_penalty() {
+        return multi_penalty;
+    }
+
+    public void setMulti_penalty(int multi_penalty) {
+        this.multi_penalty = multi_penalty;
+    }
+
+    public int getMulti_total() {
+        return multi_total;
+    }
+
+    public void setMulti_total(int multi_total) {
+        this.multi_total = multi_total;
     }
 
     public void setMission_mode(int mission_mode) {

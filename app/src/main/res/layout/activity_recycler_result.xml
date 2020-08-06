@@ -21,7 +21,6 @@
 
 
         <RelativeLayout
-            android:id="@+id/map_view_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="-24dp"
@@ -154,7 +153,6 @@
                 android:visibility="visible">
 
                 <LinearLayout
-                    android:id="@+id/tv_MissionTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="40dp"

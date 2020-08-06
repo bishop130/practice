@@ -1,10 +1,15 @@
 package com.suji.lj.myapplication.Fragments;
 
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,20 +19,35 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.ToggleButton;
 
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.suji.lj.myapplication.Adapters.MissionRecyclerAdapter;
-import com.suji.lj.myapplication.Adapters.RecyclerMissionProgressAdapter;
+import com.prolificinteractive.materialcalendarview.CalendarDay;
+import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
+import com.prolificinteractive.materialcalendarview.format.TitleFormatter;
+import com.suji.lj.myapplication.Adapters.RecyclerMissionByMissionAdapter;
+import com.suji.lj.myapplication.Adapters.RecyclerMissionDayAdapter;
 import com.suji.lj.myapplication.Adapters.RecyclerViewDivider;
-import com.suji.lj.myapplication.Items.ItemForDateTimeByList;
+import com.suji.lj.myapplication.Items.ItemForMissionByDay;
+import com.suji.lj.myapplication.Items.ItemForMultiKey;
 import com.suji.lj.myapplication.Items.MissionInfoList;
 import com.suji.lj.myapplication.R;
+import com.suji.lj.myapplication.SingleModeActivity;
+import com.suji.lj.myapplication.Utils.Account;
+import com.suji.lj.myapplication.Utils.Utils;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -41,14 +61,17 @@ public class MissionByMissionFragment extends Fragment {
 
 
     private String user_id;
-    private Context mContext;
     private RecyclerView recyclerView;
     private ProgressBar loading_panel;
     private SwipeRefreshLayout ly_swipe_refresh;
+    DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+    Activity activity;
+    int numOfData = 0;
+    AlertDialog loading_dialog;
 
-    public MissionByMissionFragment() {
-        // Required empty public constructor
-    }
+    List<MissionInfoList> singleList = new ArrayList<>();
+    RelativeLayout rl_is_empty;
+    TextView tv_add_mission;
 
 
     @Override
@@ -59,49 +82,106 @@ public class MissionByMissionFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerView);
         loading_panel = view.findViewById(R.id.loadingPanel);
         ly_swipe_refresh = view.findViewById(R.id.ly_swipe_refresh);
-        recyclerView.addItemDecoration(new RecyclerViewDivider(28));
-        ly_swipe_refresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        rl_is_empty = view.findViewById(R.id.rl_is_empty);
+        tv_add_mission = view.findViewById(R.id.tv_add_mission);
+
+
+        user_id = Account.getUserId(activity);
+
+        tv_add_mission.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onRefresh() {
-                getMissionData();
-                ly_swipe_refresh.setRefreshing(false);
+            public void onClick(View v) {
+                Intent intent = new Intent(activity, SingleModeActivity.class);
+                startActivity(intent);
+
             }
         });
 
+        Utils.drawRecyclerViewDivider(activity, recyclerView);
+        //recyclerView.addItemDecoration(new RecyclerViewDivider(28));
+        ly_swipe_refresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
 
-        user_id = mContext.getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
+                querySingleData();
+                loading_panel.setVisibility(View.VISIBLE);
+                ly_swipe_refresh.setRefreshing(false);
 
-        getMissionData();
+            }
+        });
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setCancelable(false); // if you want user to wait for some process to finish,
+        builder.setView(R.layout.layout_progress);
+        loading_dialog = builder.create();
+
+        if (loading_dialog.getWindow() != null) {
+            loading_dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+        }
+        querySingleData();
 
 
         return view;
     }
 
-    private void getMissionData(){
-        FirebaseDatabase.getInstance().getReference().child("user_data").child(user_id).child("mission_info_list").addValueEventListener(new ValueEventListener() {
+    private void querySingleData() {
+
+        databaseReference.child("user_data").child(user_id).child("mission_info_list").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 //infoLists.clear();
-                List<MissionInfoList> list = new ArrayList<>();
-                for (DataSnapshot data : dataSnapshot.getChildren()) {
-                    MissionInfoList missionInfoList = data.getValue(MissionInfoList.class);
-                    list.add(missionInfoList);
-                    Log.d("아이템바이", data.getKey());
-                }
-                //setRecyclerViewByMission(keyList, list);
-                Collections.sort(list, new Comparator<MissionInfoList>() {
-                    @Override
-                    public int compare(MissionInfoList o1, MissionInfoList o2) {
-                        return o1.getMin_date().compareTo(o2.getMin_date());
-                    }
-                });
-                Collections.reverse(list);
-                MissionRecyclerAdapter adapter = new MissionRecyclerAdapter(mContext,list);
-                recyclerView.setLayoutManager(new LinearLayoutManager(mContext));
-                recyclerView.setAdapter(adapter);
+                singleList = new ArrayList<>();
+                numOfData = (int) dataSnapshot.getChildrenCount();
 
-                recyclerView.setVisibility(View.VISIBLE);
                 loading_panel.setVisibility(View.GONE);
+                if (dataSnapshot.exists()) {
+
+                    for (DataSnapshot data : dataSnapshot.getChildren()) {
+                        Boolean isSingle = data.child("single_mode").getValue(Boolean.class);
+                        if (!isSingle) {
+                            String key = data.child("mission_id").getValue(String.class);
+                            databaseReference.child("multi_data").orderByChild("mission_id").equalTo(key).addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    if (snapshot.exists()) {
+                                        for (DataSnapshot shot : snapshot.getChildren()) {
+                                            MissionInfoList missionInfoList = shot.child("mission_info_list").getValue(MissionInfoList.class);
+                                            singleList.add(missionInfoList);
+
+
+                                        }
+
+
+                                        update();
+                                    }
+
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                }
+                            });
+                        } else {
+                            MissionInfoList missionInfoList = data.getValue(MissionInfoList.class);
+                            singleList.add(missionInfoList);
+
+
+                        }
+
+
+                    }
+                    //setRecyclerViewByMission(keyList, list);
+                    update();
+
+                } else {
+
+                    rl_is_empty.setVisibility(View.VISIBLE);
+                    update();
+
+
+                }
 
             }
 
@@ -112,13 +192,53 @@ public class MissionByMissionFragment extends Fragment {
         });
 
     }
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
 
-        Log.d("홈프레그", "onAttach_SearchFragment");
-        mContext = context;
+    private void update() {
+
+        if (numOfData == singleList.size()) {
+
+            rl_is_empty.setVisibility(View.GONE);
+            ly_swipe_refresh.setRefreshing(false);
+            Collections.sort(singleList, new Comparator<MissionInfoList>() {
+                @Override
+                public int compare(MissionInfoList o1, MissionInfoList o2) {
+                    return o1.getMin_date().compareTo(o2.getMin_date());
+                }
+            });
+            Collections.reverse(singleList);
+            Log.d("들어와", "업데이트");
+            RecyclerMissionByMissionAdapter adapter = new RecyclerMissionByMissionAdapter(activity, singleList, loading_dialog);
+            recyclerView.setLayoutManager(new LinearLayoutManager(activity));
+            recyclerView.setAdapter(adapter);
+            Log.d("들어와", "여기요");
+            recyclerView.setVisibility(View.VISIBLE);
+            loading_panel.setVisibility(View.GONE);
+        }
+
 
     }
 
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if (context instanceof Activity) {
+            this.activity = (Activity) context;
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d("로딩", "onpause");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d("로딩", "onresume");
+        if (loading_dialog.isShowing()) {
+            loading_dialog.dismiss();
+        }
+    }
 }

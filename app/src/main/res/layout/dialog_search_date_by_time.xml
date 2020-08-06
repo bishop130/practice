@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20sp"
+            android:text="기간조회"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            app:fontFamily="@font/nexon_level2_gothic" />
+
+        <LinearLayout
+            android:id="@+id/ly_select"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            >
+
+
+            <androidx.appcompat.widget.AppCompatToggleButton
+                android:id="@+id/tg_one_month"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:background="@drawable/rectangle_stroke"
+                android:gravity="center"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:textColor="@color/colorPrimary"
+                android:textOff="1개월"
+                android:textOn="1개월" />
+
+            <androidx.appcompat.widget.AppCompatToggleButton
+                android:id="@+id/tg_three_month"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="3"
+                android:background="@drawable/rectangle_stroke"
+                android:gravity="center"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+
+                android:textColor="@color/colorPrimary"
+                android:textOff="3개월"
+                android:textOn="3개월" />
+
+
+            <androidx.appcompat.widget.AppCompatToggleButton
+                android:id="@+id/tg_six_month"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="3"
+                android:background="@drawable/rectangle_stroke"
+                android:gravity="center"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+
+                android:textColor="@color/colorPrimary"
+                android:textOff="6개월"
+                android:textOn="6개월" />
+
+            <androidx.appcompat.widget.AppCompatToggleButton
+                android:id="@+id/tg_pick_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="3"
+                android:background="@drawable/rectangle_stroke"
+                android:gravity="center"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:textColor="@color/colorPrimary"
+                android:textOff="선택"
+                android:textOn="선택" />
+
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/ly_select"
+            android:orientation="vertical">
+
+            <com.prolificinteractive.materialcalendarview.MaterialCalendarView
+                android:id="@+id/calendar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="12dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="시작일" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="20.09.0" />
+
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/rl_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@color/colorPrimary"
+            android:gravity="center"
+            android:paddingStart="80dp"
+            android:paddingEnd="80dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="조회"
+                android:textColor="@color/White"
+                android:textSize="20sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+
+</RelativeLayout>

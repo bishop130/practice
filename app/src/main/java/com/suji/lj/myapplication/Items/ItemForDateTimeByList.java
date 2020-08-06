@@ -1,67 +1,26 @@
 package com.suji.lj.myapplication.Items;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ItemForDateTimeByList implements Serializable {
-    String date;
-    String time;
-    boolean success;
     String time_stamp;
-    int year;
-    int month;
-    int day;
-    int hour;
-    int min;
+    boolean success;
+    String date_time;
+    List<ItemForFriendByDay> friendByDayList;
 
     public ItemForDateTimeByList(){
 
     }
 
 
-    public ItemForDateTimeByList(String date, String time, boolean success) {
-        this.date = date;
-        this.time = time;
-        this.success = success;
+    public List<ItemForFriendByDay> getFriendByDayList() {
+        return friendByDayList;
     }
 
-    public int getYear() {
-        return year;
-    }
-
-    public void setYear(int year) {
-        this.year = year;
-    }
-
-    public int getMonth() {
-        return month;
-    }
-
-    public void setMonth(int month) {
-        this.month = month;
-    }
-
-    public int getDay() {
-        return day;
-    }
-
-    public void setDay(int day) {
-        this.day = day;
-    }
-
-    public int getHour() {
-        return hour;
-    }
-
-    public void setHour(int hour) {
-        this.hour = hour;
-    }
-
-    public int getMin() {
-        return min;
-    }
-
-    public void setMin(int min) {
-        this.min = min;
+    public void setFriendByDayList(List<ItemForFriendByDay> friendByDayList) {
+        this.friendByDayList = friendByDayList;
     }
 
     public String getTime_stamp() {
@@ -72,22 +31,6 @@ public class ItemForDateTimeByList implements Serializable {
         this.time_stamp = time_stamp;
     }
 
-    public String getDate() {
-        return date;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
-    }
-
-    public String getTime() {
-        return time;
-    }
-
-    public void setTime(String time) {
-        this.time = time;
-    }
-
     public boolean isSuccess() {
         return success;
     }
@@ -95,7 +38,16 @@ public class ItemForDateTimeByList implements Serializable {
     public void setSuccess(boolean success) {
         this.success = success;
     }
-/*
+
+    public String getDate_time() {
+        return date_time;
+    }
+
+    public void setDate_time(String date_time) {
+        this.date_time = date_time;
+    }
+
+    /*
     @Override
     public int compareTo(ItemForDateTimeByList o) {
         if (Integer.valueOf(this.getDate()+this.getTime()) < Integer.valueOf(o.getDate()+o.getTime())) {

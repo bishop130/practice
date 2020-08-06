@@ -14,27 +14,72 @@ public class MissionInfoList implements Serializable {
     public String mission_title;
     public String address;
     public boolean success;
-    public boolean valid;
     public double lat;
     public double lng;
     public List<ContactItem> friends_selected_list;
+    List<ItemForFriendByDay> friendByDayList;
     public Map<String, ItemForDateTimeByList> mission_dates;
+    List<ItemPortion> itemPortionList;
     String min_date;
     String max_date;
     String mission_id;
     String bank_name;
     String account_num;
     int penalty_amount;
+    int penalty;
     String account_holder;
-    int mission_mode;
+    boolean single_mode;
+    int failed_count;
+    int radius;
 
 
-    public int getMission_mode() {
-        return mission_mode;
+    public int getRadius() {
+        return radius;
     }
 
-    public void setMission_mode(int mission_mode) {
-        this.mission_mode = mission_mode;
+    public void setRadius(int radius) {
+        this.radius = radius;
+    }
+
+    public List<ItemPortion> getItemPortionList() {
+        return itemPortionList;
+    }
+
+    public void setItemPortionList(List<ItemPortion> itemPortionList) {
+        this.itemPortionList = itemPortionList;
+    }
+
+    public List<ItemForFriendByDay> getFriendByDayList() {
+        return friendByDayList;
+    }
+
+    public void setFriendByDayList(List<ItemForFriendByDay> friendByDayList) {
+        this.friendByDayList = friendByDayList;
+    }
+
+    public int getPenalty() {
+        return penalty;
+    }
+
+    public void setPenalty(int penalty) {
+        this.penalty = penalty;
+    }
+
+    public int getFailed_count() {
+        return failed_count;
+    }
+
+    public void setFailed_count(int failed_count) {
+        this.failed_count = failed_count;
+    }
+
+
+    public boolean isSingle_mode() {
+        return single_mode;
+    }
+
+    public void setSingle_mode(boolean single_mode) {
+        this.single_mode = single_mode;
     }
 
     public String getAccount_holder() {
@@ -83,14 +128,6 @@ public class MissionInfoList implements Serializable {
 
     public void setFriends_selected_list(List<ContactItem> friends_selected_list) {
         this.friends_selected_list = friends_selected_list;
-    }
-
-    public boolean isValid() {
-        return valid;
-    }
-
-    public void setValid(boolean valid) {
-        this.valid = valid;
     }
 
     public String getMin_date() {
@@ -149,6 +186,7 @@ public class MissionInfoList implements Serializable {
         this.lng = lng;
     }
 
+
     public Map<String, ItemForDateTimeByList> getMission_dates() {
         return mission_dates;
     }
@@ -156,6 +194,4 @@ public class MissionInfoList implements Serializable {
     public void setMission_dates(Map<String, ItemForDateTimeByList> mission_dates) {
         this.mission_dates = mission_dates;
     }
-
-
 }

@@ -3,38 +3,6 @@
     <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
 
 
-    <string-array name="stepLabels">
-        <item>Approval</item>
-        <item>333</item>
-        <item>222</item>
-        <item>111</item>
-        <item>0999</item>
-
-    </string-array>
-
-
-    <string name="txt_sun">일</string>
-    <string name="txt_mon">월</string>
-    <string name="txt_tue">화</string>
-    <string name="txt_wed">수</string>
-    <string name="txt_thu">목</string>
-    <string name="txt_fri">금</string>
-    <string name="txt_sat">토</string>
-
-
-    <string name="default_notification_channel_name" translatable="true">Weather</string>
-    <string name="form_hint_title">제목을 입력하세요 (필수)</string>
-    <string name="form_empty_field">(Empty)</string>
-    <string name="form_sending_data_message">추가하는 중</string>
-    <string name="form_discard_question">작성을 취소하시겠습니까?</string>
-    <string name="form_info_will_be_lost">이 페이지를 벗어나면 마지막 저장 후 수정된 내용은 저장되지 않습니다.</string>
-    <string name="form_discard_cancel">취소</string>
-    <string name="form_discard">나가기</string>
-    <string name="add_alarm">확인</string>
-    <string name="error_alarm_name_min_characters">최소 1글자 이상을 입력하세요</string>
-
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="question_mark">\?</string>
     <string name="content_description">error\?</string>
 
@@ -44,35 +12,7 @@
     <string name="checked_time">시간 확인</string>
     <string name="checked_date">날짜 확인</string>
     <string name="success">성공</string>
-    <string name="first_text">Network Error.</string>
-    <string name="bug">현재 개발자가 인지하고 있고 개선해 나갈 문제들 \n\n\n
-
-
-mapview를 2개 이상 중복 호출할 경우 앱이 중지되는 문제\n\n
-
-목표장소 선택시 간헐적으로 마지막 선택 바로 전 좌표값이 호출되는 문제\n\n
-
-네트워크 상태가 전환될 때 http post error로 인해 간헐적으로 앱이 중지되는 문제\n\n
-
-자동위치등록이 실행중일때 배터리 소비 효율 문제\n\n
-
-Android 9.0 (Pie)이상부터 적용되는 http 지원종료 관련 문제\n\n
-
-자동위치등록 실행시 안드로이드 설정에서 위치권한을 꺼도 중지되지 않는 문제\n\n
-
-Android 8.0 (Oreo)이상에서 Foreground가 아닌 Service가 Doze모드에서 종료되는 문제\n\n
-
-Android 8.0 (Oreo)이상에서 Foreground로 실행중인 Service가 없을때 wakelock이 작동하지 않는 문제\n\n
-
-Doze모드가 길어질 경우 다음 알람이 죽는 문제\n\n
-
-디바이스 설정에서 절전모드 실행시 foreground service가 작동상태를 파악하지 못하는 문제\n\n
-
-서버 트래픽 효율성 문제\n\n
-
-카카오 User Token 호출량 문제 \n\n
-    디테일 액티비티에서 뒤로가면 약속 레이아웃이 사라지는 현상\n\n
-    악성 사용자의 부정결제 방지를 위한 구글 리시트 검증</string>
+    <string name="icon">icon</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

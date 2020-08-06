@@ -47,7 +47,7 @@ public class RecyclerInvitationDateTimeAdapter extends RecyclerView.Adapter<Recy
         String time = list.get(i).getTime();
 
         holder.date.setText(DateTimeUtils.makeDateForHuman(date));
-        holder.time.setText(DateTimeUtils.makeTimeForHuman(time));
+        holder.time.setText(DateTimeUtils.makeTimeForHuman(time,"HHmm"));
 
     }
 

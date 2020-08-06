@@ -48,7 +48,7 @@ public class CalendarSelectFragment extends Fragment implements RecyclerDateTime
     TextView wrong_time_tv;
     TextView common_time;
 
-    Switch no_time_switch;
+
     Calendar calendar = Calendar.getInstance();
     int selected_year = calendar.get(Calendar.YEAR);
     int selected_month = calendar.get(Calendar.MONTH) + 1;
@@ -69,7 +69,6 @@ public class CalendarSelectFragment extends Fragment implements RecyclerDateTime
         materialCalendarView = view.findViewById(R.id.material_calendarView);
         date_time_recyclerView = view.findViewById(R.id.recycler_date_time);
         ly_date_error = view.findViewById(R.id.ly_date_error);
-        no_time_switch = view.findViewById(R.id.no_time_switch);
         common_time = view.findViewById(R.id.common_time);
         realm = Realm.getDefaultInstance();
         MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
@@ -110,7 +109,7 @@ public class CalendarSelectFragment extends Fragment implements RecyclerDateTime
 
 
                 if (selected) {
-                    Log.d("사이즈","선택");
+                    Log.d("사이즈", "선택");
 
                     realm.executeTransaction(new Realm.Transaction() {
                         @Override
@@ -143,12 +142,11 @@ public class CalendarSelectFragment extends Fragment implements RecyclerDateTime
 
 
                             if (list.size() == 0) {
-                                Log.d("사이즈0",list.size()+"");
+                                Log.d("사이즈0", list.size() + "");
                                 list.add(item);
                                 recyclerDateTimeAdapter.notifyItemInserted(0);
-                            }
-                            else if (list.size() == 1) {
-                                Log.d("사이즈1",list.size()+"");
+                            } else if (list.size() == 1) {
+                                Log.d("사이즈1", list.size() + "");
                                 if (DateTimeFormatter.dateParser(list.get(0).getDate(), "yyyyMMdd").getTime() > time) {
                                     list.add(0, item);
                                     recyclerDateTimeAdapter.notifyItemInserted(0);
@@ -158,24 +156,24 @@ public class CalendarSelectFragment extends Fragment implements RecyclerDateTime
                                     recyclerDateTimeAdapter.notifyItemInserted(1);
                                 }
                             } else {
-                                Log.d("사이즈2",list.size()+"");
+                                Log.d("사이즈2", list.size() + "");
                                 for (int i = 1; i < list.size(); i++) {
-                                    Log.d("사이즈2","for");
+                                    Log.d("사이즈2", "for");
                                     if (time > DateTimeFormatter.dateParser(list.get(i - 1).getDate(), "yyyyMMdd").getTime()) {
                                         if (time < DateTimeFormatter.dateParser(list.get(i).getDate(), "yyyyMMdd").getTime()) {
-                                            Log.d("사이즈2","문제가되는곳1");
+                                            Log.d("사이즈2", "문제가되는곳1");
                                             list.add(i, item);
                                             recyclerDateTimeAdapter.notifyItemInserted(i);
                                             break;
                                         } else if (i == list.size() - 1) {
-                                            Log.d("사이즈2","문제가되는곳2");
+                                            Log.d("사이즈2", "문제가되는곳2");
                                             list.add(i + 1, item);
                                             recyclerDateTimeAdapter.notifyItemInserted(i + 1);
                                             break;
                                         }
 
                                     } else {
-                                        Log.d("사이즈2","문제가되는곳3");
+                                        Log.d("사이즈2", "문제가되는곳3");
                                         list.add(i - 1, item);
                                         recyclerDateTimeAdapter.notifyItemInserted(i - 1);
                                         break;
@@ -217,20 +215,7 @@ public class CalendarSelectFragment extends Fragment implements RecyclerDateTime
             }
         });
 
-        no_time_switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
-
-                if (isChecked) {
-
-
-                } else {
-
-
-                }
-            }
-        });
         setSelectedDate();
 
 
@@ -315,43 +300,9 @@ public class CalendarSelectFragment extends Fragment implements RecyclerDateTime
             }
         });
     }
-    /*
-    private void checkDateTime() {
-        long diff = 0;
-        long now = System.currentTimeMillis();
-        DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.KOREA);
-        String input_time = min_date + " " + hour + ":" + min;
-        Log.d("싱글", input_time + "  inputdate");
-        try {
-            Date input_date = sdf.parse(input_time);
-            diff = (input_date.getTime() - now) / 60000;
-            Log.d("싱글", now + "\n" + input_date.getTime() + "\n" + diff);
-        } catch (ParseException e) {
-            e.getErrorOffset();
-        }
-
-        if (diff >= 30) {
-
-            wrong_time_tv.setVisibility(View.GONE);
-        } else {
-
-            if (!no_time_switch.isChecked()) {
-
-                wrong_time_tv.setVisibility(View.GONE);
-            } else {
-
-                wrong_time_tv.setVisibility(View.VISIBLE);
-            }
-
-        }
-
-
-    }
-
-     */
 
     @Override
-    public void onAttach(@NonNull  Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         try {
             onResetAmountListener = (OnResetAmountFromCalendarListener) context;
@@ -360,13 +311,14 @@ public class CalendarSelectFragment extends Fragment implements RecyclerDateTime
                     + " must implement TextClicked");
         }
     }
+
     @Override
     public void onDetach() {
         onResetAmountListener = null; // => avoid leaking, thanks @Deepscorn
         super.onDetach();
     }
 
-    public interface OnResetAmountFromCalendarListener{
+    public interface OnResetAmountFromCalendarListener {
         void onResetAmountFromCalendar();
 
 

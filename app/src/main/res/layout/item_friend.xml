@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/lyContainer"
+    android:padding="12dp">
+
+    <ImageView
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:id="@+id/ivFriendImage"/>
+    <TextView
+        android:id="@+id/tvFriendName"
+        android:layout_marginStart="12dp"
+        android:layout_gravity="center_vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/nexon_level2_gothic"
+        android:textColor="@color/black"
+        android:text="친구이름"/>
+
+
+
+
+</LinearLayout>

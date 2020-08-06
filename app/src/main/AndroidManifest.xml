@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.suji.lj.myapplication">
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -12,19 +13,31 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:name=".Adapters.GlobalApplication"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@drawable/carrot_and_stick"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:usesCleartextTraffic="true">
-        <activity android:name=".PaymentActivity"></activity>
+        android:usesCleartextTraffic="true"
+        tools:replace="android:allowBackup">
+        <activity android:name=".SampleLoginActivity" />
+        <activity android:name=".SelectKakaoFriendActivity" />
+        <activity android:name=".MissionDetailMultiActivity" />
+        <activity android:name=".FriendSearchActivity" />
+        <activity android:name=".TransactionActivity" />
+        <activity android:name=".FindPasswordActivity" />
+        <activity android:name=".SecuritySettingActivity" />
+        <activity android:name=".SecurityActivity" />
+        <activity
+            android:name=".WithDrawActivity"
+            android:windowSoftInputMode="adjustPan|adjustResize" />
+        <activity android:name=".PaymentActivity" />
         <activity android:name=".MissionCheckActivity" />
-        <activity android:name=".Main2Activity" />
         <activity android:name=".InvitationInfoActivity" />
         <activity android:name=".MultiModeDetailActivity" />
         <activity android:name=".FriendsActivity" />
@@ -32,7 +45,9 @@
         <activity android:name=".AccountActivity" />
         <activity android:name=".DetailSettingActivity" />
         <activity android:name=".OpenBankingActivity" />
-        <activity android:name=".SingleModeActivity" />
+        <activity
+            android:name=".SingleModeActivity"
+            android:screenOrientation="portrait" />
         <activity android:name=".FAQActivity" />
 
         <uses-library
@@ -46,8 +61,9 @@
         <activity android:name=".AutoLocationSetting" />
         <activity android:name=".MissionDetailActivity" />
         <activity
-            android:name=".MainActivity"
-            android:launchMode="singleTop">
+            android:name=".SplashActivity"
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />
@@ -55,7 +71,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SampleLoginActivity" />
+        <activity android:name=".MainActivity" />
         <activity android:name=".ContactActivity" />
         <activity android:name=".DaumMapActivity" />
         <activity android:name=".RecyclerResultActivity" />

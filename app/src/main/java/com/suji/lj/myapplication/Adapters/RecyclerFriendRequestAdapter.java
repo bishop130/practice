@@ -59,15 +59,17 @@ public class RecyclerFriendRequestAdapter extends RecyclerView.Adapter<RecyclerF
     @Override
     public void onBindViewHolder(@NonNull RecyclerFriendRequestAdapter.ViewHolder holder, int i) {
 
+
+        String friend_image = list.get(i).getThumnail_img();
         holder.name.setText(list.get(i).getUser_name());
 
         holder.thumbnail.setBackground(new ShapeDrawable(new OvalShape()));
         holder.thumbnail.setClipToOutline(true);
 
-        if (!Utils.isEmpty(list.get(i).getThumnail_img())) {
+        if (friend_image!=null && !friend_image.isEmpty()) {
 
             Picasso.with(context)
-                    .load(list.get(i).getThumnail_img())
+                    .load(friend_image)
                     .fit()
                     .into(holder.thumbnail);
         }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+
     android:id="@+id/main_recycler_view_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -35,11 +35,12 @@
                     android:id="@+id/tv_mission_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginStart="12dp"
                     android:layout_marginTop="10dp"
                     android:layout_gravity="center"
                     android:layout_marginBottom="8dp"
                     android:maxLines="1"
+                    android:fontFamily="@font/nexon_level2_gothic"
                     android:text="제목"
                     android:textColor="@color/black"
                     android:textSize="18sp" />
@@ -49,7 +50,7 @@
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="30dp"
+                android:layout_marginStart="32dp"
                 android:layout_marginBottom="4dp">
 
                 <ImageView
@@ -63,6 +64,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
                     android:text="date"
+                    android:layout_gravity="center"
+                    android:fontFamily="@font/nexon_level2_gothic"
                     android:textSize="14sp" />
 
                 <TextView
@@ -70,7 +73,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
+                    android:fontFamily="@font/nexon_level2_gothic"
                     android:text="time"
+                    android:layout_gravity="center"
                     android:textSize="14sp" />
 
 
@@ -88,7 +93,7 @@
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/location_pin" />
+                    android:src="@drawable/ic_location" />
 
                 <TextView
                     android:id="@+id/address_display"
@@ -96,6 +101,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_marginStart="12dp"
+                    android:fontFamily="@font/nexon_level2_gothic"
                     android:text="주소" />
 
 

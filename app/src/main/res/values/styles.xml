@@ -11,65 +11,13 @@
         <item name="android:windowEnableSplitTouch">false</item>
 
     </style>
-
-    <style name="MyTimePicker" parent="android:Widget.Material.Light.TimePicker">
-        <item name="android:timePickerMode">clock</item>
-        <item name="android:headerBackground">@color/colorPrimary</item>
-        <item name="android:amPmTextColor">?android:attr/textColorSecondary</item>
+    <style name="Theme.AppCompat.Light.NoActionBar.FullScreen" parent="@style/Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
     </style>
 
-    <style name="CustomTextAppearanceForDay" parent="TextAppearance.MaterialCalendarWidget.Date">
-    <item name="android:textSize">16sp</item>
-
-</style>
-    <style name="CustomTextAppearanceForWeek" parent="TextAppearance.MaterialCalendarWidget.Date">
-        <item name="android:textSize">16sp</item>
-        <item name="android:textColor">#DEDEDE</item>
-    </style>
-
-    <style name="CustomTextAppearanceForHeader" parent="TextAppearance.MaterialCalendarWidget.Date">
-        <item name="android:textSize">16sp</item>
-        <item name="android:textColor">#DEDEDE</item>
-    </style>
-
-    <style name="MyCustomPickerTheme" parent="MultiContactPicker.Azure">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="mcpToolbarTheme">@style/MyCustomToolbarTheme</item>
-        <item name="mcpListPopupWindowStyleTheme">@style/MyCustomToolbarTheme</item>
-    </style>
-
-    <style name="MyCustomToolbarTheme" parent="ThemeOverlay.AppCompat.Light">
-        <item name="android:textColorPrimary">@color/colorAccent</item>
-        <item name="android:textColorSecondary">@color/colorAccent</item>
-    </style>
-
-    <style name="DatePicker" parent="Theme.AppCompat.Light.Dialog">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimary</item>
-        <item name="colorAccent">@color/colorPrimaryDark</item>
-    </style>
-    <style name="days_style">
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">0dp</item>
-        <item name="android:gravity">center</item>
-        <item name="android:textSize">16sp</item>
-        <item name="android:textColor">@color/black</item>
-    </style>
-    <style name="AppTheme.Purple" parent="AppTheme">
-        <item name="colorPrimary">@color/material_purple_500</item>
-        <item name="colorPrimaryDark">@color/material_purple_700</item>
-        <item name="colorAccent">@color/material_purple_a700</item>
-        <item name="colorControlHighlight">@color/material_purple_200</item>
-    </style>
-    <style name="Theme.MyApp" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <item name="textInputStyle">@style/Widget.MyApp.TextInputLayout</item>
-    </style>
-
-    <style name="Widget.MyApp.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.FilledBox">
-        <item name="boxStrokeWidth">0dp</item>
-        <item name="boxStrokeWidthFocused">0dp</item>
-    </style>
     <style name="CalendarWidgetHeader">
         <item name="android:textSize">16sp</item>
         <item name="android:textStyle">bold</item>

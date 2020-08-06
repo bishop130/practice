@@ -367,6 +367,7 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
                         item.setPhoneNumbers(selected_item.get(i).getPhoneNumbers());
                         item.setDisplayName(selected_item.get(i).getDisplayName());
                         item.setSelected(selected_item.get(i).isSelected());
+                        item.setThumbnail(selected_item.get(i).getThumbnail());
                         item.setContact_or_friend(selected_item.get(i).getContact_or_friend());
                         item.setFriend_position(selected_item.get(i).getFriend_position());
                         item.setFriend_selected(selected_item.get(i).isFriend_selected());

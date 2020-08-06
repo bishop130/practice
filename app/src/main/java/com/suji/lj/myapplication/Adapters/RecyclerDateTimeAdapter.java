@@ -86,7 +86,7 @@ public class RecyclerDateTimeAdapter extends RecyclerView.Adapter<RecyclerDateTi
 
 
             holder.date.setText(DateTimeUtils.makeDateForHumanNoYear(date));
-            holder.time.setText(DateTimeUtils.makeTimeForHuman(calendarDayList.get(position).getTime()));
+            holder.time.setText(DateTimeUtils.makeTimeForHuman(calendarDayList.get(position).getTime(),"HHmm"));
             holder.time.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

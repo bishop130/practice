@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -14,21 +15,25 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomnavigation.BottomNavigationItemView;
+import com.google.android.material.bottomnavigation.BottomNavigationMenu;
+import com.google.android.material.bottomnavigation.BottomNavigationMenuView;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.kakao.auth.AccessTokenCallback;
-import com.kakao.auth.authorization.accesstoken.AccessToken;
-import com.kakao.usermgmt.UserManagement;
-import com.kakao.usermgmt.callback.MeV2ResponseCallback;
-import com.kakao.usermgmt.response.MeV2Response;
-import com.kakao.usermgmt.response.model.Profile;
-import com.kakao.usermgmt.response.model.UserAccount;
-import com.kakao.util.OptionalBoolean;
-import com.suji.lj.myapplication.Fragments.LocationFragment;
+import com.kakao.util.helper.Utility;
+import com.suji.lj.myapplication.Fragments.GiftFragment;
+import com.suji.lj.myapplication.Fragments.NotificationFragment;
 import com.suji.lj.myapplication.Fragments.SearchFragment;
 import com.suji.lj.myapplication.Fragments.SettingFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -38,25 +43,33 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
-import es.dmoral.toasty.Toasty;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.toolbox.StringRequest;
-import com.suji.lj.myapplication.Fragments.FavoriteFragment;
+import com.suji.lj.myapplication.Fragments.MissionFragment;
 import com.kakao.auth.ApiResponseCallback;
 import com.kakao.auth.AuthService;
 import com.kakao.auth.Session;
@@ -66,10 +79,16 @@ import com.kakao.kakaotalk.response.KakaoTalkProfile;
 import com.kakao.kakaotalk.v2.KakaoTalkService;
 import com.kakao.network.ErrorResult;
 import com.kakao.util.helper.log.Logger;
+import com.suji.lj.myapplication.Items.ItemForFriendByDay;
+import com.suji.lj.myapplication.Items.ItemForMultiKey;
+import com.suji.lj.myapplication.Items.ItemRegisterAccount;
+import com.suji.lj.myapplication.Utils.Account;
 import com.suji.lj.myapplication.Utils.BackPressHandler;
+import com.suji.lj.myapplication.Utils.BadgeManager;
+import com.suji.lj.myapplication.Utils.DateTimeUtils;
+import com.suji.lj.myapplication.Utils.Utils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,42 +96,53 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
 
 
-    Toolbar myToolbar;
     String[] REQUIRED_PERMISSIONS = {Manifest.permission.ACCESS_FINE_LOCATION, // 카메라
-            Manifest.permission.READ_CONTACTS, Manifest.permission.READ_PHONE_STATE, Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS};
+            Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS};
     private static final int PERMISSIONS_REQUEST_CODE = 100;
-    private Fragment fa, fb, fc;
+    private Fragment fa, fb, fc, fd, fe;
     private FragmentManager fragmentManager;
     private BackPressHandler backPressHandler = new BackPressHandler(this);
     String TAG = "메인";
-
+    DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+    String user_id;
+    public BottomNavigationView bottomNavigationView;
+    AlertDialog loading_dialog;
 
     @Override
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Session.getCurrentSession().checkAndImplicitOpen();
+
+
         if (Session.getCurrentSession().isClosed()) {
-            Log.d("카카오", Session.getCurrentSession().isClosed() + "");
+            Log.d("카카오", Session.getCurrentSession().isOpened() + "세션오픈");
             Intent intent = new Intent(getApplicationContext(), SampleLoginActivity.class);
             startActivity(intent);
             finish();
         }
-        Log.d("카카오", Session.getCurrentSession().isOpened() + "");
-        String user_id = getSharedPreferences("Kakao", MODE_PRIVATE).getString("email", "");
-        if(TextUtils.isEmpty(user_id)){
-            Intent intent = new Intent(getApplicationContext(), SampleLoginActivity.class);
-            startActivity(intent);
-            finish();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setCancelable(false); // if you want user to wait for some process to finish,
+        builder.setView(R.layout.layout_progress);
+        loading_dialog = builder.create();
+
+        if (loading_dialog.getWindow() != null) {
+            loading_dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+
         }
 
-
+        user_id = Account.getUserId(this);
+        Realm.init(this);
+        // requestProfile();
         checkPermission();
 
 
+// ...
+// Initialize Firebase Auth
 
-        Toasty.Config.getInstance()
-                .setTextSize(14) // optional
-                .apply(); // required
+        //clearPassedMission();
 
 
         fragmentManager = getSupportFragmentManager();
@@ -126,6 +156,17 @@ public class MainActivity extends AppCompatActivity {
 */
 
         //requestAccessTokenInfo();
+
+
+        /*
+        String mission_id = "20200721231316U1285672933";
+        String dateTime = "202007222310";
+        String date = "20200722";
+        String time_stamp = DateTimeUtils.getCurrentTime();
+
+
+         */
+
 
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         boolean isWhiteListing = false;
@@ -159,38 +200,39 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        myToolbar = findViewById(R.id.my_toolbar);
-        setSupportActionBar(myToolbar);
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(navigationItemSelectedListener);
-        fa = new FavoriteFragment();
-        fragmentManager.beginTransaction().replace(R.id.fragment_container,fa).commit();
+        fa = new MissionFragment();
+        fragmentManager.beginTransaction().replace(R.id.fragment_container, fa).commit();
 
 
-        FirebaseInstanceId.getInstance().getInstanceId()
-                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
-                        if (!task.isSuccessful()) {
-                            Log.w(TAG, "getInstanceId failed", task.getException());
-                            return;
-                        }
+        displayBadgeCount();
 
-                        // Get new Instance ID token
-                        String token = task.getResult().getToken();
 
-                        // Log and toast
-                        //String msg = getString(R.string.msg_token_fmt, token);
-                        Log.d("뉴토큰", "메인"+token);
-                        String user_id = getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
-                        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-                        Map<String,String> objectMap = new HashMap<>();
-                        objectMap.put("token",token);
-                        if(user_id!=null)
-                            databaseReference.child("user_data").child(user_id).child("fcm_data").setValue(objectMap);
-                        //Toast.makeText(MainActivity.this, token, Toast.LENGTH_SHORT).show();
-                    }
-                });
+    }
+
+    private void displayBadgeCount() {
+        databaseReference.child("user_data").child(user_id).child("notification").orderByChild("read").equalTo(false).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+
+                    int badge_count = (int) dataSnapshot.getChildrenCount();
+                    Log.d("뱃지", badge_count + "");
+                    BadgeManager.showBottomNavigationViewBadge(MainActivity.this, bottomNavigationView, 2, badge_count);
+
+
+                } else {
+
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
 
 
     }
@@ -199,59 +241,100 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        //Session.getCurrentSession().removeCallback(mKakaocallback);
     }
 
-    private BottomNavigationView.OnNavigationItemSelectedListener navigationItemSelectedListener =
-            new BottomNavigationView.OnNavigationItemSelectedListener() {
-                @Override
-                public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+    private BottomNavigationView.OnNavigationItemSelectedListener navigationItemSelectedListener = new BottomNavigationView.OnNavigationItemSelectedListener() {
+        @Override
+        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
-                    switch (item.getItemId()) {
-                        case R.id.nav_favorite:
+            switch (item.getItemId()) {
+                case R.id.nav_favorite:
 
-                            if (fa == null) {
-                                fa = new FavoriteFragment();
-                                fragmentManager.beginTransaction().add(R.id.fragment_container, fa).commit();
-                            }
-
-                            if (fa != null) fragmentManager.beginTransaction().show(fa).commit();
-                            if (fb != null) fragmentManager.beginTransaction().hide(fb).commit();
-                            if (fc != null) fragmentManager.beginTransaction().hide(fc).commit();
-
-                            break;
-                        case R.id.nav_search:
-
-                            if (fb == null) {
-                                fb = new SearchFragment();
-                                fragmentManager.beginTransaction().add(R.id.fragment_container, fb).commit();
-                            }
-
-                            if (fa != null) fragmentManager.beginTransaction().hide(fa).commit();
-                            if (fb != null) fragmentManager.beginTransaction().show(fb).commit();
-                            if (fc != null) fragmentManager.beginTransaction().hide(fc).commit();
-                            //Realm.init(getApplicationContext());
-                            //Realm.setDefaultConfiguration(getRealmConfig());
-
-
-                            break;
-                        case R.id.nav_setting:
-
-                            if (fc == null) {
-                                fc = new SettingFragment();
-                                fragmentManager.beginTransaction().add(R.id.fragment_container, fc).commit();
-                            }
-
-                            if (fa != null) fragmentManager.beginTransaction().hide(fa).commit();
-                            if (fb != null) fragmentManager.beginTransaction().hide(fb).commit();
-                            if (fc != null) fragmentManager.beginTransaction().show(fc).commit();
-
-                            break;
-
+                    if (fa == null) {
+                        fa = new MissionFragment();
+                        fragmentManager.beginTransaction().add(R.id.fragment_container, fa).commit();
                     }
-                    return true;
-                }
-            };
+
+                    if (fa != null) fragmentManager.beginTransaction().show(fa).commit();
+                    if (fb != null) fragmentManager.beginTransaction().hide(fb).commit();
+                    if (fc != null) fragmentManager.beginTransaction().hide(fc).commit();
+                    if (fd != null) fragmentManager.beginTransaction().hide(fd).commit();
+                    if (fe != null) fragmentManager.beginTransaction().hide(fe).commit();
+
+                    break;
+                case R.id.nav_search:
+
+                    if (fb == null) {
+                        fb = new SearchFragment();
+                        fragmentManager.beginTransaction().add(R.id.fragment_container, fb).commit();
+                    }
+
+                    if (fa != null) fragmentManager.beginTransaction().hide(fa).commit();
+                    if (fb != null) fragmentManager.beginTransaction().show(fb).commit();
+                    if (fc != null) fragmentManager.beginTransaction().hide(fc).commit();
+                    if (fd != null) fragmentManager.beginTransaction().hide(fd).commit();
+                    if (fe != null) fragmentManager.beginTransaction().hide(fe).commit();
+                    //Realm.init(getApplicationContext());
+                    //Realm.setDefaultConfiguration(getRealmConfig());
+
+
+                    break;
+                case R.id.nav_setting:
+
+                    if (fc == null) {
+                        fc = new SettingFragment();
+                        fragmentManager.beginTransaction().add(R.id.fragment_container, fc).commit();
+                    }
+
+                    if (fa != null) fragmentManager.beginTransaction().hide(fa).commit();
+                    if (fb != null) fragmentManager.beginTransaction().hide(fb).commit();
+                    if (fc != null) fragmentManager.beginTransaction().show(fc).commit();
+                    if (fd != null) fragmentManager.beginTransaction().hide(fd).commit();
+                    if (fe != null) fragmentManager.beginTransaction().hide(fe).commit();
+                    break;
+
+
+                case R.id.nav_notification:
+                    if (fd == null) {
+                        fd = new NotificationFragment();
+                        fragmentManager.beginTransaction().add(R.id.fragment_container, fd).commit();
+                    }
+
+                    if (fa != null)
+                        fragmentManager.beginTransaction().hide(fa).commit();
+                    if (fb != null)
+                        fragmentManager.beginTransaction().hide(fb).commit();
+                    if (fc != null)
+                        fragmentManager.beginTransaction().hide(fc).commit();
+                    if (fd != null)
+                        fragmentManager.beginTransaction().show(fd).commit();
+                    if (fe != null)
+                        fragmentManager.beginTransaction().hide(fe).commit();
+
+                    break;
+                case R.id.nav_gift:
+
+                    if (fe == null) {
+                        fe = new GiftFragment();
+                        fragmentManager.beginTransaction().add(R.id.fragment_container, fe).commit();
+                    }
+                    if (fa != null)
+                        fragmentManager.beginTransaction().hide(fa).commit();
+                    if (fb != null)
+                        fragmentManager.beginTransaction().hide(fb).commit();
+                    if (fc != null)
+                        fragmentManager.beginTransaction().hide(fc).commit();
+                    if (fd != null)
+                        fragmentManager.beginTransaction().hide(fd).commit();
+                    if (fe != null)
+                        fragmentManager.beginTransaction().show(fe).commit();
+                    break;
+
+
+            }
+            return true;
+        }
+    };
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -265,23 +348,9 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         //return super.onOptionsItemSelected(item);
         switch (item.getItemId()) {
-            /*
-            case R.id.action_login:
 
-                Intent intent = new Intent(MainActivity.this, SampleLoginActivity.class);
-                startActivity(intent);
-                //Intent intent = new Intent(MainActivity.this,SampleLoginActivity.class);
-                //startActivity(intent);
-
-                // User chose the "Settings" item, show the app settings UI...
-
-
-                return true;
-                */
             case R.id.notification_icon:
-                //startActivity(new Intent(MainActivity.this, SingleModeActivity.class));
-                //Realm.init(getApplicationContext());
-                //Realm.setDefaultConfiguration(getRealmConfig());
+
 
                 Realm.init(this);
                 RealmConfiguration realmConfiguration = new RealmConfiguration.Builder()
@@ -300,8 +369,6 @@ public class MainActivity extends AppCompatActivity {
                 //FirebaseDatabase.getInstance().getReference().child("common").child("service_account").removeValue();
 
 
-
-
                 return true;
 
 
@@ -313,69 +380,39 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+
+        // 카카오톡|스토리 간편로그인 실행 결과를 받아서 SDK로 전달
+        if (Session.getCurrentSession().handleActivityResult(requestCode, resultCode, data)) {
+            return;
+        }
+
         super.onActivityResult(requestCode, resultCode, data);
-
     }
 
-    private void requestAccessTokenInfo() {
-        AuthService.getInstance().requestAccessTokenInfo(new ApiResponseCallback<AccessTokenInfoResponse>() {
-            @Override
-            public void onSessionClosed(ErrorResult errorResult) {
-                //redirectLoginActivity(self);
-            }
-
-            @Override
-            public void onNotSignedUp() {
-                // not happened
-            }
-
-            @Override
-            public void onFailure(ErrorResult errorResult) {
-                Logger.e("failed to get access token info. msg=" + errorResult);
-            }
-
-            @Override
-            public void onSuccess(AccessTokenInfoResponse accessTokenInfoResponse) {
-                String user_id = String.valueOf(accessTokenInfoResponse.getUserId());
-                Log.d("카카오세션", user_id);
-
-                SharedPreferences sharedPreferences = getSharedPreferences("Kakao", Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString("token", user_id);
-                editor.apply();
-
-
-                String access_token = Session.getCurrentSession().getTokenInfo().getAccessToken();
-                String refresh_token = Session.getCurrentSession().getTokenInfo().getRefreshToken();
-
-
-            }
-        });
-    }
 
     private void checkPermission() {
         int locationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
-        int contactsPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS);
-        int phoneNumPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE);
+
         int batteryPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
 
-        if ((locationPermission == PackageManager.PERMISSION_GRANTED) && (contactsPermission == PackageManager.PERMISSION_GRANTED) && (phoneNumPermission == PackageManager.PERMISSION_GRANTED) && (batteryPermission == PackageManager.PERMISSION_GRANTED)) {
+        if ((locationPermission == PackageManager.PERMISSION_GRANTED) && (batteryPermission == PackageManager.PERMISSION_GRANTED)) {
 
             Toast.makeText(getApplicationContext(), "권한승인", Toast.LENGTH_LONG).show();
 
 
         } else {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[0]) || ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[1]) || ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[2]) || ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[3])) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[0]) || ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[1])) {
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle("AlertDialog Title");
-                builder.setMessage("이 앱을 실행하려면 위치정보와 연락처에 대한 접근 권한이 필요합니다.");
-                builder.setPositiveButton("예",
+                builder.setTitle("권한설정");
+                builder.setMessage("서비스를 이용하시려면 위치정보에 대한 접근 권한이 필요합니다.");
+                builder.setPositiveButton("네",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                Toast.makeText(getApplicationContext(), "예를 선택했습니다.", Toast.LENGTH_LONG).show();
+                                //Toast.makeText(getApplicationContext(), "예를 선택했습니다.", Toast.LENGTH_LONG).show();
                                 ActivityCompat.requestPermissions(MainActivity.this, REQUIRED_PERMISSIONS,
                                         PERMISSIONS_REQUEST_CODE);
                             }
@@ -392,9 +429,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        //checkPermission();
-        SharedPreferences sharedPreferences = getSharedPreferences("alarm_setting", Context.MODE_PRIVATE);
-        Log.d("확인좀9", String.valueOf(sharedPreferences.getBoolean("alarm_setting", true)));
     }
 
 
@@ -417,13 +451,13 @@ public class MainActivity extends AppCompatActivity {
 
                 Toast.makeText(this, "권한허가", Toast.LENGTH_LONG).show();
             } else {
-                if (ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[0]) || ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[1]) || ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[2]) || ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[3])) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[0]) || ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[1])) {
 
                     // 사용자가 거부만 선택한 경우에는 앱을 다시 실행하여 허용을 선택하면 앱을 사용할 수 있습니다.
-                    Toast.makeText(this, "퍼미션이 거부되었습니다. 앱을 다시 실행하여 퍼미션을 허용해주세요. ", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "권한이 거부되었습니다. 앱을 다시 실행하여 권한을 허용해주세요. ", Toast.LENGTH_LONG).show();
                 } else {
                     // “다시 묻지 않음”을 사용자가 체크하고 거부를 선택한 경우에는 설정(앱 정보)에서 퍼미션을 허용해야 앱을 사용할 수 있습니다.
-                    Toast.makeText(this, "퍼미션이 거부되었습니다. 설정(앱 정보)에서 퍼미션을 허용해야 합니다. ", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "권한이 거부되었습니다. 설정(앱 정보)에서 권한설정을 해야 합니다. ", Toast.LENGTH_LONG).show();
                 }
 
 
@@ -434,51 +468,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void requestProfile() {
-        KakaoTalkService.getInstance().requestProfile(new KakaoTalkResponseCallback<KakaoTalkProfile>() {
-            @Override
-            public void onSuccess(KakaoTalkProfile talkProfile) {
-                final String nickName = talkProfile.getNickName();
-                final String thumbnailURL = talkProfile.getThumbnailUrl();
-
-
-
-                SharedPreferences.Editor editor = getSharedPreferences("kakao_profile", MODE_PRIVATE).edit();
-                editor.putString("name", nickName);
-                editor.putString("profile_image", thumbnailURL);
-                editor.apply();
-
-            }
-        });
-    }
-
-
-    private abstract class KakaoTalkResponseCallback<T> extends TalkResponseCallback<T> {
-        @Override
-        public void onNotKakaoTalkUser() {
-            Logger.w("not a KakaoTalk user");
-        }
-
-        @Override
-        public void onFailure(ErrorResult errorResult) {
-            Logger.e("failure : " + errorResult);
-        }
-
-        @Override
-        public void onSessionClosed(ErrorResult errorResult) {
-            //redirectLoginActivity();
-        }
-
-        @Override
-        public void onNotSignedUp() {
-            //redirectSignupActivity();
-        }
-
-        @Override
-        public void onSuccess(T result) {
-
-        }
-    }
 
     private RealmConfiguration getRealmConfig() {
 
@@ -487,7 +476,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        Log.d("메인","onBackPressed");
+        Log.d("메인", "onBackPressed");
         //backPressHandler.onBackPressed();
         // Toast 메세지 사용자 지정
         //backPressHandler.onBackPressed("뒤로가기 버튼 한번 더 누르면 종료");
@@ -500,7 +489,82 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    private void clearPassedMission() {
 
+        String user_id = Account.getUserId(this);
+        String date_time = DateTimeUtils.getCurrentDateTimeForKey();
+
+        databaseReference.child("user_data").child(user_id).child("passed_mission").orderByChild("date_time").endAt(date_time).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+
+                    databaseReference.child("user_data").child(user_id).child("notification").setValue(dataSnapshot.getValue());
+                    //dataSnapshot.getRef().removeValue();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        databaseReference.child("user_data").child(user_id).child("multi_key").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        ItemForMultiKey item = snapshot.getValue(ItemForMultiKey.class);
+                        if (item != null) {
+                            String multi_key = item.getMulti_mission_id();
+                            databaseReference.child("user_data").child("multi_mode").child(multi_key).child("mission_display").orderByChild("date_time").endAt(date_time).addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    if (dataSnapshot.exists()) {
+
+                                        databaseReference.child("user_data").child(user_id).child("notification").setValue(dataSnapshot.getValue());
+                                        dataSnapshot.getRef().removeValue();
+
+
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                }
+                            });
+                        }
+
+
+                    }
+
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (loading_dialog.isShowing()) {
+            loading_dialog.dismiss();
+
+
+        }
+        // Check if user is signed in (non-null) and update UI accordingly.
+
+
+    }
 
 
 }

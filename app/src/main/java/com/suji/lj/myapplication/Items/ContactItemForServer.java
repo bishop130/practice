@@ -11,6 +11,7 @@ public class ContactItemForServer implements Serializable {
     String friend_id;
     private int amount;
     private int contact_or_friend;
+    boolean success;
 
     public ContactItemForServer() {
 

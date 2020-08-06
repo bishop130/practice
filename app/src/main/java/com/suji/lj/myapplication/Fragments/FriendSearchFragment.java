@@ -130,7 +130,6 @@ public class FriendSearchFragment extends Fragment implements RecyclerContactFri
                         //selected_item = realm.where(ItemForFriends.class).findAll();
                         for (int j = 0; j < realmResults.size(); j++) {
                             if (realmResults.get(j).getContact_or_friend() == 1) {
-
                                 Log.d("멀티", listItem.get(realmResults.get(j).getPosition()).getPosition() + "전체");
                                 Log.d("멀티", realmResults.get(j).getPosition() + "선택");
                                 listItem.get(realmResults.get(j).getFriend_position()).setSelected(true);

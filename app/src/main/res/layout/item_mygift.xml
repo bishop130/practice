@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="@color/White"
+    android:padding="12dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/ivGift"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+
+            android:src="@drawable/carrot_and_stick" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+
+            android:layout_marginStart="12dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvGiftName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="00커피"
+                android:textColor="@color/black"
+                android:fontFamily="@font/nexon_level2_gothic"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/tvGiftExpire"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="유효기간 "
+                android:fontFamily="@font/nexon_level2_gothic"
+
+                />
+
+        </LinearLayout>
+    </LinearLayout>
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/right_arrow"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        />
+
+
+</RelativeLayout>

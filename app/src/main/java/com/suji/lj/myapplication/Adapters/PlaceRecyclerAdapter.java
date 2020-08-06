@@ -4,12 +4,12 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.suji.lj.myapplication.Items.PlaceItem;
 import com.suji.lj.myapplication.R;
-import com.suji.lj.myapplication.SingleModeActivity;
 
 import java.util.List;
 
@@ -22,6 +22,7 @@ public class PlaceRecyclerAdapter extends RecyclerView.Adapter<PlaceRecyclerAdap
     private Context context;
     OnMoveSelectedPlaceListener listener;
 
+
     public PlaceRecyclerAdapter(List<PlaceItem> placeList, Context context,OnMoveSelectedPlaceListener listener) {
         this.placeList = placeList;
         this.context = context;
@@ -33,7 +34,7 @@ public class PlaceRecyclerAdapter extends RecyclerView.Adapter<PlaceRecyclerAdap
     public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view;
         LayoutInflater inflater = LayoutInflater.from(context);
-        view = inflater.inflate(R.layout.place_item, parent, false);
+        view = inflater.inflate(R.layout.item_address, parent, false);
         final PlaceRecyclerAdapter.ItemViewHolder place = new PlaceRecyclerAdapter.ItemViewHolder(view);
 
         return place;
@@ -43,8 +44,20 @@ public class PlaceRecyclerAdapter extends RecyclerView.Adapter<PlaceRecyclerAdap
     public void onBindViewHolder(@NonNull ItemViewHolder holder, final int position) {
 
         holder.place_name.setText(placeList.get(position).getPlaceName());
-        holder.road_address.setText(placeList.get(position).getRoadAddress());
-        holder.old_address.setText(placeList.get(position).getOldAddress());
+        if(placeList.get(position).getRoadAddress().isEmpty()){
+
+            holder.ly_road_address.setVisibility(View.GONE);
+            holder.ly_old_address.setVisibility(View.VISIBLE);
+            holder.old_address.setText(placeList.get(position).getOldAddress());
+
+        }else{
+            holder.ly_old_address.setVisibility(View.GONE);
+            holder.ly_road_address.setVisibility(View.VISIBLE);
+            holder.road_address.setText(placeList.get(position).getRoadAddress());
+
+        }
+
+
         holder.view_container.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -66,7 +79,9 @@ public class PlaceRecyclerAdapter extends RecyclerView.Adapter<PlaceRecyclerAdap
         TextView place_name;
         TextView road_address;
         TextView old_address;
-        RelativeLayout view_container;
+        LinearLayout view_container;
+        LinearLayout ly_old_address;
+        LinearLayout ly_road_address;
 
         public ItemViewHolder(View itemView) {
             super(itemView);
@@ -74,6 +89,8 @@ public class PlaceRecyclerAdapter extends RecyclerView.Adapter<PlaceRecyclerAdap
             place_name= (TextView) itemView.findViewById(R.id.place_name);
             road_address= (TextView) itemView.findViewById(R.id.road_address);
             old_address = (TextView)itemView.findViewById(R.id.old_address);
+            ly_old_address = itemView.findViewById(R.id.ly_old_address);
+            ly_road_address = itemView.findViewById(R.id.ly_road_address);
         }
     }
 

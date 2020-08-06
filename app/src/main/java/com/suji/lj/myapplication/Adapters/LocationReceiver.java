@@ -27,9 +27,9 @@ public class LocationReceiver extends BroadcastReceiver {
             if (isGpsEnabled || isNetworkEnabled) {
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    ContextCompat.startForegroundService(context, i);
+                    //ContextCompat.startForegroundService(context, i);
                 } else {
-                    context.startService(i);
+                    //context.startService(i);
                 }
             } else {
                 Toast.makeText(context, "위치설정 꺼짐",

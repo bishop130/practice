@@ -59,14 +59,19 @@ public class RecyclerContactFriendAdapter extends RecyclerView.Adapter<RecyclerC
 
         holder.thumbnail.setBackground(new ShapeDrawable(new OvalShape()));
         holder.thumbnail.setClipToOutline(true);
+        String image = list.get(i).getImage();
 
 
-        if (!list.get(i).getImage().isEmpty()) {
+        if (image != null && !image.isEmpty()) {
             Picasso.with(context)
                     .load(list.get(i).getImage())
                     .fit()
                     .into(holder.thumbnail);
             Log.d("이미지", "이미지있음");
+        } else {
+            holder.thumbnail.setImageDrawable(context.getResources().getDrawable(R.drawable.default_profile));
+
+
         }
 
         //holder.first_name.setBackgroundResource(itemList.get(position).isSelected() ? R.drawable.checked_icon : R.drawable.contact_circle);
@@ -77,39 +82,37 @@ public class RecyclerContactFriendAdapter extends RecyclerView.Adapter<RecyclerC
             @Override
             public void onClick(View v) {
 
-                    list.get(i).setSelected(!list.get(i).isSelected()); //스위치
-                    list.get(i).setPosition(i);
-                    //Log.d("멀티", itemList.get(position).isSelected() + "선택");
-                    //Log.d("라니스터","position  "+position+"\n"+"isture"+itemList.get(position).isSelected());
+                list.get(i).setSelected(!list.get(i).isSelected()); //스위치
+                list.get(i).setPosition(i);
+                //Log.d("멀티", itemList.get(position).isSelected() + "선택");
+                //Log.d("라니스터","position  "+position+"\n"+"isture"+itemList.get(position).isSelected());
 
-                    if (list.get(i).isSelected()) {
-
-
-                        ItemForFriends item = new ItemForFriends();
-                        item.setName(list.get(i).getName());
-                        item.setUuid(list.get(i).getUuid());
-                        item.setId(list.get(i).getId());
-                        item.setImage(list.get(i).getImage());
-                        item.setFavorite(list.get(i).isFavorite());
-                        //item.setAmount(1000);
-                        item.setPosition(i);
-                        item.setSelected(true);
-                        Log.d("멀티", i + "포지션");
+                if (list.get(i).isSelected()) {
 
 
-                        //onFriendSelectListener.onFriendSelect(item, i);
-                        //((MultiModeFragment) context).selectedList(item, position);
-                        ((ContactActivity) context).addFromFriendToSelect(item, i);
-                        notifyDataSetChanged();
+                    ItemForFriends item = new ItemForFriends();
+                    item.setName(list.get(i).getName());
+                    item.setUuid(list.get(i).getUuid());
+                    item.setId(list.get(i).getId());
+                    item.setImage(list.get(i).getImage());
+                    item.setFavorite(list.get(i).isFavorite());
+                    //item.setAmount(1000);
+                    item.setPosition(i);
+                    item.setSelected(true);
+                    Log.d("멀티", i + "포지션");
 
-                    }
-                    else{
 
-                        ((ContactActivity) context).removeFromFriendToSelect(i);
-                        notifyDataSetChanged();
-                        //onFriendUnSelectListener.onFriendUnSelect(i);
-                    }
+                    //onFriendSelectListener.onFriendSelect(item, i);
+                    //((MultiModeFragment) context).selectedList(item, position);
+                    ((ContactActivity) context).addFromFriendToSelect(item, i);
+                    notifyDataSetChanged();
 
+                } else {
+
+                    ((ContactActivity) context).removeFromFriendToSelect(i);
+                    notifyDataSetChanged();
+                    //onFriendUnSelectListener.onFriendUnSelect(i);
+                }
 
 
             }

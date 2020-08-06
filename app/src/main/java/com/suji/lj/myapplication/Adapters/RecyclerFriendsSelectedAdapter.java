@@ -66,12 +66,12 @@ public class RecyclerFriendsSelectedAdapter extends RecyclerView.Adapter<Recycle
             public void onClick(View v) {
 
                 //((FriendsActivity) context).refreshSelection(position);
-                onRefreshSelectListener.onRefreshSelect(position);
+                onRefreshSelectListener.onRefreshSelect(position, itemList.size());
 
                 //notifyDataSetChanged();
 
 
-               // onFriendsCountListener.onFriendsCount(itemList.size());
+                // onFriendsCountListener.onFriendsCount(itemList.size());
 
 
             }
@@ -109,7 +109,7 @@ public class RecyclerFriendsSelectedAdapter extends RecyclerView.Adapter<Recycle
     }
 
     public interface OnRefreshSelectListener {
-        void onRefreshSelect(int position);
+        void onRefreshSelect(int position, int size);
     }
 
 

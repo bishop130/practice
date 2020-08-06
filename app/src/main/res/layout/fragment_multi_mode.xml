@@ -2,8 +2,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
+    android:paddingBottom="24dp"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
     tools:context=".Fragments.MultiModeFragment">
 
     <!-- TODO: Update blank fragment layout -->
@@ -14,23 +17,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/contact_search"
+        android:layout_marginTop="8dp"
         android:clipToPadding="false"
         android:scrollbars="vertical"
-        android:layout_marginTop="8dp"
         android:splitMotionEvents="false" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:layout_marginBottom="32dp"
         android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginEnd="24dp"
             android:orientation="vertical">
 
             <LinearLayout
@@ -42,22 +42,34 @@
                     android:id="@+id/recycler_friend_select"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/rounded_edittext"
-                    android:minHeight="50dp"
-                    android:padding="12dp" />
+                    android:background="@drawable/line_divider" />
 
-
-                <LinearLayout
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_marginTop="8dp">
+
+                    <TextView
+                        android:id="@+id/amount_warning"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:text=""
+                        android:textColor="@color/colorError" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
 
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
                         android:layout_gravity="bottom"
-                        android:text="1회 실패시 벌칙금"
+                        android:fontFamily="@font/nexon_level2_gothic"
+                        android:text="1일 벌칙금 : "
                         android:textColor="@color/black"
                         android:textSize="16sp" />
 
@@ -65,40 +77,44 @@
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/amount_warning"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text=""
-                            android:textColor="@color/colorError" />
+                        android:layout_alignParentEnd="true"
+                        android:orientation="horizontal">
 
 
                         <EditText
                             android:id="@+id/if_fail"
                             android:layout_width="120dp"
-                            android:layout_height="32dp"
-                            android:background="@drawable/rounded_edittext"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:imeOptions="actionDone"
                             android:inputType="number"
                             android:maxLength="6"
-                            android:imeOptions="actionDone"
-                            android:gravity="center"
                             android:textColor="@color/black"
                             android:textSize="16sp" />
+
+                        <RelativeLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            >
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom"
+
+
+                                android:text="원"
+                                android:padding="8dp"
+                                android:textColor="@color/black"
+                                android:textSize="16sp" />
+
+                        </RelativeLayout>
                     </LinearLayout>
 
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="bottom"
-                        android:text="원"
-                        android:textColor="@color/black"
-                        android:textSize="16sp" />
-                </LinearLayout>
+                </RelativeLayout>
 
-                <LinearLayout
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp">
@@ -106,26 +122,24 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="누적벌칙금은 "
+                        android:layout_centerVertical="true"
+                        android:fontFamily="@font/nexon_level2_gothic"
+                        android:text="분배비율 : "
                         android:textColor="@color/black"
                         android:textSize="16sp" />
+
 
                     <TextView
                         android:id="@+id/custom_portion"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="정해진 비율"
+                        android:layout_alignParentEnd="true"
+                        android:padding="8dp"
+                        android:text="설정"
                         android:textColor="@color/colorPrimary"
-                        android:textSize="20sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="에 따라 분배"
-                        android:textColor="@color/black"
                         android:textSize="16sp" />
 
-                </LinearLayout>
+                </RelativeLayout>
 
 
             </LinearLayout>

@@ -20,18 +20,26 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.suji.lj.myapplication.Adapters.RecyclerInvitationAdapter;
+import com.suji.lj.myapplication.Items.ItemForInvitationPreview;
 import com.suji.lj.myapplication.Items.ItemForMultiInvitationKey;
 import com.suji.lj.myapplication.Items.ItemForMultiModeRequest;
 import com.suji.lj.myapplication.R;
 import com.suji.lj.myapplication.Utils.Account;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MultiRequestFragment extends Fragment {
 
     RecyclerView recyclerView;
     Context context;
     ProgressBar progressBar;
+    DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
+    ArrayList<ItemForMultiModeRequest> list = new ArrayList<>();
+    List<ItemForInvitationPreview> previewList = new ArrayList<>();
+    RecyclerInvitationAdapter recyclerAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -43,6 +51,7 @@ public class MultiRequestFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerView);
         progressBar = view.findViewById(R.id.progress_bar);
 
+        setupRecyclerViewRequest();
 
         loadMissionRequest();
         return view;
@@ -50,41 +59,45 @@ public class MultiRequestFragment extends Fragment {
 
 
     private void loadMissionRequest() {
-        ArrayList<ItemForMultiModeRequest> list = new ArrayList<>();
+
         String user_id = Account.getUserId(context);
-        DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
-        if (!TextUtils.isEmpty(user_id)) {
-            mRootRef.child("user_data").child(user_id).child("invitation").orderByKey().addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    //int count = (int) dataSnapshot.getChildrenCount();
 
-                    if (dataSnapshot.exists()) {
-                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                            ItemForMultiModeRequest multiModeRequest = snapshot.getValue(ItemForMultiModeRequest.class);
-                            Log.d("호반꿀", multiModeRequest.getTitle());
 
-                            list.add(multiModeRequest);
+        mRootRef.child("user_data").child(user_id).child("invitation").child("preview").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                previewList = new ArrayList<>();
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        ItemForInvitationPreview preview = snapshot.getValue(ItemForInvitationPreview.class);
+                        if (preview != null) {
+
+                            Log.d("리퀘스트","preview");
+
+                            previewList.add(preview);
+
                         }
-                        setupRecyclerViewRequest(list);
 
                     }
-
-
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    setupRecyclerViewRequest();
 
                 }
-            });
-        }
+                recyclerAdapter.notifyDataSetChanged();
+
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
 
 
     }
 
-    private void setupRecyclerViewRequest(ArrayList<ItemForMultiModeRequest> list) {
-        RecyclerInvitationAdapter recyclerAdapter = new RecyclerInvitationAdapter(getContext(), list);
+    private void setupRecyclerViewRequest() {
+        recyclerAdapter = new RecyclerInvitationAdapter(getContext(), list, previewList);
         //recyclerAdapter.notifyDataSetChanged();
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(recyclerAdapter);

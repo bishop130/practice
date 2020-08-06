@@ -5,12 +5,14 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
+
 import android.util.Log;
 
 import com.google.firebase.database.DatabaseReference;
@@ -19,6 +21,7 @@ import com.suji.lj.myapplication.MainActivity;
 import com.suji.lj.myapplication.R;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.suji.lj.myapplication.Utils.Account;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,11 +29,11 @@ import java.util.Map;
 import static android.content.ContentValues.TAG;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
-
+    DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
 
     @Override
     public void onNewToken(@NonNull String token) {
-        Log.d("뉴토큰",token);
+        Log.d("뉴토큰", token);
         sendRegistrationToServer(token);
 
     }
@@ -56,57 +59,56 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         // Check if message contains a notification payload.
         if (remoteMessage.getNotification() != null) {
             Log.d("여기왜안돼body", "Message Notification Body: " + remoteMessage.getNotification().getBody());
-            sendNotification(remoteMessage.getNotification().getBody(),remoteMessage.getNotification().getTitle());
+            sendNotification(remoteMessage.getNotification().getBody(), remoteMessage.getNotification().getTitle());
         }
-
-
 
 
     }
 
-    private void sendNotification(String body,String title) {
+    private void sendNotification(String body, String title) {
 
-        Intent intent = new Intent(this,MainActivity.class);
+        Log.d("여기왜", body);
+        Log.d("여기왜", title);
+        Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
-                PendingIntent.FLAG_ONE_SHOT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
 
         String channelId = getString(R.string.default_notification_channel_id);
-        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        // Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
-        NotificationCompat.Builder notificationBuilder =
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, channelId)
 
-                new NotificationCompat.Builder(this,channelId)
-
-                        .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentTitle(title)
-                        .setContentText(body)
-                        .setAutoCancel(true)
-                        .setSound(defaultSoundUri)
-                        .setContentIntent(pendingIntent);
+                .setSmallIcon(R.drawable.carrot_and_stick)
+                .setContentTitle(title)
+                .setContentText(body)
+                .setContentIntent(pendingIntent);
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(channelId,
-                    "Channel human readable title",
-                    NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationChannel channel = new NotificationChannel(channelId, "Channel human readable title", NotificationManager.IMPORTANCE_DEFAULT);
             notificationManager.createNotificationChannel(channel);
         }
 
-        notificationManager.notify(0,notificationBuilder.build());
+            notificationManager.notify(0, notificationBuilder.build());
 
 
 
 
     }
+
     private void sendRegistrationToServer(String token) {
 
-        String user_id = getSharedPreferences("Kakao", MODE_PRIVATE).getString("token", "");
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-        Map<String,String> objectMap = new HashMap<>();
-        objectMap.put("token",token);
-        if(user_id!=null)
-        databaseReference.child("user_data").child(user_id).child("fcm_data").setValue(objectMap);
+        String user_id = Account.getUserId(this);
+        SharedPreferences sharedPreferences = getSharedPreferences("FCM", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("fcm_token", token);
+        editor.apply();
+
+
+        Map<String, String> objectMap = new HashMap<>();
+        objectMap.put("token", token);
+        if (user_id != null)
+            databaseReference.child("user_data").child(user_id).child("fcm_data").setValue(objectMap);
 
 
         // TODO: Implement this method to send token to your app server.

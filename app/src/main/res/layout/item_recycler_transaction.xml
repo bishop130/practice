@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/White"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <TextView
+        android:id="@+id/tv_date_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="2020-09-07 11:00:00"
+        app:fontFamily="@font/nexon_level2_gothic" />
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="포인트 정산 (광화문)"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        app:fontFamily="@font/nexon_level2_gothic" />
+
+    <RelativeLayout
+        android:id="@+id/rlCashMethod"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="결제방법"
+            app:fontFamily="@font/nexon_level2_gothic" />
+
+
+
+        <TextView
+            android:id="@+id/tv_payment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="20dp"
+            android:text="카카오페이"
+            app:fontFamily="@font/nexon_level2_gothic" />
+
+
+    </RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/rlWithdraw"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="인출계좌"
+            app:fontFamily="@font/nexon_level2_gothic" />
+
+
+
+        <TextView
+            android:id="@+id/tvAccountNum"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            android:layout_alignParentEnd="true"
+            android:text="29030204202663"
+            android:textColor="@color/colorPrimary"
+            app:fontFamily="@font/nexon_level2_gothic" />
+
+
+    </RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/rlMission"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="약속"
+            app:fontFamily="@font/nexon_level2_gothic" />
+
+
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="20dp"
+            android:text="광화문"
+            app:fontFamily="@font/nexon_level2_gothic" />
+
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/rlPoint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="포인트"
+            app:fontFamily="@font/nexon_level2_gothic" />
+
+
+
+        <TextView
+            android:id="@+id/tv_point"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            android:layout_alignParentEnd="true"
+            android:text="500 P"
+            android:textColor="@color/colorPrimary"
+            app:fontFamily="@font/nexon_level2_gothic" />
+
+
+    </RelativeLayout>
+
+
+
+
+</LinearLayout>
