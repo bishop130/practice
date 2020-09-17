@@ -3,9 +3,9 @@ package com.suji.lj.myapplication.Items;
 public class ItemForInvitationPreview {
 
     String title;
-    String mission_id;
-    String friend_name;
-    String friend_image;
+    String missionId;
+    String friendName;
+    String friendImage;
 
 
     public String getTitle() {
@@ -16,27 +16,27 @@ public class ItemForInvitationPreview {
         this.title = title;
     }
 
-    public String getMission_id() {
-        return mission_id;
+    public String getMissionId() {
+        return missionId;
     }
 
-    public void setMission_id(String mission_id) {
-        this.mission_id = mission_id;
+    public void setMissionId(String missionId) {
+        this.missionId = missionId;
     }
 
-    public String getFriend_name() {
-        return friend_name;
+    public String getFriendName() {
+        return friendName;
     }
 
-    public void setFriend_name(String friend_name) {
-        this.friend_name = friend_name;
+    public void setFriendName(String friendName) {
+        this.friendName = friendName;
     }
 
-    public String getFriend_image() {
-        return friend_image;
+    public String getFriendImage() {
+        return friendImage;
     }
 
-    public void setFriend_image(String friend_image) {
-        this.friend_image = friend_image;
+    public void setFriendImage(String friendImage) {
+        this.friendImage = friendImage;
     }
 }

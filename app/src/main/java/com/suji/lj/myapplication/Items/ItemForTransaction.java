@@ -3,24 +3,51 @@ package com.suji.lj.myapplication.Items;
 public class ItemForTransaction {
 
 
-    String user_id;
-    String date_time;
-    String payment_method;
-    String receipt_id;
-    String mission_id;
+    String userId;
+    String dateTime;
+    String paymentMethod;
+    String receiptId;
+    String missionId;
     String title;
+    String accountNum;
+    String bankName;
+    String accountHolderName;
     int point;
     int cash;
     int missionMode;
-    int transactionCode;
+    int code;
 
-
-    public int getTransactionCode() {
-        return transactionCode;
+    public String getAccountNum() {
+        return accountNum;
     }
 
-    public void setTransactionCode(int transactionCode) {
-        this.transactionCode = transactionCode;
+
+    public String getBankName() {
+        return bankName;
+    }
+
+    public void setBankName(String bankName) {
+        this.bankName = bankName;
+    }
+
+    public String getAccountHolderName() {
+        return accountHolderName;
+    }
+
+    public void setAccountHolderName(String accountHolderName) {
+        this.accountHolderName = accountHolderName;
+    }
+
+    public void setAccountNum(String accountNum) {
+        this.accountNum = accountNum;
+    }
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
     }
 
     public int getMissionMode() {
@@ -39,44 +66,45 @@ public class ItemForTransaction {
         this.title = title;
     }
 
-    public String getUser_id() {
-        return user_id;
+
+    public String getUserId() {
+        return userId;
     }
 
-    public void setUser_id(String user_id) {
-        this.user_id = user_id;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
-    public String getDate_time() {
-        return date_time;
+    public String getDateTime() {
+        return dateTime;
     }
 
-    public void setDate_time(String date_time) {
-        this.date_time = date_time;
+    public void setDateTime(String dateTime) {
+        this.dateTime = dateTime;
     }
 
-    public String getPayment_method() {
-        return payment_method;
+    public String getPaymentMethod() {
+        return paymentMethod;
     }
 
-    public void setPayment_method(String payment_method) {
-        this.payment_method = payment_method;
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
     }
 
-    public String getReceipt_id() {
-        return receipt_id;
+    public String getReceiptId() {
+        return receiptId;
     }
 
-    public void setReceipt_id(String receipt_id) {
-        this.receipt_id = receipt_id;
+    public void setReceiptId(String receiptId) {
+        this.receiptId = receiptId;
     }
 
-    public String getMission_id() {
-        return mission_id;
+    public String getMissionId() {
+        return missionId;
     }
 
-    public void setMission_id(String mission_id) {
-        this.mission_id = mission_id;
+    public void setMissionId(String missionId) {
+        this.missionId = missionId;
     }
 
     public int getPoint() {

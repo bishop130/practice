@@ -52,17 +52,18 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginStart="20dp"
                     android:gravity="center"
                     android:orientation="vertical">
 
 
                     <TextView
                         android:id="@+id/kakao_name_setting"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="..."
                         android:textColor="@color/black"
+
 
 
                         android:textSize="18sp"
@@ -412,151 +413,6 @@
 
                 </LinearLayout>
 
-            </LinearLayout>
-
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:layout_marginTop="24dp"
-                android:text="결제"
-                android:textSize="16sp"
-                app:fontFamily="@font/nexon_level2_gothic"
-
-                />
-
-            <LinearLayout
-                android:id="@+id/ly_transaction"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:background="@color/White"
-                android:padding="12dp">
-
-                <ImageView
-
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:contentDescription="@string/icon"
-                    android:src="@drawable/ic_list" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginStart="24dp"
-                    android:gravity="center"
-                    android:text="결제내역"
-                    android:textSize="14sp"
-                    app:fontFamily="@font/nexon_level2_gothic" />
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_weight="1" />
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginEnd="12dp"
-                    android:contentDescription="@string/icon"
-                    android:src="@drawable/right_arrow" />
-
-            </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginStart="80dp"
-                android:layout_marginEnd="24dp"
-                android:background="@color/divider_line" />
-
-            <LinearLayout
-                android:id="@+id/ly_register_account"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/White"
-                android:padding="12dp">
-
-                <ImageView
-
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:contentDescription="@string/icon"
-                    android:src="@drawable/ic_register" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginStart="24dp"
-                    android:gravity="center"
-                    android:text="계좌등록"
-                    android:textSize="14sp"
-                    app:fontFamily="@font/nexon_level2_gothic" />
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_weight="1" />
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginEnd="12dp"
-                    android:contentDescription="@string/icon"
-                    android:src="@drawable/right_arrow" />
-            </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginStart="80dp"
-                android:layout_marginEnd="24dp"
-                android:background="@color/divider_line" />
-
-            <LinearLayout
-                android:id="@+id/ly_my_account"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/White"
-                android:padding="12dp">
-
-                <ImageView
-
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:contentDescription="@string/icon"
-                    android:src="@drawable/logout" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginStart="24dp"
-                    android:gravity="center"
-                    android:text="내 계좌"
-                    android:textSize="14sp"
-                    app:fontFamily="@font/nexon_level2_gothic" />
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_weight="1" />
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginEnd="12dp"
-                    android:contentDescription="@string/icon"
-                    android:src="@drawable/right_arrow" />
             </LinearLayout>
 
 

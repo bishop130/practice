@@ -44,8 +44,8 @@ public class RecyclerSendFriendRequestAdapter extends RecyclerView.Adapter<Recyc
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        String friend_name = list.get(position).getFriends_name();
-        String friend_image = list.get(position).getFriends_image();
+        String friend_name = list.get(position).getFriendName();
+        String friend_image = list.get(position).getFriendImage();
 
         holder.tv_friend_name.setText(friend_name);
 

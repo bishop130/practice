@@ -347,12 +347,13 @@ public class SampleLoginActivity extends AppCompatActivity {
         String real_name = kakaoAccount.getLegalName();
         String user_name = kakaoAccount.getProfile().getNickname();
         String profile_img = kakaoAccount.getProfile().getProfileImageUrl();
+        String kakaoId = kakaoAccount.getDisplayId();
         String thumbnail_img = kakaoAccount.getProfile().getThumbnailImageUrl();
         String userid = String.valueOf(kakaoAccount.getDisplayId());
         Session.getCurrentSession().removeCallback(callback);
 
 
-        databaseReference.child("account").orderByChild("user_id").equalTo(user_id).addListenerForSingleValueEvent(new ValueEventListener() {
+        databaseReference.child("account").orderByChild("userId").equalTo(user_id).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
@@ -372,11 +373,12 @@ public class SampleLoginActivity extends AppCompatActivity {
                     Log.d("카카오", "새로운 유저");
                     //Log.d("이메일 : ",email+"이메일");
                     ItemRegisterAccount item = new ItemRegisterAccount();
-                    item.setUser_id(user_id);
-                    item.setIs_public(true);
-                    item.setUser_name(user_name);
-                    item.setThumnail_img(thumbnail_img);
+                    item.setUserId(user_id);
+                    item.setOpen(true);
+                    item.setUserName(user_name);
+                    item.setThumbnail(thumbnail_img);
                     item.setEmail(email);
+                    item.setKakaoId(kakaoId);
 
 
                     databaseReference.child("account").push().setValue(item).addOnCompleteListener(new OnCompleteListener<Void>() {

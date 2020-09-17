@@ -57,6 +57,7 @@ public class AddFriendFragment extends Fragment {
     ItemForFriendsList itemForFriendsList;
     String user_id;
     AlertDialog loading_dialog;
+    String friendId;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -158,7 +159,7 @@ public class AddFriendFragment extends Fragment {
     }
 
     private void checkIfSendRequest(String email) {
-        databaseReference.child("user_data").child(user_id).child("send_friend_request").orderByChild("email").equalTo(email).addListenerForSingleValueEvent(new ValueEventListener() {
+        databaseReference.child("user_data").child(user_id).child("sendFriendRequest").orderByChild("email").equalTo(email).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
@@ -190,7 +191,7 @@ public class AddFriendFragment extends Fragment {
 
     private void checkIfReceiveRequest(String email) {
 
-        databaseReference.child("user_data").child(user_id).child("receive_friend_request").orderByChild("email").equalTo(email).addListenerForSingleValueEvent(new ValueEventListener() {
+        databaseReference.child("user_data").child(user_id).child("receiveFriendRequest").orderByChild("email").equalTo(email).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
@@ -234,76 +235,12 @@ public class AddFriendFragment extends Fragment {
 
                         if (item != null) {
 
-                            String friend_id = item.getUser_id();
+                            String friend_id = item.getUserId();
                             Log.d("친구 ", friend_id);
 
                             if (!friend_id.equals(user_id)) {
+                                displayResult(item);
 
-
-                                AppFriendContext friendContext = new AppFriendContext(true, 0, 100, "asc");
-
-                                KakaoTalkService.getInstance().requestAppFriends(friendContext,
-                                        new TalkResponseCallback<AppFriendsResponse>() {
-                                            @Override
-                                            public void onNotKakaoTalkUser() {
-                                                Log.d("카카오친구 ", "카카오 유저가 아님");
-                                            }
-
-                                            @Override
-                                            public void onSessionClosed(ErrorResult errorResult) {
-                                                Log.d("카카오친구 ", errorResult.toString());
-                                            }
-
-                                            @Override
-                                            public void onNotSignedUp() {
-                                                Log.d("카카오친구 ", "onNotSinedup");
-                                            }
-
-                                            @Override
-                                            public void onFailure(ErrorResult errorResult) {
-                                                Log.d("카카오친구 ", errorResult.toString());
-                                            }
-
-                                            @Override
-                                            public void onSuccess(AppFriendsResponse result) {
-                                                Log.d("카카오친구 ", result.getTotalCount() + "이 앱에 가입된 친구숫자");
-
-                                                boolean found = false;
-                                                for (int i = 0; i < result.getFriends().size(); i++) {
-                                                    Log.d("카카오친구 ", result.getFriends().get(i).getId() + "친구 아이디");
-
-                                                    if (friend_id.equals(result.getFriends().get(i).getId() + "")) {
-
-
-                                                        itemForFriendsList.setFriends_name(result.getFriends().get(i).getProfileNickname());
-                                                        itemForFriendsList.setFriends_image(result.getFriends().get(i).getProfileThumbnailImage());
-                                                        itemForFriendsList.setFriend_id(friend_id);
-                                                        itemForFriendsList.setUuid(result.getFriends().get(i).getUUID());
-                                                        itemForFriendsList.setEmail(email);
-                                                        itemForFriendsList.setFavorite(result.getFriends().get(i).isFavorite().getBoolean());
-                                                        Log.d("친구", itemForFriendsList.getFriends_name() + "확인");
-                                                        tv_request_friend.setClickable(true);
-                                                        found = true;
-
-                                                        displayResult(itemForFriendsList);
-                                                        loading_dialog.dismiss();
-                                                    }
-
-                                                    if (!found && i == result.getFriends().size() - 1) {
-                                                        /** 회원은 맞지만 친구가 아닐경우**/
-                                                        ly_result.setVisibility(View.GONE);
-                                                        Utils.makeAlertDialog("검색결과가 없습니다.", activity);
-                                                        loading_dialog.dismiss();
-
-
-                                                    }
-
-
-                                                }
-
-
-                                            }
-                                        });
 
                             } else {
                                 /**본인메일을 검색한 경우 **/
@@ -342,25 +279,42 @@ public class AddFriendFragment extends Fragment {
     /**
      * 검색결과 디스플레이
      **/
-    private void displayResult(ItemForFriendsList item) {
+    private void displayResult(ItemRegisterAccount item) {
 
         ly_result.setVisibility(View.VISIBLE);
+        loading_dialog.dismiss();
 
 
-        String friend_name = item.getFriends_name();
-        String friend_image = item.getFriends_image();
+        String friendName = item.getUserName();
+        String friendImage = item.getThumbnail();
+        friendId = item.getUserId();
+        itemForFriendsList.setFriendId(item.getUserId());
+        itemForFriendsList.setEmail(item.getEmail());
+        itemForFriendsList.setFriendImage(item.getThumbnail());
+        itemForFriendsList.setFriendName(item.getUserName());
 
-        tv_friend_name.setText(friend_name);
+
+        String me_id = Account.getUserId(activity);
+        String me_name = Account.getUserName(activity);
+        String me_image = Account.getUserThumbnail(activity);
+        String email = Account.getUserEmail(activity);
+        Log.d("친구", me_name);
+
+
+
+        tv_friend_name.setText(friendName);
         iv_friend_image.setBackground(new ShapeDrawable(new OvalShape()));
         iv_friend_image.setClipToOutline(true);
 
-        if (friend_image != null && !friend_image.isEmpty()) {
+        if (friendImage != null && !friendImage.isEmpty()) {
 
-            Picasso.with(activity).load(friend_image).fit().into(iv_friend_image);
+            Picasso.with(activity).load(friendImage).fit().into(iv_friend_image);
         } else {
 
             iv_friend_image.setImageDrawable(getResources().getDrawable(R.drawable.default_profile));
         }
+
+
 
 
     }
@@ -379,7 +333,6 @@ public class AddFriendFragment extends Fragment {
      **/
     private void sendRequestFriend() {
 
-        String friend_id = String.valueOf(itemForFriendsList.getFriend_id());
 
         String me_id = Account.getUserId(activity);
         String me_name = Account.getUserName(activity);
@@ -388,19 +341,19 @@ public class AddFriendFragment extends Fragment {
         Log.d("친구", me_name);
 
         ItemForFriendsList item = new ItemForFriendsList();
-        item.setFriend_id(me_id);
-        item.setFriends_name(me_name);
-        item.setFriends_image(me_image);
+        item.setFriendId(me_id);
+        item.setFriendName(me_name);
+        item.setFriendImage(me_image);
         item.setEmail(email);
 
-
         /** 친구의 받은요청함에 등록**/
-        databaseReference.child("user_data").child(friend_id).child("receive_friend_request").push().setValue(item);
+        databaseReference.child("user_data").child(friendId).child("receiveFriendRequest").push().setValue(item);
+
 
 
         /** 내 보낸요청함에 등록**/
         if (itemForFriendsList != null) {
-            databaseReference.child("user_data").child(me_id).child("send_friend_request").push().setValue(itemForFriendsList).addOnCompleteListener(new OnCompleteListener<Void>() {
+            databaseReference.child("user_data").child(me_id).child("sendFriendRequest").push().setValue(itemForFriendsList).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isComplete()) {

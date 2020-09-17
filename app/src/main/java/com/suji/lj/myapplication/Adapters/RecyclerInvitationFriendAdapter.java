@@ -46,15 +46,15 @@ public class RecyclerInvitationFriendAdapter extends RecyclerView.Adapter<Recycl
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int i) {
 
-        holder.friend_name.setText(list.get(i).getFriend_name());
+        holder.friend_name.setText(list.get(i).getFriendName());
         holder.friend_image.setBackground(new ShapeDrawable(new OvalShape()));
         holder.friend_image.setClipToOutline(true);
-        String thumbnail = list.get(i).getThumbnail();
+        String thumbnail = list.get(i).getFriendImage();
         int accept = list.get(i).getAccept();
 
 
         if (thumbnail!=null && !thumbnail.isEmpty()) {
-            Picasso.with(context).load(list.get(i).getThumbnail()).fit().into(holder.friend_image);
+            Picasso.with(context).load(list.get(i).getFriendImage()).fit().into(holder.friend_image);
         }
         if(accept==0){
             holder.check_state.setImageDrawable(changeDrawableColor(context,R.drawable.faq_icon, context.getResources().getColor(R.color.colorPrimary)));

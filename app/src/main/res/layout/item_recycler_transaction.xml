@@ -71,7 +71,8 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="20dp"
             android:layout_alignParentEnd="true"
-            android:text="29030204202663"
+            android:gravity="end"
+            android:text=""
             android:textColor="@color/colorPrimary"
             app:fontFamily="@font/nexon_level2_gothic" />
 
@@ -93,7 +94,7 @@
 
 
         <TextView
-            android:id="@+id/tvTitle"
+            android:id="@+id/tvMissionTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"

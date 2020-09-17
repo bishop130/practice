@@ -3,41 +3,41 @@ package com.suji.lj.myapplication.Items;
 public class ItemForAccountList {
 
 
-    String account_holder_name;
-    String account_num;
-    String bank_code;
-    String bank_name;
+    String accountHolderName;
+    String accountNum;
+    String bankCode;
+    String bankName;
 
 
-    public String getAccount_holder_name() {
-        return account_holder_name;
+    public String getAccountHolderName() {
+        return accountHolderName;
     }
 
-    public void setAccount_holder_name(String account_holder_name) {
-        this.account_holder_name = account_holder_name;
+    public void setAccountHolderName(String accountHolderName) {
+        this.accountHolderName = accountHolderName;
     }
 
-    public String getAccount_num() {
-        return account_num;
+    public String getAccountNum() {
+        return accountNum;
     }
 
-    public void setAccount_num(String account_num) {
-        this.account_num = account_num;
+    public void setAccountNum(String accountNum) {
+        this.accountNum = accountNum;
     }
 
-    public String getBank_code() {
-        return bank_code;
+    public String getBankCode() {
+        return bankCode;
     }
 
-    public void setBank_code(String bank_code) {
-        this.bank_code = bank_code;
+    public void setBankCode(String bankCode) {
+        this.bankCode = bankCode;
     }
 
-    public String getBank_name() {
-        return bank_name;
+    public String getBankName() {
+        return bankName;
     }
 
-    public void setBank_name(String bank_name) {
-        this.bank_name = bank_name;
+    public void setBankName(String bankName) {
+        this.bankName = bankName;
     }
 }

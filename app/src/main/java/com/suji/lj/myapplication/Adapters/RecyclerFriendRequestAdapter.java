@@ -60,8 +60,8 @@ public class RecyclerFriendRequestAdapter extends RecyclerView.Adapter<RecyclerF
     public void onBindViewHolder(@NonNull RecyclerFriendRequestAdapter.ViewHolder holder, int i) {
 
 
-        String friend_image = list.get(i).getThumnail_img();
-        holder.name.setText(list.get(i).getUser_name());
+        String friend_image = list.get(i).getThumbnail();
+        holder.name.setText(list.get(i).getUserName());
 
         holder.thumbnail.setBackground(new ShapeDrawable(new OvalShape()));
         holder.thumbnail.setClipToOutline(true);
@@ -75,7 +75,7 @@ public class RecyclerFriendRequestAdapter extends RecyclerView.Adapter<RecyclerF
         }
 
         String user_id = Account.getUserId(context);
-        String friend_id = list.get(i).getUser_id();
+        String friend_id = list.get(i).getUserId();
         String email = list.get(i).getEmail();
 
         holder.accept_request.setOnClickListener(new View.OnClickListener() {
@@ -83,20 +83,20 @@ public class RecyclerFriendRequestAdapter extends RecyclerView.Adapter<RecyclerF
             public void onClick(View v) {
                 ItemRegisterAccount friend_item = new ItemRegisterAccount();
 
-                friend_item.setUser_name(list.get(i).getUser_name());
-                friend_item.setThumnail_img(list.get(i).getThumnail_img());
+                friend_item.setUserName(list.get(i).getUserName());
+                friend_item.setThumbnail(list.get(i).getThumbnail());
                 friend_item.setEmail(list.get(i).getEmail());
-                friend_item.setUser_id(list.get(i).getUser_id());
-                friend_item.setProfile_img(list.get(i).getProfile_img());
-                friend_item.setIs_public(list.get(i).isIs_public());
+                friend_item.setUserId(list.get(i).getUserId());
+                friend_item.setProfileImg(list.get(i).getProfileImg());
+                friend_item.setOpen(list.get(i).isOpen());
 
 
                 // String user_id = context.getSharedPreferences("Kakao",Context.MODE_PRIVATE).getString("token","");
                 DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-                databaseReference.child("user_data").child(friend_id).child("friend_accept_waiting").child(user_id).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                databaseReference.child("user_data").child(friend_id).child("friendAcceptWaiting").child(user_id).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                        databaseReference.child("user_data").child(user_id).child("friend_request").child(friend_id).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                        databaseReference.child("user_data").child(user_id).child("friendRequest").child(friend_id).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 ItemRegisterAccount item = new ItemRegisterAccount();
@@ -104,15 +104,15 @@ public class RecyclerFriendRequestAdapter extends RecyclerView.Adapter<RecyclerF
                                 String thumbnail = context.getSharedPreferences("Kakao", MODE_PRIVATE).getString("thumbnail", "");
                                 String email = context.getSharedPreferences("Kakao",MODE_PRIVATE).getString("email","");
 
-                                item.setUser_name(user_name);
-                                item.setThumnail_img(thumbnail);
-                                item.setUser_id(user_id);
+                                item.setUserName(user_name);
+                                item.setThumbnail(thumbnail);
+                                item.setUserId(user_id);
                                 item.setEmail(email);
 
-                                databaseReference.child("user_data").child(friend_id).child("friends_list").push().setValue(item).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                databaseReference.child("user_data").child(friend_id).child("friendsList").push().setValue(item).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
-                                        databaseReference.child("user_data").child(user_id).child("friends_list").push().setValue(friend_item);
+                                        databaseReference.child("user_data").child(user_id).child("friendsList").push().setValue(friend_item);
                                     }
                                 });
 

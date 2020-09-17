@@ -179,8 +179,8 @@ public class RuleFragment extends Fragment implements View.OnClickListener, Recy
                     @Override
                     public void execute(Realm realm) {
                         MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
-                        item.setSingle_penalty(amount);
-                        item.setMission_mode(missionMode);
+                        item.setSinglePenaltyPerDay(amount);
+                        item.setMissionMode(missionMode);
                         RealmResults<ItemPortion> itemPortions = realm.where(ItemPortion.class).findAll();
                         itemPortions.deleteAllFromRealm();
                     }
@@ -203,8 +203,8 @@ public class RuleFragment extends Fragment implements View.OnClickListener, Recy
                     @Override
                     public void execute(Realm realm) {
                         MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
-                        item.setMulti_penalty(amount);
-                        item.setMission_mode(missionMode);
+                        item.setMultiPenaltyPerDay(amount);
+                        item.setMissionMode(missionMode);
                     }
                 });
                 onResetAmountFromSingleModeListener.onResetAmountFromSingleMode();
@@ -331,13 +331,13 @@ public class RuleFragment extends Fragment implements View.OnClickListener, Recy
 
                             if (editText.getId() == R.id.etPenaltySingle) {
                                 //amount = Integer.valueOf(editText.getText().toString());
-                                item.setMission_mode(0);
-                                item.setSingle_penalty(amount);
+                                item.setMissionMode(0);
+                                item.setSinglePenaltyPerDay(amount);
 
                             } else {
 
-                                item.setMission_mode(1);
-                                item.setMulti_penalty(amount);
+                                item.setMissionMode(1);
+                                item.setMultiPenaltyPerDay(amount);
 
                             }
 
@@ -404,6 +404,7 @@ public class RuleFragment extends Fragment implements View.OnClickListener, Recy
             @Override
             public void onClick(View v) {
                 if (Utils.is100(portionList)) {
+                    tvCustomPortion.setTextColor(activity.getResources().getColor(R.color.colorSuccess));
                     realm.executeTransaction(new Realm.Transaction() {
                         @Override
                         public void execute(Realm realm) {
@@ -421,6 +422,7 @@ public class RuleFragment extends Fragment implements View.OnClickListener, Recy
 
                         }
                     });
+
                     bottomSheetDialog.dismiss();
                 } else {
                     Toast.makeText(activity, "배분비율이 맞지 않습니다.", Toast.LENGTH_LONG).show();

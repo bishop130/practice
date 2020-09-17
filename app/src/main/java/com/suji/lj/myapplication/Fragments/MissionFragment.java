@@ -40,6 +40,7 @@ import com.suji.lj.myapplication.Adapters.WithDrawPagerAdapter;
 import com.suji.lj.myapplication.Items.ItemForMissionByDay;
 import com.suji.lj.myapplication.Items.MissionInfoList;
 import com.suji.lj.myapplication.Items.RecyclerItem;
+import com.suji.lj.myapplication.MainActivity;
 import com.suji.lj.myapplication.MissionDetailActivity;
 import com.suji.lj.myapplication.R;
 import com.suji.lj.myapplication.SingleModeActivity;
@@ -65,7 +66,7 @@ public class MissionFragment extends Fragment {
     ViewPager pager;
     LinearLayout ly_add_mission;
     Activity activity;
-    AlertDialog loading_dialog;
+    //AlertDialog loading_dialog;
 
     @Nullable
     @Override
@@ -83,17 +84,6 @@ public class MissionFragment extends Fragment {
         tab_ly.addTab(tab_ly.newTab().setText("약속"));
         tab_ly.addTab(tab_ly.newTab().setText("전체약속"));
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setCancelable(false); // if you want user to wait for some process to finish,
-        builder.setView(R.layout.layout_progress);
-        loading_dialog = builder.create();
-
-        if (loading_dialog.getWindow() != null) {
-            loading_dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-
-        }
-
-
 
         MissionPagerAdapter adapter = new MissionPagerAdapter(getChildFragmentManager(), tab_ly.getTabCount());
         pager.setAdapter(adapter);
@@ -102,11 +92,10 @@ public class MissionFragment extends Fragment {
         ly_add_mission.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                loading_dialog.show();
+                ((MainActivity) activity).showLoadingDialog();
 
-                Intent intent = new Intent(activity,SingleModeActivity.class);
+                Intent intent = new Intent(activity, SingleModeActivity.class);
                 activity.startActivity(intent);
-
 
 
             }
@@ -116,7 +105,7 @@ public class MissionFragment extends Fragment {
         tab_ly.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                switch (tab.getPosition()){
+                switch (tab.getPosition()) {
                     case 0:
                         pager.setCurrentItem(tab.getPosition());
                         break;
@@ -156,9 +145,6 @@ public class MissionFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if(loading_dialog.isShowing()){
-            loading_dialog.dismiss();
-        }
         Log.d("홈프레그", "onResume_SearchFragment");
 
 
@@ -187,7 +173,6 @@ public class MissionFragment extends Fragment {
         super.onDetach();
         Log.d("홈프레그", "onDetach");
     }
-
 
 
 }

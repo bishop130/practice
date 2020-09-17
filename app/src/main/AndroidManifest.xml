@@ -39,7 +39,6 @@
         <activity android:name=".PaymentActivity" />
         <activity android:name=".MissionCheckActivity" />
         <activity android:name=".InvitationInfoActivity" />
-        <activity android:name=".MultiModeDetailActivity" />
         <activity android:name=".FriendsActivity" />
         <activity android:name=".MultiModeActivity" />
         <activity android:name=".AccountActivity" />
@@ -62,7 +61,6 @@
         <activity android:name=".MissionDetailActivity" />
         <activity
             android:name=".SplashActivity"
-            android:launchMode="singleTop"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -71,7 +69,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity" />
+        <activity android:name=".MainActivity"
+            android:launchMode="singleTask"
+
+            />
         <activity android:name=".ContactActivity" />
         <activity android:name=".DaumMapActivity" />
         <activity android:name=".RecyclerResultActivity" />
@@ -79,7 +80,7 @@
         <receiver
             android:name=".Adapters.BroadCastService"
             android:enabled="true"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
@@ -109,9 +110,6 @@
         </service>
         <service
             android:name=".Adapters.NewLocationService"
-            android:enabled="true" />
-        <service
-            android:name=".Adapters.AlarmService"
             android:enabled="true" />
 
         <meta-data

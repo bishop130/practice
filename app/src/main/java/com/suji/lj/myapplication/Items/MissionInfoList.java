@@ -11,147 +11,45 @@ public class MissionInfoList implements Serializable {
 
     }
 
-    public String mission_title;
+    public String title;
     public String address;
     public boolean success;
     public double lat;
     public double lng;
     public List<ContactItem> friends_selected_list;
     List<ItemForFriendByDay> friendByDayList;
-    public Map<String, ItemForDateTimeByList> mission_dates;
-    List<ItemPortion> itemPortionList;
-    String min_date;
-    String max_date;
-    String mission_id;
-    String bank_name;
-    String account_num;
-    int penalty_amount;
-    int penalty;
-    String account_holder;
-    boolean single_mode;
-    int failed_count;
-    int radius;
+    public Map<String, ItemForDateTimeByList> missionDates;
+    public Map<String, Object> successCount;
+    List<ItemPortion> portionList;
+    String minDate;
+    String maxDate;
+    String minTime;
+    String maxTime;
+    String missionId;
+    String bankName;
+    String accountNum;
+    int penaltyTotal;
+    int penaltyPerDay;
+    String accountHolder;
+    boolean singleMode;
+    int failedCount;
+    boolean activation;
 
 
-    public int getRadius() {
-        return radius;
+    public Map<String, Object> getSuccessCount() {
+        return successCount;
     }
 
-    public void setRadius(int radius) {
-        this.radius = radius;
+    public void setSuccessCount(Map<String, Object> successCount) {
+        this.successCount = successCount;
     }
 
-    public List<ItemPortion> getItemPortionList() {
-        return itemPortionList;
+    public String getTitle() {
+        return title;
     }
 
-    public void setItemPortionList(List<ItemPortion> itemPortionList) {
-        this.itemPortionList = itemPortionList;
-    }
-
-    public List<ItemForFriendByDay> getFriendByDayList() {
-        return friendByDayList;
-    }
-
-    public void setFriendByDayList(List<ItemForFriendByDay> friendByDayList) {
-        this.friendByDayList = friendByDayList;
-    }
-
-    public int getPenalty() {
-        return penalty;
-    }
-
-    public void setPenalty(int penalty) {
-        this.penalty = penalty;
-    }
-
-    public int getFailed_count() {
-        return failed_count;
-    }
-
-    public void setFailed_count(int failed_count) {
-        this.failed_count = failed_count;
-    }
-
-
-    public boolean isSingle_mode() {
-        return single_mode;
-    }
-
-    public void setSingle_mode(boolean single_mode) {
-        this.single_mode = single_mode;
-    }
-
-    public String getAccount_holder() {
-        return account_holder;
-    }
-
-    public void setAccount_holder(String account_holder) {
-        this.account_holder = account_holder;
-    }
-
-    public String getBank_name() {
-        return bank_name;
-    }
-
-    public void setBank_name(String bank_name) {
-        this.bank_name = bank_name;
-    }
-
-    public String getAccount_num() {
-        return account_num;
-    }
-
-    public void setAccount_num(String account_num) {
-        this.account_num = account_num;
-    }
-
-    public int getPenalty_amount() {
-        return penalty_amount;
-    }
-
-    public void setPenalty_amount(int penalty_amount) {
-        this.penalty_amount = penalty_amount;
-    }
-
-    public String getMission_id() {
-        return mission_id;
-    }
-
-    public void setMission_id(String mission_id) {
-        this.mission_id = mission_id;
-    }
-
-    public List<ContactItem> getFriends_selected_list() {
-        return friends_selected_list;
-    }
-
-    public void setFriends_selected_list(List<ContactItem> friends_selected_list) {
-        this.friends_selected_list = friends_selected_list;
-    }
-
-    public String getMin_date() {
-        return min_date;
-    }
-
-    public void setMin_date(String min_date) {
-        this.min_date = min_date;
-    }
-
-    public String getMax_date() {
-        return max_date;
-    }
-
-    public void setMax_date(String max_date) {
-        this.max_date = max_date;
-    }
-
-    public String getMission_title() {
-        return mission_title;
-    }
-
-    public void setMission_title(String mission_title) {
-        this.mission_title = mission_title;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getAddress() {
@@ -186,12 +84,139 @@ public class MissionInfoList implements Serializable {
         this.lng = lng;
     }
 
-
-    public Map<String, ItemForDateTimeByList> getMission_dates() {
-        return mission_dates;
+    public List<ContactItem> getFriends_selected_list() {
+        return friends_selected_list;
     }
 
-    public void setMission_dates(Map<String, ItemForDateTimeByList> mission_dates) {
-        this.mission_dates = mission_dates;
+    public void setFriends_selected_list(List<ContactItem> friends_selected_list) {
+        this.friends_selected_list = friends_selected_list;
+    }
+
+    public List<ItemForFriendByDay> getFriendByDayList() {
+        return friendByDayList;
+    }
+
+    public void setFriendByDayList(List<ItemForFriendByDay> friendByDayList) {
+        this.friendByDayList = friendByDayList;
+    }
+
+    public Map<String, ItemForDateTimeByList> getMissionDates() {
+        return missionDates;
+    }
+
+    public void setMissionDates(Map<String, ItemForDateTimeByList> missionDates) {
+        this.missionDates = missionDates;
+    }
+
+    public List<ItemPortion> getPortionList() {
+        return portionList;
+    }
+
+    public void setPortionList(List<ItemPortion> portionList) {
+        this.portionList = portionList;
+    }
+
+    public String getMinDate() {
+        return minDate;
+    }
+
+    public String getMinTime() {
+        return minTime;
+    }
+
+    public void setMinTime(String minTime) {
+        this.minTime = minTime;
+    }
+
+    public String getMaxTime() {
+        return maxTime;
+    }
+
+    public void setMaxTime(String maxTime) {
+        this.maxTime = maxTime;
+    }
+
+    public void setMinDate(String minDate) {
+        this.minDate = minDate;
+    }
+
+    public String getMaxDate() {
+        return maxDate;
+    }
+
+    public void setMaxDate(String maxDate) {
+        this.maxDate = maxDate;
+    }
+
+    public String getMissionId() {
+        return missionId;
+    }
+
+    public void setMissionId(String missionId) {
+        this.missionId = missionId;
+    }
+
+    public String getBankName() {
+        return bankName;
+    }
+
+    public void setBankName(String bankName) {
+        this.bankName = bankName;
+    }
+
+    public String getAccountNum() {
+        return accountNum;
+    }
+
+    public void setAccountNum(String accountNum) {
+        this.accountNum = accountNum;
+    }
+
+    public int getPenaltyTotal() {
+        return penaltyTotal;
+    }
+
+    public void setPenaltyTotal(int penaltyTotal) {
+        this.penaltyTotal = penaltyTotal;
+    }
+
+    public int getPenaltyPerDay() {
+        return penaltyPerDay;
+    }
+
+    public void setPenaltyPerDay(int penaltyPerDay) {
+        this.penaltyPerDay = penaltyPerDay;
+    }
+
+    public String getAccountHolder() {
+        return accountHolder;
+    }
+
+    public void setAccountHolder(String accountHolder) {
+        this.accountHolder = accountHolder;
+    }
+
+    public boolean isSingleMode() {
+        return singleMode;
+    }
+
+    public void setSingleMode(boolean singleMode) {
+        this.singleMode = singleMode;
+    }
+
+    public int getFailedCount() {
+        return failedCount;
+    }
+
+    public void setFailedCount(int failedCount) {
+        this.failedCount = failedCount;
+    }
+
+    public boolean isActivation() {
+        return activation;
+    }
+
+    public void setActivation(boolean activation) {
+        this.activation = activation;
     }
 }

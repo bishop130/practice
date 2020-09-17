@@ -47,15 +47,15 @@ public class RecyclerWaitingFriendAdapter extends RecyclerView.Adapter<RecyclerW
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int i) {
-        holder.friends_name.setText(list.get(i).getUser_name());
+        holder.friends_name.setText(list.get(i).getUserName());
 
         holder.friends_image.setBackground(new ShapeDrawable(new OvalShape()));
         holder.friends_image.setClipToOutline(true);
 
 
-        if (list.get(i).getThumnail_img() != null) {
+        if (list.get(i).getThumbnail() != null) {
             Picasso.with(context)
-                    .load(list.get(i).getThumnail_img())
+                    .load(list.get(i).getThumbnail())
                     .fit()
                     .into(holder.friends_image);
 
@@ -67,7 +67,7 @@ public class RecyclerWaitingFriendAdapter extends RecyclerView.Adapter<RecyclerW
             public void onClick(View v) {
 
                 String user_id = Account.getUserId(context);
-                String friend_id = list.get(i).getUser_id();
+                String friend_id = list.get(i).getUserId();
                 //상대 친구요청리스트에서 삭제
 
                 if (user_id != null) {

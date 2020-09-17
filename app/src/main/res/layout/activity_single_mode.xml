@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -17,8 +18,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <LinearLayout xmlns:app="http://schemas.android.com/apk/res-auto"
-            xmlns:tools="http://schemas.android.com/tools"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/wall_paper2"
@@ -96,7 +96,6 @@
                             android:iconifiedByDefault="false"
                             android:imeOptions="actionDone"
                             android:inputType="text"
-                            android:maxLength="20"
                             android:padding="12dp"
                             app:fontFamily="@font/nexon_level2_gothic"
                             app:iconifiedByDefault="false" />
@@ -331,19 +330,11 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="0 P"
+                       android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                     android:layout_toStartOf="@+id/tvPointPurchase"
                         android:textColor="@color/colorPrimary"
                         app:fontFamily="@font/nexon_level2_gothic" />
 
-                    <TextView
-                        android:layout_marginStart="24dp"
-                        android:layout_width="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_height="wrap_content"
-                        android:text="충전"
-                        android:layout_alignParentEnd="true"
-                        android:id="@+id/tvPointPurchase"/>
                 </RelativeLayout>
 
                 <View
@@ -382,6 +373,7 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentBottom="true"
                             android:layout_toLeftOf="@+id/won"
+                            android:layout_marginBottom="-12dp"
                             android:gravity="end"
                             android:text="0"
                             android:textColor="@color/colorPrimary"
@@ -395,8 +387,7 @@
                             android:layout_alignParentEnd="true"
                             android:layout_marginStart="8dp"
                             android:layout_marginTop="20dp"
-                            android:layout_marginBottom="8dp"
-                            android:text="원"
+                            android:text="P"
                             android:textColor="@color/colorPrimary"
                             android:textSize="16sp"
                             app:fontFamily="@font/nexon_level2_gothic" />
@@ -410,7 +401,6 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
                 android:background="@color/White"
                 android:orientation="vertical"
                 android:padding="20dp">

@@ -183,7 +183,7 @@ public class RecyclerResultActivity extends AppCompatActivity implements MapView
 
 
             } else {
-                Date is_success_date_time = dtf.dateTimeParser(mission_date_time);
+                Date is_success_date_time = dtf.dateTimeParser(mission_date_time,"yyyyMMddHHmm");
 
                 if (is_success_date_time.after(new Date(System.currentTimeMillis()))) {
                     register_location.setVisibility(View.VISIBLE);
@@ -391,7 +391,7 @@ public class RecyclerResultActivity extends AppCompatActivity implements MapView
 
         Date cur_date_time = new Date(System.currentTimeMillis());
         Date set_mission_date = DateTimeFormatter.dateParser(mission_date,"yyyyMMdd");
-        Date set_mission_date_time = dtf.dateTimeParser(mission_date_time);
+        Date set_mission_date_time = dtf.dateTimeParser(mission_date_time,"yyyyMMddHHmm");
 
         date_time_timer = new CountDownTimer((set_mission_date.getTime() + 86400 * 1000) - cur_date_time.getTime(), 1000) {
             @Override

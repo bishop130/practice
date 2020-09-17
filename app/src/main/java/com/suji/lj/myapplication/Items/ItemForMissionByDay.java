@@ -20,12 +20,21 @@ public class ItemForMissionByDay {
     double lng;
     boolean success;
     boolean activation;
-    String mission_id;
-    String date_time;
-    boolean single_mode;
-    String multi_code;
+    String missionId;
+    String dateTime;
+    boolean singleMode;
+    String code;
+    String timeStamp;
     List<ItemForFriendByDay> friendByDayList = new ArrayList<>();
 
+
+    public String getTimeStamp() {
+        return timeStamp;
+    }
+
+    public void setTimeStamp(String timeStamp) {
+        this.timeStamp = timeStamp;
+    }
 
     public List<ItemForFriendByDay> getFriendByDayList() {
         return friendByDayList;
@@ -33,23 +42,6 @@ public class ItemForMissionByDay {
 
     public void setFriendByDayList(List<ItemForFriendByDay> friendByDayList) {
         this.friendByDayList = friendByDayList;
-    }
-
-    public String getMulti_code() {
-        return multi_code;
-    }
-
-    public void setMulti_code(String multi_code) {
-        this.multi_code = multi_code;
-    }
-
-
-    public boolean isSingle_mode() {
-        return single_mode;
-    }
-
-    public void setSingle_mode(boolean single_mode) {
-        this.single_mode = single_mode;
     }
 
     public boolean isActivation() {
@@ -60,20 +52,36 @@ public class ItemForMissionByDay {
         this.activation = activation;
     }
 
-    public String getDate_time() {
-        return date_time;
+    public String getMissionId() {
+        return missionId;
     }
 
-    public void setDate_time(String date_time) {
-        this.date_time = date_time;
+    public void setMissionId(String missionId) {
+        this.missionId = missionId;
     }
 
-    public String getMission_id() {
-        return mission_id;
+    public String getDateTime() {
+        return dateTime;
     }
 
-    public void setMission_id(String mission_id) {
-        this.mission_id = mission_id;
+    public void setDateTime(String dateTime) {
+        this.dateTime = dateTime;
+    }
+
+    public boolean isSingleMode() {
+        return singleMode;
+    }
+
+    public void setSingleMode(boolean singleMode) {
+        this.singleMode = singleMode;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public boolean isSuccess() {

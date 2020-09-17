@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ItemForDateTimeByList implements Serializable {
-    String time_stamp;
+    String timeStamp;
     boolean success;
-    String date_time;
+    String dateTime;
     List<ItemForFriendByDay> friendByDayList;
 
     public ItemForDateTimeByList(){
@@ -23,12 +23,12 @@ public class ItemForDateTimeByList implements Serializable {
         this.friendByDayList = friendByDayList;
     }
 
-    public String getTime_stamp() {
-        return time_stamp;
+    public String getTimeStamp() {
+        return timeStamp;
     }
 
-    public void setTime_stamp(String time_stamp) {
-        this.time_stamp = time_stamp;
+    public void setTimeStamp(String timeStamp) {
+        this.timeStamp = timeStamp;
     }
 
     public boolean isSuccess() {
@@ -39,13 +39,14 @@ public class ItemForDateTimeByList implements Serializable {
         this.success = success;
     }
 
-    public String getDate_time() {
-        return date_time;
+    public String getDateTime() {
+        return dateTime;
     }
 
-    public void setDate_time(String date_time) {
-        this.date_time = date_time;
+    public void setDateTime(String dateTime) {
+        this.dateTime = dateTime;
     }
+
 
     /*
     @Override

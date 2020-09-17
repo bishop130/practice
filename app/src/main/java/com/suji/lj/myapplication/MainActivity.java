@@ -32,6 +32,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.kakao.util.helper.Utility;
+import com.suji.lj.myapplication.Adapters.MyFirebaseMessagingService;
+import com.suji.lj.myapplication.Adapters.NewLocationService;
 import com.suji.lj.myapplication.Fragments.GiftFragment;
 import com.suji.lj.myapplication.Fragments.NotificationFragment;
 import com.suji.lj.myapplication.Fragments.SearchFragment;
@@ -107,6 +109,8 @@ public class MainActivity extends AppCompatActivity {
     String user_id;
     public BottomNavigationView bottomNavigationView;
     AlertDialog loading_dialog;
+    boolean isFetched = false;
+
 
     @Override
 
@@ -125,6 +129,12 @@ public class MainActivity extends AppCompatActivity {
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setCancelable(false); // if you want user to wait for some process to finish,
+        builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                Toast.makeText(MainActivity.this, "취소", Toast.LENGTH_SHORT).show();
+            }
+        });
         builder.setView(R.layout.layout_progress);
         loading_dialog = builder.create();
 
@@ -144,6 +154,38 @@ public class MainActivity extends AppCompatActivity {
 
         //clearPassedMission();
 
+        boolean autoLocation = getSharedPreferences("settings", MODE_PRIVATE).getBoolean("auto_register_location", true);
+        if (autoLocation) {
+            boolean foregroundRunning = Utils.isServiceRunningInForeground(this, NewLocationService.class);
+            if (!foregroundRunning) {
+                Intent service = new Intent(this, NewLocationService.class);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    ContextCompat.startForegroundService(this, service);
+                } else {
+                    startService(service);
+                }
+            }
+        } else {
+            Intent serviceIntent = new Intent(this, NewLocationService.class);
+            stopService(serviceIntent);
+        }
+
+        FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+            @Override
+            public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                if (!task.isSuccessful()) {
+                    Log.w(TAG, "getInstanceId failed", task.getException());
+                    return;
+                }
+
+                // Get new Instance ID token
+                String token = task.getResult().getToken();
+                sendRegistrationToServer(token);
+
+                Toast.makeText(MainActivity.this, token, Toast.LENGTH_SHORT).show();
+            }
+        });
+
 
         fragmentManager = getSupportFragmentManager();
 /*
@@ -157,45 +199,19 @@ public class MainActivity extends AppCompatActivity {
 
         //requestAccessTokenInfo();
 
-
-        /*
-        String mission_id = "20200721231316U1285672933";
-        String dateTime = "202007222310";
-        String date = "20200722";
-        String time_stamp = DateTimeUtils.getCurrentTime();
-
-
-         */
-
-
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         boolean isWhiteListing = false;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
             isWhiteListing = pm.isIgnoringBatteryOptimizations(getApplicationContext().getPackageName());
             Log.d("절전", isWhiteListing + "");
         }
+
         if (!isWhiteListing) {
-            AlertDialog.Builder setdialog = new AlertDialog.Builder(MainActivity.this);
-            setdialog.setTitle("추가 설정이 필요합니다.")
-                    .setMessage("어플을 문제없이 사용하기 위해서는 해당 어플을 \"배터리 사용량 최적화\" 목록에서 \"제외\"해야 합니다. 설정화면으로 이동하시겠습니까?")
-                    .setPositiveButton("네", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-                                intent.setData(Uri.parse("package:" + getApplicationContext().getPackageName()));
-                                startActivity(intent);
-                            }
-                        }
-                    })
-                    .setNegativeButton("아니오", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            Toast.makeText(MainActivity.this, "설정을 취소했습니다.", Toast.LENGTH_SHORT).show();
-                        }
-                    })
-                    .create()
-                    .show();
+            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                intent.setData(Uri.parse("package:" + getApplicationContext().getPackageName()));
+                startActivity(intent);
+            }
 
         }
 
@@ -205,25 +221,25 @@ public class MainActivity extends AppCompatActivity {
         fa = new MissionFragment();
         fragmentManager.beginTransaction().replace(R.id.fragment_container, fa).commit();
 
-
-        displayBadgeCount();
+        //displayBadgeCount();
+        //displayBadgeCount();
 
 
     }
 
     private void displayBadgeCount() {
+        int count = 0;
         databaseReference.child("user_data").child(user_id).child("notification").orderByChild("read").equalTo(false).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
-
                     int badge_count = (int) dataSnapshot.getChildrenCount();
                     Log.d("뱃지", badge_count + "");
-                    BadgeManager.showBottomNavigationViewBadge(MainActivity.this, bottomNavigationView, 2, badge_count);
+                    BadgeManager.showBottomNavigationViewBadge(MainActivity.this, bottomNavigationView, 3, badge_count);
 
 
                 } else {
-
+                    BadgeManager.hideBottomNavigationViewBadge(bottomNavigationView, 3);
 
                 }
             }
@@ -429,6 +445,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
     }
 
 
@@ -483,75 +500,14 @@ public class MainActivity extends AppCompatActivity {
         // 뒤로가기 간격 사용자 지정
         //backPressHandler.onBackPressed(3000);
         // Toast, 간격 사용자 지정
+        if (loading_dialog.isShowing()) {
+            loading_dialog.dismiss();
+        }
         backPressHandler.onBackPressed("뒤로가기 버튼 한번 더 누르면 종료", 3000);
 
 
     }
 
-
-    private void clearPassedMission() {
-
-        String user_id = Account.getUserId(this);
-        String date_time = DateTimeUtils.getCurrentDateTimeForKey();
-
-        databaseReference.child("user_data").child(user_id).child("passed_mission").orderByChild("date_time").endAt(date_time).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-
-                    databaseReference.child("user_data").child(user_id).child("notification").setValue(dataSnapshot.getValue());
-                    //dataSnapshot.getRef().removeValue();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
-        databaseReference.child("user_data").child(user_id).child("multi_key").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        ItemForMultiKey item = snapshot.getValue(ItemForMultiKey.class);
-                        if (item != null) {
-                            String multi_key = item.getMulti_mission_id();
-                            databaseReference.child("user_data").child("multi_mode").child(multi_key).child("mission_display").orderByChild("date_time").endAt(date_time).addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                    if (dataSnapshot.exists()) {
-
-                                        databaseReference.child("user_data").child(user_id).child("notification").setValue(dataSnapshot.getValue());
-                                        dataSnapshot.getRef().removeValue();
-
-
-                                    }
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                }
-                            });
-                        }
-
-
-                    }
-
-
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
-
-    }
 
     @Override
     public void onStart() {
@@ -564,6 +520,39 @@ public class MainActivity extends AppCompatActivity {
         // Check if user is signed in (non-null) and update UI accordingly.
 
 
+    }
+
+    public void showLoadingDialog() {
+
+
+        loading_dialog.show();
+
+
+    }
+
+
+    public void dismissLoadingDialog() {
+        loading_dialog.dismiss();
+
+
+    }
+
+    private void sendRegistrationToServer(String token) {
+
+        String user_id = Account.getUserId(this);
+        SharedPreferences sharedPreferences = getSharedPreferences("FCM", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("fcm_token", token);
+        editor.apply();
+
+
+        Map<String, String> objectMap = new HashMap<>();
+        objectMap.put("token", token);
+        if (user_id != null)
+            databaseReference.child("user_data").child(user_id).child("fcm_data").setValue(objectMap);
+
+
+        // TODO: Implement this method to send token to your app server.
     }
 
 

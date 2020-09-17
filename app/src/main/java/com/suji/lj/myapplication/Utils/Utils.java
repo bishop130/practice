@@ -51,6 +51,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationMenuView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.gson.GsonBuilder;
+import com.suji.lj.myapplication.Adapters.BroadCastService;
 import com.suji.lj.myapplication.Adapters.NewLocationService;
 import com.suji.lj.myapplication.Items.ContactItem;
 import com.suji.lj.myapplication.Items.UserAccountItem;
@@ -429,14 +430,14 @@ public class Utils {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {//26
             //PendingIntent foregroundService_sender = PendingIntent.getForegroundService(this, 123, new Intent(this, LocationService.class), PendingIntent.FLAG_UPDATE_CURRENT);
-            PendingIntent foregroundService_sender = PendingIntent.getService(context, 123, new Intent(context, NewLocationService.class), PendingIntent.FLAG_UPDATE_CURRENT);
-
+            PendingIntent foregroundService_sender = PendingIntent.getBroadcast(context, 123, new Intent(context, BroadCastService.class), PendingIntent.FLAG_UPDATE_CURRENT);
+            Log.d("서비스", "wakeDoze O");
             alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(0, foregroundService_sender), foregroundService_sender);
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { //21
-            PendingIntent foregroundService_sender = PendingIntent.getService(context, 123, new Intent(context, NewLocationService.class), PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent foregroundService_sender = PendingIntent.getBroadcast(context, 123, new Intent(context, BroadCastService.class), PendingIntent.FLAG_UPDATE_CURRENT);
             alarmManager.setExact(AlarmManager.RTC, 0, foregroundService_sender);
         } else {
-            PendingIntent foregroundService_sender = PendingIntent.getService(context, 123, new Intent(context, NewLocationService.class), PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent foregroundService_sender = PendingIntent.getBroadcast(context, 123, new Intent(context, BroadCastService.class), PendingIntent.FLAG_UPDATE_CURRENT);
             alarmManager.set(AlarmManager.RTC, 0, foregroundService_sender);
         }
 
@@ -477,8 +478,7 @@ public class Utils {
         return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
     }
 
-    public static Boolean isLocationEnabled(Context context)
-    {
+    public static Boolean isLocationEnabled(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
 // This is new method provided in API 28
             LocationManager lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
@@ -487,7 +487,7 @@ public class Utils {
 // This is Deprecated in API 28
             int mode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE,
                     Settings.Secure.LOCATION_MODE_OFF);
-            return  (mode != Settings.Secure.LOCATION_MODE_OFF);
+            return (mode != Settings.Secure.LOCATION_MODE_OFF);
 
         }
     }
@@ -736,7 +736,7 @@ public class Utils {
 
     public static void shuffleArray(int[] ar) {
         // If running on Java 6 or older, use `new Random()` on RHS here
-        Random rnd = ThreadLocalRandom.current();
+        Random rnd = new Random();
         for (int i = ar.length - 1; i > 0; i--) {
             int index = rnd.nextInt(i + 1);
             // Simple swap

@@ -35,7 +35,9 @@ import com.suji.lj.myapplication.Items.ItemForNotification;
 import com.suji.lj.myapplication.Items.ItemForMissionCheck;
 import com.suji.lj.myapplication.MainActivity;
 import com.suji.lj.myapplication.R;
+import com.suji.lj.myapplication.SplashActivity;
 import com.suji.lj.myapplication.Utils.Account;
+import com.suji.lj.myapplication.Utils.Code;
 import com.suji.lj.myapplication.Utils.DateTimeFormatter;
 import com.suji.lj.myapplication.Utils.DateTimeUtils;
 import com.suji.lj.myapplication.Utils.FCM;
@@ -46,7 +48,11 @@ import com.suji.lj.myapplication.Utils.Utils;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -78,10 +84,10 @@ public class NewLocationService extends Service {
     PreciseCountdown timeOutAlarm;
     boolean isWakeUpTimerRunning = false;
     boolean isTimeOutTimerRunning = false;
-    FusedLocationProviderClient mFusedLocationClient;
     String mission_id;
     String user_id;
     String title;
+    boolean activation = false;
 
     double lat, lng;
     int count = 0;
@@ -90,6 +96,7 @@ public class NewLocationService extends Service {
     String date;
     String time;
     boolean isSingle;
+    int numOfData = 0;
     DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
     ArrayList<ItemForMissionByDay> singleList;
     List<ItemForFriendByDay> friendByDayList = new ArrayList<>();
@@ -145,20 +152,77 @@ public class NewLocationService extends Service {
     private void queryData(String date_time) {
 
         singleList = new ArrayList<>();
+        numOfData = 0;
 
 
-        databaseReference.child("user_data").child(user_id).child("mission_display").orderByChild("date_time").startAt(date_time).limitToFirst(1).addListenerForSingleValueEvent(new ValueEventListener() {
+        databaseReference.child("user_data").child(user_id).child("missionDisplay").orderByChild("dateTime").startAt(date_time).limitToFirst(1).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
+                    numOfData = (int) dataSnapshot.getChildrenCount();
                     for (DataSnapshot data : dataSnapshot.getChildren()) {
+
                         ItemForMissionByDay itemForMissionByDay = data.getValue(ItemForMissionByDay.class);
                         if (itemForMissionByDay != null) {
-                            locationOrNot(itemForMissionByDay);
+                            boolean single = itemForMissionByDay.isSingleMode();
+                            String missionId = itemForMissionByDay.getMissionId();
+                            String dateTime = itemForMissionByDay.getDateTime();
+                            if (single) {
+                                singleList.add(itemForMissionByDay);
+
+                            } else {
+                                databaseReference.child("multi_data").orderByChild("missionId").equalTo(missionId).addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        if (snapshot.exists()) {
+                                            for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                                                snapshot1.getRef().child("missionDisplay").orderByChild("dateTime").equalTo(dateTime).addListenerForSingleValueEvent(new ValueEventListener() {
+                                                    @Override
+                                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                        if (snapshot.exists()) {
+                                                            for (DataSnapshot shot : snapshot.getChildren()) {
+                                                                ItemForMissionByDay day = shot.getValue(ItemForMissionByDay.class);
+
+                                                                if (day != null) {
+                                                                    Log.d("멀티", day.getTitle() + " 밸류3");
+                                                                    singleList.add(day);
+
+
+                                                                }
+
+
+                                                            }
+                                                        }
+
+                                                        sortLatest();
+                                                        //rl_is_empty.setVisibility(View.GONE);
+
+                                                    }
+
+                                                    @Override
+                                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                                    }
+                                                });
+
+
+                                            }
+                                        }
+
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+
+                            }
 
                         }
 
                     }
+                    sortLatest();
                 } else {
 
                     updateNotification("다음약속이 없습니다.", "새 약속을 등록해주세요.");
@@ -177,6 +241,34 @@ public class NewLocationService extends Service {
 
     }
 
+    private void sortLatest() {
+        if (numOfData == singleList.size()) {
+            Collections.sort(singleList, new Comparator<ItemForMissionByDay>() {
+                @Override
+                public int compare(ItemForMissionByDay o1, ItemForMissionByDay o2) {
+                    return o1.getDateTime().compareTo(o2.getDateTime());
+                }
+            });
+            Iterator<ItemForMissionByDay> i = singleList.iterator();
+            while (i.hasNext()) {
+                if (i.next().isSuccess()) {
+                    // Remove the last thing returned by next()
+                    i.remove();
+                }
+            }
+
+            if (singleList.size() == 0) {
+                updateNotification("다음약속이 없습니다.", "새 약속을 등록해주세요.");
+            } else {
+                locationOrNot(singleList.get(0));
+
+            }
+
+        }
+
+
+    }
+
 
     private void locationOrNot(ItemForMissionByDay item) {
 
@@ -184,16 +276,16 @@ public class NewLocationService extends Service {
         lng = item.getLng();
         title = item.getTitle();
         date = item.getDate();
-        mission_id = item.getMission_id();
+        mission_id = item.getMissionId();
         time = item.getTime();
-        isSingle = item.isSingle_mode();
+        isSingle = item.isSingleMode();
         if (!isSingle) {
             friendByDayList = item.getFriendByDayList();
         }
 
 
         Date current_date_time = new Date(System.currentTimeMillis());
-        Date mission_date_time = DateTimeFormatter.dateTimeParser(date + time);
+        Date mission_date_time = DateTimeFormatter.dateTimeParser(date + time, "yyyyMMddHHmm");
         long diff = mission_date_time.getTime() - current_date_time.getTime();
 
 
@@ -223,9 +315,10 @@ public class NewLocationService extends Service {
     private Notification getMyActivityNotification(String title, String text) {
         // The PendingIntent to launch our activity if the user selects
         // this notification
+        Intent intent = new Intent(this, MainActivity.class);
 
-        PendingIntent contentIntent = PendingIntent.getActivity(this,
-                0, new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 
         Notification.Builder builder;
@@ -233,6 +326,10 @@ public class NewLocationService extends Service {
             String CHANNEL_ID = "WindWalk";
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "WindWalk", NotificationManager.IMPORTANCE_DEFAULT);
             channel.setShowBadge(false);
+            channel.setSound(null, null);
+            channel.enableLights(false);
+            channel.setImportance(NotificationManager.IMPORTANCE_LOW);
+            channel.enableVibration(false);
 
             ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).createNotificationChannel(channel);
 
@@ -246,7 +343,6 @@ public class NewLocationService extends Service {
             return builder.setSmallIcon(R.drawable.carrot_and_stick)
                     .setContentTitle(text)
                     .setContentText(title)
-
                     .setDefaults(Notification.DEFAULT_ALL)
                     .setContentIntent(contentIntent).build();
         }
@@ -264,25 +360,26 @@ public class NewLocationService extends Service {
 
         if (isWakeUpTimerRunning) {
             preciseCountdown.cancel();
-        } else {
-
-            preciseCountdown = new PreciseCountdown(diff - 1000 * 60 * 30, 1000) {//30분전에 알람 diff - 1000 * 60 * 3
-                @Override
-                public void onTick(long timeLeft) {
-                    //Log.d("서비스", "" + timeLeft);
-                    isWakeUpTimerRunning = true;
-                }
-
-                @Override
-                public void onFinished() {
-                    isWakeUpTimerRunning = false;
-                    Log.d("서비스", "" + "onfinished");
-                    Utils.wakeDoze(getApplicationContext());
-
-                }
-            };
-            preciseCountdown.start();
         }
+
+        Log.d("서비스", "wakeupAlarm");
+        preciseCountdown = new PreciseCountdown(diff - 1000 * 60 * 30, 1000) {//30분전에 알람 diff - 1000 * 60 * 3
+            @Override
+            public void onTick(long timeLeft) {
+                Log.d("서비스", "" + timeLeft);
+                isWakeUpTimerRunning = true;
+            }
+
+            @Override
+            public void onFinished() {
+                isWakeUpTimerRunning = false;
+                Log.d("서비스", "" + "onfinished");
+                Utils.wakeDoze(NewLocationService.this);
+
+            }
+        };
+        preciseCountdown.start();
+
     }
 
 
@@ -303,7 +400,7 @@ public class NewLocationService extends Service {
 
 
                 /** 서버에 성공여부 기록**/
-                databaseReference.child("check_mission").child(date + time).orderByChild("mission_id").equalTo(mission_id).addListenerForSingleValueEvent(new ValueEventListener() {
+                databaseReference.child("check_mission").child(date + time).orderByChild("missionId").equalTo(mission_id).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
@@ -312,11 +409,11 @@ public class NewLocationService extends Service {
                             Log.d("서비스", dataSnapshot.getChildrenCount() + "  how_many");
                             for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                                 ItemForMissionCheck object = snapshot.getValue(ItemForMissionCheck.class);
-                                String userId = snapshot.child("user_id").getValue(String.class);
+                                String userId = snapshot.child("userId").getValue(String.class);
                                 if (userId != null && object != null) {
                                     if (userId.equals(user_id)) {
                                         object.setSuccess(true);
-                                        object.setTime_stamp(time_stamp);
+                                        object.setTimeStamp(time_stamp);
                                         snapshot.getRef().setValue(object);
 
 
@@ -337,48 +434,59 @@ public class NewLocationService extends Service {
 
                     /** 싱글미션은 개인db에 기록**/
 
-                    databaseReference.child("user_data").child(user_id).child("mission_display").orderByChild("mission_id").equalTo(mission_id).addListenerForSingleValueEvent(new ValueEventListener() {
+                    databaseReference.child("user_data").child(user_id).child("missionDisplay").orderByChild("missionId").equalTo(mission_id).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-                            for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                            for (DataSnapshot snapshot1 : dataSnapshot.getChildren()) {
 
-                                String key = snapshot.getKey();
+                                ItemForMissionByDay item = snapshot1.getValue(ItemForMissionByDay.class);
 
-                                ItemForMissionByDay item = snapshot.getValue(ItemForMissionByDay.class);
-
-                                if (item != null && key != null) {
-                                    String mission_id2 = item.getMission_id();
-                                    item.setSuccess(true);
-                                    if (mission_id.equals(mission_id2)) { //날짜와 시간 미션id가 모두 일치한다
+                                if (item != null) {
+                                    String missionId = item.getMissionId();
+                                    //item.setSuccess(true);
+                                    if (mission_id.equals(missionId)) { //날짜와 시간 미션id가 모두 일치한다
 
                                         //databaseReference.child("user_data").child(user_id).child("notification").push().setValue(item);
-                                        /** 성공한 약속은 display DB에서 삭제**/
-                                        databaseReference.child("user_data").child(user_id).child("mission_display").child(key).removeValue();
 
 
                                         /** 성공여부를 mission_info_list에 기록**/
-                                        databaseReference.child("user_data").child(user_id).child("mission_info_list").orderByChild("mission_id").equalTo(mission_id).addListenerForSingleValueEvent(new ValueEventListener() {
+                                        databaseReference.child("user_data").child(user_id).child("missionInfoList").orderByChild("missionId").equalTo(mission_id).addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                                                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                                    String key = snapshot.getKey();
-                                                    ItemForDateTimeByList item = snapshot.child("mission_dates").getValue(ItemForDateTimeByList.class);
-                                                    Log.d("서비스", dataSnapshot.exists() + "");
-                                                    if (item != null) {
-                                                        item.setSuccess(true);
-                                                        item.setTime_stamp(time_stamp);
-                                                        item.setDate_time(item.getDate_time());
+                                                    ItemForDateTimeByList item = snapshot.child("missionDates").child(date).getValue(ItemForDateTimeByList.class);
 
-                                                        databaseReference.child("user_data").child(user_id).child("mission_info_list").child(key).child("mission_dates").child(date).setValue(item).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    if (item != null) {
+                                                        item.setDateTime(item.getDateTime());
+                                                        item.setSuccess(true);
+                                                        item.setTimeStamp(time_stamp);
+                                                        snapshot.getRef().child("missionDates").child(date).setValue(item).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                             @Override
                                                             public void onComplete(@NonNull Task<Void> task) {
+
+                                                                if (task.isSuccessful()) {
+                                                                    /** 성공한 약속은 display DB에서 삭제**/
+                                                                    snapshot1.getRef().removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                        @Override
+                                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                                            if (task.isSuccessful()) {
+                                                                                String date_time = DateTimeUtils.getCurrentTime();
+                                                                                queryData(date_time);
+                                                                            }
+                                                                        }
+                                                                    });
+
+
+                                                                }
                                                                 //Log.d("서비스", "성공인가 = " + item.getDate());
 
 
                                                             }
                                                         });
+
+
                                                     }
                                                 }
 
@@ -391,14 +499,16 @@ public class NewLocationService extends Service {
                                             }
                                         });
 
-                                        /** 미션 성공여부 알림보관함에 기록(싱글성공 코드400)**/
+                                        /** 미션 성공여부 알림보관함에 기록(싱글성공 코드300)**/
                                         ItemForNotification notification = new ItemForNotification();
-                                        notification.setMission_id(mission_id);
+                                        notification.setMissionId(mission_id);
                                         notification.setTitle(title);
-                                        notification.setFriend_name(my_name);
+                                        notification.setFriendName(my_name);
+                                        notification.setContent("도착 성공!");
                                         notification.setSingle(true);
-                                        notification.setDate_time(time_stamp);
-                                        notification.setNotification_code(100);
+                                        notification.setDateTime(time_stamp);
+                                        notification.setCode(Code.ARRIVE_SUCCESS);
+                                        notification.setContent("도착");
 
 
                                         databaseReference.child("user_data").child(user_id).child("notification").push().setValue(notification);
@@ -423,12 +533,12 @@ public class NewLocationService extends Service {
 
                     /** 공유데이터 mission_display에 내 도착시간 기록**/
 
-                    databaseReference.child("multi_data").orderByChild("mission_id").equalTo(mission_id).addListenerForSingleValueEvent(new ValueEventListener() {
+                    databaseReference.child("multi_data").orderByChild("missionId").equalTo(mission_id).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             if (dataSnapshot.exists()) {
                                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                    snapshot.getRef().child("mission_display").orderByChild("date_time").equalTo(date + time).addListenerForSingleValueEvent(new ValueEventListener() {
+                                    snapshot.getRef().child("missionDisplay").orderByChild("dateTime").equalTo(date + time).addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                                             if (snapshot.exists()) {
@@ -441,12 +551,12 @@ public class NewLocationService extends Service {
                                                     List<ItemForFriendByDay> friendByDayArrayList = shot.child("friendByDayList").getValue(t);
 
                                                     for (int i = 0; i < friendByDayArrayList.size(); i++) {
-                                                        String friend_id = friendByDayArrayList.get(i).getUser_id();
+                                                        String friend_id = friendByDayArrayList.get(i).getFriendId();
 
                                                         if (friend_id.equals(user_id)) {
 
                                                             friendByDayArrayList.get(i).setSuccess(true);
-                                                            friendByDayArrayList.get(i).setTime_stamp(time_stamp);
+                                                            friendByDayArrayList.get(i).setTimeStamp(time_stamp);
                                                             shot.getRef().child("friendByDayList").setValue(friendByDayArrayList);
                                                         }
 
@@ -481,22 +591,35 @@ public class NewLocationService extends Service {
 
                     /** 공유데이터 mission_info_list에 내 도착시간 기록**/
 
-                    databaseReference.child("multi_data").orderByChild("mission_id").equalTo(mission_id).addListenerForSingleValueEvent(new ValueEventListener() {
+                    databaseReference.child("multi_data").orderByChild("missionId").equalTo(mission_id).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if (snapshot.exists()) {
                                 for (DataSnapshot shot : snapshot.getChildren()) {
                                     GenericTypeIndicator<List<ItemForFriendByDay>> t = new GenericTypeIndicator<List<ItemForFriendByDay>>() {
                                     };
-                                    List<ItemForFriendByDay> friendByDayArrayList = shot.child("mission_info_list").child("mission_dates").child(date).child("friendByDayList").getValue(t);
+
+                                    Integer successCount = shot.child("missionInfoList").child("successCount").child(user_id).getValue(Integer.class);
+                                    HashMap<String, Object> hashMap = new HashMap<>();
+                                    if (successCount == null) {
+                                        hashMap.put(user_id, 1);
+                                        shot.getRef().child("missionInfoList").child("successCount").updateChildren(hashMap);
+                                    } else {
+                                        hashMap.put(user_id, successCount + 1);
+                                        shot.getRef().child("missionInfoList").child("successCount").updateChildren(hashMap);
+                                    }
+
+
+                                    List<ItemForFriendByDay> friendByDayArrayList = shot.child("missionInfoList").child("missionDates").child(date).child("friendByDayList").getValue(t);
                                     for (int i = 0; i < friendByDayArrayList.size(); i++) {
-                                        String friend_id = friendByDayArrayList.get(i).getUser_id();
+                                        String friend_id = friendByDayArrayList.get(i).getFriendId();
 
                                         if (friend_id.equals(user_id)) {
 
                                             friendByDayArrayList.get(i).setSuccess(true);
-                                            friendByDayArrayList.get(i).setTime_stamp(time_stamp);
-                                            shot.getRef().child("mission_info_list").child("mission_dates").child(date).child("friendByDayList").setValue(friendByDayArrayList);
+                                            friendByDayArrayList.get(i).setTimeStamp(time_stamp);
+                                            shot.getRef().child("missionInfoList").child("missionDates").child(date).child("friendByDayList").setValue(friendByDayArrayList);
+
                                         }
 
 
@@ -516,7 +639,7 @@ public class NewLocationService extends Service {
                     });
 
                     /** 개인데이터에 성공했으면 삭제**/
-                    databaseReference.child("user_data").child(user_id).child("mission_display").orderByChild("date_time").equalTo(date + time).addListenerForSingleValueEvent(new ValueEventListener() {
+                    databaseReference.child("user_data").child(user_id).child("missionDisplay").orderByChild("dateTime").equalTo(date + time).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if (snapshot.exists()) {
@@ -543,42 +666,15 @@ public class NewLocationService extends Service {
                     /**  의미없는 타임스탬프를 찍어서 데이터갱신**/
 
                     for (int i = 0; i < friendByDayList.size(); i++) {
-                        String friend_id = friendByDayList.get(i).getUser_id();
-                        databaseReference.child("user_data").child(friend_id).child("mission_display").orderByChild("mission_id").equalTo(mission_id).addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                if (dataSnapshot.exists()) {
-                                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                        ItemForMissionByDay itemForMissionByDay = snapshot.getValue(ItemForMissionByDay.class);
-                                        if (itemForMissionByDay != null) {
-                                            if (itemForMissionByDay.getDate_time().equals(date + time)) {
+                        String friend_id = friendByDayList.get(i).getFriendId();
 
-                                                snapshot.getRef().child("time_stamp").setValue(time_stamp);
-                                            }
-
-
-                                        }
-
-                                    }
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-
-                            }
-                        });
-
-                        databaseReference.child("user_data").child(friend_id).child("mission_info_list").orderByChild("mission_id").equalTo(mission_id).addListenerForSingleValueEvent(new ValueEventListener() {
+                        databaseReference.child("user_data").child(friend_id).child("missionInfoList").orderByChild("missionId").equalTo(mission_id).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot snapshot) {
                                 if (snapshot.exists()) {
                                     for (DataSnapshot shot : snapshot.getChildren()) {
-                                        shot.getRef().child("time_stamp").setValue(time_stamp);
-
-
+                                        shot.getRef().child("timeStamp").setValue(time_stamp);
                                     }
-
                                 }
                             }
 
@@ -591,13 +687,13 @@ public class NewLocationService extends Service {
 
                         if (!friend_id.equals(user_id)) {
                             ItemForNotification item = new ItemForNotification();
-                            item.setDate_time(time_stamp);
-                            item.setFriend_image(my_image);
-                            item.setFriend_name(my_name);
+                            item.setDateTime(time_stamp);
+                            item.setFriendImage(my_image);
+                            item.setFriendName(my_name);
                             item.setTitle(title);
                             item.setSingle(false);
-                            item.setMission_id(mission_id);
-                            item.setNotification_code(100);
+                            item.setMissionId(mission_id);
+                            item.setCode(Code.ARRIVE_SUCCESS);
                             item.setRead(false);
 
 
@@ -606,14 +702,14 @@ public class NewLocationService extends Service {
                             /** 나에게 **/
 
                             ItemForNotification item = new ItemForNotification();
-                            item.setDate_time(time_stamp);
-                            item.setFriend_image(my_image);
-                            item.setFriend_name(my_name);
+                            item.setDateTime(time_stamp);
+                            item.setFriendImage(my_image);
+                            item.setFriendName(my_name);
                             item.setSingle(false);
-                            item.setMission_id(mission_id);
+                            item.setMissionId(mission_id);
                             item.setTitle(title);
                             item.setRead(false);
-                            item.setNotification_code(100);
+                            item.setCode(Code.ARRIVE_SUCCESS);
                             databaseReference.child("user_data").child(user_id).child("notification").push().setValue(item).addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
@@ -634,27 +730,35 @@ public class NewLocationService extends Service {
             }
 
         } else {//타임아웃 푸시보내기?
-            ItemForNotification item = new ItemForNotification();
-            item.setDate_time(time_stamp);
-            item.setFriend_image(my_image);
-            item.setFriend_name(my_name);
-            item.setSingle(false);
-            item.setMission_id(mission_id);
-            item.setTitle(title);
-            item.setRead(false);
-            item.setNotification_code(100);
-            databaseReference.child("user_data").child(user_id).child("notification").push().setValue(item).addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    //pushAlarm(friend_id);
 
-                    FCM.fcmPushAlarm(user_id, title, "실패하셨습니다..");
-                    stopLocationUpdates();
+            if (isSingle) {
+                ItemForNotification item = new ItemForNotification();
+                item.setDateTime(time_stamp);
+                item.setFriendImage(my_image);
+                item.setFriendName(my_name);
+                item.setSingle(false);
+                item.setMissionId(mission_id);
+                item.setTitle(title);
+                item.setRead(false);
+                item.setCode(Code.ARRIVE_FAIL);
 
-                    String date_time = DateTimeUtils.getCurrentTime();
-                    queryData(date_time);
-                }
-            });
+                //FCM.fcmPushAlarm(user_id, title, "약속실패");
+                databaseReference.child("user_data").child(user_id).child("notification").push().setValue(item).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        //pushAlarm(friend_id);
+
+                        FCM.fcmPushAlarm(user_id, title, "약속실패");
+                        stopLocationUpdates();
+
+                        String date_time = DateTimeUtils.getCurrentTime();
+                        queryData(date_time);
+                    }
+                });
+            } else {
+
+
+            }
 
 
         }
@@ -704,7 +808,7 @@ public class NewLocationService extends Service {
                     /** 30분 지나면 mission_display 삭제**/
 
 
-                    //Utils.wakeDoze(getApplicationContext());
+                    //Utils.wakeDoze(NewLocationService.this);
 
 
                 }

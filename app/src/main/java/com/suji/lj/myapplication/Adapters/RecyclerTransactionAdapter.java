@@ -24,6 +24,13 @@ public class RecyclerTransactionAdapter extends RecyclerView.Adapter<RecyclerTra
 
     List<ItemForTransaction> list;
     Context context;
+    private final static int CASH_TO_POINT = 100;
+    private final static int POINT_DEPOSIT = 101;
+    private final static int POINT_TO_CASH = 102;
+    private final static int POINT_REWARD_DISTRIBUTION = 103;
+    private final static int POINT_REFUND = 104;
+
+
 
     public RecyclerTransactionAdapter(Context context, List<ItemForTransaction> list) {
         this.list = list;
@@ -44,22 +51,23 @@ public class RecyclerTransactionAdapter extends RecyclerView.Adapter<RecyclerTra
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
         String title = list.get(position).getTitle();
-        String date_time = list.get(position).getDate_time();
-        String method = list.get(position).getPayment_method();
+        String date_time = list.get(position).getDateTime();
+        String method = list.get(position).getPaymentMethod();
         int point = list.get(position).getPoint();
-        int pointTransactionCode = list.get(position).getTransactionCode();
+        int cash = list.get(position).getCash();
+        int pointTransactionCode = list.get(position).getCode();
         holder.rlMethod.setVisibility(View.GONE);
         holder.rlWithdraw.setVisibility(View.GONE);
         holder.rlPoint.setVisibility(View.GONE);
         holder.rlMission.setVisibility(View.GONE);
 
-        switch (pointTransactionCode){
-            case 0:
+        switch (pointTransactionCode) {
+            case CASH_TO_POINT:
                 /** 포인트 충전 **/
                 holder.tv_title.setText("포인트 충전");
                 holder.tv_date_time.setText(date_time);
                 holder.tv_payment.setText(method);
-                holder.tv_point.setText(Utils.makeNumberComma(point));
+                holder.tv_point.setText(Utils.makeNumberComma(cash) + " P");
                 holder.tv_point.setTextColor(context.getResources().getColor(R.color.colorSuccess));
 
                 holder.rlMethod.setVisibility(View.VISIBLE);
@@ -68,15 +76,15 @@ public class RecyclerTransactionAdapter extends RecyclerView.Adapter<RecyclerTra
                 holder.rlMission.setVisibility(View.GONE);
                 break;
 
-            case 1:
+            case POINT_REWARD_DISTRIBUTION:
                 /** 포인트 분배금 수령 **/
 
                 holder.tv_title.setText("분배금");
                 holder.tv_date_time.setText(date_time);
                 holder.tv_payment.setText(method);
-                holder.tv_point.setText(Utils.makeNumberComma(point));
+                holder.tv_point.setText(Utils.makeNumberComma(point) + " P");
                 holder.tv_point.setTextColor(context.getResources().getColor(R.color.colorSuccess));
-                holder.tvTitle.setText(title);
+                holder.tvMissionTitle.setText(title);
 
                 holder.rlMethod.setVisibility(View.GONE);
                 holder.rlWithdraw.setVisibility(View.GONE);
@@ -85,49 +93,54 @@ public class RecyclerTransactionAdapter extends RecyclerView.Adapter<RecyclerTra
 
                 break;
 
-            case 2:
+            case POINT_TO_CASH:
                 /** 포인트 인출**/
+                String accountNum = list.get(position).getAccountNum();
+                String bankName = list.get(position).getBankName();
+                String accountHolderName = list.get(position).getAccountHolderName();
                 holder.tv_title.setText("포인트 계좌인출");
                 holder.tv_date_time.setText(date_time);
 
-                holder.tvAccountNum.setText("계좌번호");
-                holder.tv_point.setText(Utils.makeNumberComma(point));
-                holder.tv_point.setTextColor(context.getResources().getColor(R.color.colorError));
+                String textAccount = bankName+" "+accountNum+"\n"+accountHolderName;
+                holder.tvAccountNum.setText(textAccount);
+                holder.tv_point.setText(Utils.makeNumberComma(point) + " P");
+                holder.tv_point.setTextColor(context.getResources().getColor(R.color.colorPrimary));
 
                 holder.rlMethod.setVisibility(View.GONE);
                 holder.rlWithdraw.setVisibility(View.VISIBLE);
                 holder.rlPoint.setVisibility(View.VISIBLE);
                 holder.rlMission.setVisibility(View.GONE);
+                break;
 
-            case 3:
+            case POINT_DEPOSIT:
                 /** 약속 보증금 납입**/
 
-                holder.tv_title.setText(title);
-                holder.tvTitle.setText(title);
-                holder.tv_point.setText(Utils.makeNumberComma(point));
-
+                holder.tv_title.setText("약속 등록");
+                holder.tv_date_time.setText(date_time);
+                holder.tvMissionTitle.setText(title);
+                holder.tv_point.setText(Utils.makeNumberComma(point) + " P");
+                holder.tv_point.setTextColor(context.getResources().getColor(R.color.colorPrimary));
 
                 holder.rlMethod.setVisibility(View.GONE);
                 holder.rlWithdraw.setVisibility(View.GONE);
                 holder.rlPoint.setVisibility(View.VISIBLE);
                 holder.rlMission.setVisibility(View.VISIBLE);
-
 
 
                 break;
 
-            case 4:
+            case POINT_REFUND:
                 /** 보증금 취소 반환**/
                 holder.tv_title.setText("약속 취소");
-                holder.tvTitle.setText(title);
-                holder.tv_point.setText(Utils.makeNumberComma(point));
+                holder.tvMissionTitle.setText(title);
+                holder.tv_point.setText(Utils.makeNumberComma(point) + " P");
+                holder.tv_point.setTextColor(context.getResources().getColor(R.color.colorSuccess));
 
 
                 holder.rlMethod.setVisibility(View.GONE);
                 holder.rlWithdraw.setVisibility(View.GONE);
                 holder.rlPoint.setVisibility(View.VISIBLE);
                 holder.rlMission.setVisibility(View.VISIBLE);
-
 
 
                 break;
@@ -139,13 +152,7 @@ public class RecyclerTransactionAdapter extends RecyclerView.Adapter<RecyclerTra
                 break;
 
 
-
-
-
-
         }
-
-
 
 
     }
@@ -167,7 +174,7 @@ public class RecyclerTransactionAdapter extends RecyclerView.Adapter<RecyclerTra
         RelativeLayout rlPoint;
         RelativeLayout rlMission;
         TextView tvAccountNum;
-        TextView tvTitle;
+        TextView tvMissionTitle;
 
 
         public ViewHolder(@NonNull View itemView) {
@@ -182,7 +189,7 @@ public class RecyclerTransactionAdapter extends RecyclerView.Adapter<RecyclerTra
             rlMethod = itemView.findViewById(R.id.rlCashMethod);
             rlPoint = itemView.findViewById(R.id.rlPoint);
             rlMission = itemView.findViewById(R.id.rlMission);
-            tvTitle = itemView.findViewById(R.id.tvTitle);
+            tvMissionTitle = itemView.findViewById(R.id.tvMissionTitle);
 
             tvAccountNum = itemView.findViewById(R.id.tvAccountNum);
 

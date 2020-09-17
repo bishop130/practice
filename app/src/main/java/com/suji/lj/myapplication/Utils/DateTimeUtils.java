@@ -13,7 +13,6 @@ import java.util.concurrent.TimeUnit;
 public class DateTimeUtils {
 
 
-
     public static String makeDateTimeForHuman(String date, String time) {
 
         String mission_time;
@@ -94,7 +93,7 @@ public class DateTimeUtils {
         Calendar cal = Calendar.getInstance();
         cal.setTime(DateTimeFormatter.dateParser(date, "yyyyMMdd"));
 
-        int mission_month = cal.get(Calendar.MONTH)+1;
+        int mission_month = cal.get(Calendar.MONTH) + 1;
         int mission_day = cal.get(Calendar.DAY_OF_MONTH);
 
         Log.d("날짜이상", mission_month + "   " + mission_day);
@@ -121,10 +120,10 @@ public class DateTimeUtils {
 
     }
 
-    public static String makeTimeForHuman(String date_time,String pattern) {
+    public static String makeTimeForHuman(String date_time, String pattern) {
 
         String minutes;
-        Date  date = DateTimeFormatter.dateParser(date_time,pattern);
+        Date date = DateTimeFormatter.dateParser(date_time, pattern);
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
@@ -137,6 +136,9 @@ public class DateTimeUtils {
             minutes = String.valueOf(min);
         }
 
+        Log.d("오전오후", hour + "  hour");
+        Log.d("오전오후", min + "  min");
+
 
         if (hour == 12) {
             if (min == 0) {
@@ -148,7 +150,7 @@ public class DateTimeUtils {
         } else if (hour == 0) {
 
             if (min == 0) {
-                return "오후 " + hour + "시 ";
+                return "오전 12시 ";
             } else {
                 return "오전 12시 " + minutes + "분";
             }
@@ -175,7 +177,7 @@ public class DateTimeUtils {
         } else if (hour == 0) {
 
             if (min == 0) {
-                return "오후 " + hour + "시 ";
+                return "오전 12시 ";
             } else {
                 return "오전 12시 " + min + "분";
             }
@@ -292,6 +294,18 @@ public class DateTimeUtils {
 
         return simpleDate.format(date);
     }
+
+    public static String getCurrentTimePattern(String pattern){
+        long now = System.currentTimeMillis();
+        Date date = new Date(now);
+        SimpleDateFormat simpleDate = new SimpleDateFormat(pattern, Locale.KOREA);
+
+
+        return simpleDate.format(date);
+
+
+    }
+
     public static String getCurrentDateTimeForKey() {
         long now = System.currentTimeMillis();
         Date date = new Date(now);
@@ -311,7 +325,7 @@ public class DateTimeUtils {
         return getTime;
     }
 
-    public static String getToday(){
+    public static String getToday() {
         long now = System.currentTimeMillis();
         Date date = new Date(now);
         SimpleDateFormat simpleDate = new SimpleDateFormat("yyyyMMdd", Locale.KOREA);
@@ -321,9 +335,9 @@ public class DateTimeUtils {
 
     }
 
-    public static boolean compareIsFuture(String input_date_time) {
+    public static boolean compareIsFuture(String input_date_time, String pattern) {
         DateTimeFormatter dateTimeFormatter = new DateTimeFormatter();
-        Date date = dateTimeFormatter.dateTimeParser(input_date_time);
+        Date date = dateTimeFormatter.dateTimeParser(input_date_time, pattern);
         long input = date.getTime();
         long now = System.currentTimeMillis();
         if (input > now) {
@@ -333,9 +347,9 @@ public class DateTimeUtils {
         }
     }
 
-    public static boolean compareIsFuture30min(String input_date_time) {
+    public static boolean compareIsFuture30min(String input_date_time,String pattern) {
         DateTimeFormatter dateTimeFormatter = new DateTimeFormatter();
-        Date date = dateTimeFormatter.dateTimeParser(input_date_time);
+        Date date = dateTimeFormatter.dateTimeParser(input_date_time,pattern);
         long input = date.getTime();
         long now = System.currentTimeMillis();
         if ((input - now) >= 1000 * 60 * 30) {
@@ -383,7 +397,6 @@ public class DateTimeUtils {
 
         return day_of_week;
     }
-
 
 
 }

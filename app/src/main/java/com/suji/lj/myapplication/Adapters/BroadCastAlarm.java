@@ -15,11 +15,15 @@ import com.suji.lj.myapplication.MainActivity;
 
 import androidx.core.app.NotificationCompat;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 public class BroadCastAlarm extends BroadcastReceiver {
     PowerManager pm;
     PowerManager.WakeLock wakeLock;
 
-    private static final String TAG = "BroadCastAlarm";
+    private static final String TAG = "com.suji.lj.myapplication";
 
 
     @Override
@@ -50,15 +54,18 @@ public class BroadCastAlarm extends BroadcastReceiver {
         String content = intent.getStringExtra("is_success");
 
 
-        Log.d("확인좀4", "들어왔나확인");
+        Log.d("확인좀", "들어왔나확인");
 
-        builder.setContentTitle(title) // required
+
+        builder.setContentTitle("title") // required
                 .setContentText(content)  // required
                 .setDefaults(Notification.DEFAULT_ALL) // 알림, 사운드 진동 설정
                 .setAutoCancel(true) // 알림 터치시 반응 후 삭제
                 .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                 .setSmallIcon(android.R.drawable.btn_star)
-                .setContentIntent(pendingIntent);
+                .setContentIntent(pendingIntent)
+           .setGroup(TAG)
+          .setGroupSummary(true);
 
 
         notifManager.notify(0, builder.build());

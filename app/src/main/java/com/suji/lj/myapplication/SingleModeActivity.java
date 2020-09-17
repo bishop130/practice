@@ -7,20 +7,24 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatCheckBox;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
+import android.text.InputFilter;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -28,6 +32,7 @@ import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -53,6 +58,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.suji.lj.myapplication.Adapters.NewLocationService;
 import com.suji.lj.myapplication.Adapters.OpenBanking;
 import com.suji.lj.myapplication.Adapters.RecyclerTransferRespectivelyAdapter;
 import com.suji.lj.myapplication.Fragments.CalendarSelectFragment;
@@ -80,6 +86,7 @@ import com.suji.lj.myapplication.Items.MissionCartItem;
 import com.suji.lj.myapplication.Items.MissionInfoList;
 import com.suji.lj.myapplication.Items.UserAccountItem;
 import com.suji.lj.myapplication.Utils.Account;
+import com.suji.lj.myapplication.Utils.ByteLengthFilter;
 import com.suji.lj.myapplication.Utils.DateTimeUtils;
 import com.suji.lj.myapplication.Utils.FCM;
 import com.suji.lj.myapplication.Utils.FirebaseDB;
@@ -165,7 +172,7 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
                                     item.setAddress(road_address);
                                     //transferAmount();
                                     MissionCartItem missionCartItem = realm.copyFromRealm(item);
-                                    int missionMode = missionCartItem.getMission_mode();
+                                    int missionMode = missionCartItem.getMissionMode();
 
                                     pointPayRequest();
                                     //startActivity(new Intent(getApplicationContext(), MissionCheckActivity.class));
@@ -180,7 +187,7 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
                                     item.setAddress(old_address);
                                     // transferAmount();
                                     MissionCartItem missionCartItem = realm.copyFromRealm(item);
-                                    int missionMode = missionCartItem.getMission_mode();
+                                    int missionMode = missionCartItem.getMissionMode();
 
                                     pointPayRequest();
 
@@ -247,7 +254,8 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
     String user_id;
     DatabaseReference mRootRef;
     TextView tvTotalAmount;
-
+    boolean isTitleValid;
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -296,6 +304,9 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
         next_btn.setEnabled(false);
         next_btn.setClickable(false);
 
+        InputFilter[] filters = new InputFilter[]{new ByteLengthFilter(20, "KSC5601")};
+        textInputEditText.setFilters(filters);
+
         //Utils.fixMapScroll(imageView,scrollView);
 
         toolbar.setTitle("새 약속");
@@ -326,6 +337,14 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
         });
 
 
+        textInputEditText.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+
+                textInputEditText.setFocusableInTouchMode(true);
+                return false;
+            }
+        });
         textInputEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -342,6 +361,7 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
 
                         }
                     });
+                    textInputEditText.setFocusable(false);
 
                     return true;
                 }
@@ -428,7 +448,7 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
             text_clear.setVisibility(View.INVISIBLE);
             text_length.setVisibility(View.INVISIBLE);
         } else {
-            isTitleValid(length);
+            //isTitleValid(length);
             text_length.setVisibility(View.VISIBLE);
             text_clear.setVisibility(View.VISIBLE);
         }
@@ -448,19 +468,6 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
     }
 
 
-    private void isTitleValid(int length) {
-        text_length.setText(length + "/" + 20);
-        if (length < 20) {
-            text_length.setTextColor(getResources().getColor(R.color.colorError));
-            //제목이 너무 짧습니다. 최소 두 글자부터 입력이 가능합니다.
-        } else {
-            text_length.setTextColor(getResources().getColor(R.color.colorSuccess));
-        }
-
-
-    }
-
-
     @Override
     public void onClick(View v) {
 
@@ -477,15 +484,6 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
             case R.id.account_select:
 
                 break;
-            case R.id.kakao_pay:
-
-
-                break;
-            case R.id.naver_pay:
-                break;
-            case R.id.credit_pay:
-                break;
-
 
         }
     }
@@ -497,18 +495,18 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
             Log.d("포인트", "onresult");
             MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
             MissionCartItem missionCartItem = realm.copyFromRealm(item);
-            int missionMode = item.getMission_mode();
+            int missionMode = item.getMissionMode();
             Log.d("포인트", missionMode + "mission_mode");
 
 
             if (missionMode == SINGLE_MODE) {
 
                 FirebaseDB.registerMissionInfoList(mRootRef, this, missionCartItem);//미션목록추가
-                FirebaseDB.registerMainDisplay(mRootRef, this, missionCartItem);
-                FirebaseDB.registerCheckForServer(mRootRef, missionCartItem, this);
 
 
-                finish();
+
+
+
                 /** 파이어베이스 추가후 deleteRealm **/
 
 
@@ -517,10 +515,12 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
 
                 FirebaseDB.multiMode(item, this, "receipt");
 
-                finish();
-
             }
 
+
+        }else if(requestCode == 6){
+            Toast.makeText(SingleModeActivity.this, "응답을 받지 못했습니다", Toast.LENGTH_SHORT).show();
+            loading_dialog.dismiss();
 
         }
     }
@@ -537,6 +537,7 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
                 RealmList<ContactItem> contactList = new RealmList<>();
                 contactList.addAll(result.subList(0, result.size()));
                 missionCartItem.setContactList(contactList);
+                missionCartItem.setTitle(textInputEditText.getText().toString());
 
                 RealmResults<ItemForFriends> realmResults = realm.where(ItemForFriends.class).findAll();
                 RealmList<ItemForFriends> friendList = new RealmList<>();
@@ -544,7 +545,7 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
                 missionCartItem.setFriendsList(friendList);
 
                 String mission_id = Utils.getCurrentTime() + "U" + user_id;
-                missionCartItem.setMission_id(mission_id);
+                missionCartItem.setMissionId(mission_id);
 
 
             }
@@ -563,6 +564,7 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
             isValid = false;
             Toast.makeText(getApplicationContext(), "제목을 입력해주세요", Toast.LENGTH_LONG).show();
         }
+
         if (item.getCalendarDayList().size() == 0) {
             isValid = false;
 
@@ -571,7 +573,7 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
             for (int i = 0; i < item.getCalendarDayList().size(); i++) {
                 String date = item.getCalendarDayList().get(i).getDate();
                 String time = item.getCalendarDayList().get(i).getTime();
-                boolean is30 = DateTimeUtils.compareIsFuture30min(date + time);
+                boolean is30 = DateTimeUtils.compareIsFuture30min(date + time, "yyyyMMddHHmm");
                 if (!is30) {
                     isValid = false;
                     Toast.makeText(getApplicationContext(), "시간을 30분 이후 부터 선택해주세요", Toast.LENGTH_LONG).show();
@@ -579,8 +581,8 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
                 Log.d("비니", date + "/" + time + "/" + is30);
             }
         }
-        if (item.getMission_mode() == 1) { //멀티라면
-            if (item.getMulti_penalty() < 1000) {
+        if (item.getMissionMode() == 1) { //멀티라면
+            if (item.getMultiPenaltyPerDay() < 1000) {
                 Toast.makeText(getApplicationContext(), "금액을 입력해주세요.", Toast.LENGTH_LONG).show();
                 isValid = false;
 
@@ -596,7 +598,7 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
 
 
         } else {
-            if (item.getSingle_penalty() < 1000) {
+            if (item.getSinglePenaltyPerDay() < 1000) {
                 Toast.makeText(getApplicationContext(), "금액을 입력해주세요.", Toast.LENGTH_LONG).show();
                 isValid = false;
 
@@ -676,6 +678,9 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
     @Override
     protected void onResume() {
         super.onResume();
+        if(loading_dialog.isShowing()){
+            loading_dialog.dismiss();
+        }
         //realm.beginTransaction();
         Log.d("목장", "onResume");
 
@@ -814,45 +819,42 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
 
     public void singleAmountDisplay() {
         Log.d("디스플레이", "display");
-        if (!realm.isClosed()) {
-            RealmResults<ItemForFriends> realmResults2 = realm.where(ItemForFriends.class).findAll();
-            MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
 
-            int dates = item.getCalendarDayList().size();
-            int missionMode = item.getMission_mode();
+        RealmResults<ItemForFriends> realmResults2 = realm.where(ItemForFriends.class).findAll();
+        MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
 
-            if (item.getMission_mode() == 0) {
-                amount = item.getSingle_penalty();
-                total = realmResults2.size() * amount * dates;
+        int dates = item.getCalendarDayList().size();
+        int missionMode = item.getMissionMode();
+
+        if (item.getMissionMode() == 0) {
+            amount = item.getSinglePenaltyPerDay();
+            total = realmResults2.size() * amount * dates;
+        } else {
+            if (realmResults2.size() > 0) {
+                amount = item.getMultiPenaltyPerDay();
+                total = amount * dates;
             } else {
-                if (realmResults2.size() > 0) {
-                    amount = item.getMulti_penalty();
-                    total = amount * dates;
-                } else {
-                    total = 0;
-                }
+                total = 0;
             }
-
-            String point_total_string = 0 + " P";
-            point_input = 0;
-
-            String rest_point_string = Utils.makeNumberComma(point_amount) + " P";
-            tvTotalAmount.setText(Utils.makeNumberComma(total));
-            text_rest_point.setText(rest_point_string);
-            realm.executeTransaction(new Realm.Transaction() {
-                @Override
-                public void execute(Realm realm) {
-                    MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
-                    if (missionMode == 0) {
-                        item.setSingle_total(total);
-                    } else {
-                        item.setMulti_total(total);
-                    }
-                }
-            });
         }
 
+        String point_total_string = 0 + " P";
+        point_input = 0;
 
+        String rest_point_string = Utils.makeNumberComma(point_amount) + " P";
+        tvTotalAmount.setText(Utils.makeNumberComma(total));
+        text_rest_point.setText(rest_point_string);
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
+                if (missionMode == 0) {
+                    item.setSinglePenaltyTotal(total);
+                } else {
+                    item.setMultiPenaltyTotal(total);
+                }
+            }
+        });
     }
 
 
@@ -884,11 +886,24 @@ public class SingleModeActivity extends AppCompatActivity implements TextWatcher
 
         MissionCartItem cartItem = realm.where(MissionCartItem.class).findFirst();
         Intent intent = new Intent(this, SecurityActivity.class);
-        intent.putExtra("password", 5);
-        intent.putExtra("point", amount);
-        intent.putExtra("title",cartItem.getTitle());
-        intent.putExtra("missionId",cartItem.getMission_id());
-        intent.putExtra("missionMode",cartItem.getMission_mode());
+        int missionMode = cartItem.getMissionMode();
+        if(missionMode == 0){
+            intent.putExtra("password", 5);
+            intent.putExtra("pointTotal", cartItem.getSinglePenaltyTotal());
+            intent.putExtra("title", cartItem.getTitle());
+            intent.putExtra("missionId", cartItem.getMissionId());
+            intent.putExtra("missionMode", cartItem.getMissionMode());
+
+
+        }else{
+            intent.putExtra("password", 5);
+            intent.putExtra("pointTotal", cartItem.getMultiPenaltyTotal());
+            intent.putExtra("title", cartItem.getTitle());
+            intent.putExtra("missionId", cartItem.getMissionId());
+            intent.putExtra("missionMode", cartItem.getMissionMode());
+
+
+        }
 
         startActivityForResult(intent, 5);
 

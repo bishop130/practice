@@ -89,8 +89,8 @@ public class SingleModeFragment extends Fragment implements RecyclerTransferResp
         } else {
             MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
 
-            if_fail.setText(Utils.makeNumberComma(item.getSingle_penalty()));
-            if (item.getSingle_penalty() >= 1000) {
+            if_fail.setText(Utils.makeNumberComma(item.getSinglePenaltyPerDay()));
+            if (item.getSinglePenaltyPerDay() >= 1000) {
                 amount_warning.setVisibility(View.INVISIBLE);
             } else {
                 amount_warning.setVisibility(View.VISIBLE);
@@ -114,7 +114,7 @@ public class SingleModeFragment extends Fragment implements RecyclerTransferResp
                             MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
 
                             Log.d("부트", amount + "");
-                            item.setSingle_penalty(amount);
+                            item.setSinglePenaltyPerDay(amount);
 
                         }
                     });

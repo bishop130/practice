@@ -31,6 +31,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
@@ -50,6 +51,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -72,81 +74,29 @@ public class MissionByMissionFragment extends Fragment {
     List<MissionInfoList> singleList = new ArrayList<>();
     RelativeLayout rl_is_empty;
     TextView tv_add_mission;
+    boolean isFetched = false;
+    Query query;
+    ValueEventListener listener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_mission_by_mission, container, false);
-
-        recyclerView = view.findViewById(R.id.recyclerView);
-        loading_panel = view.findViewById(R.id.loadingPanel);
-        ly_swipe_refresh = view.findViewById(R.id.ly_swipe_refresh);
-        rl_is_empty = view.findViewById(R.id.rl_is_empty);
-        tv_add_mission = view.findViewById(R.id.tv_add_mission);
-
-
-        user_id = Account.getUserId(activity);
-
-        tv_add_mission.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(activity, SingleModeActivity.class);
-                startActivity(intent);
-
-            }
-        });
-
-        Utils.drawRecyclerViewDivider(activity, recyclerView);
-        //recyclerView.addItemDecoration(new RecyclerViewDivider(28));
-        ly_swipe_refresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-
-                querySingleData();
-                loading_panel.setVisibility(View.VISIBLE);
-                ly_swipe_refresh.setRefreshing(false);
-
-            }
-        });
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setCancelable(false); // if you want user to wait for some process to finish,
-        builder.setView(R.layout.layout_progress);
-        loading_dialog = builder.create();
-
-        if (loading_dialog.getWindow() != null) {
-            loading_dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-
-        }
-        querySingleData();
-
-
-        return view;
-    }
-
-    private void querySingleData() {
-
-        databaseReference.child("user_data").child(user_id).child("mission_info_list").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                //infoLists.clear();
-                singleList = new ArrayList<>();
-                numOfData = (int) dataSnapshot.getChildrenCount();
-
-                loading_panel.setVisibility(View.GONE);
-                if (dataSnapshot.exists()) {
-
+            loading_panel.setVisibility(View.GONE);
+            if (dataSnapshot.exists()) {
+                if (!isFetched) {
+                    isFetched = true;
+                    singleList = new ArrayList<>();
+                    numOfData = (int) dataSnapshot.getChildrenCount();
+                    rl_is_empty.setVisibility(View.GONE);
                     for (DataSnapshot data : dataSnapshot.getChildren()) {
-                        Boolean isSingle = data.child("single_mode").getValue(Boolean.class);
+                        Boolean isSingle = data.child("singleMode").getValue(Boolean.class);
                         if (!isSingle) {
-                            String key = data.child("mission_id").getValue(String.class);
-                            databaseReference.child("multi_data").orderByChild("mission_id").equalTo(key).addListenerForSingleValueEvent(new ValueEventListener() {
+                            String key = data.child("missionId").getValue(String.class);
+                            databaseReference.child("multi_data").orderByChild("missionId").equalTo(key).addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                                     if (snapshot.exists()) {
                                         for (DataSnapshot shot : snapshot.getChildren()) {
-                                            MissionInfoList missionInfoList = shot.child("mission_info_list").getValue(MissionInfoList.class);
+                                            MissionInfoList missionInfoList = shot.child("missionInfoList").getValue(MissionInfoList.class);
                                             singleList.add(missionInfoList);
 
 
@@ -182,30 +132,100 @@ public class MissionByMissionFragment extends Fragment {
 
 
                 }
-
             }
 
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError error) {
+
+        }
+    };
+
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.fragment_mission_by_mission, container, false);
+
+        recyclerView = view.findViewById(R.id.recyclerView);
+        loading_panel = view.findViewById(R.id.loadingPanel);
+        ly_swipe_refresh = view.findViewById(R.id.ly_swipe_refresh);
+        rl_is_empty = view.findViewById(R.id.rl_is_empty);
+        tv_add_mission = view.findViewById(R.id.tv_add_mission);
+
+
+        user_id = Account.getUserId(activity);
+
+        tv_add_mission.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+            public void onClick(View v) {
+                Intent intent = new Intent(activity, SingleModeActivity.class);
+                startActivity(intent);
 
             }
         });
 
+        Utils.drawRecyclerViewDivider(activity, recyclerView);
+        //recyclerView.addItemDecoration(new RecyclerViewDivider(28));
+        ly_swipe_refresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+
+                query = databaseReference.child("user_data").child(user_id).child("missionInfoList");
+                query.addValueEventListener(listener);
+                loading_panel.setVisibility(View.VISIBLE);
+                ly_swipe_refresh.setRefreshing(false);
+
+            }
+        });
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setCancelable(false); // if you want user to wait for some process to finish,
+        builder.setView(R.layout.layout_progress);
+        loading_dialog = builder.create();
+
+        if (loading_dialog.getWindow() != null) {
+            loading_dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+        }
+
+        query = databaseReference.child("user_data").child(user_id).child("missionInfoList");
+        query.addValueEventListener(listener);
+
+
+        return view;
     }
 
     private void update() {
 
         if (numOfData == singleList.size()) {
 
-            rl_is_empty.setVisibility(View.GONE);
+            isFetched = false;
+            //query.removeEventListener(listener);
+            //rl_is_empty.setVisibility(View.GONE);
             ly_swipe_refresh.setRefreshing(false);
             Collections.sort(singleList, new Comparator<MissionInfoList>() {
                 @Override
                 public int compare(MissionInfoList o1, MissionInfoList o2) {
-                    return o1.getMin_date().compareTo(o2.getMin_date());
+                    return o1.getMinDate().compareTo(o2.getMinDate());
                 }
             });
             Collections.reverse(singleList);
+            Iterator<MissionInfoList> i = singleList.iterator();
+            while (i.hasNext()) {
+                if (!i.next().isActivation()) {
+                    // Remove the last thing returned by next()
+                    i.remove();
+                }
+            }
+
+            if (singleList.size() == 0) {
+                rl_is_empty.setVisibility(View.VISIBLE);
+
+            }
+
+
             Log.d("들어와", "업데이트");
             RecyclerMissionByMissionAdapter adapter = new RecyclerMissionByMissionAdapter(activity, singleList, loading_dialog);
             recyclerView.setLayoutManager(new LinearLayoutManager(activity));

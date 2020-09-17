@@ -119,7 +119,7 @@ public class MultiModeFragment extends Fragment implements RecyclerFriendsAdapte
 
 
         MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
-        if_fail.setText(Utils.makeNumberComma(item.getMulti_penalty()));
+        if_fail.setText(Utils.makeNumberComma(item.getMultiPenaltyPerDay()));
         if_fail.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -136,7 +136,7 @@ public class MultiModeFragment extends Fragment implements RecyclerFriendsAdapte
                         @Override
                         public void execute(Realm realm) {
                             MissionCartItem item = realm.where(MissionCartItem.class).findFirst();
-                            item.setMulti_penalty(amount);
+                            item.setMultiPenaltyPerDay(amount);
                         }
                     });
 

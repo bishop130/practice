@@ -5,122 +5,43 @@ import android.os.Parcelable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-public class ItemForMultiModeRequest implements Parcelable {
+public class ItemForMultiModeRequest {
     String title;
-    String mission_key;
-    String manager_name;
-    String manager_id;
-    String manager_uuid;
-    String manager_thumbnail;
+
+    String managerName;
+    String managerId;
+    String managerUuid;
+    String managerImage;
     String address;
-    String mission_id;
-    String register_time;
+    String missionId;
+    String registeredTime;
 
     int accept;
     double lat;
     double lng;
 
-    int late_penalty;
-    int fail_penalty;
-    int radius;
+    int penaltyTotal;
+    int penaltyPerDay;
 
     List<ItemForDateTime> calendarDayList = new ArrayList<>();
     List<ItemForFriendResponseForRequest> friendRequestList = new ArrayList<>();
-    List<ItemPortion> itemPortionList = new ArrayList<>();
+    List<ItemPortion> portionList = new ArrayList<>();
     List<ItemForDateTimeCheck> dateTimeCheckList = new ArrayList<>();
+    public Map<String, ItemForDateTimeByList> missionDates;
 
 
     public ItemForMultiModeRequest() {
     }
 
-    public ItemForMultiModeRequest(Parcel in) {
-        this.title = in.readString();
-        this.mission_key = in.readString();
-        this.manager_name = in.readString();
-        this.manager_id = in.readString();
-        this.manager_uuid = in.readString();
-        this.manager_thumbnail = in.readString();
-        this.address = in.readString();
-        this.mission_id = in.readString();
-        this.register_time = in.readString();
 
-        this.accept = in.readInt();
-        this.lat = in.readDouble();
-        this.lng = in.readDouble();
-        this.late_penalty = in.readInt();
-        this.fail_penalty = in.readInt();
-        in.readList(this.calendarDayList, ItemForDateTime.class.getClassLoader());
-        in.readList(this.friendRequestList, ItemForFriendResponseForRequest.class.getClassLoader());
-        in.readList(this.itemPortionList, ItemPortion.class.getClassLoader());
-        in.readList(this.dateTimeCheckList,ItemForDateTimeCheck.class.getClassLoader());
-        this.radius = in.readInt();
-
-
+    public Map<String, ItemForDateTimeByList> getMissionDates() {
+        return missionDates;
     }
 
-    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
-
-        @Override
-        public ItemForMultiModeRequest createFromParcel(Parcel in) {
-            return new ItemForMultiModeRequest(in);
-        }
-
-        @Override
-        public ItemForMultiModeRequest[] newArray(int size) {
-            // TODO Auto-generated method stub
-            return new ItemForMultiModeRequest[size];
-        }
-
-    };
-
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-
-        dest.writeString(this.title);
-        dest.writeString(this.mission_key);
-        dest.writeString(this.manager_name);
-        dest.writeString(this.manager_id);
-        dest.writeString(this.manager_uuid);
-        dest.writeString(this.manager_thumbnail);
-        dest.writeString(this.address);
-        dest.writeString(this.mission_id);
-        dest.writeString(this.register_time);
-
-        dest.writeInt(this.accept);
-        dest.writeDouble(this.lat);
-        dest.writeDouble(this.lng);
-        dest.writeInt(this.late_penalty);
-        dest.writeInt(this.fail_penalty);
-        dest.writeList(this.calendarDayList);
-        dest.writeList(this.friendRequestList);
-        dest.writeList(this.itemPortionList);
-        dest.writeList(this.dateTimeCheckList);
-        dest.writeInt(this.radius);
-
-    }
-
-
-    public int getRadius() {
-        return radius;
-    }
-
-    public void setRadius(int radius) {
-        this.radius = radius;
-    }
-
-    public String getRegister_time() {
-        return register_time;
-    }
-
-    public void setRegister_time(String register_time) {
-        this.register_time = register_time;
+    public void setMissionDates(Map<String, ItemForDateTimeByList> missionDates) {
+        this.missionDates = missionDates;
     }
 
     public List<ItemForDateTimeCheck> getDateTimeCheckList() {
@@ -139,53 +60,13 @@ public class ItemForMultiModeRequest implements Parcelable {
         this.accept = accept;
     }
 
-    public String getMission_id() {
-        return mission_id;
+
+    public List<ItemPortion> getPortionList() {
+        return portionList;
     }
 
-    public void setMission_id(String mission_id) {
-        this.mission_id = mission_id;
-    }
-
-    public List<ItemPortion> getItemPortionList() {
-        return itemPortionList;
-    }
-
-    public void setItemPortionList(List<ItemPortion> itemPortionList) {
-        this.itemPortionList = itemPortionList;
-    }
-
-
-    public String getMission_key() {
-        return mission_key;
-    }
-
-    public void setMission_key(String mission_key) {
-        this.mission_key = mission_key;
-    }
-
-    public String getManager_name() {
-        return manager_name;
-    }
-
-    public void setManager_name(String manager_name) {
-        this.manager_name = manager_name;
-    }
-
-    public String getManager_id() {
-        return manager_id;
-    }
-
-    public void setManager_id(String manager_id) {
-        this.manager_id = manager_id;
-    }
-
-    public String getManager_uuid() {
-        return manager_uuid;
-    }
-
-    public void setManager_uuid(String manager_uuid) {
-        this.manager_uuid = manager_uuid;
+    public void setPortionList(List<ItemPortion> portionList) {
+        this.portionList = portionList;
     }
 
     public double getLat() {
@@ -212,21 +93,7 @@ public class ItemForMultiModeRequest implements Parcelable {
         this.address = address;
     }
 
-    public int getLate_penalty() {
-        return late_penalty;
-    }
 
-    public void setLate_penalty(int late_penalty) {
-        this.late_penalty = late_penalty;
-    }
-
-    public int getFail_penalty() {
-        return fail_penalty;
-    }
-
-    public void setFail_penalty(int fail_penalty) {
-        this.fail_penalty = fail_penalty;
-    }
 
     public String getTitle() {
         return title;
@@ -252,11 +119,67 @@ public class ItemForMultiModeRequest implements Parcelable {
         this.friendRequestList = friendRequestList;
     }
 
-    public String getManager_thumbnail() {
-        return manager_thumbnail;
+    public String getManagerName() {
+        return managerName;
     }
 
-    public void setManager_thumbnail(String manager_thumbnail) {
-        this.manager_thumbnail = manager_thumbnail;
+    public void setManagerName(String managerName) {
+        this.managerName = managerName;
+    }
+
+    public String getManagerId() {
+        return managerId;
+    }
+
+    public void setManagerId(String managerId) {
+        this.managerId = managerId;
+    }
+
+    public String getManagerUuid() {
+        return managerUuid;
+    }
+
+    public void setManagerUuid(String managerUuid) {
+        this.managerUuid = managerUuid;
+    }
+
+    public String getManagerImage() {
+        return managerImage;
+    }
+
+    public void setManagerImage(String managerImage) {
+        this.managerImage = managerImage;
+    }
+
+    public String getMissionId() {
+        return missionId;
+    }
+
+    public void setMissionId(String missionId) {
+        this.missionId = missionId;
+    }
+
+    public String getRegisteredTime() {
+        return registeredTime;
+    }
+
+    public void setRegisteredTime(String registeredTime) {
+        this.registeredTime = registeredTime;
+    }
+
+    public int getPenaltyTotal() {
+        return penaltyTotal;
+    }
+
+    public void setPenaltyTotal(int penaltyTotal) {
+        this.penaltyTotal = penaltyTotal;
+    }
+
+    public int getPenaltyPerDay() {
+        return penaltyPerDay;
+    }
+
+    public void setPenaltyPerDay(int penaltyPerDay) {
+        this.penaltyPerDay = penaltyPerDay;
     }
 }

@@ -23,7 +23,6 @@
             android:id="@+id/tv_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text=""
             android:textSize="18sp"
             android:textColor="@color/colorPrimary"
             android:fontFamily="@font/nexon_level2_gothic"/>
@@ -32,16 +31,15 @@
             android:id="@+id/tv_content"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text=""
+            android:layout_marginTop="6dp"
             android:textColor="@color/black"/>
         <TextView
             android:id="@+id/tv_date_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="6dp"
             android:fontFamily="@font/nexon_level2_gothic"
-            android:text=""/>
+          />
     </LinearLayout>
 
 

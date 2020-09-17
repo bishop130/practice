@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="친구설정"
+        android:textSize="20sp"
+        android:padding="20dp"
+        android:fontFamily="@font/nexon_level2_gothic"
+        android:textColor="@color/black"
+        android:layout_marginStart="12dp" />
+
+    <TextView
+        android:id="@+id/tvEditFriendName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:layout_marginStart="40dp"
+        android:textSize="16sp"
+        android:textColor="@color/black"
+        android:fontFamily="@font/nexon_level2_gothic"
+        android:text="친구이름수정"
+        android:layout_marginBottom="12dp"
+        />
+    <TextView
+        android:id="@+id/tvDeleteFriend"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:layout_marginStart="40dp"
+        android:layout_marginBottom="12dp"
+        android:textSize="16sp"
+        android:textColor="@color/black"
+        android:fontFamily="@font/nexon_level2_gothic"
+        android:text="친구삭제"
+        />
+
+
+
+</LinearLayout>

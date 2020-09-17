@@ -18,6 +18,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
@@ -25,6 +26,10 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -38,6 +43,7 @@ import com.suji.lj.myapplication.MissionDetailMultiActivity;
 import com.suji.lj.myapplication.R;
 import com.suji.lj.myapplication.Utils.Account;
 import com.suji.lj.myapplication.Utils.BadgeManager;
+import com.suji.lj.myapplication.Utils.Code;
 import com.suji.lj.myapplication.Utils.DateTimeFormatter;
 import com.suji.lj.myapplication.Utils.Utils;
 
@@ -45,8 +51,23 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+
+import static com.suji.lj.myapplication.Utils.Code.ACCEPT_INVITATION;
+import static com.suji.lj.myapplication.Utils.Code.ARRIVE_SUCCESS;
+import static com.suji.lj.myapplication.Utils.Code.INVITE_FRIEND;
+import static com.suji.lj.myapplication.Utils.Code.INVITE_MISSION_CANCEL;
+import static com.suji.lj.myapplication.Utils.Code.INVITE_MISSION_START;
+import static com.suji.lj.myapplication.Utils.Code.MISSION_MADE;
+import static com.suji.lj.myapplication.Utils.Code.MISSION_OVER;
+import static com.suji.lj.myapplication.Utils.Code.MISSION_START;
+import static com.suji.lj.myapplication.Utils.Code.POINT_REFUND;
+import static com.suji.lj.myapplication.Utils.Code.POINT_REWARD_DISTRIBUTION;
+import static com.suji.lj.myapplication.Utils.Code.POINT_TO_CASH;
+import static com.suji.lj.myapplication.Utils.Code.RECEIVED_INVITATION;
+import static com.suji.lj.myapplication.Utils.Code.SEND_INVITATION;
 
 public class NotificationFragment extends Fragment {
 
@@ -67,6 +88,12 @@ public class NotificationFragment extends Fragment {
     AlertDialog loading_dialog;
 
 
+    //200 약속생성알림
+    //201 약속초대알림
+    //202 초대약속취소
+    //203 초대약속시작
+
+
     private ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
 
         @Override
@@ -82,11 +109,68 @@ public class NotificationFragment extends Fragment {
 
 
             String key = list.get(position).getKey();
+            list.remove(position);
+            adapter.notifyItemRemoved(position);
 
-            databaseReference.child("user_data").child(user_id).child("notification").child(key).removeValue();
+
+            databaseReference.child("user_data").child(user_id).child("notification").child(key).removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+
+                }
+            });
+            //adapter.notifyDataSetChanged();
+
+        }
+
+    };
+
+    boolean isFetched = false;
+    HashMap<String,Object> hashMap;
+
+    ValueEventListener singleEventListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+            hashMap =  new HashMap<>();
+            list = new ArrayList<>();
+            if (snapshot.exists()) {
+                for(DataSnapshot shot : snapshot.getChildren()) {
+                    String key = shot.getKey();
+
+                    ItemForNotification item = shot.getValue(ItemForNotification.class);
+                    if (item != null) {
+                        item.setKey(shot.getKey());
+                        item.setRead(true);
+                        Log.d("알림", item.getMissionId());
+                        hashMap.put(key,item);
+                        list.add(item);
+                        //shot.getRef().child("read").setValue(true);
+                    }
+                }
+                snapshot.getRef().updateChildren(hashMap);
+
+                rl_is_empty.setVisibility(View.GONE);
+                progressBar.setVisibility(View.GONE);
+                //loading_dialog.dismiss();
+                setRecyclerView(list);
+            } else {
+                Log.d("차일드", "none");
+                //loading_dialog.dismiss();
+                rl_is_empty.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.GONE);
+            }
+            //databaseReference.child("user_data").child(user_id).child("notification").addValueEventListener(valueEventListener);
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError error) {
 
         }
     };
+
+
+
 
 
     @Override
@@ -113,48 +197,23 @@ public class NotificationFragment extends Fragment {
             loading_dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
 
         }
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
+        itemTouchHelper.attachToRecyclerView(recyclerView);
 
         user_id = Account.getUserId(activity);
-        databaseReference.child("user_data").child(user_id).child("notification").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+        Log.d("차일드", "data");
+        databaseReference.child("user_data").child(user_id).child("notification").addListenerForSingleValueEvent(singleEventListener);
 
-                list = new ArrayList<>();
 
-                if (dataSnapshot.exists()) {
-                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        ItemForNotification item = snapshot.getValue(ItemForNotification.class);
-                        if (item != null) {
-                            item.setKey(snapshot.getKey());
-                            Log.d("알림", item.getMission_id());
-                            list.add(item);
-                            snapshot.getRef().child("read").setValue(true);
-                        }
-                    }
-                    rl_is_empty.setVisibility(View.GONE);
-                    setRecyclerView(list);
-                } else {
-                    rl_is_empty.setVisibility(View.VISIBLE);
-                    setRecyclerView(list);
-                }
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
 
 
         toolbar.setTitle("알림");
 
-        BadgeManager.hideBottomNavigationViewBadge(((MainActivity) activity).bottomNavigationView, 2);
+
 
 
         return view;
     }
-
 
     private void setRecyclerView(List<ItemForNotification> list) {
 
@@ -165,8 +224,6 @@ public class NotificationFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(activity));
         recyclerView.setAdapter(adapter);
 
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
-        itemTouchHelper.attachToRecyclerView(recyclerView);
 
     }
 
@@ -191,16 +248,18 @@ public class NotificationFragment extends Fragment {
             return new NotificationAdapter.ViewHolder(view);
         }
 
+
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
-            int code = list.get(position).getNotification_code();
-            String friend_name = list.get(position).getFriend_name();
+            int code = list.get(position).getCode();
+            String friend_name = list.get(position).getFriendName();
             String title = list.get(position).getTitle();
-            String friend_image = list.get(position).getFriend_image();
-            String date_time = list.get(position).getDate_time();
-            String mission_id = list.get(position).getMission_id();
+            String friend_image = list.get(position).getFriendImage();
+            String date_time = list.get(position).getDateTime();
+            String mission_id = list.get(position).getMissionId();
             boolean is_single = list.get(position).isSingle();
+            String content = list.get(position).getContent();
             Date date = DateTimeFormatter.dateParser(date_time, "yyyyMMddHHmmss");
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(date);
@@ -208,83 +267,101 @@ public class NotificationFragment extends Fragment {
             String timeformat = simpleDateFormat.format(date);
 
 
-            Log.d("알림", code + "");
+            Log.d("차일드", code + "");
             holder.iv_notification.setBackground(new ShapeDrawable(new OvalShape()));
             holder.iv_notification.setClipToOutline(true);
 
 
-            switch (code) {
-                case 100: /** 친구도착 알림**/
-                    String content = friend_name + " 님 도착 성공!";
-                    holder.tv_content.setText(content);
-                    holder.tv_date_time.setText(timeformat);
-                    holder.tv_title.setText(title);
-                    if (friend_image != null && !friend_image.isEmpty()) {
-                        Log.d("알림", "여기들어와?" + friend_name);
-                        Picasso.with(activity)
-                                .load(friend_image)
-                                .error(R.drawable.default_profile)
-                                .fit()
-                                .into(holder.iv_notification);
-                    } else {
-                        Log.d("알림", "여기들어와?" + friend_name);
-                        holder.iv_notification.setImageDrawable(activity.getDrawable(R.drawable.default_profile));
+            holder.tv_content.setText(content);
+            holder.tv_date_time.setText(timeformat);
+            holder.tv_title.setText(title);
+            if (friend_image != null && !friend_image.isEmpty()) {
+                Log.d("알림", "여기들어와?" + friend_name);
+                Picasso.with(activity)
+                        .load(friend_image)
+                        .error(R.drawable.default_profile)
+                        .fit()
+                        .into(holder.iv_notification);
+            } else {
+                Log.d("알림", "여기들어와?" + friend_name);
+                holder.iv_notification.setImageDrawable(activity.getDrawable(R.drawable.default_profile));
 
 
-                    }
-                    holder.ly_container.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
+            }
+            holder.ly_container.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+
+                    switch (code) {
+                        case ARRIVE_SUCCESS: /** 친구도착 알림**/
                             loading_dialog.show();
                             if (is_single) {
                                 Log.d("알림", "싱글" + is_single);
                                 Intent intent = new Intent(activity, MissionDetailActivity.class);
-                                intent.putExtra("mission_id", mission_id);
-                                intent.putExtra("mission_mode", true);
+                                intent.putExtra("missionId", mission_id);
+                                intent.putExtra("missionMode", true);
                                 startActivity(intent);
                             } else {
                                 Log.d("알림", "멀티" + is_single);
                                 Intent intent = new Intent(activity, MissionDetailMultiActivity.class);
-                                intent.putExtra("mission_id", mission_id);
-                                intent.putExtra("mission_mode", false);
+                                intent.putExtra("missionId", mission_id);
+                                intent.putExtra("missionMode", false);
                                 startActivity(intent);
 
 
                             }
 
 
-                        }
-                    });
+
+                            break;
+                        case INVITE_FRIEND:/** 친구초대 알림**/
 
 
-                    break;
-                case 200:/** 친구초대 알림**/
-                    String invitation_conent = friend_name + "님이 " + title + "에 초대하셨습니다.";
-                    holder.tv_content.setText(invitation_conent);
-                    holder.tv_date_time.setText(timeformat);
-                    holder.tv_title.setText(title);
-                    if (friend_image != null && !friend_image.isEmpty()) {
-                        Picasso.with(activity)
-                                .load(friend_image)
-                                .error(R.drawable.default_profile)
-                                .fit()
-                                .into(holder.iv_notification);
+                            break;
+                        case MISSION_MADE:
+                            /** 약속 등록 알림**/
+
+
+                            break;
+                        case POINT_REFUND:
+                            /** 환불**/
+
+                            break;
+                        case POINT_TO_CASH:
+                            break;
+                        case SEND_INVITATION:
+
+                            break;
+                        case RECEIVED_INVITATION:
+
+                            break;
+
+                        case ACCEPT_INVITATION:
+
+                            break;
+                        case INVITE_MISSION_START:
+
+                            break;
+                        case INVITE_MISSION_CANCEL:
+
+                            break;
+                        case MISSION_START:
+
+                            break;
+                        case MISSION_OVER:
+
+                            break;
+
+                        case POINT_REWARD_DISTRIBUTION:
+
+                            break;
                     }
-                    holder.ly_container.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            loading_dialog.show();
-
-                        }
-                    });
-
-                    break;
-                case 300:
-
-                    break;
 
 
-            }
+
+                }
+            });
 
 
         }

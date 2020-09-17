@@ -10,27 +10,23 @@ public class ItemForNotification {
 
     String key;
     String title;
-    String mission_id;
+    String missionId;
     boolean single;
     boolean success;
     boolean read;
-    String date_time;
+    String dateTime;
     String content;
-
-    //새약속 등록 알림
-    int penalty;
 
 
     //친구추가 알림
-    String friend_name;
-    String friend_image;
-    String friend_id;
+    String friendName;
+    String friendImage;
+    String friendId;
 
     List<ItemForFriendByDay> forFriendByDayList;
 
 
-
-    int notification_code;
+    int code;
 
 
     public boolean isRead() {
@@ -57,13 +53,6 @@ public class ItemForNotification {
         this.content = content;
     }
 
-    public String getDate_time() {
-        return date_time;
-    }
-
-    public void setDate_time(String date_time) {
-        this.date_time = date_time;
-    }
 
     public String getKey() {
         return key;
@@ -81,13 +70,6 @@ public class ItemForNotification {
         this.title = title;
     }
 
-    public String getMission_id() {
-        return mission_id;
-    }
-
-    public void setMission_id(String mission_id) {
-        this.mission_id = mission_id;
-    }
 
     public boolean isSingle() {
         return single;
@@ -105,43 +87,53 @@ public class ItemForNotification {
         this.success = success;
     }
 
-    public int getPenalty() {
-        return penalty;
+    public String getMissionId() {
+        return missionId;
     }
 
-    public void setPenalty(int penalty) {
-        this.penalty = penalty;
+    public void setMissionId(String missionId) {
+        this.missionId = missionId;
     }
 
-    public String getFriend_name() {
-        return friend_name;
+    public String getDateTime() {
+        return dateTime;
     }
 
-    public void setFriend_name(String friend_name) {
-        this.friend_name = friend_name;
+    public void setDateTime(String dateTime) {
+        this.dateTime = dateTime;
     }
 
-    public String getFriend_image() {
-        return friend_image;
+    public String getFriendName() {
+        return friendName;
     }
 
-    public void setFriend_image(String friend_image) {
-        this.friend_image = friend_image;
+    public void setFriendName(String friendName) {
+        this.friendName = friendName;
     }
 
-    public String getFriend_id() {
-        return friend_id;
+    public String getFriendImage() {
+        return friendImage;
     }
 
-    public void setFriend_id(String friend_id) {
-        this.friend_id = friend_id;
+    public void setFriendImage(String friendImage) {
+        this.friendImage = friendImage;
     }
 
-    public int getNotification_code() {
-        return notification_code;
+    public String getFriendId() {
+        return friendId;
     }
 
-    public void setNotification_code(int notification_code) {
-        this.notification_code = notification_code;
+    public void setFriendId(String friendId) {
+        this.friendId = friendId;
+    }
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
     }
 }
+
+

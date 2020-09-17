@@ -15,8 +15,6 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 
@@ -25,16 +23,10 @@ import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexboxLayoutManager;
 import com.google.android.flexbox.JustifyContent;
 import com.google.android.material.tabs.TabLayout;
-import com.suji.lj.myapplication.Adapters.ContactPagerAdapter;
-import com.suji.lj.myapplication.Adapters.FriendPagerAdapter;
-import com.suji.lj.myapplication.Adapters.GlobalApplication;
 import com.suji.lj.myapplication.Adapters.RecyclerContactFriendSelectAdapter;
-import com.suji.lj.myapplication.Fragments.ContactSearchFragment;
-import com.suji.lj.myapplication.Fragments.FriendSearchFragment;
 import com.suji.lj.myapplication.Items.ContactItem;
 import com.github.tamir7.contacts.Contacts;
 import com.suji.lj.myapplication.Items.ItemForFriends;
-import com.suji.lj.myapplication.Items.MissionCartItem;
 import com.suji.lj.myapplication.Utils.Utils;
 
 import java.util.ArrayList;
@@ -216,10 +208,6 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
         selected_item = realm.copyFromRealm(realmResults);
         confirm_button.setText("(" + selected_item.size() + ") 선택완료");
 
-        ContactPagerAdapter adapter = new ContactPagerAdapter
-                (getSupportFragmentManager(), tab_ly.getTabCount(), this, realm, onUnCheckFromSelectToContactListener, onUnCheckFromSelectToFriendListener);
-        view_pager.setAdapter(adapter);
-        view_pager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tab_ly));
 
         tab_ly.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override

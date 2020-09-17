@@ -162,22 +162,22 @@ public class MissionDetailMultiActivity extends AppCompatActivity {
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
-            String mission_id = bundle.getString("mission_id");
-            boolean isSingle = bundle.getBoolean("mission_mode", false);
+            String mission_id = bundle.getString("missionId");
+            boolean isSingle = bundle.getBoolean("missionMode", false);
             if (!isSingle) {
-                Log.d("초대", mission_id + "");
+                Log.d("초대", mission_id + "mission_id");
 
-                databaseReference.child("multi_data").orderByChild("mission_id").equalTo(mission_id).addValueEventListener(new ValueEventListener() {
+                databaseReference.child("multi_data").orderByChild("missionId").equalTo(mission_id).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         if (dataSnapshot.exists()) {
 
                             for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                MissionInfoList missionInfoList = snapshot.child("mission_info_list").getValue(MissionInfoList.class);
+                                MissionInfoList missionInfoList = snapshot.child("missionInfoList").getValue(MissionInfoList.class);
 
                                 if (missionInfoList != null) {
 
-                                    Log.d("초대", missionInfoList.getMission_title() + "");
+                                    Log.d("초대", missionInfoList.getTitle() + "");
 
                                     displayData(missionInfoList);
                                 }
@@ -202,7 +202,7 @@ public class MissionDetailMultiActivity extends AppCompatActivity {
 
         materialCalendarView.clearSelection();
 
-        String date_time = itemForDateTimeByLists.get(index).getDate_time();
+        String date_time = itemForDateTimeByLists.get(index).getDateTime();
         Date temp = DateTimeFormatter.dateParser(date_time, "yyyyMMddHHmm");
 
 
@@ -230,7 +230,7 @@ public class MissionDetailMultiActivity extends AppCompatActivity {
         OneDayDecorator one = new OneDayDecorator(getResources().getColor(R.color.White));
         one.setDate(CalendarDay.from(year, month, day));
         materialCalendarView.addDecorator(one);
-        setupRecyclerViewFriendByDay(itemForDateTimeByLists.get(index).getFriendByDayList());
+        setupRecyclerViewFriendByDay(itemForDateTimeByLists.get(index));
 
 
     }
@@ -238,14 +238,14 @@ public class MissionDetailMultiActivity extends AppCompatActivity {
 
     private void displayData(MissionInfoList item) {
 
-        String title = item.getMission_title();
+        String title = item.getTitle();
         String address = item.getAddress();
-        String start_date = DateTimeUtils.makeDateForHuman(item.getMin_date());
-        String end_date = DateTimeUtils.makeDateForHuman(item.getMax_date());
+        String start_date = DateTimeUtils.makeDateForHuman(item.getMinDate());
+        String end_date = DateTimeUtils.makeDateForHuman(item.getMaxDate());
         double lat = item.getLat();
         double lng = item.getLng();
         itemForDateTimeByLists = new ArrayList<>();
-        Map<String, ItemForDateTimeByList> map = item.getMission_dates();
+        Map<String, ItemForDateTimeByList> map = item.getMissionDates();
         addMapFragment(new MapFragment(mainScrollView, lat, lng));
 
 
@@ -255,7 +255,7 @@ public class MissionDetailMultiActivity extends AppCompatActivity {
             Collections.sort(itemForDateTimeByLists, new Comparator<ItemForDateTimeByList>() {
                 @Override
                 public int compare(ItemForDateTimeByList o1, ItemForDateTimeByList o2) {
-                    return o1.getDate_time().compareTo(o2.getDate_time());
+                    return o1.getDateTime().compareTo(o2.getDateTime());
                 }
             });
 
@@ -265,23 +265,23 @@ public class MissionDetailMultiActivity extends AppCompatActivity {
 
 
         List<ItemForFriendByDay> friendByDayList = item.getFriendByDayList();
-        List<ItemPortion> portionList = item.getItemPortionList();
+        List<ItemPortion> portionList = item.getPortionList();
 
         toolbar.setTitle(title);
         tv_address.setText(address);
         tv_date_start.setText(start_date);
         tv_date_end.setText(end_date);
-        tv_time_start.setText(DateTimeUtils.makeTimeForHuman(itemForDateTimeByLists.get(0).getDate_time(), "yyyyMMddHHmm"));
-        tv_time_end.setText(DateTimeUtils.makeTimeForHuman(itemForDateTimeByLists.get(itemForDateTimeByLists.size() - 1).getDate_time(), "yyyyMMddHHmm"));
-        tv_penalty.setText(Utils.makeNumberCommaWon(item.getPenalty()));
-        tv_penalty_total.setText(Utils.makeNumberCommaWon(item.getPenalty_amount()));
+        tv_time_start.setText(DateTimeUtils.makeTimeForHuman(itemForDateTimeByLists.get(0).getDateTime(), "yyyyMMddHHmm"));
+        tv_time_end.setText(DateTimeUtils.makeTimeForHuman(itemForDateTimeByLists.get(itemForDateTimeByLists.size() - 1).getDateTime(), "yyyyMMddHHmm"));
+        tv_penalty.setText(Utils.makeNumberCommaWon(item.getPenaltyPerDay()));
+        tv_penalty_total.setText(Utils.makeNumberCommaWon(item.getPenaltyTotal()));
         //tv_current_penalty.setText(Utils.makeNumberCommaWon(item.getPenalty() * item.getFailed_count()));
         //tv_failed_count.setText(item.getFailed_count() + " 번");
 
         cal = new HashSet<CalendarDay>();
         for (int i = 0; i < itemForDateTimeByLists.size(); i++) {
 
-            String date_time = itemForDateTimeByLists.get(i).getDate_time();
+            String date_time = itemForDateTimeByLists.get(i).getDateTime();
             Date date = DateTimeFormatter.dateParser(date_time, "yyyyMMddHHmm");
             //Calendar calendar = Calendar.getInstance();
             calendar.setTime(date);
@@ -307,7 +307,7 @@ public class MissionDetailMultiActivity extends AppCompatActivity {
     private void createCalendar(List<ItemForDateTimeByList> itemForDateTimeByLists) {
 
 
-        String date_time = itemForDateTimeByLists.get(0).getDate_time();
+        String date_time = itemForDateTimeByLists.get(0).getDateTime();
         Date temp = DateTimeFormatter.dateParser(date_time, "yyyyMMddHHmm");
         //Calendar calendar = Calendar.getInstance();
         //calendar.clear();
@@ -327,16 +327,17 @@ public class MissionDetailMultiActivity extends AppCompatActivity {
             public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
 
                 Log.d("달력", selected + " 선택");
+
                 //widget.removeDecorators();
                 widget.addDecorator(new EventDecorator(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary), cal));
                 if (cal.contains(date)) {
 
-
+                    rv_friend_by_day.setVisibility(View.VISIBLE);
                     OneDayDecorator one = new OneDayDecorator(getResources().getColor(R.color.White));
                     one.setDate(date);
                     widget.addDecorator(one);
                     for (int i = 0; i < itemForDateTimeByLists.size(); i++) {
-                        String date_time = itemForDateTimeByLists.get(i).getDate_time();
+                        String date_time = itemForDateTimeByLists.get(i).getDateTime();
                         Date temp = DateTimeFormatter.dateParser(date_time, "yyyyMMddHHmm");
                         // calendar.clear();
                         calendar.setTime(temp);
@@ -352,18 +353,18 @@ public class MissionDetailMultiActivity extends AppCompatActivity {
 
                                     int hour = calendar.get(Calendar.HOUR_OF_DAY);
                                     int min = calendar.get(Calendar.MINUTE);
+                                    String dateTime = itemForDateTimeByLists.get(i).getDateTime();
 
-                                    setupRecyclerViewFriendByDay(itemForDateTimeByLists.get(i).getFriendByDayList());
+                                    setupRecyclerViewFriendByDay(itemForDateTimeByLists.get(i));
                                     tv_selected_date.setText(DateTimeUtils.makeTimeForHumanInt(hour, min));
+
 
                                 }
                             }
                         }
                     }
                 } else {
-                    List<ItemForFriendByDay> friendByDayList = new ArrayList<>();
-                    setupRecyclerViewFriendByDay(friendByDayList);
-                    tv_selected_date.setText("");
+                    rv_friend_by_day.setVisibility(View.GONE);
 
                 }
             }
@@ -396,8 +397,8 @@ public class MissionDetailMultiActivity extends AppCompatActivity {
 
     }
 
-    private void setupRecyclerViewFriendByDay(List<ItemForFriendByDay> friendByDayList) {
-        FriendByDayAdapter adapter = new FriendByDayAdapter(friendByDayList);
+    private void setupRecyclerViewFriendByDay(ItemForDateTimeByList itemForDateTimeByList) {
+        FriendByDayAdapter adapter = new FriendByDayAdapter(itemForDateTimeByList);
         rv_friend_by_day.setLayoutManager(new LinearLayoutManager(this));
         rv_friend_by_day.setAdapter(adapter);
 
@@ -425,8 +426,8 @@ public class MissionDetailMultiActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-            String friend_name = list.get(position).getFriend_name();
-            String friend_image = list.get(position).getFriend_image();
+            String friend_name = list.get(position).getFriendName();
+            String friend_image = list.get(position).getFriendImage();
 
             holder.tv_friend_name.setText(friend_name);
 
@@ -480,12 +481,12 @@ public class MissionDetailMultiActivity extends AppCompatActivity {
     private class FriendByDayAdapter extends RecyclerView.Adapter<FriendByDayAdapter.ViewHolder> {
 
 
-        List<ItemForFriendByDay> friendByDayList;
+        ItemForDateTimeByList itemForDateTimeByList;
         int hour;
         int min;
 
-        public FriendByDayAdapter(List<ItemForFriendByDay> friendByDayList) {
-            this.friendByDayList = friendByDayList;
+        public FriendByDayAdapter(ItemForDateTimeByList itemForDateTimeByList) {
+            this.itemForDateTimeByList = itemForDateTimeByList;
             this.hour = hour;
             this.min = min;
 
@@ -503,9 +504,11 @@ public class MissionDetailMultiActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-            String friend_name = friendByDayList.get(position).getFriend_name();
-            String friend_image = friendByDayList.get(position).getFriend_image();
-            String timeStamp = friendByDayList.get(position).getTime_stamp();
+            String friend_name = itemForDateTimeByList.getFriendByDayList().get(position).getFriendName();
+            String friend_image = itemForDateTimeByList.getFriendByDayList().get(position).getFriendImage();
+            String timeStamp = itemForDateTimeByList.getFriendByDayList().get(position).getTimeStamp();
+            String dateTime = itemForDateTimeByList.getDateTime();
+            Log.d("멀티", dateTime + "데이트타임");
             if (timeStamp != null && !timeStamp.isEmpty()) {
                 Log.d("멀티", timeStamp + "타임");
                 String checkTime = DateTimeUtils.makeTimeForHuman(timeStamp, "yyyyMMddHHmmss");
@@ -514,7 +517,16 @@ public class MissionDetailMultiActivity extends AppCompatActivity {
             } else {
 
 
-                holder.tv_time.setText("도착정보없음");
+                if (DateTimeUtils.compareIsFuture(dateTime, "yyyyMMddHHmm")) {
+
+                    holder.tv_time.setText("도착정보없음");
+                    holder.tv_time.setTextColor(getResources().getColor(R.color.black));
+                    // tvArriveTime.setTextColor(getResources().getColor(R.color.colorPrimary));
+                } else {
+                    holder.tv_time.setText("도착정보없음");
+                    holder.tv_time.setTextColor(getResources().getColor(R.color.colorError));
+
+                }
 
             }
             holder.tv_friend_name.setText(friend_name);
@@ -536,7 +548,7 @@ public class MissionDetailMultiActivity extends AppCompatActivity {
 
         @Override
         public int getItemCount() {
-            return friendByDayList.size();
+            return itemForDateTimeByList.getFriendByDayList().size();
         }
 
         private class ViewHolder extends RecyclerView.ViewHolder {

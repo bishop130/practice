@@ -5,18 +5,16 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
-import android.app.ProgressDialog;
-import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,8 +27,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.suji.lj.myapplication.Items.ItemForAccountList;
 import com.suji.lj.myapplication.Items.ItemForPassword;
-import com.suji.lj.myapplication.Items.ItemForTransaction;
 import com.suji.lj.myapplication.Utils.Account;
+import com.suji.lj.myapplication.Utils.Code;
+import com.suji.lj.myapplication.Utils.DateTimeFormatter;
+import com.suji.lj.myapplication.Utils.DateTimeUtils;
 import com.suji.lj.myapplication.Utils.Utils;
 
 import org.mindrot.jbcrypt.BCrypt;
@@ -39,9 +39,9 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Locale;
 
-import io.realm.internal.Collection;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
@@ -74,6 +74,8 @@ public class SecurityActivity extends AppCompatActivity implements View.OnClickL
     private static int POINT_PAY_REQUEST = 5;
     int code;
     AlertDialog loading_dialog;
+    Handler handler = new Handler();
+
 
     private int[] key_list = {
             R.id.key_1,
@@ -146,7 +148,7 @@ public class SecurityActivity extends AppCompatActivity implements View.OnClickL
         backspace.setOnClickListener(this);
 
         code = getIntent().getIntExtra("password", 0);
-        pointAmount = getIntent().getIntExtra("point", 0);
+        pointAmount = getIntent().getIntExtra("pointTotal", 0);
         missionMode = getIntent().getIntExtra("missionMode", 0);
         title = getIntent().getStringExtra("title");
         missionId = getIntent().getStringExtra("missionId");
@@ -175,7 +177,7 @@ public class SecurityActivity extends AppCompatActivity implements View.OnClickL
     public void onClick(View v) {
 
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        vibrator.vibrate(10);
+        vibrator.vibrate(5);
 
         Log.d("시큐리티", "length   " + stringBuffer.length() + "");
 
@@ -380,7 +382,9 @@ public class SecurityActivity extends AppCompatActivity implements View.OnClickL
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Log.d("부트페이", "실패");
 
-                loading_dialog.dismiss();
+                if(loading_dialog.isShowing()) {
+                    loading_dialog.dismiss();
+                }
 
 
             }
@@ -390,7 +394,34 @@ public class SecurityActivity extends AppCompatActivity implements View.OnClickL
 
 
                 if (!response.isSuccessful()) {
-                    Log.d("부트페이", "fail response from firebase cloud function");
+                    String body = response.body().string();
+                    Log.d("부트페이", "fail response from firebase cloud function"+"\n"+body);
+                    String code = Utils.getValueFromJson(body,"rsp_code");
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(SecurityActivity.this);
+                            builder.setMessage("일치하는 계좌를 찾을 수 없습니다");
+                            builder.setPositiveButton("네", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+
+                                   finish();
+                                }
+                            });
+                            builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                                @Override
+                                public void onDismiss(DialogInterface dialog) {
+                                    finish();
+                                }
+                            });
+                            builder.create().show();
+
+                        }
+                    });
+
+
+
                     loading_dialog.dismiss();
 
 
@@ -400,28 +431,36 @@ public class SecurityActivity extends AppCompatActivity implements View.OnClickL
                     String receipt = response.body().string();
 
                     Log.d("부트페이", "성공" + receipt);
-                    //Log.d("부트페이", "성공" + Utils.getValueFromJson(responseBody.string(), "date_time"));
-                    //displayReceipt(result);
-                    //dataSave(item, receipt);
-                    //최근계좌 저장
-                    databaseReference.child("user_data").child(user_id).child("recent_account").orderByChild("account_num").equalTo(account_num).addValueEventListener(new ValueEventListener() {
+
+                    databaseReference.child("user_data").child(user_id).child("recentAccount").orderByChild("accountNum").equalTo(account_num).addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-
                             if (!dataSnapshot.exists()) {
-                                Log.d("계좌", "계좌없으므로 추가");
                                 ItemForAccountList item = new ItemForAccountList();
-                                item.setBank_name(bank_name);
-                                item.setAccount_num(account_num);
-                                item.setBank_code(bank_code);
-                                item.setAccount_holder_name(account_holder_name);
-                                databaseReference.child("user_data").child(user_id).child("recent_account").push().setValue(item).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                item.setBankName(bank_name);
+                                item.setAccountNum(account_num);
+                                item.setBankCode(bank_code);
+                                item.setAccountHolderName(account_holder_name);
+                                databaseReference.child("user_data").child(user_id).child("recentAccount").push().setValue(item).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
                                         loading_dialog.dismiss();
-                                        Utils.makeAlertDialog("이체를 완료했습니다.", SecurityActivity.this);
-                                        finish();
+                                        AlertDialog.Builder builder = new AlertDialog.Builder(SecurityActivity.this);
+                                        builder.setMessage("이체를 완료했습니다");
+                                        builder.setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+
+                                                finish();
+                                            }
+                                        });
+                                        builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                                            @Override
+                                            public void onDismiss(DialogInterface dialog) {
+                                                finish();
+                                            }
+                                        });
+                                        builder.create().show();
 
 
                                     }
@@ -429,12 +468,23 @@ public class SecurityActivity extends AppCompatActivity implements View.OnClickL
 
 
                             } else {
-                                Log.d("계좌", "계좌있음");
                                 loading_dialog.dismiss();
-                                Utils.makeAlertDialog("이체를 완료했습니다.", SecurityActivity.this);
+                                AlertDialog.Builder builder = new AlertDialog.Builder(SecurityActivity.this);
+                                builder.setMessage("이체를 완료했습니다");
+                                builder.setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
 
-
-                                finish();
+                                        finish();
+                                    }
+                                });
+                                builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                                    @Override
+                                    public void onDismiss(DialogInterface dialog) {
+                                        finish();
+                                    }
+                                });
+                                builder.create().show();
 
 
                             }
@@ -478,7 +528,7 @@ public class SecurityActivity extends AppCompatActivity implements View.OnClickL
 
 
         //DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-        databaseReference.child("user_data").child(user_id).child("transfer_key").child("key").addListenerForSingleValueEvent(new ValueEventListener() {
+        databaseReference.child("user_data").child(user_id).child("transferKey").child("key").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
@@ -512,14 +562,24 @@ public class SecurityActivity extends AppCompatActivity implements View.OnClickL
                         shuffleKeyPad();
                         Log.d("시큐리티", "비밀번호 틀림");
                         //비밀번호 틀림
-                        databaseReference.child("user_data").child(user_id).child("transfer_key").child("limit_count").addListenerForSingleValueEvent(new ValueEventListener() {
+                        long now = Calendar.getInstance().getTimeInMillis();
+                        String dateNow = DateTimeUtils.getCurrentTimePattern("yyyyMMddHHmm");
+                        databaseReference.child("user_data").child(user_id).child("transferKey").addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                if (dataSnapshot.exists() && dataSnapshot.getValue() != null) {
-                                    int count = ((Long) dataSnapshot.getValue()).intValue();
-                                    Integer aa = dataSnapshot.getValue(Integer.class);
+                                if (dataSnapshot.exists() && dataSnapshot.child("limitCount").getValue() != null) {
+                                    //int count = ((Long) dataSnapshot.child("limitCount").getValue()).intValue();
+                                    Integer count = dataSnapshot.child("limitCount").getValue(Integer.class);
+                                    String dateTime = dataSnapshot.child("dateTime").getValue(String.class);
+                                    Date failedTime = DateTimeFormatter.dateTimeParser(dateTime,"yyyyMMddHHmm");
+                                    if (failedTime.getTime() + 1000*60*60*6> now){
+                                        count = 5;
+                                        dataSnapshot.getRef().child("limitCount").setValue(count);
+                                        dataSnapshot.getRef().child("dateTime").setValue(dateNow);
+                                    }
+
                                     Log.d("시큐리티", "인트" + count);
-                                    Log.d("시큐리티", "인티저" + aa);
+                                    //Log.d("시큐리티", "인티저" + aa);
 
 
                                     if (count > 0) {
@@ -536,12 +596,18 @@ public class SecurityActivity extends AppCompatActivity implements View.OnClickL
 
                                             }
                                         });
+                                        builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                                            @Override
+                                            public void onCancel(DialogInterface dialog) {
+
+                                            }
+                                        });
                                         AlertDialog alertDialog = builder.create();
                                         alertDialog.show();
 
 
                                         clearPassword();
-                                        databaseReference.child("user_data").child(user_id).child("transfer_key").child("limit_count").setValue(count).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        databaseReference.child("user_data").child(user_id).child("transferKey").child("limitCount").setValue(count).addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
 
@@ -551,8 +617,8 @@ public class SecurityActivity extends AppCompatActivity implements View.OnClickL
 
 
                                     } else {//5번 모두 실패시  비번 삭제후 재설정 페이지 이동
-
-                                        databaseReference.child("user_data").child(user_id).child("transfer_key").child("key").setValue("").addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        String passwordHashed = BCrypt.hashpw("abcdef", BCrypt.gensalt(10));
+                                        databaseReference.child("user_data").child(user_id).child("transferKey").child("key").setValue(passwordHashed).addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 Intent intent = new Intent(getApplicationContext(), FindPasswordActivity.class);
@@ -607,13 +673,15 @@ public class SecurityActivity extends AppCompatActivity implements View.OnClickL
             String password = stringBuffer.toString();
             if (temp.equals(password)) {//첫번째 비밀번호와 두번째가 같다면
 
+                String dateTime = DateTimeUtils.getCurrentTimePattern("yyyyMMddHHmm");
                 String passwordHashed = BCrypt.hashpw(password, BCrypt.gensalt(10));
                 ItemForPassword item = new ItemForPassword();
                 item.setKey(passwordHashed);
-                item.setLimit_count(5);
+                item.setLimitCount(5);
+                item.setDateTime(dateTime);
 
                 DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-                databaseReference.child("user_data").child(user_id).child("transfer_key").setValue(item).addOnCompleteListener(new OnCompleteListener<Void>() {
+                databaseReference.child("user_data").child(user_id).child("transferKey").setValue(item).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
@@ -689,6 +757,7 @@ public class SecurityActivity extends AppCompatActivity implements View.OnClickL
 
         Utils.shuffleArray(key_list);
 
+
         for (int i = 0; i < key_list.length; i++) {
             textViewArray[i] = findViewById(key_list[i]);
             textViewArray[i].setOnClickListener(this);
@@ -699,58 +768,12 @@ public class SecurityActivity extends AppCompatActivity implements View.OnClickL
     }
 
 
-    private void pointManage() {
-        databaseReference.child("user_data").child(user_id).child("point").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    Integer point = snapshot.getValue(Integer.class);
-                    if (point != null) {
-                        int done = point - pointAmount;
-                        Log.d("포인트", point + "point");
-                        Log.d("포인트", pointAmount + "pointAmount");
-                        Log.d("포인트", done + "done");
+    private void function() {
 
-                        snapshot.getRef().setValue(done);
-
-                    }
-
-
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.KOREA);
-        String date_time = format.format(calendar.getTime());
+        String dateTime = format.format(calendar.getTime());
 
-        ItemForTransaction transaction = new ItemForTransaction();
-        transaction.setPoint(pointAmount);
-        transaction.setTitle(title);
-        transaction.setDate_time(date_time);
-        transaction.setPayment_method("보증금 납입");
-        transaction.setMission_id(missionId);
-        transaction.setUser_id(user_id);
-        transaction.setMissionMode(missionMode);
-        //"2020-08-04 20:58:43"
-
-        /** 영수증 서버에 기록**/
-
-        databaseReference.child("user_data").child(user_id).child("transaction").push().setValue(transaction);
-
-        /** 관리자 열람 서버에 기록**/
-        databaseReference.child("common").child("transaction").push().setValue(transaction);
-
-        setResult(5);
-        finish();
-
-    }
-
-    private void function() {
         OkHttpClient httpClient = new OkHttpClient();
         // HttpUrl.Builder httpBuider = HttpUrl.parse("").newBuilder();
         String url = "https://us-central1-cloudmessaging-dcdf0.cloudfunctions.net/point_transaction";
@@ -760,9 +783,11 @@ public class SecurityActivity extends AppCompatActivity implements View.OnClickL
                 .add("userId", user_id)
                 .add("title", title)
                 .add("missionId", missionId)
+                .add("dateTime", dateTime)
                 .add("missionMode", String.valueOf(missionMode))
-                .add("point", String.valueOf(pointAmount))
-                .add("purchase", String.valueOf(1))
+                .add("pointTotal", String.valueOf(pointAmount))
+                .add("purchase", String.valueOf(1))// 0은 충전 1은 차감
+                .add("code", String.valueOf(Code.POINT_FOR_MISSION))
                 .build();
         Request request = new Request.Builder()
                 .post(formBody)
@@ -773,6 +798,13 @@ public class SecurityActivity extends AppCompatActivity implements View.OnClickL
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Log.d("부트페이", "실패");
+                loading_dialog.dismiss();
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        Toast.makeText(SecurityActivity.this, "인터넷을 연결이 필요합니다", Toast.LENGTH_SHORT).show();
+                    }
+                });
+                finish();
             }
 
             @Override
@@ -780,14 +812,26 @@ public class SecurityActivity extends AppCompatActivity implements View.OnClickL
                 ResponseBody responseBody = response.body();
                 String resp = "";
                 if (!response.isSuccessful()) {
+                    loading_dialog.dismiss();
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+
+
+                        }
+                    });
+                    setResult(6);
+                    finish();
                     Log.d("부트페이", "fail response from firebase cloud function");
+
+
                 } else {
 
                     loading_dialog.dismiss();
                     if (responseBody != null) {
                         Log.d("포인트", "전송성공");
                         String receipt = responseBody.string();
-                        pointManage();
+                        setResult(5);
+                        finish();
 
                     }
                 }

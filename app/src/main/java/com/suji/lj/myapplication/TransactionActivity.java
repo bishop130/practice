@@ -85,9 +85,7 @@ public class TransactionActivity extends AppCompatActivity {
 
                     tvNoList.setVisibility(View.VISIBLE);
 
-
                 }
-
             }
 
             @Override
@@ -95,21 +93,14 @@ public class TransactionActivity extends AppCompatActivity {
 
             }
         });
-
-
     }
-
-
     private void setupRecyclerView(List<ItemForTransaction> list) {
         RecyclerTransactionAdapter adapter = new RecyclerTransactionAdapter(this, list);
         rv_transaction.setLayoutManager(new LinearLayoutManager(this));
         rv_transaction.setAdapter(adapter);
 
         Utils.drawRecyclerViewDivider(this, rv_transaction);
-
-
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -117,11 +108,7 @@ public class TransactionActivity extends AppCompatActivity {
                 finish();
                 return true;
             }
-
-
         }
         return super.onOptionsItemSelected(item);
-
-
     }
 }

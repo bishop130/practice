@@ -54,9 +54,9 @@ public class RecyclerInvitationAdapter extends RecyclerView.Adapter<RecyclerInvi
 
 
         String title = previewList.get(i).getTitle();
-        String friend_name = previewList.get(i).getFriend_name();
-        String friend_image = previewList.get(i).getFriend_image();
-        String mission_id = previewList.get(i).getMission_id();
+        String friendName = previewList.get(i).getFriendName();
+        String friendImage = previewList.get(i).getFriendImage();
+        String missionId = previewList.get(i).getMissionId();
 
         /*
         String title = list.get(i).getTitle();
@@ -64,20 +64,20 @@ public class RecyclerInvitationAdapter extends RecyclerView.Adapter<RecyclerInvi
         int friends_num = list.get(i).getFriendRequestList().size();
         String thumbnail = list.get(i).getManager_thumbnail();
  */
-        if (friend_image!=null && !friend_image.isEmpty()) {
-            Picasso.with(context).load(friend_image).fit().into(holder.thumbnail);
+        if (friendImage!=null && !friendImage.isEmpty()) {
+            Picasso.with(context).load(friendImage).fit().into(holder.thumbnail);
         }
 
 
 
 
-        holder.text.setText(friend_name + "님이 " + title + "미션에 초대하셨습니다.");
+        holder.text.setText(friendName + "님이 " + title + "미션에 초대하셨습니다.");
         holder.ly_multi_request.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(context, InvitationInfoActivity.class);
                 //intent.putExtra("item",list.get(i));
-                intent.putExtra("mission_id", mission_id);
+                intent.putExtra("missionId", missionId);
                 context.startActivity(intent);
 
             }

@@ -50,10 +50,10 @@ public class RecyclerAccountListAdapter extends RecyclerView.Adapter<RecyclerAcc
     @Override
     public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
 
-        String bank_name = accountLists.get(position).getBank_name();
-        String account_num = accountLists.get(position).getAccount_num();
-        String account_holder_name = accountLists.get(position).getAccount_holder_name();
-        int bankCode = Integer.valueOf(accountLists.get(position).getBank_code());
+        String bank_name = accountLists.get(position).getBankName();
+        String account_num = accountLists.get(position).getAccountNum();
+        String account_holder_name = accountLists.get(position).getAccountHolderName();
+        int bankCode = Integer.valueOf(accountLists.get(position).getBankCode());
 
 
 

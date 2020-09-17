@@ -1,5 +1,6 @@
 package com.suji.lj.myapplication.Adapters;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -23,7 +24,10 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.suji.lj.myapplication.Utils.Account;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import static android.content.ContentValues.TAG;
@@ -83,13 +87,19 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 .setContentText(body)
                 .setContentIntent(pendingIntent);
 
+
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(channelId, "Channel human readable title", NotificationManager.IMPORTANCE_DEFAULT);
             notificationManager.createNotificationChannel(channel);
         }
 
-            notificationManager.notify(0, notificationBuilder.build());
+        Date result = new Date();
+        SimpleDateFormat date_sdf = new SimpleDateFormat("HHmmsss", Locale.KOREA);
+        String d1 = date_sdf.format(result);
+        Log.d("확인좀", d1);
+
+        notificationManager.notify(0, notificationBuilder.build());
 
 
 

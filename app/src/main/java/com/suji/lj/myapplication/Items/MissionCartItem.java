@@ -18,7 +18,7 @@ public class MissionCartItem extends RealmObject {
     String title;
     String date;
     String address;
-    String mission_id;
+    String missionId;
     int radius;
 
     RealmList<ItemForDateTime> calendarDayList = new RealmList<>();
@@ -30,20 +30,15 @@ public class MissionCartItem extends RealmObject {
     boolean no_time_limit;
     double lat;
     double lng;
-    String min_date;
-    String max_date;
-    String bank_name;
-    String account_num;
-    String account_holder;
-    int mission_mode;
+    String minDate;
+    String maxDate;
+    int missionMode;
 
-    int single_point;
-    int single_penalty;
-    int single_total;
+    int singlePenaltyPerDay;
+    int singlePenaltyTotal;
 
-    int multi_point;
-    int multi_penalty;
-    int multi_total;
+    int multiPenaltyPerDay;
+    int multiPenaltyTotal;
     int pay_method;
 
 
@@ -60,12 +55,13 @@ public class MissionCartItem extends RealmObject {
         this.radius = radius;
     }
 
-    public String getMission_id() {
-        return mission_id;
+
+    public String getMissionId() {
+        return missionId;
     }
 
-    public void setMission_id(String mission_id) {
-        this.mission_id = mission_id;
+    public void setMissionId(String missionId) {
+        this.missionId = missionId;
     }
 
     public RealmList<ContactItem> getContactList() {
@@ -92,87 +88,25 @@ public class MissionCartItem extends RealmObject {
         this.pay_method = pay_method;
     }
 
-    public int getMission_mode() {
-        return mission_mode;
+
+
+    public int getMultiPenaltyPerDay() {
+        return multiPenaltyPerDay;
+    }
+
+    public void setMultiPenaltyPerDay(int multiPenaltyPerDay) {
+        this.multiPenaltyPerDay = multiPenaltyPerDay;
     }
 
 
-    public int getSingle_point() {
-        return single_point;
+    public int getMultiPenaltyTotal() {
+        return multiPenaltyTotal;
     }
 
-    public void setSingle_point(int single_point) {
-        this.single_point = single_point;
+    public void setMultiPenaltyTotal(int multiPenaltyTotal) {
+        this.multiPenaltyTotal = multiPenaltyTotal;
     }
 
-    public int getSingle_penalty() {
-        return single_penalty;
-    }
-
-    public void setSingle_penalty(int single_penalty) {
-        this.single_penalty = single_penalty;
-    }
-
-    public int getMulti_point() {
-        return multi_point;
-    }
-
-    public void setMulti_point(int multi_point) {
-        this.multi_point = multi_point;
-    }
-
-
-    public int getSingle_total() {
-        return single_total;
-    }
-
-    public void setSingle_total(int single_total) {
-        this.single_total = single_total;
-    }
-
-    public int getMulti_penalty() {
-        return multi_penalty;
-    }
-
-    public void setMulti_penalty(int multi_penalty) {
-        this.multi_penalty = multi_penalty;
-    }
-
-    public int getMulti_total() {
-        return multi_total;
-    }
-
-    public void setMulti_total(int multi_total) {
-        this.multi_total = multi_total;
-    }
-
-    public void setMission_mode(int mission_mode) {
-        this.mission_mode = mission_mode;
-    }
-
-    public String getBank_name() {
-        return bank_name;
-    }
-
-    public void setBank_name(String bank_name) {
-        this.bank_name = bank_name;
-    }
-
-    public String getAccount_num() {
-        return account_num;
-    }
-
-    public void setAccount_num(String account_num) {
-        this.account_num = account_num;
-    }
-
-    public String getAccount_holder() {
-        return account_holder;
-    }
-
-    public void setAccount_holder(String account_holder) {
-        this.account_holder = account_holder;
-    }
 
     public RealmList<ItemPortion> getPortionList() {
         return portionList;
@@ -190,20 +124,44 @@ public class MissionCartItem extends RealmObject {
         this.id = id;
     }
 
-    public String getMin_date() {
-        return min_date;
+    public String getMinDate() {
+        return minDate;
     }
 
-    public void setMin_date(String min_date) {
-        this.min_date = min_date;
+    public void setMinDate(String minDate) {
+        this.minDate = minDate;
     }
 
-    public String getMax_date() {
-        return max_date;
+    public String getMaxDate() {
+        return maxDate;
     }
 
-    public void setMax_date(String max_date) {
-        this.max_date = max_date;
+    public void setMaxDate(String maxDate) {
+        this.maxDate = maxDate;
+    }
+
+    public int getMissionMode() {
+        return missionMode;
+    }
+
+    public void setMissionMode(int missionMode) {
+        this.missionMode = missionMode;
+    }
+
+    public int getSinglePenaltyPerDay() {
+        return singlePenaltyPerDay;
+    }
+
+    public void setSinglePenaltyPerDay(int singlePenaltyPerDay) {
+        this.singlePenaltyPerDay = singlePenaltyPerDay;
+    }
+
+    public int getSinglePenaltyTotal() {
+        return singlePenaltyTotal;
+    }
+
+    public void setSinglePenaltyTotal(int singlePenaltyTotal) {
+        this.singlePenaltyTotal = singlePenaltyTotal;
     }
 
     public String getTitle() {

@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
@@ -19,6 +20,7 @@ public class GiftFragment extends Fragment {
     TabLayout tabLayout;
     FrameLayout frameLayout;
     ViewPager viewPager;
+    Toolbar toolbar;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -26,10 +28,12 @@ public class GiftFragment extends Fragment {
 
         tabLayout = view.findViewById(R.id.tlSelect);
         viewPager = view.findViewById(R.id.viewPager);
+        toolbar = view.findViewById(R.id.toolbar);
 
 
         tabLayout.addTab(tabLayout.newTab().setText("포인트교환"));
         tabLayout.addTab(tabLayout.newTab().setText("선물함"));
+        toolbar.setTitle("선물");
 
 
         GiftViewPager adapter = new GiftViewPager(getChildFragmentManager(), tabLayout.getTabCount());

@@ -462,7 +462,7 @@ public class WithDrawFragment extends Fragment implements RecyclerBankSelectionA
 
         String user_id = Account.getUserId(activity);
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-        databaseReference.child("user_data").child(user_id).child("recent_account").addValueEventListener(new ValueEventListener() {
+        databaseReference.child("user_data").child(user_id).child("recentAccount").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 List<ItemForAccountList> accountLists = new ArrayList<>();
@@ -470,15 +470,15 @@ public class WithDrawFragment extends Fragment implements RecyclerBankSelectionA
                     ItemForAccountList item = snapshot.getValue(ItemForAccountList.class);
                     if (item != null) {
 
-                        String bank_name = item.getBank_name();
-                        String account_num = item.getAccount_num();
-                        String bank_code = item.getBank_code();
-                        String bank_account_holder = item.getAccount_holder_name();
+                        String bank_name = item.getBankName();
+                        String account_num = item.getAccountNum();
+                        String bank_code = item.getBankCode();
+                        String bank_account_holder = item.getAccountHolderName();
                         ItemForAccountList itemForAccountList = new ItemForAccountList();
-                        itemForAccountList.setAccount_holder_name(bank_account_holder);
-                        itemForAccountList.setAccount_num(account_num);
-                        itemForAccountList.setBank_code(bank_code);
-                        itemForAccountList.setBank_name(bank_name);
+                        itemForAccountList.setAccountHolderName(bank_account_holder);
+                        itemForAccountList.setAccountNum(account_num);
+                        itemForAccountList.setBankCode(bank_code);
+                        itemForAccountList.setBankName(bank_name);
                         accountLists.add(itemForAccountList);
                     }
 
@@ -531,10 +531,10 @@ public class WithDrawFragment extends Fragment implements RecyclerBankSelectionA
 
     @Override
     public void onCompleteAccount(ItemForAccountList item) {
-        String bank_name = item.getBank_name();
-        String account_num = item.getAccount_num();
-        String account_holder_name = item.getAccount_holder_name();
-        bank_code = item.getBank_code();
+        String bank_name = item.getBankName();
+        String account_num = item.getAccountNum();
+        String account_holder_name = item.getAccountHolderName();
+        bank_code = item.getBankCode();
 
 
         et_account_holder.setText(account_holder_name);

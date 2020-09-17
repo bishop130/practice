@@ -24,8 +24,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.kakao.friends.AppFriendContext;
 import com.kakao.friends.response.AppFriendsResponse;
 import com.kakao.friends.response.model.AppFriendInfo;
@@ -36,6 +39,8 @@ import com.squareup.picasso.Picasso;
 import com.suji.lj.myapplication.Adapters.RecyclerFriendsAdapter;
 import com.suji.lj.myapplication.Items.ContactItem;
 import com.suji.lj.myapplication.Items.ItemForFriends;
+import com.suji.lj.myapplication.Items.ItemForFriendsList;
+import com.suji.lj.myapplication.Items.ItemFriendsList;
 import com.suji.lj.myapplication.Utils.Account;
 import com.suji.lj.myapplication.Utils.HangulUtils;
 import com.suji.lj.myapplication.Utils.Utils;
@@ -133,40 +138,19 @@ public class SelectKakaoFriendActivity extends AppCompatActivity {
         });
 
 
-        KakaoTalkService.getInstance().requestAppFriends(friendContext,
-                new TalkResponseCallback<AppFriendsResponse>() {
-                    @Override
-                    public void onNotKakaoTalkUser() {
-                        Log.d("카카오친구 ", "카카오 유저가 아님");
-                    }
+        databaseReference.child("user_data").child(userId).child("friend").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()){
+                    for(DataSnapshot shot : snapshot.getChildren()){
+                        ItemForFriendsList item = shot.getValue(ItemForFriendsList.class);
 
-                    @Override
-                    public void onSessionClosed(ErrorResult errorResult) {
-                        Log.d("카카오친구 ", errorResult.toString());
-                    }
-
-                    @Override
-                    public void onNotSignedUp() {
-                        Log.d("카카오친구 ", "onNotSinedup");
-                    }
-
-                    @Override
-                    public void onFailure(ErrorResult errorResult) {
-                        Log.d("카카오친구 ", errorResult.toString());
-                    }
-
-                    @Override
-                    public void onSuccess(AppFriendsResponse result) {
-
-
-                        for (AppFriendInfo friend : result.getFriends()) {
-                            Log.d("KAKAO_API", friend.toString());
-
+                        if(item!=null) {
                             ItemForFriends itemForFriends = new ItemForFriends();
-                            String uuid = friend.getUUID();
-                            String userName = friend.getProfileNickname();
-                            String userImage = friend.getProfileThumbnailImage();
-                            String userId = String.valueOf(friend.getId());
+                            String uuid = item.getUuid();
+                            String userName = item.getFriendName();
+                            String userImage = item.getFriendImage();
+                            String userId = item.getFriendId();
                             // 메시지 전송 시 사용
 
                             itemForFriends.setUuid(uuid);
@@ -174,46 +158,52 @@ public class SelectKakaoFriendActivity extends AppCompatActivity {
                             itemForFriends.setImage(userImage);
                             itemForFriends.setId(userId);
                             itemForFriends.setSelected(false);
-
                             friendsList.add(itemForFriends);
                         }
 
-                        long count = realm.where(ItemForFriends.class).count();
-                        if (count != 0) {
-                            realmResults = realm.where(ItemForFriends.class).findAll();
+                    }
 
-                            selectedList = realm.copyFromRealm(realmResults);
-                            tvSelectConfirm.setText("(" + selectedList.size() + ") 선택완료");
+                    long count = realm.where(ItemForFriends.class).count();
+                    if (count != 0) {
+                        realmResults = realm.where(ItemForFriends.class).findAll();
+
+                        selectedList = realm.copyFromRealm(realmResults);
+                        tvSelectConfirm.setText("(" + selectedList.size() + ") 선택완료");
 
 
-                            for (int i = 0; i < realmResults.size(); i++) {
-                                String realmId = realmResults.get(i).getId();
-                                for (int j = 0; j < friendsList.size(); j++) {
-                                    String listId = friendsList.get(j).getId();
-                                    if (realmId.equals(listId)) {
+                        for (int i = 0; i < realmResults.size(); i++) {
+                            String realmId = realmResults.get(i).getId();
+                            for (int j = 0; j < friendsList.size(); j++) {
+                                String listId = friendsList.get(j).getId();
+                                if (realmId.equals(listId)) {
 
-                                        int idx = realmResults.get(i).getPosition();
-                                        friendsList.get(idx).setSelected(true);
-
-                                    }
-
+                                    int idx = realmResults.get(i).getPosition();
+                                    friendsList.get(idx).setSelected(true);
 
                                 }
 
 
                             }
 
+
                         }
-
-
-                        friendAdapter.notifyDataSetChanged();
-                        selectedAdapter.notifyDataSetChanged();
-
 
                     }
 
-                });
 
+                    friendAdapter.notifyDataSetChanged();
+                    selectedAdapter.notifyDataSetChanged();
+
+
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
 
     }
 

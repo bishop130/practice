@@ -67,10 +67,10 @@
                                 android:layout_marginTop="20dp"
                                 android:layout_marginBottom="8dp"
                                 android:text="시작일"
-                                app:fontFamily="@font/nexon_level2_gothic"
-
                                 android:textColor="@color/colorPrimary"
-                                android:textSize="16sp" />
+
+                                android:textSize="16sp"
+                                app:fontFamily="@font/nexon_level2_gothic" />
 
                             <TextView
                                 android:id="@+id/mission_date_start"
@@ -78,16 +78,16 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="20dp"
                                 android:layout_marginBottom="8dp"
-                                app:fontFamily="@font/nexon_level2_gothic"
-                                android:textSize="16sp" />
+                                android:textSize="16sp"
+                                app:fontFamily="@font/nexon_level2_gothic" />
 
                             <TextView
                                 android:id="@+id/mission_time_start"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="20dp"
-                                app:fontFamily="@font/nexon_level2_gothic"
-                                android:layout_marginBottom="8dp" />
+                                android:layout_marginBottom="8dp"
+                                app:fontFamily="@font/nexon_level2_gothic" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -126,9 +126,9 @@
                                 android:layout_marginEnd="20dp"
                                 android:layout_marginBottom="8dp"
                                 android:text="종료일"
-                                app:fontFamily="@font/nexon_level2_gothic"
                                 android:textColor="@color/colorPrimary"
-                                android:textSize="16sp" />
+                                android:textSize="16sp"
+                                app:fontFamily="@font/nexon_level2_gothic" />
 
                             <TextView
                                 android:id="@+id/mission_date_end"
@@ -136,22 +136,21 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginEnd="20dp"
                                 android:layout_marginBottom="8dp"
-                                app:fontFamily="@font/nexon_level2_gothic"
-                                android:textSize="16sp" />
+                                android:textSize="16sp"
+                                app:fontFamily="@font/nexon_level2_gothic" />
 
                             <TextView
                                 android:id="@+id/mission_time_end"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginEnd="20dp"
-                                app:fontFamily="@font/nexon_level2_gothic"
-                                android:layout_marginBottom="8dp" />
+                                android:layout_marginBottom="8dp"
+                                app:fontFamily="@font/nexon_level2_gothic" />
                         </LinearLayout>
 
 
                     </LinearLayout>
                 </RelativeLayout>
-
 
 
                 <LinearLayout
@@ -171,30 +170,70 @@
                         app:mcv_selectionMode="single"
                         app:mcv_showOtherDates="all"
                         app:mcv_weekDayTextAppearance="@style/CalendarWidgetWeek" />
-
-                    <TextView
-                        android:id="@+id/selected_date"
-                        android:layout_width="wrap_content"
+                    <RelativeLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="40dp"
                         android:layout_marginTop="12dp"
-                        android:textColor="@color/black"
-                        android:textSize="18sp" />
+                        >
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="약속시간"
+                            android:textSize="14sp"
+                            android:fontFamily="@font/nexon_level2_gothic"
+                            android:textColor="@color/colorPrimary"
+                            android:layout_centerVertical="true"
+                            android:layout_marginStart="40dp"/>
+
+                        <TextView
+                            android:layout_alignParentEnd="true"
+                            android:id="@+id/selected_date"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="40dp"
+                            android:layout_centerVertical="true"
+                            android:textColor="@color/black"
+                            android:fontFamily="@font/nexon_level2_gothic"
+                            android:textSize="14sp" />
+
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:layout_marginBottom="12dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="도착시간"
+                            android:layout_marginStart="40dp"
+                            android:fontFamily="@font/nexon_level2_gothic"
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="14sp"
+
+                            />
+                        <TextView
+                            android:id="@+id/tvArriveTime"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/nexon_level2_gothic"
+                            android:layout_marginEnd="40dp"
+                            android:layout_centerVertical="true"
+                            android:layout_alignParentEnd="true"
+                            android:textSize="14sp"
+                            android:textColor="@color/black"
+                            />
+
+
+
+                    </RelativeLayout>
 
                 </LinearLayout>
 
-                <TextView
-                    android:id="@+id/tv_date_time_total"
-                    android:background="@color/White"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="전체날짜보기"
-                    android:textSize="20sp"
-                    android:gravity="center"
-                    android:paddingBottom="8dp"
-                    android:paddingTop="8dp"
-                    app:fontFamily="@font/nexon_level2_gothic"
-                    android:textColor="@color/colorPrimary"/>
+
+
 
 
                 <RelativeLayout
@@ -248,16 +287,17 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="20dp"
                         android:text="목표"
-                        app:fontFamily="@font/nexon_level2_gothic"
                         android:textColor="@color/black"
                         android:textSize="18sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        app:fontFamily="@font/nexon_level2_gothic" />
+
                     <TextView
-                        android:layout_marginTop="12dp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        app:fontFamily="@font/nexon_level2_gothic"
-                        android:text="약속시간 안에 목표지점 도착"/>
+                        android:layout_marginTop="12dp"
+                        android:text="약속시간 안에 목표지점 도착"
+                        app:fontFamily="@font/nexon_level2_gothic" />
 
                     <TextView
                         android:id="@+id/address_detail"
@@ -265,9 +305,9 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:layout_marginBottom="20dp"
-                        app:fontFamily="@font/nexon_level2_gothic"
                         android:text=""
-                        android:textSize="14sp" />
+                        android:textSize="14sp"
+                        app:fontFamily="@font/nexon_level2_gothic" />
 
                     <View
                         android:layout_width="match_parent"
@@ -285,9 +325,9 @@
                             android:layout_height="wrap_content"
                             android:text="벌칙"
                             android:textColor="@color/black"
-                            app:fontFamily="@font/nexon_level2_gothic"
                             android:textSize="18sp"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            app:fontFamily="@font/nexon_level2_gothic" />
 
 
                     </LinearLayout>
@@ -296,44 +336,46 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginTop="8dp">
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
 
                             android:layout_marginStart="20dp"
-                            app:fontFamily="@font/nexon_level2_gothic"
                             android:text="하루 실패시 벌칙금"
-                            android:textColor="@color/colorPrimary" />
+                            android:textColor="@color/colorPrimary"
+                            app:fontFamily="@font/nexon_level2_gothic" />
+
                         <View
                             android:layout_width="0dp"
                             android:layout_height="0dp"
                             android:layout_weight="1" />
+
                         <TextView
                             android:id="@+id/penalty"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="2,000 원"
                             android:layout_marginEnd="20dp"
-                            app:fontFamily="@font/nexon_level2_gothic"
-                            android:textSize="14sp"/>
+                            android:text="2,000 원"
+                            android:textSize="14sp"
+                            app:fontFamily="@font/nexon_level2_gothic" />
                     </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginTop="8dp">
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            app:fontFamily="@font/nexon_level2_gothic"
                             android:layout_marginStart="20dp"
+                            android:text="총 예치금"
                             android:textColor="@color/colorPrimary"
-                            android:text="총 예치금" />
+                            app:fontFamily="@font/nexon_level2_gothic" />
 
                         <View
                             android:layout_width="0dp"
@@ -341,27 +383,28 @@
                             android:layout_weight="1" />
 
                         <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="5,000 원"
                             android:id="@+id/penalty_amount"
-                            app:fontFamily="@font/nexon_level2_gothic"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="20dp"
+                            android:text="5,000 원"
                             android:textSize="14sp"
-                            android:layout_marginEnd="20dp"/>
+                            app:fontFamily="@font/nexon_level2_gothic" />
                     </LinearLayout>
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginTop="8dp">
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            app:fontFamily="@font/nexon_level2_gothic"
                             android:layout_marginStart="20dp"
+                            android:text="실패 횟수"
                             android:textColor="@color/colorPrimary"
-                            android:text="실패 횟수" />
+                            app:fontFamily="@font/nexon_level2_gothic" />
 
                         <View
                             android:layout_width="0dp"
@@ -369,27 +412,28 @@
                             android:layout_weight="1" />
 
                         <TextView
+                            android:id="@+id/failed_count"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginEnd="20dp"
                             android:text="5,000 원"
-                            android:id="@+id/failed_count"
-                            app:fontFamily="@font/nexon_level2_gothic"
                             android:textSize="14sp"
-                            android:layout_marginEnd="20dp"/>
+                            app:fontFamily="@font/nexon_level2_gothic" />
                     </LinearLayout>
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginTop="8dp">
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            app:fontFamily="@font/nexon_level2_gothic"
                             android:layout_marginStart="20dp"
+                            android:text="누적벌칙금"
                             android:textColor="@color/colorPrimary"
-                            android:text="누적벌칙금" />
+                            app:fontFamily="@font/nexon_level2_gothic" />
 
                         <View
                             android:layout_width="0dp"
@@ -403,22 +447,23 @@
                             android:layout_marginEnd="20dp"
                             android:text="0 원"
 
-                            app:fontFamily="@font/nexon_level2_gothic"
-                            android:textSize="14sp" />
+                            android:textSize="14sp"
+                            app:fontFamily="@font/nexon_level2_gothic" />
                     </LinearLayout>
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginTop="8dp">
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            app:fontFamily="@font/nexon_level2_gothic"
                             android:layout_marginStart="20dp"
+                            android:text="친구"
                             android:textColor="@color/colorPrimary"
-                            android:text="친구" />
+                            app:fontFamily="@font/nexon_level2_gothic" />
 
                     </LinearLayout>
 

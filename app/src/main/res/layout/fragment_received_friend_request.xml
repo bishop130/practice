@@ -28,7 +28,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/nexon_level2_gothic"
-                android:text="받은 요청이 없습니다."
+                android:text="받은 초대가 없습니다."
                 android:layout_gravity="center"
                 android:textSize="18sp"/>
 

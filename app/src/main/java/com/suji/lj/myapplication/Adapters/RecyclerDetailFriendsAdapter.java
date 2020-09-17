@@ -45,8 +45,8 @@ public class RecyclerDetailFriendsAdapter extends RecyclerView.Adapter<RecyclerD
     @Override
     public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
 
-        holder.friend_name.setText(friendsLists.get(position).getFriend_name());
-        String thumbnail = friendsLists.get(position).getFriend_image();
+        holder.friend_name.setText(friendsLists.get(position).getFriendName());
+        String thumbnail = friendsLists.get(position).getFriendImage();
 
         holder.friend_image.setBackground(new ShapeDrawable(new OvalShape()));
         holder.friend_image.setClipToOutline(true);

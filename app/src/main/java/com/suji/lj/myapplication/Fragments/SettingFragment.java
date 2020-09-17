@@ -27,6 +27,7 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -64,12 +65,14 @@ import com.suji.lj.myapplication.SingleModeActivity;
 import com.suji.lj.myapplication.TransactionActivity;
 import com.suji.lj.myapplication.Utils.Account;
 import com.suji.lj.myapplication.Utils.DateTimeUtils;
+import com.suji.lj.myapplication.Utils.FCM;
 import com.suji.lj.myapplication.Utils.Utils;
 import com.suji.lj.myapplication.WithDrawActivity;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.AppCompatCheckBox;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -116,24 +119,26 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
     private TextView point;
     private LinearLayout ly_withdraw;
     private LinearLayout ly_find_password;
-    private LinearLayout ly_register_account;
-    private LinearLayout ly_my_account;
     private LinearLayout unlink_button;
     private LinearLayout kakao_logout_button;
     LinearLayout lyPointPurchase;
     LinearLayout ly_add_new_mission;
-    LinearLayout ly_transaction;
     LinearLayout ly_reset_password;
     LinearLayout ly_password_test;
     LinearLayout lyPointTransaction;
     Toolbar toolbar;
     int paymentMethod = 0;
+    boolean TERMS_AGREE_1 = false; // No Check = 0, Check = 1
+    boolean TERMS_AGREE_2 = false; // No Check = 0, Check = 1
+
+    private static final int POINT_RECHARGE = 0;
 
     AlertDialog loading_dialog;
     private boolean hasFractionalPart;
     DecimalFormat df = new DecimalFormat("#,###.##");
     private DecimalFormat dfnd = new DecimalFormat("#,###");
     BottomSheetDialog bottomSheetDialog;
+    private static final String key = "5d25d429396fa67ca2bd0f45";
 
     String user_id;
     private final static String TAG = "SettingFragment";
@@ -173,14 +178,11 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
         alarm_setting_go = view.findViewById(R.id.alarm_setting_go);
         auto_location_switch = view.findViewById(R.id.auto_location_switch);
         ly_find_password = view.findViewById(R.id.ly_find_password);
-        ly_register_account = view.findViewById(R.id.ly_register_account);
-        ly_my_account = view.findViewById(R.id.ly_my_account);
         unlink_button = view.findViewById(R.id.kakao_unlink);
         kakao_logout_button = view.findViewById(R.id.kakao_logout);
         point = view.findViewById(R.id.point);
         ly_withdraw = view.findViewById(R.id.ly_withdraw);
         ly_add_new_mission = view.findViewById(R.id.ly_add_new_mission);
-        ly_transaction = view.findViewById(R.id.ly_transaction);
         ly_reset_password = view.findViewById(R.id.ly_reset_password);
         ly_password_test = view.findViewById(R.id.ly_password_test);
         toolbar = view.findViewById(R.id.toolbar);
@@ -193,15 +195,14 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
         profile_image_setting.setClipToOutline(true);
         ly_withdraw.setOnClickListener(this);
         ly_find_password.setOnClickListener(this);
-        ly_register_account.setOnClickListener(this);
-        ly_my_account.setOnClickListener(this);
         unlink_button.setOnClickListener(this);
         lyPointPurchase.setOnClickListener(this);
         kakao_logout_button.setOnClickListener(this);
-        ly_transaction.setOnClickListener(this);
         ly_reset_password.setOnClickListener(this);
         ly_password_test.setOnClickListener(this);
         lyPointTransaction.setOnClickListener(this);
+        tv_user_name.setOnClickListener(this);
+
 
         toolbar.setTitle("설정");
 
@@ -272,8 +273,12 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            case R.id.kakao_name_setting:
+                //nameEditBottom
+                break;
 
             case R.id.ly_find_password:
+                ly_find_password.setEnabled(false);
                 startActivity(new Intent(getActivity(), FindPasswordActivity.class));
                 break;
 
@@ -285,8 +290,8 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
                 break;
             case R.id.kakao_unlink:
                 //onClickUnlink();
-                cancelRegister();
-                /*
+               // cancelRegister();
+
                 Realm.init(getActivity());
                 RealmConfiguration realmConfiguration = new RealmConfiguration.Builder()
                         .deleteRealmIfMigrationNeeded()
@@ -301,11 +306,11 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
 //commit realm changes
                 realm.commitTransaction();
 
-                 */
 
 
                 break;
             case R.id.lyPointPurchase:
+                lyPointPurchase.setEnabled(false);
                 pointPurchaseDialog();
                 break;
 
@@ -316,20 +321,17 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
                 break;
 
             case R.id.ly_withdraw:
+                ly_withdraw.setEnabled(false);
                 startActivity(new Intent(getActivity(), WithDrawActivity.class));
+
                 // startActivity(new Intent(getActivity(), SelectKakaoFriendActivity.class));
                 break;
 
-            case R.id.ly_register_account:
-                startActivity(new Intent(getActivity(), OpenBankingActivity.class));
-
-                break;
             case R.id.ly_add_new_mission:
+
                 startActivity(new Intent(getActivity(), SingleModeActivity.class));
                 break;
-            case R.id.ly_transaction:
 
-                break;
             case R.id.ly_reset_password:
                 Intent intent_reset = new Intent(getActivity(), SecurityActivity.class);
                 intent_reset.putExtra("password", 4);
@@ -342,6 +344,7 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
                 startActivity(test);
                 break;
             case R.id.lyPointTransaction:
+                lyPointTransaction.setEnabled(false);
                 startActivity(new Intent(getActivity(), TransactionActivity.class));
                 break;
 
@@ -554,7 +557,7 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
                     String date_time = item.getDate() + item.getTime();
                     Log.d("라스트", date_time);
 
-                    if (!DateTimeUtils.compareIsFuture(date_time)) {
+                    if (!DateTimeUtils.compareIsFuture(date_time, "yyyyMMddHHmm")) {
                         //미션이 현재시간이후로 없으면 바로 탈퇴
                         Log.d("라스트", "바로탈퇴");
                         AlertDialog.Builder setdialog = new AlertDialog.Builder(activity);
@@ -706,23 +709,59 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
     private void pointPurchaseDialog() {
 
 
-        bottomSheetDialog = new BottomSheetDialog(activity);
+        bottomSheetDialog = new BottomSheetDialog(activity, R.style.DialogStyle);
         View view = View.inflate(activity, R.layout.dialog_point_purchase, null);
         EditText etPoint = view.findViewById(R.id.etPoint);
-        TextView tvPurchase = view.findViewById(R.id.tvPurchase);
+        RelativeLayout rlPurchase = view.findViewById(R.id.rlPurchase);
         TextView tvKakaoPay = view.findViewById(R.id.tvKakaoPay);
         TextView tvNaverPay = view.findViewById(R.id.tvNaverPay);
         TextView tvCreditPay = view.findViewById(R.id.tvCreditPay);
         TextView tvActualPayment = view.findViewById(R.id.tvActualPayment);
+        TextView tvAmountWarning = view.findViewById(R.id.tvAmountWarning);
+        AppCompatCheckBox cbAgreeTermUse = view.findViewById(R.id.cbAgreeTermUse);
+        AppCompatCheckBox cbAgreeTermPrivate = view.findViewById(R.id.cbAgreeTermPrivate);
+        int amount = 0;
+        paymentMethod = 0;
+
+        bottomSheetDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                lyPointPurchase.setEnabled(true);
+            }
+        });
+
+        cbAgreeTermUse.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (buttonView.isChecked()) {
+                    TERMS_AGREE_1 = true;
+                } else {
+
+                    TERMS_AGREE_1 = false;
+                }
+
+            }
+        });
+        cbAgreeTermPrivate.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (buttonView.isChecked()) {
+                    TERMS_AGREE_2 = true;
+                } else {
+                    TERMS_AGREE_2 = false;
+                }
+            }
+        });
+
 
         tvKakaoPay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                tvKakaoPay.setBackground(activity.getResources().getDrawable(R.drawable.rounded_filled));
+                tvKakaoPay.setBackground(activity.getResources().getDrawable(R.drawable.rounded_rectangle));
                 tvKakaoPay.setTextColor(activity.getResources().getColor(R.color.White));
-                tvNaverPay.setBackground(activity.getResources().getDrawable(R.drawable.rounded_stroke));
+                tvNaverPay.setBackground(activity.getResources().getDrawable(R.drawable.rectangle_stroke));
                 tvNaverPay.setTextColor(activity.getResources().getColor(R.color.colorPrimary));
-                tvCreditPay.setBackground(activity.getResources().getDrawable(R.drawable.rounded_stroke));
+                tvCreditPay.setBackground(activity.getResources().getDrawable(R.drawable.rectangle_stroke));
                 tvCreditPay.setTextColor(activity.getResources().getColor(R.color.colorPrimary));
 
                 paymentMethod = 1;
@@ -731,11 +770,11 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
         tvNaverPay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                tvNaverPay.setBackground(activity.getResources().getDrawable(R.drawable.rounded_filled));
+                tvNaverPay.setBackground(activity.getResources().getDrawable(R.drawable.rounded_rectangle));
                 tvNaverPay.setTextColor(activity.getResources().getColor(R.color.White));
-                tvKakaoPay.setBackground(activity.getResources().getDrawable(R.drawable.rounded_stroke));
+                tvKakaoPay.setBackground(activity.getResources().getDrawable(R.drawable.rectangle_stroke));
                 tvKakaoPay.setTextColor(activity.getResources().getColor(R.color.colorPrimary));
-                tvCreditPay.setBackground(activity.getResources().getDrawable(R.drawable.rounded_stroke));
+                tvCreditPay.setBackground(activity.getResources().getDrawable(R.drawable.rectangle_stroke));
                 tvCreditPay.setTextColor(activity.getResources().getColor(R.color.colorPrimary));
 
                 paymentMethod = 2;
@@ -745,11 +784,11 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
         tvCreditPay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                tvCreditPay.setBackground(activity.getResources().getDrawable(R.drawable.rounded_filled));
+                tvCreditPay.setBackground(activity.getResources().getDrawable(R.drawable.rounded_rectangle));
                 tvCreditPay.setTextColor(activity.getResources().getColor(R.color.White));
-                tvKakaoPay.setBackground(activity.getResources().getDrawable(R.drawable.rounded_stroke));
+                tvKakaoPay.setBackground(activity.getResources().getDrawable(R.drawable.rectangle_stroke));
                 tvKakaoPay.setTextColor(activity.getResources().getColor(R.color.colorPrimary));
-                tvNaverPay.setBackground(activity.getResources().getDrawable(R.drawable.rounded_stroke));
+                tvNaverPay.setBackground(activity.getResources().getDrawable(R.drawable.rectangle_stroke));
                 tvNaverPay.setTextColor(activity.getResources().getColor(R.color.colorPrimary));
 
                 paymentMethod = 3;
@@ -767,7 +806,20 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
                     etPoint.clearFocus();
                     InputMethodManager imm = (InputMethodManager) v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-                    tvActualPayment.setText(Utils.makeNumberComma(point));
+
+                    if (point > 100000) {
+                        etPoint.setText("100,000");
+                        tvActualPayment.setText(Utils.makeNumberComma(100000));
+
+
+                    } else if (point < 1000) {
+                        etPoint.setText("1,000");
+                        tvActualPayment.setText(Utils.makeNumberComma(1000));
+                    } else {
+
+                        tvActualPayment.setText(Utils.makeNumberComma(point));
+
+                    }
 
 
                     //amountDisplay();
@@ -780,24 +832,61 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
         });
 
 
-        tvPurchase.setOnClickListener(new View.OnClickListener() {
+        rlPurchase.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
 
-                if (!etPoint.getText().toString().isEmpty()) {
-                    int point = Integer.valueOf(etPoint.getText().toString().replaceAll(",", ""));
-
-                    loading_dialog.show();
-
-                    bootPayRequest(point);
+                boolean isValid = true;
 
 
-                } else {
-                    Toast.makeText(activity, "입력해주세요", Toast.LENGTH_LONG).show();
+                if (etPoint.getText().toString().isEmpty()) {
+
+
+                    isValid = false;
+                    Toast.makeText(activity, "충전금액을 입력해주세요", Toast.LENGTH_LONG).show();
 
 
                 }
+                if (paymentMethod == 0) {
+
+                    Toast.makeText(activity, "결제수단을 선택해주세요", Toast.LENGTH_LONG).show();
+                    isValid = false;
+
+                }
+                if (!TERMS_AGREE_1 || !TERMS_AGREE_2) {
+
+                    Toast.makeText(activity, "약관동의를 확인해주세요", Toast.LENGTH_LONG).show();
+                    isValid = false;
+                }
+
+
+                if (isValid) {
+                    loading_dialog.show();
+
+
+                    BootpayAnalytics.init(activity, key);
+
+                    int point = Integer.valueOf(etPoint.getText().toString().replaceAll(",", ""));
+
+                    switch(paymentMethod){
+                        case 1:
+                            kakaoPayRequest(point);
+                            break;
+
+                        case 2:
+                            break;
+                        case 3:
+                            creditCardRequest(point);
+                            break;
+
+                    }
+
+
+
+                }
+
+
             }
         });
         etPoint.addTextChangedListener(new TextWatcher() {
@@ -849,6 +938,29 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
 
                 etPoint.addTextChangedListener(this);
 
+                if (s.toString().equals("")) {
+
+                    tvAmountWarning.setText("*최소금액 1,000원");
+                    tvAmountWarning.setVisibility(View.VISIBLE);
+                    //if_fail.setError("최소금액은 100원입니다.",context.getResources().getDrawable(R.drawable.ic_error));
+                } else {
+                    int amount = Integer.valueOf(s.toString().replaceAll(",", ""));
+                    if (amount >= 100000) {
+                        tvAmountWarning.setText("최대금액 100,000원");
+                        tvAmountWarning.setVisibility(View.VISIBLE);
+                    } else {
+
+                        if (amount < 1000) {
+                            tvAmountWarning.setText("*최소금액 1,000원");
+                            tvAmountWarning.setVisibility(View.VISIBLE);
+                            //if_fail.setError("최소금액은 100원입니다.",context.getResources().getDrawable(R.drawable.ic_error));
+                        } else {
+                            tvAmountWarning.setVisibility(View.INVISIBLE);
+
+                        }
+                    }
+                }
+
 
             }
         });
@@ -860,17 +972,12 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
 
     }
 
-    public void bootPayRequest(int actual_payment) {
+    public void kakaoPayRequest(int actual_payment) {
         // 결제호출
         //int stuck = 10;
-
-
-        String key = "5d25d429396fa67ca2bd0f45";
-        BootpayAnalytics.init(activity, key);
-
-
         BootUser bootUser = new BootUser().setPhone("010-1234-5678");
         BootExtra bootExtra = new BootExtra().setQuotas(new int[]{0, 2, 3});
+
 
         Bootpay.init(activity)
                 .setApplicationId(key) // 해당 프로젝트(안드로이드)의 application id 값
@@ -879,7 +986,7 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
                 .setContext(activity)
                 .setBootUser(bootUser)
                 .setBootExtra(bootExtra)
-                .setTaxFree(10000.0)
+                .setTaxFree((double)actual_payment)
                 .setUX(UX.PG_DIALOG)
 //              .setUserPhone("010-1234-5678") // 구매자 전화번호
                 .setName("포인트 충전") // 결제할 상품명
@@ -910,7 +1017,7 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
                     @Override
                     public void onReady(@Nullable String message) {
                         Log.d("부트", message + "ready");
-                        String msg = Utils.getValueFromJson(message, "msg");
+                        String msg = Utils.getValueFromJson(message, "message");
                         Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show();
                     }
                 })
@@ -920,8 +1027,8 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
 
                         loading_dialog.dismiss();
                         Log.d("부트", "결제취소" + message);
-                        String msg = Utils.getValueFromJson(message, "msg");
-                        Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show();
+                        String msg = Utils.getValueFromJson(message, "message");
+                        Toast.makeText(activity, "결제가 취소되었습니다", Toast.LENGTH_SHORT).show();
                         //finish();
                     }
                 })
@@ -931,7 +1038,7 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
                         Log.d("부트", "에러" + message);
                         //finish();
                         loading_dialog.dismiss();
-                        String msg = Utils.getValueFromJson(message, "msg");
+                        String msg = Utils.getValueFromJson(message, "message");
                         Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show();
                     }
                 })
@@ -940,12 +1047,83 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
                     public void onClose(String message) {
                         loading_dialog.dismiss();
                         Log.d("부트", "닫힘" + message);
-                        String msg = Utils.getValueFromJson(message, "msg");
-                        Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(activity, "결제가 취소되었습니다", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .request();
     }
+
+
+    public void creditCardRequest(int actual_payment) {
+        // 결제호출
+        //int stuck = 10;
+
+
+        String key = "5d25d429396fa67ca2bd0f45";
+        BootpayAnalytics.init(activity, key);
+
+
+        BootUser bootUser = new BootUser().setPhone("010-1234-5678");
+        BootExtra bootExtra = new BootExtra().setQuotas(new int[] {0,2,3});
+
+        Bootpay.init(activity)
+                .setApplicationId(key) // 해당 프로젝트(안드로이드)의 application id 값
+                .setPG(PG.PAYAPP) // 결제할 PG 사
+                .setMethod(Method.CARD) // 결제수단
+                .setContext(activity)
+                .setBootUser(bootUser)
+                .setBootExtra(bootExtra)
+                .setUX(UX.PG_DIALOG)
+//                .setUserPhone("010-1234-5678") // 구매자 전화번호
+                .setName("포인트 충전") // 결제할 상품명
+                .setOrderId("1234") // 결제 고유번호expire_month
+                .setPrice(actual_payment) // 결제할 금액
+                .onConfirm(new ConfirmListener() { // 결제가 진행되기 바로 직전 호출되는 함수로, 주로 재고처리 등의 로직이 수행
+                    @Override
+                    public void onConfirm(@Nullable String message) {
+
+                        Bootpay.confirm(message); // 재고가 있을 경우.
+                       // 재고가 없어 중간에 결제창을 닫고 싶을 경우
+                        Log.d("confirm", message);
+                    }
+                })
+                .onDone(new DoneListener() { // 결제완료시 호출, 아이템 지급 등 데이터 동기화 로직을 수행합니다
+                    @Override
+                    public void onDone(@Nullable String message) {
+                        Log.d("done", message);
+                        function(message);
+                    }
+                })
+                .onReady(new ReadyListener() { // 가상계좌 입금 계좌번호가 발급되면 호출되는 함수입니다.
+                    @Override
+                    public void onReady(@Nullable String message) {
+                        Log.d("ready", message);
+                    }
+                })
+                .onCancel(new CancelListener() { // 결제 취소시 호출
+                    @Override
+                    public void onCancel(@Nullable String message) {
+
+                        Log.d("cancel", message);
+                    }
+                })
+                .onError(new ErrorListener() { // 에러가 났을때 호출되는 부분
+                    @Override
+                    public void onError(@Nullable String message) {
+                        Log.d("error", message);
+                    }
+                })
+                .onClose(
+                        new CloseListener() { //결제창이 닫힐때 실행되는 부분
+                            @Override
+                            public void onClose(String message) {
+                                Log.d("close", "close");
+                            }
+                        })
+                .request();
+
+    }
+
 
     private void function(String message) {//영수증 검증
         OkHttpClient httpClient = new OkHttpClient();
@@ -954,11 +1132,11 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
 
 
         RequestBody formBody = new FormBody.Builder()
-                .add("receipt_id", Utils.getValueFromJson(message, "receipt_id"))
+                .add("receiptId", Utils.getValueFromJson(message, "receipt_id"))
                 .add("price", Utils.getValueFromJson(message, "price"))
-                .add("user_id", user_id)
+                .add("userId", user_id)
                 .add("message", message)
-                .add("title", "포인트 충전")
+                .add("code", String.valueOf(POINT_RECHARGE))
                 .build();
         Request request = new Request.Builder()
                 .post(formBody)
@@ -969,6 +1147,7 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Log.d("부트페이", "실패");
+                loading_dialog.dismiss();
             }
 
             @Override
@@ -981,7 +1160,8 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
 
                     loading_dialog.dismiss();
                     if (responseBody != null) {
-                        String receipt = responseBody.string();
+                        Log.d("부트페이", responseBody.string());
+                        //String receipt = responseBody.string();
                         bottomSheetDialog.dismiss();
 
                     }
@@ -989,6 +1169,38 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
 
             }
         });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        ly_withdraw.setEnabled(true);
+        lyPointTransaction.setEnabled(true);
+        ly_find_password.setEnabled(true);
+        ly_reset_password.setEnabled(true);
+        if (loading_dialog.isShowing()) {
+
+            loading_dialog.dismiss();
+
+
+        }
+    }
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        Log.d("리줌","onhidden");
+        if (hidden) {
+            //do when hidden
+        } else {
+           // auto_location_switch.setChecked(sharedPreferences.getBoolean("auto_register_location", false));
+            if (Utils.isServiceRunningInForeground(activity, NewLocationService.class)) {
+
+                auto_location_switch.setChecked(true);
+            } else {
+                auto_location_switch.setChecked(false);
+            }
+            //do when show
+        }
     }
 
 

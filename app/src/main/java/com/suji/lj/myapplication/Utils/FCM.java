@@ -70,10 +70,10 @@ public class FCM {
                                 ResponseBody responseBody = response.body();
                                 String resp = "";
                                 if (!response.isSuccessful()) {
-                                    Log.d("부트페이", "fail response from firebase cloud function");
+                                    Log.d("푸시알림", "fail response from firebase cloud function");
                                 } else {
                                     if (responseBody != null) {
-                                        Log.d("부트페이", responseBody.string() + "fail response from firebase cloud function");
+                                        Log.d("푸시알림", responseBody.string() + "fail response from firebase cloud function");
 
                                     }
                                 }

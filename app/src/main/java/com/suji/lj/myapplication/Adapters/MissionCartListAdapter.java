@@ -56,8 +56,8 @@ public class MissionCartListAdapter extends RecyclerView.Adapter<MissionCartList
 
         int hour = missionCartItemList.get(position).getHour();
         int min = missionCartItemList.get(position).getMin();
-        String start_date = missionCartItemList.get(position).getMin_date();
-        String end_date = missionCartItemList.get(position).getMax_date();
+        String start_date = missionCartItemList.get(position).getMinDate();
+        String end_date = missionCartItemList.get(position).getMaxDate();
         holder.title.setText(missionCartItemList.get(position).getTitle());
         holder.start_date.setText(DateTimeUtils.makeDateForHuman(start_date));
         holder.end_date.setText(DateTimeUtils.makeDateForHuman(end_date));
@@ -81,7 +81,7 @@ public class MissionCartListAdapter extends RecyclerView.Adapter<MissionCartList
             String date_time = DateTimeUtils.makeDateForServer(year,month,day)+DateTimeUtils.makeTimeForServer(hour,min);
             Log.d("과거는삭제",date_time);
 
-            if(!DateTimeUtils.compareIsFuture(date_time)){
+            if(!DateTimeUtils.compareIsFuture(date_time,"yyyyMMddHHmm")){
                 holder.title.setTextColor(context.getResources().getColor(R.color.red));
                 holder.ly_past_warning.setVisibility(View.VISIBLE);
                 break;

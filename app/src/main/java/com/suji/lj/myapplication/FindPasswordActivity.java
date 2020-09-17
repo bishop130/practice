@@ -9,6 +9,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.StrictMode;
@@ -58,9 +59,9 @@ public class FindPasswordActivity extends AppCompatActivity {
     CountDownTimer timer;
     Toolbar toolbar;
     LinearLayout ly_rest_time;
-    AlertDialog dialog;
     DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
     String user_id;
+    AlertDialog loading_dialog;
 
 
     @Override
@@ -77,10 +78,17 @@ public class FindPasswordActivity extends AppCompatActivity {
         ly_rest_time = findViewById(R.id.ly_rest_time);
         user_id = Account.getUserId(this);
 
+
         AlertDialog.Builder builder = new AlertDialog.Builder(FindPasswordActivity.this);
         builder.setCancelable(false); // if you want user to wait for some process to finish,
         builder.setView(R.layout.layout_progress);
-        dialog = builder.create();
+        loading_dialog = builder.create();
+        if (loading_dialog.getWindow() != null) {
+            loading_dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+        }
+
+        loading_dialog.setCancelable(false);
 
 
         toolbar.setTitle("비밀번호 재설정");
@@ -101,98 +109,107 @@ public class FindPasswordActivity extends AppCompatActivity {
         tv_send_email.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dialog.show();
+                loading_dialog.show();
 
                 String email_address = et_send_email_code.getText().toString();
-               databaseReference.child("account").orderByChild("email").equalTo(email_address).addValueEventListener(new ValueEventListener() {
-                   @Override
-                   public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                       ItemRegisterAccount item = dataSnapshot.getValue(ItemRegisterAccount.class);
-                       if(item!=null) {
-                           if (user_id.equals(item.getUser_id())) {
-                               try {
+                databaseReference.child("account").orderByChild("email").equalTo(email_address).addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            for (DataSnapshot shot : dataSnapshot.getChildren()) {
+                                ItemRegisterAccount item = shot.getValue(ItemRegisterAccount.class);
+                                if (item != null) {
+                                    if (user_id.equals(item.getUserId())) {
+                                        try {
 
 
-                                   verification_code = gMailSender.getEmailCode();
-                                   //GMailSender.sendMail(제목, 본문내용, 받는사람);
-                                   String verification = "요청하신 인증코드는 " + verification_code + "입니다.";
-                                   gMailSender.sendMail("인증코드", verification, email_address);
+                                            verification_code = gMailSender.getEmailCode();
+                                            //GMailSender.sendMail(제목, 본문내용, 받는사람);
+                                            String verification = "요청하신 인증코드는 " + verification_code + "입니다.";
+                                            gMailSender.sendMail("인증코드", verification, email_address);
 
-                                   dialog.dismiss();
-                                   Utils.makeAlertDialog(email_address + "로 인증코드를 전송했습니다.", FindPasswordActivity.this);
-
-
-                                   timer = new CountDownTimer(1000 * 60 * 3, 1000) {
-                                       @Override
-                                       public void onTick(long l) {
-                                           isTimerRunning = true;
-                                           long days = TimeUnit.MILLISECONDS.toDays(l);
-                                           long remainingHoursInMillis = l - TimeUnit.DAYS.toMillis(days);
-                                           long hours = TimeUnit.MILLISECONDS.toHours(remainingHoursInMillis);
-                                           long remainingMinutesInMillis = remainingHoursInMillis - TimeUnit.HOURS.toMillis(hours);
-                                           long minutes = TimeUnit.MILLISECONDS.toMinutes(remainingMinutesInMillis);
-                                           long remainingSecondsInMillis = remainingMinutesInMillis - TimeUnit.MINUTES.toMillis(minutes);
-                                           long seconds = TimeUnit.MILLISECONDS.toSeconds(remainingSecondsInMillis);
-                                           //Log.d("타이머", "position" + position + "   " + holder.getAdapterPosition() + "time:" + l + " " + timer_switch);
+                                            loading_dialog.dismiss();
+                                            Utils.makeAlertDialog(email_address + "로 인증코드를 전송했습니다.", FindPasswordActivity.this);
 
 
-                                           String rest_time = minutes + "분 " + seconds + "초";
-
-                                           tv_rest_time.setText(rest_time);
-
-                                       }
-
-                                       @Override
-                                       public void onFinish() {
-                                           isTimerRunning = false;
-                                           verification_code = "";
-                                           tv_rest_time.setText("유효기간이 만료됐습니다.");
-
-                                       }
-                                   };
-
-                                   ly_rest_time.setVisibility(View.VISIBLE);
-                                   timer.start();
+                                            timer = new CountDownTimer(1000 * 60 * 3, 1000) {
+                                                @Override
+                                                public void onTick(long l) {
+                                                    isTimerRunning = true;
+                                                    long days = TimeUnit.MILLISECONDS.toDays(l);
+                                                    long remainingHoursInMillis = l - TimeUnit.DAYS.toMillis(days);
+                                                    long hours = TimeUnit.MILLISECONDS.toHours(remainingHoursInMillis);
+                                                    long remainingMinutesInMillis = remainingHoursInMillis - TimeUnit.HOURS.toMillis(hours);
+                                                    long minutes = TimeUnit.MILLISECONDS.toMinutes(remainingMinutesInMillis);
+                                                    long remainingSecondsInMillis = remainingMinutesInMillis - TimeUnit.MINUTES.toMillis(minutes);
+                                                    long seconds = TimeUnit.MILLISECONDS.toSeconds(remainingSecondsInMillis);
+                                                    //Log.d("타이머", "position" + position + "   " + holder.getAdapterPosition() + "time:" + l + " " + timer_switch);
 
 
-                                   //Toast.makeText(getApplicationContext(), "이메일을 성공적으로 보냈습니다.", Toast.LENGTH_SHORT).show();
-                               } catch (SendFailedException e) {
-                                   dialog.dismiss();
-                                   Utils.makeAlertDialog("이메일 형식이 잘못되었습니다.", FindPasswordActivity.this);
-                               } catch (MessagingException e) {
-                                   dialog.dismiss();
-                                   StringWriter errors = new StringWriter();
-                                   e.printStackTrace(new PrintWriter(errors));
+                                                    String rest_time = minutes + "분 " + seconds + "초";
 
-                                   Log.d("인터넷", errors.toString());
-                                   Utils.makeAlertDialog("인터넷 연결을 확인해주십시오", FindPasswordActivity.this);
-                               } catch (Exception e) {
-                                   e.printStackTrace();
-                               }
+                                                    tv_rest_time.setText(rest_time);
 
-                           }
-                       }else{
-                           dialog.dismiss();
-                           Utils.makeAlertDialog(email_address + "로 인증코드를 전송했습니다.", FindPasswordActivity.this);
+                                                }
+
+                                                @Override
+                                                public void onFinish() {
+                                                    isTimerRunning = false;
+                                                    verification_code = "";
+                                                    tv_rest_time.setText("유효기간이 만료됐습니다.");
+
+                                                }
+                                            };
+
+                                            ly_rest_time.setVisibility(View.VISIBLE);
+                                            timer.start();
 
 
+                                            Toast.makeText(getApplicationContext(), "이메일을 성공적으로 보냈습니다.", Toast.LENGTH_SHORT).show();
+                                        } catch (SendFailedException e) {
+                                            loading_dialog.dismiss();
+                                            Utils.makeAlertDialog("이메일 형식이 잘못되었습니다.", FindPasswordActivity.this);
+                                        } catch (MessagingException e) {
+                                            loading_dialog.dismiss();
+                                            StringWriter errors = new StringWriter();
+                                            e.printStackTrace(new PrintWriter(errors));
+
+                                            Log.d("인터넷", errors.toString());
+                                            Utils.makeAlertDialog("인터넷 연결을 확인해주십시오", FindPasswordActivity.this);
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+
+                                    }else{
+                                        Utils.makeAlertDialog("에러코드 D0007", FindPasswordActivity.this);
+                                    }
+                                } else {
+                                    loading_dialog.dismiss();
+                                    Utils.makeAlertDialog(email_address + "로 인증코드를 전송했습니다.", FindPasswordActivity.this);
 
 
-                       }
+                                }
+                            }
+                        }else{
+                            Utils.makeAlertDialog("일치하는 이메일이 존재하지 않습니다", FindPasswordActivity.this);
+                            loading_dialog.dismiss();
+
+                        }
 
 
+                    }
 
-                   }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        loading_dialog.dismiss();
 
-                   @Override
-                   public void onCancelled(@NonNull DatabaseError databaseError) {
+                    }
 
-                   }
-               });
-
+                });
 
 
             }
+
         });
 
         tv_done.setOnClickListener(new View.OnClickListener() {

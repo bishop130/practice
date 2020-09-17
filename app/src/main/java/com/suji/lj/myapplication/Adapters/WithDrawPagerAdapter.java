@@ -5,8 +5,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 
-import com.suji.lj.myapplication.Fragments.FriendsListFragment;
-import com.suji.lj.myapplication.Fragments.MultiRequestFragment;
+
 import com.suji.lj.myapplication.Fragments.RecentWithDrawFragment;
 import com.suji.lj.myapplication.Fragments.WithDrawFragment;
 

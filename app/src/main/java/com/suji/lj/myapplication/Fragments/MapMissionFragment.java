@@ -246,18 +246,18 @@ public class MapMissionFragment extends Fragment implements ActivityCompat.OnReq
                         Log.d("위치", current_lat + "라스트");
                         Log.d("위치", current_lng + "라스트");
                         // Logic to handle location object
-                        mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving);
-                        mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(current_lat, current_lng), true);
-                        mapView.moveCamera(CameraUpdateFactory.newMapPoint(MapPoint.mapPointWithGeoCoord(current_lat, current_lng)));
-                        mapView.setZoomLevel(1, true);
-                        drawCircle(current_lat, current_lng, radius);
+
 
                     } else {
                         SharedPreferences preferences = activity.getSharedPreferences("location_setting", MODE_PRIVATE);
                         current_lat = Double.longBitsToDouble(preferences.getLong("lat", 0));
                         current_lng = Double.longBitsToDouble(preferences.getLong("lng", 0));
-
                     }
+                    mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving);
+                    mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(current_lat, current_lng), true);
+                    mapView.moveCamera(CameraUpdateFactory.newMapPoint(MapPoint.mapPointWithGeoCoord(current_lat, current_lng)));
+                    mapView.setZoomLevel(1, true);
+                    drawCircle(current_lat, current_lng, radius);
 
                 }
             });

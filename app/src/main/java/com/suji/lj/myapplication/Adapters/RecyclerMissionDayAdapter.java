@@ -29,6 +29,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 import com.suji.lj.myapplication.Items.ItemForFriendByDay;
 import com.suji.lj.myapplication.Items.ItemForMissionByDay;
+import com.suji.lj.myapplication.MainActivity;
 import com.suji.lj.myapplication.MissionDetailActivity;
 import com.suji.lj.myapplication.MissionDetailMultiActivity;
 import com.suji.lj.myapplication.R;
@@ -56,14 +57,12 @@ public class RecyclerMissionDayAdapter extends RecyclerView.Adapter<RecyclerMiss
     DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
     String user_id;
     OnLoadPreviewBottomSheetListener listener;
-    AlertDialog alertDialog;
 
 
-    public RecyclerMissionDayAdapter(Activity context, List<ItemForMissionByDay> list, OnLoadPreviewBottomSheetListener listener, AlertDialog alertDialog) {
+    public RecyclerMissionDayAdapter(Activity context, List<ItemForMissionByDay> list, OnLoadPreviewBottomSheetListener listener) {
         this.list = list;
         this.context = context;
         this.listener = listener;
-        this.alertDialog = alertDialog;
 
 
     }
@@ -90,9 +89,9 @@ public class RecyclerMissionDayAdapter extends RecyclerView.Adapter<RecyclerMiss
         String address = list.get(position).getAddress();
         String date = list.get(position).getDate();
         String time = list.get(position).getTime();
-        boolean isSingle = list.get(position).isSingle_mode();
-        String mission_id = list.get(position).getMission_id();
-        String date_time = list.get(position).getDate_time();
+        boolean isSingle = list.get(position).isSingleMode();
+        String mission_id = list.get(position).getMissionId();
+        String date_time = list.get(position).getDateTime();
 
         holder.tv_missionTitle.setText(title);
         holder.tv_address.setText(address);
@@ -110,7 +109,7 @@ public class RecyclerMissionDayAdapter extends RecyclerView.Adapter<RecyclerMiss
 
             holder.tvTimeLeft.setVisibility(View.VISIBLE);
 
-            Date endDate = DateTimeFormatter.dateTimeParser(date_time);
+            Date endDate = DateTimeFormatter.dateTimeParser(date_time, "yyyyMMddHHmm");
             Date curDate = new Date(System.currentTimeMillis());
 
             if (!isSingle) {
@@ -148,7 +147,7 @@ public class RecyclerMissionDayAdapter extends RecyclerView.Adapter<RecyclerMiss
                         context.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                if (days < 2) {
+                                if (days < 1) {
                                     if (l < 10 * 60 * 1000) { //10분
                                         String time2 = minutes + "분 " + seconds + "초 이후 종료";
                                         holder.tvTimeLeft.setText(time2);
@@ -160,7 +159,7 @@ public class RecyclerMissionDayAdapter extends RecyclerView.Adapter<RecyclerMiss
 
 
                                 } else {
-                                    String time = days + "일 " + hours + "시간 이후 종료";
+                                    String time = days + "일 " + hours + "시간 "+minutes+ "분 이후 종료";
 
                                     holder.tvTimeLeft.setText(time);
 
@@ -177,14 +176,14 @@ public class RecyclerMissionDayAdapter extends RecyclerView.Adapter<RecyclerMiss
                         isTimerRunning = false;
 
                         /** 시간이 지나면 mission_display 삭제**/
-                        databaseReference.child("user_data").child(user_id).child("mission_display").orderByChild("date_time").equalTo(date_time).addListenerForSingleValueEvent(new ValueEventListener() {
+                        databaseReference.child("user_data").child(user_id).child("missionDisplay").orderByChild("dateTime").equalTo(date_time).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                 if (dataSnapshot.exists()) {
                                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                                         ItemForMissionByDay item = snapshot.getValue(ItemForMissionByDay.class);
                                         if (item != null) {
-                                            if (mission_id.equals(item.getMission_id())) {
+                                            if (mission_id.equals(item.getMissionId())) {
                                                 snapshot.getRef().removeValue();
 
                                             }
@@ -224,17 +223,17 @@ public class RecyclerMissionDayAdapter extends RecyclerView.Adapter<RecyclerMiss
             @Override
             public void onSingleClick(View v) {
 
-                alertDialog.show();
+                ((MainActivity) context).showLoadingDialog();
                 if (isSingle) {
 
 
                     Intent intent = new Intent(context, MissionDetailActivity.class);
-                    intent.putExtra("mission_id", mission_id);
-                    intent.putExtra("mission_mode", isSingle);
+                    intent.putExtra("missionId", mission_id);
+                    intent.putExtra("missionMode", isSingle);
                     context.startActivity(intent);
 
                 } else {
-                    listener.onLoadPreviewBottomSheet(list.get(0));
+                    listener.onLoadPreviewBottomSheet(list.get(position));
 
 
                 }
@@ -314,9 +313,9 @@ public class RecyclerMissionDayAdapter extends RecyclerView.Adapter<RecyclerMiss
         @Override
         public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
 
-            String image = list.get(position).getFriend_image();
+            String image = list.get(position).getFriendImage();
             boolean isSuccess = list.get(position).isSuccess();
-            String name = list.get(position).getFriend_name();
+            String name = list.get(position).getFriendName();
 
             holder.iv_friend_image.setBackground(new ShapeDrawable(new OvalShape()));
             holder.iv_friend_image.setClipToOutline(true);

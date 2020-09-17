@@ -49,7 +49,7 @@ public class SendFriendRequestFragment extends Fragment implements RecyclerSendF
 
         String user_id = Account.getUserId(activity);
 
-        databaseReference.child("user_data").child(user_id).child("send_friend_request").addValueEventListener(new ValueEventListener() {
+        databaseReference.child("user_data").child(user_id).child("sendFriendRequest").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
@@ -98,11 +98,11 @@ public class SendFriendRequestFragment extends Fragment implements RecyclerSendF
     @Override
     public void onSendRequest(ItemForFriendsList item) {
         //요청 취소를 누름
-        String friend_id = item.getFriend_id();
+        String friend_id = item.getFriendId();
         String me_id = Account.getUserId(activity);
 
         /** 친구 받은요청함 지우기**/
-        databaseReference.child("user_data").child(friend_id).child("receive_friend_request").orderByChild("friend_id").equalTo(me_id).addListenerForSingleValueEvent(new ValueEventListener() {
+        databaseReference.child("user_data").child(friend_id).child("receiveFriendRequest").orderByChild("friendId").equalTo(me_id).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
@@ -122,7 +122,7 @@ public class SendFriendRequestFragment extends Fragment implements RecyclerSendF
         });
 
         /** 내 보낸요청함 지우기**/
-        databaseReference.child("user_data").child(me_id).child("send_friend_request").orderByChild("friend_id").equalTo(friend_id).addListenerForSingleValueEvent(new ValueEventListener() {
+        databaseReference.child("user_data").child(me_id).child("sendFriendRequest").orderByChild("friendId").equalTo(friend_id).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {

@@ -134,6 +134,7 @@ public class MissionDetailActivity extends AppCompatActivity {
     TextView tv_mission_time_end;
     List<ItemForFriendByDay> friendsLists;
     Calendar calendar = Calendar.getInstance();
+    TextView tvArriveTime;
 
     int total_dates;
     //TextView tv_date_progress;
@@ -156,7 +157,6 @@ public class MissionDetailActivity extends AppCompatActivity {
 
     LinearLayout ly_start_date;
     LinearLayout ly_end_date;
-    TextView tv_date_time_total;
 
     Handler mHandler;
     Runnable runnable;
@@ -200,8 +200,9 @@ public class MissionDetailActivity extends AppCompatActivity {
         tv_penalty_total = findViewById(R.id.penalty_amount);
         tv_current_penalty = findViewById(R.id.current_penalty);
         tv_failed_count = findViewById(R.id.failed_count);
-        tv_date_time_total = findViewById(R.id.tv_date_time_total);
+
         materialCalendarView = findViewById(R.id.material_calendarView);
+        tvArriveTime = findViewById(R.id.tvArriveTime);
         materialCalendarView.setTitleFormatter(new TitleFormatter() {
             @Override
             public CharSequence format(CalendarDay calendarDay) {
@@ -215,23 +216,12 @@ public class MissionDetailActivity extends AppCompatActivity {
         });
 
 
-        tv_date_time_total.setClickable(false);
         ly_start_date.setClickable(false);
         ly_end_date.setClickable(false);
 
 
         getIntents();
 
-
-        tv_date_time_total.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                createBottomSheet();
-
-
-            }
-        });
 
         ly_start_date.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -258,7 +248,7 @@ public class MissionDetailActivity extends AppCompatActivity {
 
         materialCalendarView.clearSelection();
 
-        String date_time = itemForDateTimeByLists.get(index).getDate_time();
+        String date_time = itemForDateTimeByLists.get(index).getDateTime();
         Date temp = DateTimeFormatter.dateParser(date_time, "yyyyMMddHHmm");
 
 
@@ -278,6 +268,7 @@ public class MissionDetailActivity extends AppCompatActivity {
 
         //.setText(DateTimeUtils.makeTimeForHumanInt(hour, min));
 
+        selected_date.setText(DateTimeUtils.makeTimeForHumanInt(hour, min));
 
         materialCalendarView.setCurrentDate(CalendarDay.from(year, month, day));
 
@@ -286,7 +277,28 @@ public class MissionDetailActivity extends AppCompatActivity {
         OneDayDecorator one = new OneDayDecorator(getResources().getColor(R.color.White));
         one.setDate(CalendarDay.from(year, month, day));
         materialCalendarView.addDecorator(one);
-        //setupRecyclerViewFriendByDay(itemForDateTimeByLists.get(index).getFriendByDayList());
+        String arriveTime = itemForDateTimeByLists.get(index).getTimeStamp();
+        Log.d("날짜", arriveTime + "");
+        if (!arriveTime.isEmpty()) {
+            tvArriveTime.setText(DateTimeUtils.makeTimeForHuman(arriveTime, "yyyyMMddHHmmss"));
+            tvArriveTime.setTextColor(getResources().getColor(R.color.colorSuccess));
+        } else {
+
+            String selectedDay = DateTimeUtils.makeDateForServer(year, month, day) + DateTimeUtils.makeTimeForServer(hour, min);
+            if (DateTimeUtils.compareIsFuture(selectedDay, "yyyyMMddHHmm")) {
+
+                tvArriveTime.setText("도착정보없음");
+                tvArriveTime.setTextColor(getResources().getColor(R.color.black));
+                // tvArriveTime.setTextColor(getResources().getColor(R.color.colorPrimary));
+            } else {
+                tvArriveTime.setText("도착정보없음");
+                tvArriveTime.setTextColor(getResources().getColor(R.color.colorError));
+
+            }
+
+
+        }
+       // setupRecyclerViewFriendByDay(itemForDateTimeByLists.get(index));
 
 
     }
@@ -303,7 +315,7 @@ public class MissionDetailActivity extends AppCompatActivity {
 
     private void createCalendar() {
 
-        String date_time = itemForDateTimeByLists.get(0).getDate_time();
+        String date_time = itemForDateTimeByLists.get(0).getDateTime();
         Date temp = DateTimeFormatter.dateParser(date_time, "yyyyMMddHHmm");
         //Calendar calendar = Calendar.getInstance();
         //calendar.clear();
@@ -330,10 +342,11 @@ public class MissionDetailActivity extends AppCompatActivity {
                     one.setDate(date);
                     widget.addDecorator(one);
                     for (int i = 0; i < itemForDateTimeByLists.size(); i++) {
-                        String date_time = itemForDateTimeByLists.get(i).getDate_time();
+                        String date_time = itemForDateTimeByLists.get(i).getDateTime();
                         Date temp = DateTimeFormatter.dateParser(date_time, "yyyyMMddHHmm");
                         // calendar.clear();
                         calendar.setTime(temp);
+
 
                         int year = calendar.get(Calendar.YEAR);
                         int month = calendar.get(Calendar.MONTH) + 1;
@@ -349,7 +362,27 @@ public class MissionDetailActivity extends AppCompatActivity {
 
 
                                     selected_date.setText(DateTimeUtils.makeTimeForHumanInt(hour, min));
+                                    String arriveTime = itemForDateTimeByLists.get(i).getTimeStamp();
+                                    Log.d("날짜", arriveTime + "");
+                                    if (!arriveTime.isEmpty()) {
+                                        tvArriveTime.setText(DateTimeUtils.makeTimeForHuman(arriveTime, "yyyyMMddHHmmss"));
+                                        tvArriveTime.setTextColor(getResources().getColor(R.color.colorSuccess));
+                                    } else {
 
+                                        String selectedDay = DateTimeUtils.makeDateForServer(year, month, day) + DateTimeUtils.makeTimeForServer(hour, min);
+                                        if (DateTimeUtils.compareIsFuture(selectedDay, "yyyyMMddHHmm")) {
+
+                                            tvArriveTime.setText("도착정보없음");
+                                            tvArriveTime.setTextColor(getResources().getColor(R.color.black));
+                                            // tvArriveTime.setTextColor(getResources().getColor(R.color.colorPrimary));
+                                        } else {
+                                            tvArriveTime.setText("도착정보없음");
+                                            tvArriveTime.setTextColor(getResources().getColor(R.color.colorError));
+
+                                        }
+
+
+                                    }
                                 }
                             }
                         }
@@ -358,6 +391,7 @@ public class MissionDetailActivity extends AppCompatActivity {
                     List<ItemForFriendByDay> friendByDayList = new ArrayList<>();
 
                     selected_date.setText("");
+                    tvArriveTime.setText("");
 
                 }
             }
@@ -385,15 +419,15 @@ public class MissionDetailActivity extends AppCompatActivity {
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
 
-            String mission_id = bundle.getString("mission_id");
-            boolean isSingle = bundle.getBoolean("mission_mode");
+            String mission_id = bundle.getString("missionId");
+            boolean isSingle = bundle.getBoolean("missionMode");
 
             Log.d("싱글", mission_id);
             Log.d("싱글", isSingle + "");
 
 
             if (isSingle) {
-                databaseReference.child("user_data").child(user_id).child("mission_info_list").orderByChild("mission_id").equalTo(mission_id).addValueEventListener(new ValueEventListener() {
+                databaseReference.child("user_data").child(user_id).child("missionInfoList").orderByChild("missionId").equalTo(mission_id).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
@@ -405,7 +439,7 @@ public class MissionDetailActivity extends AppCompatActivity {
                                 displaySingleItem(item);
 
 
-                                Log.d("싱글", item.getMission_title());
+                                Log.d("싱글", item.getTitle());
 
                             } else {
                                 //미션정보 없음
@@ -434,13 +468,13 @@ public class MissionDetailActivity extends AppCompatActivity {
         String address = item.getAddress();
         mission_latitude = item.getLat();
         mission_longitude = item.getLng();
-        min_date = item.getMin_date();
-        max_date = item.getMax_date();
-        String mission_title = item.getMission_title();
+        min_date = item.getMinDate();
+        max_date = item.getMaxDate();
+        String mission_title = item.getTitle();
         itemForDateTimeByLists = new ArrayList<>();
 
         //total_dates = item.getMission_dates().size();
-        Map<String, ItemForDateTimeByList> map = item.getMission_dates();
+        Map<String, ItemForDateTimeByList> map = item.getMissionDates();
 
         for (ItemForDateTimeByList object : map.values()) {
 
@@ -448,7 +482,7 @@ public class MissionDetailActivity extends AppCompatActivity {
             Collections.sort(itemForDateTimeByLists, new Comparator<ItemForDateTimeByList>() {
                 @Override
                 public int compare(ItemForDateTimeByList o1, ItemForDateTimeByList o2) {
-                    return o1.getDate_time().compareTo(o2.getDate_time());
+                    return o1.getDateTime().compareTo(o2.getDateTime());
                 }
             });
 
@@ -460,7 +494,7 @@ public class MissionDetailActivity extends AppCompatActivity {
         Log.d("싱글", min_date);
         Log.d("싱글", max_date);
         Log.d("싱글", item.getFriendByDayList().size() + "명");
-        Log.d("싱글", itemForDateTimeByLists.get(0).getDate_time() + "날짜");
+        Log.d("싱글", itemForDateTimeByLists.get(0).getDateTime() + "날짜");
 
         friendsLists = item.getFriendByDayList();
 
@@ -478,15 +512,12 @@ public class MissionDetailActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
 
-
-
-
-        tv_mission_time_start.setText(DateTimeUtils.makeTimeForHuman(itemForDateTimeByLists.get(0).getDate_time(),"yyyyMMddHHmm"));
-        tv_mission_time_end.setText(DateTimeUtils.makeTimeForHuman(itemForDateTimeByLists.get(itemForDateTimeByLists.size() - 1).getDate_time(),"yyyyMMddHHmm"));
-        tv_penalty.setText(Utils.makeNumberCommaWon(item.getPenalty()));
-        tv_penalty_total.setText(Utils.makeNumberCommaWon(item.getPenalty_amount()));
-        tv_current_penalty.setText(Utils.makeNumberCommaWon(item.getPenalty() * item.getFailed_count()));
-        tv_failed_count.setText(item.getFailed_count() + " 번");
+        tv_mission_time_start.setText(DateTimeUtils.makeTimeForHuman(itemForDateTimeByLists.get(0).getDateTime(), "yyyyMMddHHmm"));
+        tv_mission_time_end.setText(DateTimeUtils.makeTimeForHuman(itemForDateTimeByLists.get(itemForDateTimeByLists.size() - 1).getDateTime(), "yyyyMMddHHmm"));
+        tv_penalty.setText(Utils.makeNumberCommaWon(item.getPenaltyPerDay()));
+        tv_penalty_total.setText(Utils.makeNumberCommaWon(item.getPenaltyTotal()));
+        tv_current_penalty.setText(Utils.makeNumberCommaWon(item.getPenaltyPerDay() * item.getFailedCount()));
+        tv_failed_count.setText(item.getFailedCount() + " 번");
 
 
         //Calendar calendar = Calendar.getInstance();
@@ -494,7 +525,7 @@ public class MissionDetailActivity extends AppCompatActivity {
         cal = new HashSet<CalendarDay>();
         for (int i = 0; i < itemForDateTimeByLists.size(); i++) {
 
-            String date_time = itemForDateTimeByLists.get(i).getDate_time();
+            String date_time = itemForDateTimeByLists.get(i).getDateTime();
             Date date = DateTimeFormatter.dateParser(date_time, "yyyyMMddHHmm");
             //Calendar calendar = Calendar.getInstance();
             calendar.setTime(date);
@@ -514,11 +545,8 @@ public class MissionDetailActivity extends AppCompatActivity {
         createCalendar();
 
 
-        tv_date_time_total.setClickable(true);
         ly_start_date.setClickable(true);
         ly_end_date.setClickable(true);
-
-
 
 
     }

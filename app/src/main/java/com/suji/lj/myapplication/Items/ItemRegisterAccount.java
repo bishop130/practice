@@ -2,52 +2,61 @@ package com.suji.lj.myapplication.Items;
 
 public class ItemRegisterAccount {
 
-    String user_id;
-    String user_name;
-    String thumnail_img;
-    String profile_img;
-    boolean is_public;
+    String userId;
+    String userName;
+    String thumbnail;
+    String profileImg;
+    boolean open;
     String email;
+    String kakaoId;
 
-
-    public String getUser_id() {
-        return user_id;
+    public String getKakaoId() {
+        return kakaoId;
     }
 
-    public void setUser_id(String user_id) {
-        this.user_id = user_id;
+    public void setKakaoId(String kakaoId) {
+        this.kakaoId = kakaoId;
     }
 
-    public String getUser_name() {
-        return user_name;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setUser_name(String user_name) {
-        this.user_name = user_name;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
-    public String getThumnail_img() {
-        return thumnail_img;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setThumnail_img(String thumnail_img) {
-        this.thumnail_img = thumnail_img;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
-    public String getProfile_img() {
-        return profile_img;
+
+    public String getThumbnail() {
+        return thumbnail;
     }
 
-    public void setProfile_img(String profile_img) {
-        this.profile_img = profile_img;
+    public void setThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
     }
 
-    public boolean isIs_public() {
-        return is_public;
+    public String getProfileImg() {
+        return profileImg;
     }
 
-    public void setIs_public(boolean is_public) {
-        this.is_public = is_public;
+    public void setProfileImg(String profileImg) {
+        this.profileImg = profileImg;
+    }
+
+    public boolean isOpen() {
+        return open;
+    }
+
+    public void setOpen(boolean open) {
+        this.open = open;
     }
 
     public String getEmail() {

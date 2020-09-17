@@ -3,7 +3,8 @@ package com.suji.lj.myapplication.Items;
 public class ItemForPassword {
 
     String key;
-    int limit_count;
+    int limitCount;
+    String dateTime;
 
 
     public String getKey() {
@@ -14,11 +15,19 @@ public class ItemForPassword {
         this.key = key;
     }
 
-    public int getLimit_count() {
-        return limit_count;
+    public int getLimitCount() {
+        return limitCount;
     }
 
-    public void setLimit_count(int limit_count) {
-        this.limit_count = limit_count;
+    public void setLimitCount(int limitCount) {
+        this.limitCount = limitCount;
+    }
+
+    public String getDateTime() {
+        return dateTime;
+    }
+
+    public void setDateTime(String dateTime) {
+        this.dateTime = dateTime;
     }
 }

@@ -30,10 +30,7 @@ public class RecyclerDateTimeAdapter extends RecyclerView.Adapter<RecyclerDateTi
     OnTimeSetListener listener;
 
 
-
-
-
-    public RecyclerDateTimeAdapter(Context context, List<ItemForDateTime> calendarDayList,Realm realm, OnTimeSetListener listener) {
+    public RecyclerDateTimeAdapter(Context context, List<ItemForDateTime> calendarDayList, Realm realm, OnTimeSetListener listener) {
 
 
         this.context = context;
@@ -55,7 +52,7 @@ public class RecyclerDateTimeAdapter extends RecyclerView.Adapter<RecyclerDateTi
 
     @Override
     public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
-        Log.d("담쟁이2",calendarDayList.size()+"어댑");
+        Log.d("담쟁이2", calendarDayList.size() + "어댑");
 
 
         realm.executeTransaction(new Realm.Transaction() {
@@ -66,53 +63,49 @@ public class RecyclerDateTimeAdapter extends RecyclerView.Adapter<RecyclerDateTi
         });
 
 
-
         int year = calendarDayList.get(position).getYear();
         int month = calendarDayList.get(position).getMonth();
         int day = calendarDayList.get(position).getDay();
-        Log.d("솔약국",calendarDayList.get(position).getPosition()+"데이트");
-        Log.d("솔약국",position+"포지션");
+        Log.d("솔약국", calendarDayList.get(position).getPosition() + "데이트");
+        Log.d("솔약국", position + "포지션");
 
         String time = calendarDayList.get(position).getTime();
-        Log.d("담쟁이",year+""+month+""+day+time);
-        String date = DateTimeUtils.makeDateForServer(year,month,day);
-        boolean is30min = DateTimeUtils.compareIsFuture30min(date+time);
-        if(is30min){
+        Log.d("담쟁이", year + "" + month + "" + day + time);
+        String date = DateTimeUtils.makeDateForServer(year, month, day);
+        boolean is30min = DateTimeUtils.compareIsFuture30min(date + time, "yyyyMMddHHmm");
+        if (is30min) {
             holder.ly_time_error.setVisibility(View.GONE);
-        }else{
+        } else {
             holder.ly_time_error.setVisibility(View.VISIBLE);
         }
 
 
-
-            holder.date.setText(DateTimeUtils.makeDateForHumanNoYear(date));
-            holder.time.setText(DateTimeUtils.makeTimeForHuman(calendarDayList.get(position).getTime(),"HHmm"));
-            holder.time.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    //Log.d("솔약국",calendarDayList.get(position).getDate()+"데이트");
-                    //Log.d("솔약국",calendarDayList.get(position).getPosition()+"포지션");
-                    TimePickerDialog timePicker = new TimePickerDialog(context, new TimePickerDialog.OnTimeSetListener() {
-                        @Override
-                        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                            holder.time.setText(DateTimeUtils.makeTimeForHumanInt(hourOfDay,minute));
-                            listener.onTimeSet(hourOfDay,minute,position);
-                            //((SingleModeActivity)context).timeSet(hourOfDay,minute,position);
-                            boolean is30min = DateTimeUtils.compareIsFuture30min(year+""+month+""+day+time);
-                            if(is30min){
-                                holder.ly_time_error.setVisibility(View.GONE);
-                            }else{
-                                holder.ly_time_error.setVisibility(View.VISIBLE);
-                            }
-
-
+        holder.date.setText(DateTimeUtils.makeDateForHumanNoYear(date));
+        holder.time.setText(DateTimeUtils.makeTimeForHuman(calendarDayList.get(position).getTime(), "HHmm"));
+        holder.time.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Log.d("솔약국",calendarDayList.get(position).getDate()+"데이트");
+                //Log.d("솔약국",calendarDayList.get(position).getPosition()+"포지션");
+                TimePickerDialog timePicker = new TimePickerDialog(context, new TimePickerDialog.OnTimeSetListener() {
+                    @Override
+                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                        holder.time.setText(DateTimeUtils.makeTimeForHumanInt(hourOfDay, minute));
+                        listener.onTimeSet(hourOfDay, minute, position);
+                        //((SingleModeActivity)context).timeSet(hourOfDay,minute,position);
+                        boolean is30min = DateTimeUtils.compareIsFuture30min(year + "" + month + "" + day + time, "yyyyMMddHHmm");
+                        if (is30min) {
+                            holder.ly_time_error.setVisibility(View.GONE);
+                        } else {
+                            holder.ly_time_error.setVisibility(View.VISIBLE);
                         }
-                    }, calendarDayList.get(position).getHour(), calendarDayList.get(position).getMin(), false);
-                    timePicker.show();
-                }
-            });
 
 
+                    }
+                }, calendarDayList.get(position).getHour(), calendarDayList.get(position).getMin(), false);
+                timePicker.show();
+            }
+        });
 
 
     }
@@ -140,7 +133,7 @@ public class RecyclerDateTimeAdapter extends RecyclerView.Adapter<RecyclerDateTi
         }
     }
 
-    public interface OnTimeSetListener{
+    public interface OnTimeSetListener {
         void onTimeSet(int hour, int min, int position);
 
     }

@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -40,6 +41,7 @@ public class MultiRequestFragment extends Fragment {
     ArrayList<ItemForMultiModeRequest> list = new ArrayList<>();
     List<ItemForInvitationPreview> previewList = new ArrayList<>();
     RecyclerInvitationAdapter recyclerAdapter;
+    RelativeLayout rlIsEmpty;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -50,6 +52,7 @@ public class MultiRequestFragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.recyclerView);
         progressBar = view.findViewById(R.id.progress_bar);
+        rlIsEmpty = view.findViewById(R.id.rl_is_empty);
 
         setupRecyclerViewRequest();
 
@@ -63,11 +66,12 @@ public class MultiRequestFragment extends Fragment {
         String user_id = Account.getUserId(context);
 
 
-        mRootRef.child("user_data").child(user_id).child("invitation").child("preview").addValueEventListener(new ValueEventListener() {
+        mRootRef.child("user_data").child(user_id).child("invitation").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 previewList = new ArrayList<>();
                 if (dataSnapshot.exists()) {
+                    rlIsEmpty.setVisibility(View.GONE);
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                         ItemForInvitationPreview preview = snapshot.getValue(ItemForInvitationPreview.class);
                         if (preview != null) {
@@ -79,6 +83,10 @@ public class MultiRequestFragment extends Fragment {
                         }
 
                     }
+                    setupRecyclerViewRequest();
+
+                } else{
+                    rlIsEmpty.setVisibility(View.VISIBLE);
                     setupRecyclerViewRequest();
 
                 }
@@ -109,6 +117,10 @@ public class MultiRequestFragment extends Fragment {
         super.onAttach(context);
         this.context = context;
     }
+
+
+
+
 
 /*
     private static class LoadingAsyncTask extends AsyncTask<String, Void, String> {

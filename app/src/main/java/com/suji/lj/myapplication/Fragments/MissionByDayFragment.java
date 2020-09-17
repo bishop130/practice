@@ -53,6 +53,7 @@ import com.suji.lj.myapplication.Items.ItemForFriendByDay;
 import com.suji.lj.myapplication.Items.ItemForMissionByDay;
 import com.suji.lj.myapplication.Items.ItemForMultiKey;
 import com.suji.lj.myapplication.Items.MissionInfoList;
+import com.suji.lj.myapplication.MainActivity;
 import com.suji.lj.myapplication.MissionDetailActivity;
 import com.suji.lj.myapplication.MissionDetailMultiActivity;
 import com.suji.lj.myapplication.R;
@@ -64,6 +65,7 @@ import com.suji.lj.myapplication.Utils.Utils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -80,112 +82,32 @@ public class MissionByDayFragment extends Fragment implements RecyclerMissionDay
     List<ItemForMissionByDay> singleList = new ArrayList<>();
     RecyclerMissionDayAdapter adapter;
     TextView tv_add_mission;
-    AlertDialog loading_dialog;
-
-
-    String key;
-
     DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
     Activity activity;
     RelativeLayout rl_is_empty;
 
     int numOfData = 0;
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        final View view = inflater.inflate(R.layout.fragment_mission_by_day, container, false);
-        recyclerView = view.findViewById(R.id.rv_day);
-        ly_swipe_refresh = view.findViewById(R.id.ly_swipe_refresh);
-        loading_panel = view.findViewById(R.id.loadingPanel);
-        rl_is_empty = view.findViewById(R.id.rl_is_empty);
-        tv_add_mission = view.findViewById(R.id.tv_add_mission);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setCancelable(false); // if you want user to wait for some process to finish,
-        builder.setView(R.layout.layout_progress);
-        loading_dialog = builder.create();
-
-        if (loading_dialog.getWindow() != null) {
-            loading_dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-
-        }
-
-
-        user_id = Account.getUserId(activity);
-        //recyclerView.addItemDecoration(new RecyclerViewDivider(28));
-        Utils.drawRecyclerViewDivider(activity, recyclerView);
-        ly_swipe_refresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-
-
-                String key = DateTimeUtils.getCurrentDateTimeForKey();
-                querySingleData(key);
-                //fa.refresh();
-                //displayData();
-                Log.d("들어와", "리프레시해줘");
-                ly_swipe_refresh.setRefreshing(false);
-                //recyclerView.setVisibility(View.VISIBLE);
-                loading_panel.setVisibility(View.GONE);
-
-
-            }
-        });
-
-        tv_add_mission.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int isLocationGranted = ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION);
-                if (isLocationGranted == PackageManager.PERMISSION_GRANTED) {
-                    loading_dialog.show();
-                    Intent intent = new Intent(activity, SingleModeActivity.class);
-                    activity.startActivity(intent);
-
-
-                } else {
-                    Toast.makeText(activity, "위치권한설정이 필요합니다.", Toast.LENGTH_SHORT).show();
-
-
-                }
-
-
-            }
-        });
-
-
-        loading_panel.setVisibility(View.VISIBLE);
-
-        String key = DateTimeUtils.getCurrentDateTimeForKey();
-        querySingleData(key);
-
-        Log.d("데이", "oncreateview");
-
-
-        return view;
-    }
-
-
-    private void querySingleData(String key) {
-
-        databaseReference.child("user_data").child(user_id).child("mission_display").orderByChild("date_time").startAt(key).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                numOfData = 0;
-                singleList = new ArrayList<>();
-                if (dataSnapshot.exists()) {
+    boolean isFetched = false;
+    ValueEventListener listener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            Log.d("멀티", "day 콜");
+            if (dataSnapshot.exists()) {
+                if(!isFetched) {
+                    isFetched = true;
+                    singleList = new ArrayList<>();
                     numOfData = (int) dataSnapshot.getChildrenCount();
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        Boolean isSingle = snapshot.child("single_mode").getValue(Boolean.class);
+                        Boolean isSingle = snapshot.child("singleMode").getValue(Boolean.class);
                         if (!isSingle) {
-                            String missionId = snapshot.child("mission_id").getValue(String.class);
-                            String dateTime = snapshot.child("date_time").getValue(String.class);
-                            databaseReference.child("multi_data").orderByChild("mission_id").equalTo(missionId).addListenerForSingleValueEvent(new ValueEventListener() {
+                            String missionId = snapshot.child("missionId").getValue(String.class);
+                            String dateTime = snapshot.child("dateTime").getValue(String.class);
+                            databaseReference.child("multi_data").orderByChild("missionId").equalTo(missionId).addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                                     if (snapshot.exists()) {
                                         for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                                            snapshot1.getRef().child("mission_display").orderByChild("date_time").equalTo(dateTime).addListenerForSingleValueEvent(new ValueEventListener() {
+                                            snapshot1.getRef().child("missionDisplay").orderByChild("dateTime").equalTo(dateTime).addListenerForSingleValueEvent(new ValueEventListener() {
                                                 @Override
                                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                                                     if (snapshot.exists()) {
@@ -204,7 +126,7 @@ public class MissionByDayFragment extends Fragment implements RecyclerMissionDay
                                                     }
 
                                                     update();
-                                                    rl_is_empty.setVisibility(View.GONE);
+                                                    //rl_is_empty.setVisibility(View.GONE);
 
                                                 }
 
@@ -240,31 +162,108 @@ public class MissionByDayFragment extends Fragment implements RecyclerMissionDay
 
                     update();
                     rl_is_empty.setVisibility(View.GONE);
+                }else{
+                    Log.d("멀티", "추가호출막기");
+                    //rl_is_empty.setVisibility(View.GONE);
+                    //query.removeEventListener(this);
+                }
+
+
+            } else {
+                isFetched = true;
+                numOfData = 0;
+                singleList = new ArrayList<>();
+                /** 데이터 없음**/
+                update();
+                rl_is_empty.setVisibility(View.VISIBLE);
+
+
+            }
+
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError error) {
+            loading_panel.setVisibility(View.GONE);
+            Toast.makeText(activity, "데이터를 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show();
+        }
+    };
+    Query query;
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        final View view = inflater.inflate(R.layout.fragment_mission_by_day, container, false);
+        recyclerView = view.findViewById(R.id.rv_day);
+        ly_swipe_refresh = view.findViewById(R.id.ly_swipe_refresh);
+        loading_panel = view.findViewById(R.id.loadingPanel);
+        rl_is_empty = view.findViewById(R.id.rl_is_empty);
+        tv_add_mission = view.findViewById(R.id.tv_add_mission);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setCancelable(false); // if you want user to wait for some process to finish,
+        builder.setView(R.layout.layout_progress);
+
+        user_id = Account.getUserId(activity);
+        //recyclerView.addItemDecoration(new RecyclerViewDivider(28));
+        Utils.drawRecyclerViewDivider(activity, recyclerView);
+        ly_swipe_refresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                isFetched = false;
+                querySingleData();
+                //fa.refresh();
+                //displayData();
+
+                Log.d("들어와", "리프레시해줘");
+                ly_swipe_refresh.setRefreshing(false);
+                //recyclerView.setVisibility(View.VISIBLE);
+                loading_panel.setVisibility(View.GONE);
+
+
+            }
+        });
+
+        tv_add_mission.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
+                int isLocationGranted = ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION);
+                if (isLocationGranted == PackageManager.PERMISSION_GRANTED) {
+                    ((MainActivity) activity).showLoadingDialog();
+                    Intent intent = new Intent(activity, SingleModeActivity.class);
+                    activity.startActivity(intent);
 
 
                 } else {
-
-                    /** 데이터 없음**/
-                    update();
-                    rl_is_empty.setVisibility(View.VISIBLE);
+                    Toast.makeText(activity, "위치권한설정이 필요합니다.", Toast.LENGTH_SHORT).show();
 
 
                 }
 
 
             }
-
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                loading_panel.setVisibility(View.GONE);
-                Toast.makeText(activity, "데이터를 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show();
-
-            }
-
-
         });
+
+
+        loading_panel.setVisibility(View.VISIBLE);
+
+
+        //querySingleData();
+
+        Log.d("데이", "oncreateview");
+
+
+        return view;
+    }
+
+
+    private void querySingleData() {
+        query =databaseReference.child("user_data").child(user_id).child("missionDisplay");
+        query.addValueEventListener(listener);
+        //String key = DateTimeUtils.getCurrentDateTimeForKey();
+
     }
 
 
@@ -280,12 +279,9 @@ public class MissionByDayFragment extends Fragment implements RecyclerMissionDay
     @Override
     public void onResume() {
         super.onResume();
-        if (loading_dialog.isShowing()) {
-            loading_dialog.dismiss();
-
-
-        }
-        Log.d("데이", "onResumee");
+        isFetched = false;
+        querySingleData();
+        Log.d("차일드", "onResume");
     }
 
     @Override
@@ -300,25 +296,26 @@ public class MissionByDayFragment extends Fragment implements RecyclerMissionDay
         if (singleList.size() == numOfData) {
             loading_panel.setVisibility(View.GONE);
 
+            //query.removeEventListener(listener);
+
             Log.d("멀티", singleList.size() + " 리스트사이즈");
             //singleList.addAll(multiList);
             Collections.sort(singleList, new Comparator<ItemForMissionByDay>() {
                 @Override
                 public int compare(ItemForMissionByDay o1, ItemForMissionByDay o2) {
-                    return o1.getDate_time().compareTo(o2.getDate_time());
+                    return o1.getDateTime().compareTo(o2.getDateTime());
                 }
             });
 
-            for (int i = 0; i < singleList.size(); i++) {
-                String date_time = singleList.get(i).getDate_time();
-
-
-                Log.d("MissionByDayFragment", date_time + "   " + i);
+            isFetched = false;
+            Log.d("멀티", singleList.size() + " 필터완료");
+            if (singleList.size() == 0) {
+                rl_is_empty.setVisibility(View.VISIBLE);
 
             }
 
 
-            adapter = new RecyclerMissionDayAdapter(activity, singleList, MissionByDayFragment.this, loading_dialog);
+            adapter = new RecyclerMissionDayAdapter(activity, singleList, MissionByDayFragment.this);
             recyclerView.setLayoutManager(new LinearLayoutManager(activity));
             recyclerView.setAdapter(adapter);
             adapter.notifyDataSetChanged();
@@ -334,26 +331,28 @@ public class MissionByDayFragment extends Fragment implements RecyclerMissionDay
     public void onLoadPreviewBottomSheet(ItemForMissionByDay itemForMissionByDay) {
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(activity);
 
+
         View view = LayoutInflater.from(activity).inflate(R.layout.dialog_day_preview, null);
         RecyclerView rv_day_preview = view.findViewById(R.id.rv_day_preview);
         TextView tvDetail = view.findViewById(R.id.tvDetail);
         // List<ItemForBank> bankList = new ArrayList<>();
 
-        String missionId = itemForMissionByDay.getMission_id();
+        String missionId = itemForMissionByDay.getMissionId();
         String date = itemForMissionByDay.getDate();
-        String dateTime = itemForMissionByDay.getDate_time();
+        String dateTime = itemForMissionByDay.getDateTime();
         Log.d("바텀", missionId + "missionId");
         Log.d("바텀", date + "date");
         Log.d("바텀", dateTime + "dateTime");
 
+        ((MainActivity) activity).dismissLoadingDialog();
 
-        databaseReference.child("multi_data").orderByChild("mission_id").equalTo(missionId).addValueEventListener(new ValueEventListener() {
+        databaseReference.child("multi_data").orderByChild("missionId").equalTo(missionId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
 
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        snapshot.getRef().child("mission_display").orderByChild("date_time").equalTo(dateTime).addValueEventListener(new ValueEventListener() {
+                        snapshot.getRef().child("missionDisplay").orderByChild("dateTime").equalTo(dateTime).addValueEventListener(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot snapshot) {
                                 if (snapshot.exists()) {
@@ -361,7 +360,7 @@ public class MissionByDayFragment extends Fragment implements RecyclerMissionDay
                                         GenericTypeIndicator<List<ItemForFriendByDay>> t = new GenericTypeIndicator<List<ItemForFriendByDay>>() {
                                         };
                                         List<ItemForFriendByDay> friendByDayList = shot.child("friendByDayList").getValue(t);
-                                        Log.d("바텀", friendByDayList.get(0).getUser_id() + "");
+
 
                                         FriendByDayAdapter adapter = new FriendByDayAdapter(friendByDayList);
                                         rv_day_preview.setLayoutManager(new LinearLayoutManager(activity));
@@ -401,11 +400,11 @@ public class MissionByDayFragment extends Fragment implements RecyclerMissionDay
             public void onClick(View v) {
 
 
-                loading_dialog.show();
+                ((MainActivity) activity).showLoadingDialog();
 
 
                 Intent intent = new Intent(activity, MissionDetailMultiActivity.class);
-                intent.putExtra("mission_id", missionId);
+                intent.putExtra("missionId", missionId);
                 startActivity(intent);
                 bottomSheetDialog.dismiss();
             }
@@ -438,9 +437,9 @@ public class MissionByDayFragment extends Fragment implements RecyclerMissionDay
 
         @Override
         public void onBindViewHolder(@NonNull FriendByDayAdapter.ViewHolder holder, int position) {
-            String friend_name = friendByDayList.get(position).getFriend_name();
-            String friend_image = friendByDayList.get(position).getFriend_image();
-            String dateTime = friendByDayList.get(position).getTime_stamp();
+            String friend_name = friendByDayList.get(position).getFriendName();
+            String friend_image = friendByDayList.get(position).getFriendImage();
+            String dateTime = friendByDayList.get(position).getTimeStamp();
 
             // holder.tv_time.setText(DateTimeUtils.makeTimeForHumanInt(hour, min));
             holder.tv_friend_name.setText(friend_name);

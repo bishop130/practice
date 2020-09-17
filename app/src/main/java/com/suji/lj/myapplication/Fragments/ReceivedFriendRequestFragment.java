@@ -47,7 +47,6 @@ public class ReceivedFriendRequestFragment extends Fragment {
     DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
     String user_id;
     RelativeLayout rl_is_empty;
-    List<ItemForFriendsList> kakaoFriendList = new ArrayList<>();
 
 
     @Override
@@ -61,93 +60,38 @@ public class ReceivedFriendRequestFragment extends Fragment {
 
         user_id = Account.getUserId(activity);
 
-        AppFriendContext friendContext = new AppFriendContext(true, 0, 100, "asc");
+        databaseReference.child("user_data").child(user_id).child("receiveFriendRequest").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-        KakaoTalkService.getInstance().requestAppFriends(friendContext,
-                new TalkResponseCallback<AppFriendsResponse>() {
-                    @Override
-                    public void onNotKakaoTalkUser() {
-                        Log.d("카카오친구 ", "카카오 유저가 아님");
-                    }
-
-                    @Override
-                    public void onSessionClosed(ErrorResult errorResult) {
-                        Log.d("카카오친구 ", errorResult.toString());
-                    }
-
-                    @Override
-                    public void onNotSignedUp() {
-                        Log.d("카카오친구 ", "onNotSinedup");
-                    }
-
-                    @Override
-                    public void onFailure(ErrorResult errorResult) {
-                        Log.d("카카오친구 ", errorResult.toString());
-                    }
-
-                    @Override
-                    public void onSuccess(AppFriendsResponse result) {
-                        for (int i = 0; i < result.getFriends().size(); i++) {
-                            String friendId = String.valueOf(result.getFriends().get(i).getId());
-                            String friendName = result.getFriends().get(i).getProfileNickname();
-                            String friendImage = result.getFriends().get(i).getProfileThumbnailImage();
-                            ItemForFriendsList item = new ItemForFriendsList();
-                            item.setFriend_id(friendId);
-                            item.setFriends_name(friendName);
-                            item.setFriends_image(friendImage);
-                            kakaoFriendList.add(item);
-
-
-                        }
-
-                        databaseReference.child("user_data").child(user_id).child("receive_friend_request").addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                                List<ItemForFriendsList> list = new ArrayList<>();
-                                if (dataSnapshot.exists()) {
-                                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                        ItemForFriendsList item = snapshot.getValue(ItemForFriendsList.class);
-
-                                        for (int i = 0; i < kakaoFriendList.size(); i++) {
-                                            String id = kakaoFriendList.get(i).getFriend_id();
-                                            if (id.equals(item.getFriend_id())) {
-                                                item.setFriends_name(kakaoFriendList.get(i).getFriends_name());
-                                                item.setFriends_image(kakaoFriendList.get(i).getFriends_image());
-
-                                                list.add(item);
-
-                                            }
-
-
-                                        }
-
-
-                                    }
-
-                                    rl_is_empty.setVisibility(View.GONE);
-
-                                    setupRecyclerView(list);
-
-
-                                } else {
-                                    rl_is_empty.setVisibility(View.VISIBLE);
-
-                                    setupRecyclerView(list);
-                                }
-
-
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                            }
-                        });
+                List<ItemForFriendsList> list = new ArrayList<>();
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        ItemForFriendsList item = snapshot.getValue(ItemForFriendsList.class);
+                        list.add(item);
 
 
                     }
-                });
+
+                    rl_is_empty.setVisibility(View.GONE);
+
+                    setupRecyclerView(list);
+
+
+                } else {
+                    rl_is_empty.setVisibility(View.VISIBLE);
+
+                    setupRecyclerView(list);
+                }
+
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
 
 
         return view;
@@ -197,9 +141,9 @@ public class ReceivedFriendRequestFragment extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
-            String friend_name = list.get(position).getFriends_name();
-            String friend_image = list.get(position).getFriends_image();
-            String friend_id = list.get(position).getFriend_id();
+            String friend_name = list.get(position).getFriendName();
+            String friend_image = list.get(position).getFriendImage();
+            String friend_id = list.get(position).getFriendId();
 
 
             holder.tv_friend_name.setText(friend_name);
@@ -228,7 +172,7 @@ public class ReceivedFriendRequestFragment extends Fragment {
                 public void onClick(View v) {
 
                     /** 받은 요청함 비우기**/
-                    databaseReference.child("user_data").child(user_id).child("receive_friend_request").orderByChild("friend_id").equalTo(friend_id).addListenerForSingleValueEvent(new ValueEventListener() {
+                    databaseReference.child("user_data").child(user_id).child("receiveFriendRequest").orderByChild("friendId").equalTo(friend_id).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             if (dataSnapshot.exists()) {
@@ -245,7 +189,7 @@ public class ReceivedFriendRequestFragment extends Fragment {
                     });
 
                     /** 친구의 보낸요청 비우기 **/
-                    databaseReference.child("user_data").child(friend_id).child("send_friend_request").orderByChild("friend_id").equalTo(user_id).addListenerForSingleValueEvent(new ValueEventListener() {
+                    databaseReference.child("user_data").child(friend_id).child("sendFriendRequest").orderByChild("friendId").equalTo(user_id).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
@@ -273,9 +217,9 @@ public class ReceivedFriendRequestFragment extends Fragment {
                     String my_name = Account.getUserName(activity);
                     String email = Account.getUserEmail(activity);
 
-                    itemFriend.setFriend_id(user_id);
-                    itemFriend.setFriends_image(my_image);
-                    itemFriend.setFriends_name(my_name);
+                    itemFriend.setFriendId(user_id);
+                    itemFriend.setFriendImage(my_image);
+                    itemFriend.setFriendName(my_name);
                     itemFriend.setEmail(email);
 
 
@@ -288,7 +232,7 @@ public class ReceivedFriendRequestFragment extends Fragment {
                 @Override
                 public void onClick(View v) {
                     /** 받은 요청함 비우기**/
-                    databaseReference.child("user_data").child(user_id).child("receive_friend_request").orderByChild("friend_id").equalTo(friend_id).addListenerForSingleValueEvent(new ValueEventListener() {
+                    databaseReference.child("user_data").child(user_id).child("receiveFriendRequest").orderByChild("friendId").equalTo(friend_id).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             if (dataSnapshot.exists()) {
@@ -305,7 +249,7 @@ public class ReceivedFriendRequestFragment extends Fragment {
                     });
                     /** **/
                     /** 친구의 보낸요청 비우기 **/
-                    databaseReference.child("user_data").child(friend_id).child("send_friend_request").orderByChild("friend_id").equalTo(user_id).addListenerForSingleValueEvent(new ValueEventListener() {
+                    databaseReference.child("user_data").child(friend_id).child("sendFriendRequest").orderByChild("friendId").equalTo(user_id).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
